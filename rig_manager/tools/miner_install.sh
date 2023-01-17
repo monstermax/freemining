@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ./env
+source ../env
 
 
 TMP_DIR=$(mktemp -d)

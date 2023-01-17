@@ -4,11 +4,13 @@ MINER="nbminer"
 
 cd `dirname $0`
 
-source ../../env
+source ../../tools/env.sh
 
 #echo "miner.name: ${MINER}"
 
-API_URL=http://localhost:42001
+API_PORT=$(getMinerApiPort $MINER)
+
+API_URL=http://localhost:${API_PORT}
 
 SUMMARY_URL=${API_URL}/api/v1/status
 SUMMARY_JSON=$(wget -qO- $SUMMARY_URL)

@@ -1,14 +1,17 @@
 
 import WebSocket from 'ws';
 import os from 'os';
+import colors from 'colors/safe';
 const { exec } = require('child_process');
 
+const config: any = require('../rig_manager.json');
 
-const wsServerHost = '82.64.213.186';
-const wsServerPort = 4200;
+const wsServerHost = config.farmServer.host;
+const wsServerPort = config.farmServer.port;
 const serverConnTimeout = 10_000;
 
 let connectionCount = 0;
+const toolsDir = `${__dirname}/../tools`;
 
 
 function websocketConnect() {
@@ -97,7 +100,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const cmd = `${__dirname}/../service.sh start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo}`;
+                    const cmd = `${toolsDir}/service.sh start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo}`;
 
                     console.log(`${now()} [DEBUG] executing command: ${cmd}`)
 
@@ -117,7 +120,7 @@ function websocketConnect() {
                 const serviceName = args.shift();
 
                 if (serviceName) {
-                    const cmd = `${__dirname}/../service.sh stop ${serviceName}`;
+                    const cmd = `${toolsDir}/service.sh stop ${serviceName}`;
 
                     console.log(`${now()} [DEBUG] executing command: ${cmd}`)
 
@@ -208,7 +211,7 @@ function websocketConnect() {
 
 
 async function getRigStatus(): Promise<any> {
-    const cmd = __dirname + '/../monitor/rig_monitor_json.sh';
+    const cmd = `${toolsDir}/rig_monitor_json.sh`;
 
     const statusJson = await cmdExec(cmd);
 
@@ -233,7 +236,7 @@ async function cmdExec(cmd: string) {
     await new Promise((resolve, reject) => {
         exec(cmd, (error: any, stdout: string, stderr: string) => {
             if (error) {
-                console.error(`${now()} [ERROR] Error while running exec command : ${error.message.trim()}`);
+                //console.error(`${now()} [ERROR] Error while running exec command : ${error.message.trim()}`);
                 reject( error );
                 return;
             }
@@ -249,7 +252,7 @@ async function cmdExec(cmd: string) {
         ret = result;
 
     }).catch((err: any) => {
-        console.error(`${now()} [ERROR] catched while running exec command => ${err.message}`)
+        console.error(`${now()} [ERROR] catched while running exec command => ${colors.red(err.message)}`)
     });
 
     return ret;

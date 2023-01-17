@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ./env
+source ../env
 
 
 ACTION=$1
@@ -235,7 +235,7 @@ fi
 # INFO
 if [ "$ACTION" = "info" ]; then
 	#INFO=$(wget -qO- http://localhost:42999/rig/service/info?service=${SERVICE})
-	INFO=$(./miners_api/json/${SERVICE}_api_json.sh)
+	INFO=$(../miners_api/json/${SERVICE}_api_json.sh)
     echo $INFO
 fi
 

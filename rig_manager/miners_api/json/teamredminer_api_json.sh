@@ -4,15 +4,15 @@ MINER="teamredminer"
 
 cd `dirname $0`
 
-source ../../env
+source ../../tools/env.sh
 
 #echo "miner.name: $MINER"
 
 API_HOST=localhost
-API_PORT=42006
+API_PORT=$(getMinerApiPort $MINER)
 
 
-SUMMARY_JSON=$(echo -n summary | nc 127.0.0.1 42004 2>/dev/null |sed 's/,/\n/g')
+SUMMARY_JSON=$(echo -n summary | nc 127.0.0.1 ${API_PORT} 2>/dev/null |sed 's/,/\n/g')
 
 if [ "$SUMMARY_JSON" = "" ]; then
     #echo -e "miner.active: \033[0;31mfalse\033[0m"
@@ -31,9 +31,9 @@ fi
 
 
 function getGpus {
-    GPU_COUNT=$(echo -n gpucount | nc 127.0.0.1 42004 |sed 's/|/\n/g' |tail +2 |cut -d= -f2)
+    GPU_COUNT=$(echo -n gpucount | nc 127.0.0.1 ${API_PORT} |sed 's/|/\n/g' |tail +2 |cut -d= -f2)
 
-    GPU_DETAILS=$(echo -n devdetails | nc 127.0.0.1 42004 |sed 's/,/\n/g')
+    GPU_DETAILS=$(echo -n devdetails | nc 127.0.0.1 ${API_PORT} |sed 's/,/\n/g')
 
     #echo "------------"
 
@@ -45,7 +45,7 @@ function getGpus {
             true
         fi
 
-        GPU_INFOS=$(echo -n "gpu|${WORKER_ID}" | nc 127.0.0.1 42004 |sed 's/|/\n/g' |tail +2  |sed 's/,/\n/g')
+        GPU_INFOS=$(echo -n "gpu|${WORKER_ID}" | nc 127.0.0.1 ${API_PORT} |sed 's/|/\n/g' |tail +2  |sed 's/,/\n/g')
 
         GPU_ID=$(grep "^GPU=" <<< $GPU_INFOS |cut -d= -f2)
         GPU_NAME=$(grep "^ID=0" -A99 <<< $GPU_DETAILS |grep "^Model=" |head -n1 |cut -d= -f2)
@@ -87,7 +87,7 @@ _EOF
 
 
 function getPool {
-    RESULT=$(echo -n "pools" | nc 127.0.0.1 42004)
+    RESULT=$(echo -n "pools" | nc 127.0.0.1 ${API_PORT})
     POOL=$(echo $RESULT |sed 's/|/\n/g' |tail +2 |sed 's/,/\n/g')
 
     POOL_URL=$(grep "^URL=" <<< $POOL |cut -d= -f2 |sed 's/stratum+tcp:\/\///')

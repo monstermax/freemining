@@ -15,3 +15,18 @@ Tous les outils pour gérer son rig :
 
 - agent de communication avec la ferme (farm_manager) => ./farm_agent/
 
+
+
+## Installation
+
+```bash
+cd rig_manager
+./farm_agent/install.sh
+```
+
+
+## Usage
+
+```bash
+./farm_agent/agent.sh -bg
+```

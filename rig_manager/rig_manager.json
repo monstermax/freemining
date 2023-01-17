@@ -1,5 +1,41 @@
 {
     "logsDir": "~/local/var/log/rig_manager",
     "pidsDir": "~/local/var/run/rig_manager",
-    "minersDir": "~/local/opt/miners"
+    "minersDir": "~/local/opt/miners",
+    "farmServer": {
+        "host": "82.64.213.186",
+        "port": 4200
+    },
+    "miners": {
+        "nbminer": {
+            "api": {
+                "port": 42001
+            }
+        },
+        "lolminer": {
+            "api": {
+                "port": 42002
+            }
+        },
+        "xmrig": {
+            "api": {
+                "port": 42003
+            }
+        },
+        "teamredminer": {
+            "api": {
+                "port": 42004
+            }
+        },
+        "trex": {
+            "api": {
+                "port": 42005
+            }
+        },
+        "gminer": {
+            "api": {
+                "port": 42006
+            }
+        }
+    }
 }

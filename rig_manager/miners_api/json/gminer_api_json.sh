@@ -4,11 +4,13 @@ MINER="gminer"
 
 cd `dirname $0`
 
-source ../../env
+source ../../tools/env.sh
 
 #echo "miner.name: $MINER"
 
-API_URL=http://localhost:42006
+API_PORT=$(getMinerApiPort $MINER)
+
+API_URL=http://localhost:${API_PORT}
 
 SUMMARY_URL=${API_URL}/stat
 SUMMARY_JSON=$(wget -qO- $SUMMARY_URL)

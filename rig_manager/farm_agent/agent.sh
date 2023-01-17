@@ -2,6 +2,8 @@
 
 cd `dirname $0`
 
+source ../tools/env.sh
+
 
 if [ "$1" = "-bg" ]; then
     # Run typescript
