@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../env
+source ../tools/env.sh
 
 
 ACTION=$1
@@ -44,6 +44,8 @@ if [ "$SERVICE" = "" ]; then
     exit 1
 fi
 
+mkdir -p $LOGS_DIR
+mkdir -p $PIDS_DIR
 
 LOG_FILE=${LOGS_DIR}/${SERVICE}.log
 PID_FILE=${PIDS_DIR}/${SERVICE}.pid
@@ -55,27 +57,30 @@ POOL_PORT=$(echo $POOL_URL |cut -d":" -f2)
 
 case "$SERVICE" in
     nbminer)
-        CMD_EXEC="/opt/miners/nbminer/nbminer"
+        API_PORT=$(getMinerApiPort nbminer)
+        CMD_EXEC="${MINERS_DIR}/nbminer/nbminer"
 
         CMD_ARGS="-a ${ALGO} \
             -o stratum+tcp://${POOL_URL} \
             -u ${POOL_ADDRESS}.${WORKER_NAME} \
-            --api 127.0.0.1:42001 \
+            --api 127.0.0.1:${API_PORT} \
             $@"
         ;;
 
     lolminer)
-        CMD_EXEC="/opt/miners/lolminer/lolMiner"
+        API_PORT=$(getMinerApiPort lolminer)
+        CMD_EXEC="${MINERS_DIR}/lolminer/lolMiner"
 
         CMD_ARGS="--algo ${ALGO} \
             --pool ${POOL_URL} \
             --user ${POOL_ADDRESS}.${WORKER_NAME} \
-            --apihost 127.0.0.1 --apiport 42002 \
+            --apihost 127.0.0.1 --apiport ${API_PORT} \
             $@"
         ;;
 
     xmrig)
-        CMD_EXEC="/opt/miners/xmrig/xmrig-nofees"
+        API_PORT=$(getMinerApiPort xmrig)
+        CMD_EXEC="${MINERS_DIR}/xmrig/xmrig-nofees"
 
         if [ "$ALGO" = "" ]; then
             ALGO="rx/0"
@@ -86,7 +91,7 @@ case "$SERVICE" in
             -a ${ALGO} \
             -k \
             --donate-level 0 \
-            --http-enabled --http-host 127.0.0.1 --http-port 42003 --http-access-token=yomining --http-no-restricted \
+            --http-enabled --http-host 127.0.0.1 --http-port ${API_PORT} --http-access-token=yomining --http-no-restricted \
             --cpu-max-threads-hint 75 --cpu-priority 3 \
             --randomx-no-rdmsr \
             --log-file=${LOG_FILE} --no-color \
@@ -94,34 +99,37 @@ case "$SERVICE" in
         ;;
 
     teamredminer)
-        CMD_EXEC="/opt/miners/teamredminer/teamredminer"
+        API_PORT=$(getMinerApiPort teamredminer)
+        CMD_EXEC="${MINERS_DIR}/teamredminer/teamredminer"
 
         CMD_ARGS="-a ${ALGO} \
             -o stratum+tcp://${POOL_URL} \
             -u ${POOL_ADDRESS}.${WORKER_NAME} \
             -p x \
-            --api_listen=0.0.0.0:42004 \
+            --api_listen=0.0.0.0:${API_PORT} \
             $@"
         ;;
 
     trex)
-        CMD_EXEC="/opt/miners/trex/t-rex"
+        API_PORT=$(getMinerApiPort trex)
+        CMD_EXEC="${MINERS_DIR}/trex/t-rex"
 
         CMD_ARGS="-a ${ALGO} \
             -o stratum+tcp://${POOL_URL} \
             -u ${POOL_ADDRESS}.${WORKER_NAME} \
             -p x \
-            --api-bind-http 127.0.0.1:42005 \
+            --api-bind-http 127.0.0.1:${API_PORT} \
             $@"
         ;;
 
     gminer)
-        CMD_EXEC="/opt/miners/gminer/miner"
+        API_PORT=$(getMinerApiPort gminer)
+        CMD_EXEC="${MINERS_DIR}/gminer/miner"
 
         CMD_ARGS="--user ${POOL_ADDRESS}.${WORKER_NAME} \
             --server ${POOL_HOST} --port ${POOL_PORT} --pass x \
             --algo ${ALGO} \
-            --api 42006 \
+            --api ${API_PORT} \
             $@"
         ;;
 
@@ -130,7 +138,7 @@ case "$SERVICE" in
             echo "Error: unknown service ${SERVICE}"
             exit 1
         fi
-        CMD_EXEC="/opt/miners/nbminer/NOT_EXISING_FILE"
+        CMD_EXEC="${MINERS_DIR}/nbminer/NOT_EXISING_FILE"
         ;;
 
     *)

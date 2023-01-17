@@ -1,10 +1,10 @@
 #!/bin/bash
 
-MINER="lolminer"
-
 cd `dirname $0`
 
 source ../../tools/env.sh
+
+MINER="lolminer"
 
 #echo "miner.name: $MINER"
 

@@ -1,8 +1,14 @@
 #!/bin/bash
 
-echo "miner.name: lolminer"
+cd `dirname $0`
 
-API_URL=http://localhost:42002
+source ../../tools/env.sh
+
+MINER="lolminer"
+echo "miner.name: $MINER"
+
+API_PORT=$(getMinerApiPort $MINER)
+API_URL=http://localhost:${API_PORT}
 
 SUMMARY_URL=${API_URL}/
 SUMMARY_JSON=$(wget -qO- $SUMMARY_URL)

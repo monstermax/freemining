@@ -1,8 +1,14 @@
 #!/bin/bash
 
-echo "miner.name: xmrig"
+cd `dirname $0`
 
-API_URL=http://localhost:42003
+source ../../tools/env.sh
+
+MINER="xmrig"
+echo "miner.name: $MINER"
+
+API_PORT=$(getMinerApiPort $MINER)
+API_URL=http://127.0.0.1:${API_PORT}
 BEARER=yomining
 
 

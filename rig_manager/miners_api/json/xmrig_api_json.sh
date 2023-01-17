@@ -1,10 +1,10 @@
 #!/bin/bash
 
-MINER="xmrig"
-
 cd `dirname $0`
 
 source ../../tools/env.sh
+
+MINER="xmrig"
 
 #echo "miner.name: $MINER"
 
