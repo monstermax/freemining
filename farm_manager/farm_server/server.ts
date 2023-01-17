@@ -28,6 +28,9 @@ const allowedIps = [
 const wsServerPort = 4200;
 const serverConnTimeout = 10_000;
 
+const templatesDir = `${__dirname}/web/templates`;
+
+
 type Rig = {
     hostname: string,
     ip: string,
@@ -86,7 +89,7 @@ app.get('/', (req: express.Request, res: express.Response, next: Function) => {
         }
     };
 
-    const layoutTemplate = fs.readFileSync(__dirname + '/web/templates/layout.html').toString();
+    const layoutTemplate = fs.readFileSync(`${templatesDir}/layout.html`).toString();
     let pageContent = stringTemplate(layoutTemplate, opts);
 
     res.send( pageContent );
@@ -116,7 +119,7 @@ app.get('/rigs/', (req: express.Request, res: express.Response, next: Function) 
         rigs,
     };
 
-    const tplHtml = fs.readFileSync(__dirname + '/web/templates/rigs.html').toString();
+    const tplHtml = fs.readFileSync(`${templatesDir}/rigs.html`).toString();
     const content = stringTemplate(tplHtml, tplData);
 
     const rigsTmp: {[key:string]: Rig} = {} = {};
@@ -147,7 +150,7 @@ app.get('/rigs/', (req: express.Request, res: express.Response, next: Function) 
         }
     };
 
-    const layoutTemplate = fs.readFileSync(__dirname + '/web/templates/layout.html').toString();
+    const layoutTemplate = fs.readFileSync(`${templatesDir}/layout.html`).toString();
     let pageContent = stringTemplate(layoutTemplate, opts);
 
     res.send( pageContent );
@@ -168,7 +171,7 @@ app.get('/rigs/rig', (req: express.Request, res: express.Response, next: Functio
             miners,
         };
 
-        const tplHtml = fs.readFileSync(__dirname + '/web/templates/rig.html').toString();
+        const tplHtml = fs.readFileSync(`${templatesDir}/rig.html`).toString();
         const content = stringTemplate(tplHtml, tplData);
 
         const opts = {
@@ -184,7 +187,7 @@ app.get('/rigs/rig', (req: express.Request, res: express.Response, next: Functio
             }
         };
 
-        const layoutTemplate = fs.readFileSync(__dirname + '/web/templates/layout.html').toString();
+        const layoutTemplate = fs.readFileSync(`${templatesDir}/layout.html`).toString();
         let pageContent = stringTemplate(layoutTemplate, opts);
 
         res.send( pageContent );
@@ -391,7 +394,7 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
                 rigs[rigName] = status;
 
                 // save to json file
-                fs.writeFileSync('/tmp/farm_rig_' + rigName + '.json', JSON.stringify(status));
+                //fs.writeFileSync('/tmp/farm_rig_' + rigName + '.json', JSON.stringify(status));
 
             } catch(err: any) {
                 console.error(`${now()} [WARNING] received invalid rigStatus from ${clientIP} => ${err.message}`);
