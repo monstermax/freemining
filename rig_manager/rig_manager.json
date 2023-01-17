@@ -1,0 +1,5 @@
+{
+    "logsDir": "~/local/var/log/rig_manager",
+    "pidsDir": "~/local/var/run/rig_manager",
+    "minersDir": "~/local/opt/miners"
+}

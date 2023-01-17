@@ -1,0 +1,54 @@
+
+<div>
+
+    <h1 class="d-inline-block">
+        Rigs list
+    </h1>
+
+    <div class="d-inline-block h3 ms-3">
+        <a href="./" class="btn btn-secondary">🌀 refresh</a>
+    </div>
+
+</div>
+
+<br />
+<br />
+
+<table class="table table-bordered table-hover">
+<thead class="table-dark">
+    <tr>
+        <th>Rig name</th>
+        <th>IP</th>
+        <th>Operating system</th>
+        <th class="text-end">Uptime</th>
+        <th class="text-end">Load avg.</th>
+        <th class="text-end">Memory</th>
+        <th class="text-end">Services</th>
+        <th class="text-end">Freshness</th>
+    </tr>
+</thead>
+<tbody>
+    ${Object.entries(rigs).map(entry => {
+        const rig = entry[1];
+        return `<tr class="${rig.dataAge > 10 ? 'text-danger' : (Object.keys(entry[1].services).length === 0 ? 'text-warning' : 'text-success')}">
+            <td><a href="./rig?rig=${rig.rig.hostname}">${rig.rig.hostname}</a></td>
+            <td>${rig.rig.ip}</td>
+            <td>${rig.rig.os}</td>
+            <td class="text-end">${formatNumber(rig.rig.uptime)} sec.</td>
+            <td class="text-end">${rig.rig.loadAvg}</td>
+            <td class="text-end">${formatNumber(rig.rig.memory.used)}/${formatNumber(rig.rig.memory.total)} MB</td>
+            <td class="text-end">${Object.keys(rig.services).length}</td>
+            <td class="text-end"><span class="dataAge">${Math.round(Date.now()/1000 - rig.rig.dateRig)}</span> sec. ago</td>
+        </tr>`
+    }).join('')}
+</tbody>
+</table>
+
+<script>
+//setInterval(() => {
+//    jQuery('.dataAge').each(function () {
+//        const age = jQuery(this).text();
+//        jQuery(this).text(age*1 + 1);
+//    });
+//}, 1000);
+</script>

@@ -1,0 +1,78 @@
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8"/>
+    <title>${meta.title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="FreeMining. Mining tools using Linux" />
+    <meta name="color-scheme" content="dark light">
+    <link rel="icon" type="image/png" href="/img/logo_64x64.png" />
+    <!-- analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1N8B5G6R0W"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1N8B5G6R0W');
+    </script>
+    <!-- css libs -->
+    <link href="/css/bootstrap-5.2.3.min.css" rel="stylesheet">
+    <link href="/css/farm_server.css" rel="stylesheet">
+    <link href="/css/alertify/alertify.min.css" rel="stylesheet">
+    ${meta.noIndex ? `<meta name="robots" content="noindex">` : ""}
+</head>
+<body>
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/"><img src="/img/logo_64x64.png" style="height:30px; border-radius:5px;" /> FreeMining</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        <li class="nav-item">
+                            <a class="nav-link ${currentUrl.startsWith('/rigs/') ? 'active' : ''}" href="/rigs/">Rigs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/status.json">API</a>
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0)" onclick="toggleDarkMode()" title="Dark mode" class="mt-2 dark-icon">🌙</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container">
+        ${body.content}
+    </div>
+
+    <div class="container-fluid">
+        <footer class="py-3 my-4">
+            <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+              <li class="nav-item"><a href="/" class="nav-link px-2 text-muted">Accueil</a></li>
+              <!-- <li class="nav-item"><a href="javascript:void(0)" class="nav-link px-2 text-muted">FAQs</a></li> -->
+              <!-- <li class="nav-item"><a href="/about" class="nav-link px-2 text-muted">A propos</a></li> -->
+              <li class="nav-item"><a href="javascript:void(0)" onclick="toggleDarkMode()" title="Dark mode" class="nav-link px-2 text-muted">Jour/Nuit <span class="dark-icon">🌙</span></a></li>
+            </ul>
+            <p class="text-center text-muted">
+                © 2022 <a href="http://www.karma-solutions.fr/" target="_blank">Karma Solutions</a>
+            </p>
+          </footer>
+    </div>
+
+    <!-- js libs -->
+    <script src="/js/bootstrap-5.2.3.bundle.min.js"></script>
+    <script src="/js/jquery-3.6.1.min.js"></script>
+    <script src="/js/alertify.min.js"></script>
+    <script src="/js/farm_server.js"></script>
+
+
+    <!-- dark mode -->
+    <script>
+    const colorScheme = window.localStorage.getItem('colorScheme') || document.documentElement.style.colorScheme;
+    if (colorScheme) toggleDarkMode(colorScheme);
+    </script>
+
+</body>
+</html>
