@@ -8,10 +8,10 @@ source ../rig_manager.sh
 if hasOpt -bg; then
     if hasOpt -ts; then
         # Run typescript
-        ${TS_NODE} ./agent.ts $@ >${LOGS_DIR}/rig_agent.log 2>${LOGS_DIR}/rig_agent.err &
+        ${TS_NODE} ./agent.ts $@ >${LOGS_DIR}/rig_manager_agent_daemon.log 2>${LOGS_DIR}/rig_manager_agent_daemon.err &
     else
         # Run javascript
-        ${NODE} ./agent.js $@ >${LOGS_DIR}/rig_agent.log 2>${LOGS_DIR}/rig_agent.err &
+        ${NODE} ./agent.js $@ >${LOGS_DIR}/rig_manager_agent_daemon.log 2>${LOGS_DIR}/rig_manager_agent_daemon.err &
     fi
 
 else

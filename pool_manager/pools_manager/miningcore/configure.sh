@@ -69,7 +69,7 @@ if [ "$POOLS_LIST" != "" ]; then
             PORT_DIFF_MIN=$(echo $POOL_ITEM | jq -r ".stratumPorts[\"${PORT_NUMBER}\"].difficultyMin")
             PORT_DIFF_MAX=$(echo $POOL_ITEM | jq -r ".stratumPorts[\"${PORT_NUMBER}\"].difficultyMax")
 
-            if [ "$PORT_DIFF_MIN" = "" ]; then
+            if [ "$PORT_DIFF_MIN" = "" -o "$PORT_DIFF_MIN" = "null" ]; then
                 PORT_DIFF_MIN="0.1"
             fi
 
@@ -131,7 +131,9 @@ _EOF
             "id": "${POOL_ID}",
             "enabled": true,
             "coin": "${POOL_COIN}",
+            "randomXRealm": "${POOL_ID}",
             "address": "${WALLET_ADDRESS}",
+            "z-address": "${WALLET_ZADDRESS}",
             "rewardRecipients": [
                 {
                     "address": "${WALLET_ADDRESS}",

@@ -51,7 +51,7 @@
 					"host": "127.0.0.1",
 					"port": 16124,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -69,7 +69,7 @@
 					"host": "127.0.0.1",
 					"port": 16110,
 					"user": "",
-					"password": ""
+					"pass": ""
 				}
 			]
         },
@@ -87,7 +87,7 @@
 					"host": "127.0.0.1",
 					"port": 8332,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -105,7 +105,7 @@
 					"host": "127.0.0.1",
 					"port": 9766,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -123,7 +123,7 @@
 					"host": "127.0.0.1",
 					"port": 19766,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -141,7 +141,7 @@
 					"host": "192.99.16.39",
 					"port": 9766,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -159,7 +159,7 @@
 					"host": "192.99.16.39",
 					"port": 10225,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -177,7 +177,7 @@
 					"host": "127.0.0.1",
 					"port": 8766,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -195,7 +195,7 @@
 					"host": "192.99.16.39",
 					"port": 7332,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         },
@@ -219,13 +219,13 @@
 					"host": "127.0.0.1",
 					"port": 18081,
 					"user": "",
-					"password": ""
+					"pass": ""
 				},
 				{
 					"host": "127.0.0.1",
 					"port": 18082,
 					"user": "",
-					"password": "",
+					"pass": "",
 					"category": "wallet"
 				}
 			]
@@ -245,7 +245,7 @@
 					"host": "127.0.0.1",
 					"port": 8232,
 					"user": "user",
-					"password": "pass"
+					"pass": "pass"
 				}
 			]
         }

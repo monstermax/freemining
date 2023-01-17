@@ -1,5 +1,5 @@
 {
-  "name": "rig_agent",
+  "name": "rig-manager-agent",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

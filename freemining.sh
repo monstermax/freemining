@@ -149,10 +149,11 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "Usage:"
         echo "$0 [action] <params>"
         echo
-        echo "$0 rig <params>"
-        echo "$0 pool <params>"
-        echo "$0 farm <params>"
-        echo "$0 compile"
+        echo "$0 rig <params>         # manage rig"
+        echo "$0 pool <params>        # manage pool"
+        echo "$0 farm <params>        # manage farm"
+        echo "$0 install              # install all submodules (rig, farm, pool)"
+        echo "$0 compile              # compile typescript for all submodules"
     }
 
     if [ "$1" = "rig" ]; then
@@ -167,10 +168,36 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./pool_manager/pool_manager.sh $@
 
+    elif [ "$1" = "install" ]; then
+        shift
+
+        echo "Install submodules"
+
+        INSTALL_LOG=/dev/null
+
+        echo " - Installing rig_agent..."
+        ./rig_manager/rig_agent/install_agent.sh >${INSTALL_LOG}
+
+        echo " - Installing farm_server..."
+        ./farm_manager/farm_server/install_server.sh >${INSTALL_LOG}
+
+        echo " - Installing pool_server..."
+        ./pool_manager/pool_server/install_server.sh >${INSTALL_LOG}
+
+
     elif [ "$1" = "compile" ]; then
         shift
+
+        echo "Compile typescript submodules"
+
+        echo " - Compiling rig_agent..."
         cd rig_manager/rig_agent; tsc; cd ../..
+
+        echo " - Compiling farm_server..."
         cd farm_manager/farm_server; tsc; cd ../..
+
+        echo " - Compiling pool_server..."
+        cd pool_manager/pool_server; tsc; cd ../..
 
     else
         usage

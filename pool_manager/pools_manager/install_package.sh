@@ -68,7 +68,10 @@ function install_miningcore {
 
     if ! sudo -u postgres psql postgres -tXAc  "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" | grep -q 1; then
         # create role
-        sudo -u postgres psql -c "CREATE ROLE ${DB_USER} WITH LOGIN ENCRYPTED PASSWORD '${DB_PASS}'"
+        #sudo -u postgres psql -c "CREATE ROLE ${DB_USER} WITH LOGIN ENCRYPTED PASSWORD '${DB_PASS}'"
+        sudo -u postgres psql -c "CREATE ROLE ${DB_USER} WITH PASSWORD '${DB_PASS}'"
+
+        #ALTER ROLE ${DB_USER} WITH PASSWORD '${DB_PASS}';
     fi
 
     if ! sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw ${DB_NAME}; then
@@ -85,6 +88,12 @@ function install_miningcore {
     #sudo -u postgres psql -d ${DB_NAME} -f ./src/Miningcore/Persistence/Postgres/Scripts/createdb_postgresql_11_appendix.sql
     #for each active pool...
     #  sudo -u postgres psql -c "CREATE TABLE shares_xxx1 PARTITION OF shares FOR VALUES IN ('xxx1')"
+
+
+    # apply custom patch
+    mv build/coins.json build/coins.dist.json
+    cp -a ${POOL_APP_DIR}/pools_manager/patchs/miningcore_coins.json build/coins.json
+
 
     echo " - Install into ${POOLS_ENGINE_DIR}/${package}"
     mkdir -p ${POOLS_ENGINE_DIR}

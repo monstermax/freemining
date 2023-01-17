@@ -2,20 +2,19 @@
 
 cd `dirname $0`
 
-source ./pool_manager.sh
+source ../pool_manager.sh
 
 
 # install basic tools
 installBasicTools
 
 # install nodejs + npm + typescript
-installNodejs
 installNodejsPackages
 
 
-
 # install pool server
-./pool_server/install_server.sh
+npm install
 
-# install pools manager
-./pools_manager/install_pools_manager.sh
+
+# compile typescript
+${TSC}
