@@ -25,6 +25,7 @@ function usage {
     echo "   $0 start|restart <SERVICE> <POOL_URL> <POOL_ADDRESS> <WORKER> <ALGO>"
     echo "   $0 stop <SERVICE>"
     echo "   $0 status <SERVICE>"
+    echo "   $0 status"
     echo "   $0 info <SERVICE>"
     echo "   $0 log <SERVICE> [once]"
     echo "   $0 ps <SERVICE>"
@@ -41,7 +42,7 @@ if [ "$ACTION" = "" ]; then
     exit 1
 fi
 
-if [ "$SERVICE" = "" -a "$ACTION" != "ps" ]; then
+if [ "$SERVICE" = "" -a "$ACTION" != "ps" -a "$ACTION" != "status" ]; then
     usage
     exit 1
 fi
@@ -136,7 +137,7 @@ case "$SERVICE" in
         ;;
 
     "")
-        if [ "$ACTION" != "ps" ]; then
+        if [ "$ACTION" != "ps" -a "$ACTION" != "status" ]; then
             echo "Error: missing service"
             exit 1
         fi
@@ -232,25 +233,29 @@ fi
 
 # STATUS
 if [ "$ACTION" = "status" ]; then
-    if [ "$PID" != "" ]; then
-        CMD_LINE=$(ps -p $PID -o args |tail -n +2)
-
-        echo "Service ${SERVICE} is running. PID = ${PID}"
-        echo
-        echo "CMD = ${CMD_LINE}"
-        echo
-        echo "PID_FILE = ${PID_FILE}"
-        echo "LOG_FILE = ${LOG_FILE}"
-
-        if [ "$CMD_LINE" = "" ]; then
-            echo
-            echo "Process seems to be crashed"
-            echo "run $0 kill ${SERVICE}"
-            echo "then restart"
-        fi
-
+    if [ "$SERVICE" = "" ]; then
+        ./rig_monitor_txt.sh
     else
-        echo "service inactive"
+        if [ "$PID" != "" ]; then
+            CMD_LINE=$(ps -p $PID -o args |tail -n +2)
+
+            echo "Service ${SERVICE} is running. PID = ${PID}"
+            echo
+            echo "CMD = ${CMD_LINE}"
+            echo
+            echo "PID_FILE = ${PID_FILE}"
+            echo "LOG_FILE = ${LOG_FILE}"
+
+            if [ "$CMD_LINE" = "" ]; then
+                echo
+                echo "Process seems to be crashed"
+                echo "run $0 kill ${SERVICE}"
+                echo "then restart"
+            fi
+
+        else
+            echo "service inactive"
+        fi
     fi
 fi
 

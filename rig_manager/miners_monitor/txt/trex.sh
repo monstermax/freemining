@@ -4,7 +4,7 @@ cd `dirname $0`
 
 source ../../rig_manager.sh
 
-MINER="t-rex"
+MINER="trex"
 echo "miner.name: $MINER"
 
 API_PORT=$(getMinerApiPort $MINER)

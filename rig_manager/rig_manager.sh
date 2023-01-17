@@ -127,6 +127,10 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./install_rig_manager.sh $@
 
+    elif [ "$1" = "status" ]; then
+        shift
+        ./tools/rig_monitor_txt.sh
+
     elif [ "$1" = "service" ]; then
         shift
         exec ./tools/service.sh $@
