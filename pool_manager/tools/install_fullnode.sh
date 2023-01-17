@@ -35,7 +35,10 @@ function install_callisto {
     DL_URL="https://github.com/EthereumCommonwealth/go-callisto/releases/download/${VERSION}/geth-linux-amd64"
     DL_FILE=$(basename $DL_URL)
     #UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -58,7 +61,10 @@ function install_ergo {
     DL_URL="https://github.com/ergoplatform/ergo/releases/download/v${VERSION}/ergo-${VERSION}.jar"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -72,7 +78,7 @@ function install_ergo {
     wget -q $DL_URL
 
     echo " - Preparing"
-    CONF_DIR=${USER_CONF_DIR}/nodes/${coin}
+    CONF_DIR=${USER_CONF_DIR}/fullnodes/${coin}
     mkdir -p $CONF_DIR
 
     poolName=$(jq '.poolName' $CONFIG_FILE)
@@ -150,7 +156,10 @@ function install_ethereum {
     DL_URL="https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${VERSION}.tar.gz"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -174,7 +183,10 @@ function install_ethereum_classic {
     DL_URL="https://github.com/etclabscore/core-geth/releases/download/v${VERSION}/core-geth-linux-v${VERSION}.zip"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -199,7 +211,10 @@ function install_firo {
     DL_URL="https://github.com/firoorg/firo/releases/download/v${VERSION}/firo-${VERSION}-linux64.tar.gz"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -222,7 +237,10 @@ function install_flux {
     DL_URL="xxxx"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -242,7 +260,10 @@ function install_kaspa {
     DL_URL="https://github.com/kaspanet/kaspad/releases/download/v${VERSION}/kaspad-v${VERSION}-linux.zip"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -263,7 +284,10 @@ function install_komodo {
 
     coin="komodo"
     VERSION=""
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
@@ -275,16 +299,16 @@ function install_komodo {
 
 
     echo " - Downloading ${coin}"
-    git clone https://github.com/KomodoPlatform/komodo >${INSTALL_LOG} 2>${INSTALL_LOG}
+    git clone https://github.com/KomodoPlatform/komodo >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     cd komodo
 
     echo " - Fetching params"
-    ./zcutil/fetch-params.sh >${INSTALL_LOG}
+    ./zcutil/fetch-params.sh >>${INSTALL_LOG}
 
-    echo " - Compiling"
-    ./zcutil/build.sh -j$(nproc) >${INSTALL_LOG}
+    echo " - Compiling ${coin}"
+    ./zcutil/build.sh -j$(nproc) >>${INSTALL_LOG}
 
-    CONF_DIR=${USER_CONF_DIR}/nodes/${coin}
+    CONF_DIR=${USER_CONF_DIR}/fullnodes/${coin}
     mkdir -p $CONF_DIR
 
     cat << _EOF > ${CONF_DIR}/komodo.conf
@@ -314,7 +338,10 @@ function install_meowcoin {
 
     coin="meowcoin"
     VERSION="1.0.3"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     DL_URL="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-CLI-x86_64-linux-gnu.tar.gz"
     DL_FILE=$(basename $DL_URL)
@@ -352,7 +379,10 @@ function install_monero {
 
     coin="monero"
     VERSION=""
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     DL_URL="https://downloads.getmonero.org/cli/linux64"
 
@@ -367,7 +397,7 @@ function install_monero {
     UNZIP_DIR=$(basename monero-x86_64-linux-gnu-v*)
 
     echo " - Preparing"
-    CONF_DIR=${USER_CONF_DIR}/nodes/${coin}
+    CONF_DIR=${USER_CONF_DIR}/fullnodes/${coin}
     mkdir -p $CONF_DIR
 
     CONF_DIR_REAL=$(realpath $CONF_DIR)
@@ -491,7 +521,10 @@ function install_neoxa {
 
     coin="neoxa"
     VERSION="1.0.3"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     DL_URL="https://github.com/NeoxaChain/Neoxa/releases/download/v${VERSION}/neoxad-linux64.zip"
     DL_FILE=$(basename $DL_URL)
@@ -527,7 +560,10 @@ function install_radiant {
     cd ${TMP_DIR}
 
     coin="radiant"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     echo "Installing ${coin} sources..."
 
@@ -538,15 +574,15 @@ function install_radiant {
     sudo apt-get install -qq -y libqrencode-dev libprotobuf-dev protobuf-compiler qttools5-dev
 
     echo " - Downloading sources"
-    git clone https://github.com/RadiantBlockchain/radiant-node >${INSTALL_LOG} 2>${INSTALL_LOG}
+    git clone https://github.com/RadiantBlockchain/radiant-node >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
-    echo " - Compiling (1/2)"
+    echo " - Compiling ${coin} (1/2)"
     mkdir radiant-node/build && cd radiant-node/build
-    cmake -GNinja .. -DBUILD_RADIANT_QT=OFF >${INSTALL_LOG}
+    cmake -GNinja .. -DBUILD_RADIANT_QT=OFF >>${INSTALL_LOG}
     # OR cmake -GNinja ..
 
-    echo " - Compiling (2/2)"
-    ninja >${INSTALL_LOG}
+    echo " - Compiling ${coin} (2/2)"
+    ninja >>${INSTALL_LOG}
 
     echo " - Install tmp"
     rm -rf dist
@@ -573,7 +609,10 @@ function install_raptoreum {
 
     coin="raptoreum"
     VERSION=""
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     if grep -q "Debian GNU/Linux 11" /etc/os-release; then
         VERSION="1.13.17.02"
@@ -610,16 +649,16 @@ function install_raptoreum {
         rootRequired
         sudo apt-get install -qq -y curl build-essential libtool autotools-dev automake pkg-config python3 bsdmainutils
 
-        git clone https://github.com/Raptor3um/raptoreum/ >${INSTALL_LOG} 2>${INSTALL_LOG}
+        git clone https://github.com/Raptor3um/raptoreum/ >>${INSTALL_LOG} 2>>${INSTALL_LOG}
         cd raptoreum/depends
 
-        make -j$(nproc) >${INSTALL_LOG}
+        make -j$(nproc) >>${INSTALL_LOG}
         cd ..
 
-        ./autogen.sh >${INSTALL_LOG}
-        ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu >${INSTALL_LOG}
+        ./autogen.sh >>${INSTALL_LOG}
+        ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu >>${INSTALL_LOG}
 
-        make >${INSTALL_LOG}
+        make >>${INSTALL_LOG}
         #make install # optional
 
         cd src
@@ -636,7 +675,10 @@ function install_ravencoin {
 
     coin="ravencoin"
     VERSION="4.3.2.1"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     DL_URL="https://github.com/RavenProject/Ravencoin/releases/download/v${VERSION}/raven-${VERSION}-x86_64-linux-gnu.zip"
     DL_FILE=$(basename $DL_URL)
@@ -668,7 +710,10 @@ function install_zcash {
 
     coin="zcash"
     VERSION="5.3.2"
-    INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
+    INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
+    >${INSTALL_LOG}
 
     DL_URL="https://z.cash/downloads/zcash-${VERSION}-linux64-debian-buster.tar.gz"
     DL_FILE=$(basename $DL_URL)

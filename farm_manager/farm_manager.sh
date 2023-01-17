@@ -21,6 +21,7 @@ fi
 ##### CONFIG #####
 
 CONFIG_FILE=$(realpath ./farm_manager.json)
+FARM_APP_DIR=$(dirname $CONFIG_FILE)
 
 if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
     echo "Missing farm_manager.json configuration file"
@@ -58,6 +59,7 @@ if [ "$LOGS_DIR" = "" ]; then
         LOGS_DIR="${USER_CONF_DIR}/logs"
     fi
 fi
+
 
 if [ "$PIDS_DIR" = "" ]; then
     #echo "Missing pidsDir parameter. Set it in farm_manager.json"

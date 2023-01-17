@@ -4,7 +4,9 @@
     "userConfDir": "~/.freemining",
     "logsDir": "~/.freemining/logs",
     "pidsDir": "~/.freemining/run",
-    "nodesDir": "~/local/opt/fullnodes",
+    "nodesDir": "~/local/opt/freemining/fullnodes",
+    "poolsEngineDir": "~/local/opt/freemining/pools_engine",
+    "poolsUiDir": "~/local/opt/freemining/pools_ui",
 
 	"fullnodes": {
 		"ergo": {
@@ -19,11 +21,14 @@
     "pools": {
 
         "erg1": {
+			"coin": "ergo",
             "walletAddress": "9i9JiBmnMXvhbVaPDVfPogpTWuqLoNnRHwxq514Tu5xxfrJdEXT",
             "stratumPorts": {
-                "4013": "GPU-SMALL"
+                "50100": {
+					"name": "GPU-SMALL"
+				}
             },
-            "daemons": [
+            "daemonsRpc": [
                 {
 					"host": "127.0.0.1",
 					"port": 9053,
@@ -33,12 +38,15 @@
         },
 
         "flux1": {
+			"coin": "flux",
             "walletAddress": "t1MMdtvffdYKhVhenuTnRcTrBPLfwx7jArh",
             "walletZAddress": "za17xdf0apv34s5nfjdwmw0a9aphuzfwf064d6v3pqswasws5hyynuv7x7era9dl9gczzqj776ur7m",
             "stratumPorts": {
-                "4073": "GPU-SMALL"
+                "51100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 16124,
@@ -49,11 +57,14 @@
         },
 
         "kas1": {
+			"coin": "kaspa",
             "walletAddress": "kaspa:qqg8uhmej8g0yfvmjpu5fz5ekcgc0hmqyee8ycjgtr4jxag8alyyjqftlmnp7",
             "stratumPorts": {
-                "4023": "GPU-SMALL"
+                "52100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 16110,
@@ -64,11 +75,14 @@
         },
 
         "kmd1": {
+			"coin": "komodo",
             "walletAddress": "RSFvT6LcUb9LWsZ4MYXUHdEe7w6mNToGSz",
             "stratumPorts": {
-                "5073": "GPU-SMALL"
+                "53100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 8332,
@@ -79,11 +93,14 @@
         },
 
         "meow1": {
+			"coin": "meowcoin",
             "walletAddress": "MJxPvVq1Gbd71XMuXvprQnTmHiAH3KXi89",
             "stratumPorts": {
-                "4043": "GPU-SMALL"
+                "54100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 9766,
@@ -94,11 +111,14 @@
         },
 
         "neox1": {
+			"coin": "neoxa",
             "walletAddress": "MNoWSnWmAAVsXK6Vh5adSWNthsLqSHbWME",
             "stratumPorts": {
-                "4033": "GPU-SMALL"
+                "55100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 19766,
@@ -109,11 +129,14 @@
         },
 
         "neox2": {
+			"coin": "neoxa",
             "walletAddress": "Gc57wNUrwwJb6iNnLDNT9FS686mxjwVCMR",
             "stratumPorts": {
-                "4037": "GPU-SMALL"
+                "55200": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "192.99.16.39",
 					"port": 9766,
@@ -124,11 +147,14 @@
         },
 
         "rtm1": {
+			"coin": "raptoreum",
             "walletAddress": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR",
             "stratumPorts": {
-                "4093": "GPU-SMALL"
+                "56100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "192.99.16.39",
 					"port": 10225,
@@ -139,11 +165,14 @@
         },
 
         "rvn1": {
+			"coin": "ravencoin",
             "walletAddress": "RNDR75yLyFyjCgN87trijPCLEtgRz66z2A",
             "stratumPorts": {
-                "4083": "GPU-SMALL"
+                "57100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 8766,
@@ -154,11 +183,14 @@
         },
 
         "rxd1": {
+			"coin": "radiant",
             "walletAddress": "1Ba8y4fhWUYyJs4e5SSe5BAVRJRDddfFLZ",
             "stratumPorts": {
-                "4993": "GPU-SMALL"
+                "58100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "192.99.16.39",
 					"port": 7332,
@@ -169,13 +201,20 @@
         },
 
         "xmr1": {
+			"coin": "monero",
             "walletAddress": "48S2RQ4zps4GNp9Ym5sX3TMHBu1aKpr9BNdTpcTthMJCSnQasLEUGzWG38k9vh2UjtNyt5KbLtUe9GicSGwHmFEwNUrV2Ds",
             "stratumPorts": {
-                "3032": "CPU Mining",
-                "3033": "GPU Mining",
-                "3034": "High-End Multi GPU Mining"
+                "59100": {
+					"name": "CPU Mining"
+				},
+                "59110": {
+					"name": "GPU Mining"
+				},
+                "59120": {
+					"name": "High-End Multi GPU Mining"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 18081,
@@ -193,13 +232,15 @@
         },
 
         "zec1": {
+			"coin": "zcash",
             "walletAddress": "t1ffvVvfKJ18RucVThxLHJ3TEY56T3meDDw",
             "walletZAddress": "zs1y02mmzff5aq42gsxgkvhyp5e2tjhxylk2yq8vt4gk6cp8jjp2307fwrneyt84ks2240eucut8fn",
             "stratumPorts": {
-                "3092": "",
-                "3093": ""
+                "60100": {
+					"name": "GPU-SMALL"
+				}
             },
-			"daemons": [
+			"daemonsRpc": [
 				{
 					"host": "127.0.0.1",
 					"port": 8232,

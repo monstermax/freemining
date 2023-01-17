@@ -4,7 +4,7 @@
     "userConfDir": "~/.freemining",
     "logsDir": "~/.freemining/logs",
     "pidsDir": "~/.freemining/run",
-    "minersDir": "~/local/opt/miners",
+    "minersDir": "~/local/opt/freemining/miners",
 
     "farmServer": {
         "host": "82.64.213.186",

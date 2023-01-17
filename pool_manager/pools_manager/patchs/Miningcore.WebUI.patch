@@ -1,0 +1,56 @@
+diff --git a/js/miningcore.js b/js/miningcore.js
+index a85985c..755579b 100644
+--- a/js/miningcore.js
++++ b/js/miningcore.js
+@@ -39,7 +39,7 @@ if (API.substring(API.length-1) != "/")
+ } 
+ var stratumAddress = window.location.hostname;           				// Stratum address is:  domain.com
+ 
+-
++API = 'https://' + window.location.hostname + '/api/';
+ 
+ 
+ 
+@@ -172,11 +172,11 @@ function loadHomePage() {
+ 		poolCoinTableTemplate += "<tr class='coin-table-row' href='#" + value.id + "'>";
+ 		poolCoinTableTemplate += "<td class='coin'><a href='#" + value.id + "'<span>" + coinLogo + coinName + " (" + value.coin.type.toUpperCase() + ") </span></a></td>";
+ 		poolCoinTableTemplate += "<td class='algo'>" + value.coin.algorithm + "</td>";
+-		poolCoinTableTemplate += "<td class='miners'>" + value.poolStats.connectedMiners + "</td>";
+-		poolCoinTableTemplate += "<td class='pool-hash'>" + _formatter(value.poolStats.poolHashrate, 5, "H/s") + "</td>";
++		poolCoinTableTemplate += "<td class='miners'>" + ((value.poolStats || {}).connectedMiners || 0) + "</td>";
++		poolCoinTableTemplate += "<td class='pool-hash'>" + _formatter((value.poolStats || {}).poolHashrate || 0, 5, "H/s") + "</td>";
+ 		poolCoinTableTemplate += "<td class='fee'>" + value.poolFeePercent + " %</td>";
+-		poolCoinTableTemplate += "<td class='net-hash'>" + _formatter(value.networkStats.networkHashrate, 5, "H/s") + "</td>";
+-		poolCoinTableTemplate += "<td class='net-diff'>" + _formatter(value.networkStats.networkDifficulty, 5, "") + "</td>";
++		poolCoinTableTemplate += "<td class='net-hash'>" + _formatter((value.networkStats || {}).networkHashrate || 0, 5, "H/s") + "</td>";
++		poolCoinTableTemplate += "<td class='net-diff'>" + _formatter((value.networkStats || {}).networkDifficulty || 0, 5, "") + "</td>";
+ 		poolCoinTableTemplate += "<td class='card-btn col-hide'>Go Mine " + coinLogo + coinName + "</td>";
+ 		poolCoinTableTemplate += "</tr>";
+       });
+@@ -407,7 +407,7 @@ function loadConnectPage() {
+ 			}
+ 			connectPoolConfig += "<tr><td>Pool Fee</td><td>" + value.poolFeePercent + "%</td></tr>";
+ 			$.each(value.ports, function(port, options) {
+-				connectPoolConfig += "<tr><td>stratum+tcp://" + coinType + "." + stratumAddress + ":" + port + "</td><td>";
++				connectPoolConfig += "<tr><td>stratum+tcp://" + stratumAddress + ":" + port + "</td><td>";
+ 				if (typeof options.varDiff !== "undefined" && options.varDiff != null) {
+ 					connectPoolConfig += "Difficulty Variable / " + options.varDiff.minDiff + " &harr; ";
+ 					if (typeof options.varDiff.maxDiff === "undefined" || options.varDiff.maxDiff == null) {
+@@ -436,7 +436,7 @@ function loadConnectPage() {
+ 			  function(responseText){
+ 				var config = $("#miner-config")
+                 .html()
+-				.replace(/{{ stratumAddress }}/g, coinType + "." + stratumAddress + ":" + defaultPort)
++				.replace(/{{ stratumAddress }}/g, stratumAddress + ":" + defaultPort)
+ 				.replace(/{{ coinName }}/g, coinName)
+ 				.replace(/{{ aglorithm }}/g, algorithm);
+ 				$(this).html(config);  
+@@ -445,7 +445,7 @@ function loadConnectPage() {
+ 		  } else {
+ 			var config = $("#miner-config")
+             .html()
+-            .replace(/{{ stratumAddress }}/g, coinType + "." + stratumAddress + ":" + defaultPort)
++            .replace(/{{ stratumAddress }}/g, stratumAddress + ":" + defaultPort)
+ 			.replace(/{{ coinName }}/g, coinName)
+ 			.replace(/{{ aglorithm }}/g, algorithm);
+             $(this).html(config);

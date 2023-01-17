@@ -21,6 +21,7 @@ fi
 ##### CONFIG #####
 
 CONFIG_FILE=$(realpath ./rig_manager.json)
+RIG_APP_DIR=$(dirname $CONFIG_FILE)
 
 if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
     echo "Missing rig_manager.json configuration file"
@@ -73,11 +74,20 @@ if [ "$PIDS_DIR" = "" ]; then
 fi
 
 if [ "$MINERS_DIR" = "" ]; then
-    echo "Missing minersDir parameter. Set it in rig_manager.json"
-    exit 1
+    #echo "Missing minersDir parameter. Set it in rig_manager.json"
+    #exit 1
+
+    if isRoot; then
+        POOLS_UI_DIR="/opt/freemining/miners"
+    else
+        POOLS_UI_DIR="~/local/opt/freemining/miners"
+    fi
 fi
 
+
+
 ##### FUNCTIONS #####
+
 
 function getMinerApiPort {
     miner=$1
@@ -116,10 +126,10 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "$0 [action] <params>"
         echo
         echo "$0 install"
+        echo "$0 miner-install [miner]"
         echo "$0 service <params>"
         echo "$0 txt-monitor"
         echo "$0 json-monitor"
-        echo "$0 miner-install [miner]"
         echo "$0 agent"
     }
 
