@@ -101,20 +101,20 @@ ${Object.entries(rig.services).map(entry => {
     }
 
     if (service.gpu.length > 0) {
-        const gpu = service.gpu[0];
-
-        devicesHtml += `
-        <div class="border border-dark rounded bg-light">
-            <div class="row">
-                <div class="col-1"></div>
-                <div class="col-2"><b>GPU #</b> <br /> ${gpu.id}</div>
-                <div class="col-5"><b>Name</b> <br /> ${gpu.name}</div>
-                <div class="col-1"><b>Temperature</b> <br /> ${gpu.temperature}°</div>
-                <div class="col-1"><b>Fan speed</b> <br /> ${gpu.fanSpeed}%</div>
-                <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(gpu.hashRate)}/sec.</div>
+        service.gpu.forEach(gpu => {
+            devicesHtml += `
+            <div class="border border-dark rounded bg-light my-2">
+                <div class="row">
+                    <div class="col-1"></div>
+                    <div class="col-2"><b>GPU #</b> <br /> ${gpu.id}</div>
+                    <div class="col-5"><b>Name</b> <br /> ${gpu.name}</div>
+                    <div class="col-1"><b>Temperature</b> <br /> ${gpu.temperature}°</div>
+                    <div class="col-1"><b>Fan speed</b> <br /> ${gpu.fanSpeed}%</div>
+                    <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(gpu.hashRate)}/sec.</div>
+                </div>
             </div>
-        </div>
-        `;
+            `;
+        });
     }
 
     let html = `
@@ -321,6 +321,7 @@ function startService(serviceName, algo, poolUrl, poolAccount, workerName=null, 
         workerName: workerName || '${rig.rig.hostname}',
         optionnalParams: optionnalParams || '',
     };
+
     jQuery.post(url, data).then(() => {
         //jQuery('body').addClass('opacity-25');
 

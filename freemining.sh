@@ -1,5 +1,10 @@
 #!/bin/bash
 
+##### START #####
+
+OLD_PWD=$PWD
+cd `dirname $BASH_SOURCE`
+
 CMD_ARGS=($@)
 
 ##### CONFIG #####
@@ -32,6 +37,19 @@ function isRoot {
         return 1
     fi
 }
+
+
+#function getConfDir {
+#    coin=$1
+#
+#    if isRoot; then
+#        CONF_DIR="/etc/freemining"
+#    else
+#        CONF_DIR="~/.freemining"
+#    fi
+#
+#    echo $CONF_DIR
+#}
 
 
 function installBasicTools {
@@ -121,3 +139,46 @@ function getOpt {
     done
 }
 
+
+
+##### MAIN #####
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+
+    function usage {
+        echo "Usage:"
+        echo "$0 [action] <params>"
+        echo
+        echo "$0 rig <params>"
+        echo "$0 pool <params>"
+        echo "$0 farm <params>"
+        echo "$0 compile"
+    }
+
+    if [ "$1" = "rig" ]; then
+        shift
+        exec ./rig_manager/rig_manager.sh $@
+
+    elif [ "$1" = "farm" ]; then
+        shift
+        exec ./farm_manager/farm_manager.sh $@
+
+    elif [ "$1" = "pool" ]; then
+        shift
+        exec ./pool_manager/pool_manager.sh $@
+
+    elif [ "$1" = "compile" ]; then
+        shift
+        cd rig_manager/rig_agent; tsc; cd ../..
+        cd farm_manager/farm_server; tsc; cd ../..
+
+    else
+        usage
+    fi
+
+fi
+
+
+##### END #####
+
+cd $OLD_PWD

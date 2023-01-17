@@ -258,7 +258,7 @@ function install_xmrig_release {
 function install_xmrig_sources_free {
     cd ${TMP_DIR}
     echo "Installing dev tools"
-    echo " => root required. Continue ? (Press Enter to continue. CTRL+C to stop)"; read
+    rootRequired
     sudo apt-get update --allow-releaseinfo-change
     sudo apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev automake libtool autoconf
     mkdir -p xmrig-source && cd xmrig-source
@@ -348,7 +348,7 @@ if ! test -d ${MINERS_DIR}; then
 
     else
         echo "Folder $PARENT_DIR is not writable"
-        echo " => root required. Continue ? (Press Enter to continue. CTRL+C to stop)"; read
+        rootRequired
         sudo mkdir -p ${MINERS_DIR}
         sudo chown $USER: ${MINERS_DIR}
     fi

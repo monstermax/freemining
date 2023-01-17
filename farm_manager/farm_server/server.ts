@@ -304,7 +304,7 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
     ws.on('message', function message(data: Buffer) {
         const message = data.toString();
         const tmpRigName = (ws as any).auth?.rigName || 'anonymous';
-        console.log(`${now()} [${colors.blue('INFO')}] received message of ${message.length} characters from ${tmpRigName} (${clientIP})`);
+        console.log(`${now()} [${colors.blue('INFO')}] received message of ${message.length} characters from ${colors.cyan(tmpRigName)} (${clientIP})`);
         //console.log(`${now()} [${colors.blue('INFO')}] received message of ${message.length} characters from ${clientIP}`);
 
         const args = message.split(' ');

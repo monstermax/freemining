@@ -3,21 +3,78 @@ import WebSocket from 'ws';
 import os from 'os';
 import colors from 'colors/safe';
 const { exec } = require('child_process');
-
 const config: any = require('../rig_manager.json');
 
-const wsServerHost = config.farmServer?.host || 'localhost';
+
+type Rig = {
+    hostname: string,
+    ip: string,
+    os: string,
+    uptime: number,
+    loadAvg: number,
+    memory: {
+        used: number,
+        total: number,
+    },
+    devices: {
+        cpu: {
+            name: string,
+            threads: number,
+        },
+        gpu: [
+            {
+                id: number,
+                name: string,
+                driver: string,
+            }
+        ]
+    },
+    dateRig?: number,
+    dataAge?: number,
+}
+
+type Service = {
+    worker: {
+        name: string,
+        miner: string,
+        pid: number,
+        algo: string,
+        hashRate: number,
+        uptime: number,
+        date: string,
+    }
+    pool: {
+        url: string,
+        account: string,
+    },
+    cpu: {[key:string]: any}[],
+    gpu: {[key:string]: any}[],
+}
+
+type RigStatus = {
+    rig: Rig,
+    services: { [key: string]: Service },
+    dateFarm?: number,
+    dataAge?: number,
+};
+
+
+const wsServerHost = config.farmServer?.host || null;
 const wsServerPort = config.farmServer?.port || 4200;
 
 const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
-const sendStatusInterval = 10_000; // envoie le statut du rig au farmServer toutes les x millisecondes
+const checkStatusInterval = 10_000; // verifie le statut du rig toutes les x millisecondes
+const sendStatusInterval = 10_000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
 
+let checkStatusTimeout: any = null;
 let connectionCount = 0;
 
 const toolsDir = `${__dirname}/../tools`;
 const cmdService = `${toolsDir}/service.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
+
+let rigStatus: RigStatus | null = null;
 
 
 function websocketConnect() {
@@ -57,7 +114,6 @@ function websocketConnect() {
         ws.send(`auth ${rigName} xxx`);
 
         // Send rig status
-        const rigStatus = await getRigStatus();
         if (rigStatus) {
             console.log(`${now()} [${colors.blue('INFO')}] sending rigStatus to server (open) [conn ${connectionId}]`)
             ws.send( `rigStatus ${JSON.stringify(rigStatus)}`);
@@ -95,7 +151,7 @@ function websocketConnect() {
                 const serviceName = args.shift();
 
                 if (serviceName && args.length > 0) {
-                    const paramsJson = args.join('');
+                    const paramsJson = args.join(' ');
 
                     let params: any;
                     try {
@@ -106,7 +162,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo}`;
+                    const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo} ${params.optionnalParams}`;
 
                     console.log(`${now()} [DEBUG] executing command: ${cmd}`)
 
@@ -185,9 +241,7 @@ function websocketConnect() {
     async function hello() {
         sendStatusTimeout = null;
 
-        const rigStatus = await getRigStatus();
         if (rigStatus) {
-
             if (ws.readyState === WebSocket.OPEN) {
                 console.log(`${now()} [${colors.blue('INFO')}] sending rigStatus to server (hello) [conn ${connectionId}]`);
                 ws.send( `rigStatus ${JSON.stringify(rigStatus)}`);
@@ -216,15 +270,15 @@ function websocketConnect() {
 
 
 
-async function getRigStatus(): Promise<any> {
+async function getRigStatus(): Promise<RigStatus | null> {
     const cmd = cmdRigMonitorJson;
 
     const statusJson = await cmdExec(cmd);
 
     if (statusJson) {
         try {
-            const rigStatus = JSON.parse(statusJson);
-            return rigStatus;
+            const _rigStatus = JSON.parse(statusJson);
+            return _rigStatus;
 
         } catch (err: any) {
             console.error(`${now()} [${colors.red('ERROR')}] cannot read rig status (invalid shell response)`);
@@ -278,9 +332,28 @@ function now(): string {
 }
 
 
+async function checkStatus() {
+    console.log(`${now()} [${colors.blue('INFO')}] refreshing rigStatus`)
+    checkStatusTimeout = null;
+    rigStatus = await getRigStatus();
 
-function main() {
-    websocketConnect();
+    // poll services every x seconds
+    checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
+}
+
+
+async function main() {
+    await checkStatus();
+
+    if (wsServerHost) {
+        // connect to websocket server
+        websocketConnect();
+    }
+
+    if (false) {
+        // run local webserver
+        // TODO
+    }
 }
 
 

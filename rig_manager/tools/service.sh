@@ -17,7 +17,7 @@ shift
 ALGO=$1
 shift
 
-set -e
+#set -e # provoque des retours erreur dans agent.ts et provoque un throw
 
 
 function usage {

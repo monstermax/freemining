@@ -1,7 +1,20 @@
 {
     "poolName": "FreeMining pool",
-    "logsDir": "~/local/var/log/freemining",
-    "pidsDir": "~/local/var/run/freemining",
+
+    "userConfDir": "~/.freemining",
+    "logsDir": "~/.freemining/logs",
+    "pidsDir": "~/.freemining/run",
+    "nodesDir": "~/local/opt/fullnodes",
+
+	"fullnodes": {
+		"ergo": {
+			"apiSecret": "yosecret",
+			"apiKeyHash": "158f937d33215503d851b9a29f81a33a9c2c0d7c9cf15b4b9887b99fa0845010"
+		},
+		"monero": {
+			"walletPassword": "secret"
+		}
+	},
 
     "pools": {
 

@@ -7,15 +7,18 @@ const os_1 = tslib_1.__importDefault(require("os"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const { exec } = require('child_process');
 const config = require('../rig_manager.json');
-const wsServerHost = ((_a = config.farmServer) === null || _a === void 0 ? void 0 : _a.host) || 'localhost';
+const wsServerHost = ((_a = config.farmServer) === null || _a === void 0 ? void 0 : _a.host) || null;
 const wsServerPort = ((_b = config.farmServer) === null || _b === void 0 ? void 0 : _b.port) || 4200;
 const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
-const sendStatusInterval = 10000; // envoie le statut du rig au farmServer toutes les x millisecondes
+const checkStatusInterval = 10000; // verifie le statut du rig toutes les x millisecondes
+const sendStatusInterval = 10000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
+let checkStatusTimeout = null;
 let connectionCount = 0;
 const toolsDir = `${__dirname}/../tools`;
 const cmdService = `${toolsDir}/service.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
+let rigStatus = null;
 function websocketConnect() {
     let sendStatusTimeout = null;
     let newConnectionTimeout = null;
@@ -44,7 +47,6 @@ function websocketConnect() {
             // Send auth
             ws.send(`auth ${rigName} xxx`);
             // Send rig status
-            const rigStatus = yield getRigStatus();
             if (rigStatus) {
                 console.log(`${now()} [${safe_1.default.blue('INFO')}] sending rigStatus to server (open) [conn ${connectionId}]`);
                 ws.send(`rigStatus ${JSON.stringify(rigStatus)}`);
@@ -75,7 +77,7 @@ function websocketConnect() {
                     args.shift();
                     const serviceName = args.shift();
                     if (serviceName && args.length > 0) {
-                        const paramsJson = args.join('');
+                        const paramsJson = args.join(' ');
                         let params;
                         try {
                             params = JSON.parse(paramsJson);
@@ -84,7 +86,7 @@ function websocketConnect() {
                             console.error(`${now()} [${safe_1.default.red('ERROR')}] cannot start service : ${err.message}`);
                             return;
                         }
-                        const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo}`;
+                        const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo} ${params.optionnalParams}`;
                         console.log(`${now()} [DEBUG] executing command: ${cmd}`);
                         const ret = yield cmdExec(cmd);
                         console.log(`${now()} [DEBUG] command result: ${ret}`);
@@ -136,7 +138,6 @@ function websocketConnect() {
     function hello() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             sendStatusTimeout = null;
-            const rigStatus = yield getRigStatus();
             if (rigStatus) {
                 if (ws.readyState === ws_1.default.OPEN) {
                     console.log(`${now()} [${safe_1.default.blue('INFO')}] sending rigStatus to server (hello) [conn ${connectionId}]`);
@@ -166,12 +167,16 @@ function getRigStatus() {
         const statusJson = yield cmdExec(cmd);
         if (statusJson) {
             try {
-                const rigStatus = JSON.parse(statusJson);
-                return rigStatus;
+                const _rigStatus = JSON.parse(statusJson);
+                return _rigStatus;
             }
             catch (err) {
-                console.error(`${now()} [${safe_1.default.red('ERROR')}] cannot read rig status`);
+                console.error(`${now()} [${safe_1.default.red('ERROR')}] cannot read rig status (invalid shell response)`);
+                console.debug(statusJson);
             }
+        }
+        else {
+            console.log(`${now()} [${safe_1.default.red('WAWRNING')}] cannot read rig status (no response from shell)`);
         }
         return null;
     });
@@ -207,7 +212,26 @@ function now() {
     };
     return new Date().toLocaleTimeString("fr-FR", options);
 }
+function checkStatus() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        console.log(`${now()} [${safe_1.default.blue('INFO')}] refreshing rigStatus`);
+        checkStatusTimeout = null;
+        rigStatus = yield getRigStatus();
+        // poll services every x seconds
+        checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
+    });
+}
 function main() {
-    websocketConnect();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield checkStatus();
+        if (wsServerHost) {
+            // connect to websocket server
+            websocketConnect();
+        }
+        if (false) {
+            // run local webserver
+            // TODO
+        }
+    });
 }
 main();

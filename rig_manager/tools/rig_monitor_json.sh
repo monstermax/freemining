@@ -5,10 +5,10 @@ cd `dirname $0`
 source ../rig_manager.sh
 
 
-SERVICES=$(jq -r ".miners | keys | join(\" \")" $CONFIG_FILE)
+SERVICES=$(getAvailableMiners)
 
 
-TXT_MONITOR_DIR="../miners_monitor/json"
+JSON_MONITOR_DIR="../miners_monitor/json"
 
 
 #echo "###################################### RIG ###########################################"
@@ -78,7 +78,7 @@ done <<< $(echo "$VIDEO_CARDS")
 function runService {
     service_name=$1
 
-    service_cmd="${TXT_MONITOR_DIR}/${service_name}.sh"
+    service_cmd="${JSON_MONITOR_DIR}/${service_name}.sh"
     exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
 }
 
@@ -117,6 +117,7 @@ for service_name in $SERVICES; do
     readService $service_name
 done
 
+rm -rf $DATA_DIR
 
 
 cat <<_EOF

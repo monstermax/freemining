@@ -1,7 +1,7 @@
 
 ##### START #####
 
-OLD_PWD=$PWD
+RIG_OLD_PWD=$PWD
 cd `dirname $BASH_SOURCE`
 
 SOURCE_PWD=$PWD
@@ -28,6 +28,8 @@ if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
 fi
 
 
+USER_CONF_DIR=$(eval echo `jq -r ".userConfDir" ${CONFIG_FILE} 2>/dev/null`)
+
 LOGS_DIR=$(eval echo `jq -r ".logsDir" ${CONFIG_FILE} 2>/dev/null`)
 
 PIDS_DIR=$(eval echo `jq -r ".pidsDir" ${CONFIG_FILE} 2>/dev/null`)
@@ -35,23 +37,38 @@ PIDS_DIR=$(eval echo `jq -r ".pidsDir" ${CONFIG_FILE} 2>/dev/null`)
 MINERS_DIR=$(eval echo `jq -r ".minersDir" ${CONFIG_FILE} 2>/dev/null`)
 
 
+
+if [ "$USER_CONF_DIR" = "" ]; then
+    #echo "Missing userConfDir parameter. Set it in rig_manager.json"
+    #exit 1
+
+    if isRoot; then
+        USER_CONF_DIR="/etc/freemining"
+    else
+        USER_CONF_DIR="~/.freemining"
+    fi
+fi
+
+
 if [ "$LOGS_DIR" = "" ]; then
     #echo "Missing logsDir parameter. Set it in rig_manager.json"
     #exit 1
+
     if isRoot; then
         LOGS_DIR="/var/log/freemining"
     else
-        LOGS_DIR="~/.freemining/logs"
+        LOGS_DIR="${USER_CONF_DIR}/logs"
     fi
 fi
 
 if [ "$PIDS_DIR" = "" ]; then
     #echo "Missing pidsDir parameter. Set it in rig_manager.json"
     #exit 1
+
     if isRoot; then
         PIDS_DIR="/var/run/freemining"
     else
-        PIDS_DIR="~/.freemining/pids"
+        PIDS_DIR="${USER_CONF_DIR}/pids"
     fi
 fi
 
@@ -76,35 +93,59 @@ function getMinerApiPort {
 
 
 
-##### XXXX #####
+function getInstalledMiners {
+    MINERS=$(echo $(ls $MINERS_DIR))
+    echo $MINERS
+}
 
+
+function getAvailableMiners {
+    MINERS=$(jq -r ".miners | keys | join(\" \")" $CONFIG_FILE)
+    echo $MINERS
+    # TODO: filtrer/conserver uniquement les miners installés (si inclus dans getInstalledMiners)
+}
+
+
+
+##### MAIN #####
 
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     function usage {
+        echo "Usage:"
         echo "$0 [action] <params>"
         echo
-        echo "  $0 service <params>"
-        echo "  $0 txt-monitor"
-        echo "  $0 json-monitor"
-        echo "  $0 miner-install [miner]"
+        echo "$0 install"
+        echo "$0 service <params>"
+        echo "$0 txt-monitor"
+        echo "$0 json-monitor"
+        echo "$0 miner-install [miner]"
+        echo "$0 agent"
     }
 
-    if [ "$1" = "service" ]; then
+    if [ "$1" = "install" ]; then
         shift
-        ./tools/service.sh $@
+        exec ./install_rig_manager.sh $@
+
+    elif [ "$1" = "service" ]; then
+        shift
+        exec ./tools/service.sh $@
 
     elif [ "$1" = "miner-install" ]; then
         shift
-        ./tools/install_miner.sh $@
+        exec ./tools/install_miner.sh $@
 
     elif [ "$1" = "json-monitor" ]; then
         shift
-        ./tools/rig_monitor_json.sh $@
+        exec ./tools/rig_monitor_json.sh $@
 
     elif [ "$1" = "txt-monitor" ]; then
         shift
-        ./tools/rig_monitor_txt.sh $@
+        exec ./tools/rig_monitor_txt.sh $@
+
+    elif [ "$1" = "agent" ]; then
+        shift
+        exec ./rig_agent/agent.sh $@
 
     else
         usage
@@ -115,4 +156,4 @@ fi
 
 ##### END #####
 
-cd $OLD_PWD
+cd $RIG_OLD_PWD

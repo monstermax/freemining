@@ -175,24 +175,25 @@ wss.on('connection', function connection(ws, req) {
     ws.pongOk = true;
     // Prepare connection auth
     ws.auth = null;
+    // Get client informations
+    let clientIP = getWsClientIp(req);
+    if (allowedIps.length > 0 && !allowedIps.includes(clientIP)) {
+        //ws.send('ERROR: not authorized');
+        //setRigOffline(clientIP??); // TODO
+        console.log(`${now()} [${safe_1.default.yellow('WARNING')}] rejecting client ${clientIP} for non allowed IP`);
+        ws.close();
+        return;
+    }
     ws.on('pong', function pong() {
         // Received pong from client
         this.pongOk = true;
     });
-    // Get client informations
-    let clientIP = getWsClientIp(req);
-    if (allowedIps.length > 0 && !allowedIps.includes(clientIP)) {
-        //ws.send('ERROR: not authorized'); // TODO: a fixer (ip = 192.x.x.254)
-        //ws.close();
-        //setRigOffline(clientIP??); // TODO
-        ws.close();
-    }
     // Handle incoming message from client
     ws.on('message', function message(data) {
         var _a;
         const message = data.toString();
         const tmpRigName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.rigName) || 'anonymous';
-        console.log(`${now()} [${safe_1.default.blue('INFO')}] received message of ${message.length} characters from ${tmpRigName} (${clientIP})`);
+        console.log(`${now()} [${safe_1.default.blue('INFO')}] received message of ${message.length} characters from ${safe_1.default.cyan(tmpRigName)} (${clientIP})`);
         //console.log(`${now()} [${colors.blue('INFO')}] received message of ${message.length} characters from ${clientIP}`);
         const args = message.split(' ');
         const action = args.shift();

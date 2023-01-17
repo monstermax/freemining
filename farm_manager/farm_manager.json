@@ -1,7 +1,10 @@
 {
     "farmName": "FreeMining farm",
-    "logsDir": "~/local/var/log/freemining",
-    "pidsDir": "~/local/var/run/freemining",
+
+    "userConfDir": "~/.freemining",
+    "logsDir": "~/.freemining/logs",
+    "pidsDir": "~/.freemining/run",
+
     "farmServer": {
         "host": "0.0.0.0",
         "port": 4200,
