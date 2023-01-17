@@ -2,8 +2,7 @@
 
 cd `dirname $0`
 
-source ../tools/env.sh
-
+source ../rig_manager.sh
 
 ACTION=$1
 shift
@@ -17,6 +16,9 @@ WORKER_NAME=$1
 shift
 ALGO=$1
 shift
+
+set -e
+
 
 function usage {
     echo "Usage:"
@@ -44,12 +46,12 @@ if [ "$SERVICE" = "" ]; then
     exit 1
 fi
 
-mkdir -p $LOGS_DIR
-mkdir -p $PIDS_DIR
 
 LOG_FILE=${LOGS_DIR}/${SERVICE}.log
 PID_FILE=${PIDS_DIR}/${SERVICE}.pid
 
+mkdir -p $LOGS_DIR
+mkdir -p $PIDS_DIR
 
 POOL_HOST=$(echo $POOL_URL |cut -d":" -f1)
 POOL_PORT=$(echo $POOL_URL |cut -d":" -f2)
@@ -87,7 +89,7 @@ case "$SERVICE" in
         fi
 
         CMD_ARGS="--url=${POOL_URL} \
-            --user=${POOL_ADDRESS}+${WORKER_NAME} \
+            --user=${POOL_ADDRESS}.${WORKER_NAME} \
             -a ${ALGO} \
             -k \
             --donate-level 0 \
@@ -195,6 +197,7 @@ fi
 
 PID=""
 if test -f $PID_FILE; then
+    echo PID_FILE=$PID_FILE
     PID=$(cat $PID_FILE)
 fi
 
@@ -202,13 +205,13 @@ fi
 
 # STOP
 if [ "$ACTION" = "stop" -o "$ACTION" = "start" -o "$ACTION" = "restart" ]; then
+    rm -f $PID_FILE
+
     if [ "$PID" != "" ]; then
         echo "Stopping ${SERVICE} service"
-        pkill -P $PID 2>/dev/null
         kill $PID 2>/dev/null
+        pkill -P $PID 2>/dev/null
     fi
-
-    rm -f $PID_FILE
 
 fi
 
@@ -230,10 +233,22 @@ fi
 # STATUS
 if [ "$ACTION" = "status" ]; then
     if [ "$PID" != "" ]; then
-        echo "service is running"
-        echo "PID = ${PID}"
+        CMD_LINE=$(ps -p $PID -o args |tail -n +2)
+
+        echo "Service ${SERVICE} is running. PID = ${PID}"
+        echo
+        echo "CMD = ${CMD_LINE}"
+        echo
         echo "PID_FILE = ${PID_FILE}"
         echo "LOG_FILE = ${LOG_FILE}"
+
+        if [ "$CMD_LINE" = "" ]; then
+            echo
+            echo "Process seems to be crashed"
+            echo "run $0 kill ${SERVICE}"
+            echo "then restart"
+        fi
+
     else
         echo "service inactive"
     fi
@@ -284,9 +299,11 @@ if [ "$ACTION" = "kill" ]; then
     echo "Killing ${SERVICE} process"
     PID=$(pgrep -f "$CMD_EXEC")
 
+    rm -f $PID_FILE
+
     if [ "$PID" != "" ]; then
-        pkill -P $PID 2>/dev/null
         kill $PID 2>/dev/null
+        pkill -P $PID 2>/dev/null
         echo "Process(es) `echo $PID` killed"
     fi
 fi

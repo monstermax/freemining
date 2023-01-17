@@ -76,7 +76,7 @@ function runService {
     service_name=$1
 
     service_cmd="../miners_api/json/${service_name}_api_json.sh"
-    $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
+    exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
 }
 
 

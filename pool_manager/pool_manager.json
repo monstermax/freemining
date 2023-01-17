@@ -1,9 +1,195 @@
 {
     "pools": {
-        "xmr1": {
-            "ports": [
-                
+
+        "erg1": {
+            "walletAddress": "9i9JiBmnMXvhbVaPDVfPogpTWuqLoNnRHwxq514Tu5xxfrJdEXT",
+            "stratumPorts": {
+                "4013": "GPU-SMALL"
+            },
+            "daemons": [
+                {
+					"host": "127.0.0.1",
+					"port": 9053,
+					"apiKey": "yosecret"
+				}
             ]
+        },
+
+        "flux1": {
+            "walletAddress": "t1MMdtvffdYKhVhenuTnRcTrBPLfwx7jArh",
+            "walletZAddress": "za17xdf0apv34s5nfjdwmw0a9aphuzfwf064d6v3pqswasws5hyynuv7x7era9dl9gczzqj776ur7m",
+            "stratumPorts": {
+                "4073": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 16124,
+					"user": "tohQu8ie",
+					"password": "Aewe7ahw4je4Achahd3i"
+				}
+			]
+        },
+
+        "kas1": {
+            "walletAddress": "kaspa:qqg8uhmej8g0yfvmjpu5fz5ekcgc0hmqyee8ycjgtr4jxag8alyyjqftlmnp7",
+            "stratumPorts": {
+                "4023": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 16110,
+					"user": "",
+					"password": ""
+				}
+			]
+        },
+
+        "kmd1": {
+            "walletAddress": "RSFvT6LcUb9LWsZ4MYXUHdEe7w6mNToGSz",
+            "stratumPorts": {
+                "5073": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 8332,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "meow1": {
+            "walletAddress": "MJxPvVq1Gbd71XMuXvprQnTmHiAH3KXi89",
+            "stratumPorts": {
+                "4043": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 9766,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "neox1": {
+            "walletAddress": "MNoWSnWmAAVsXK6Vh5adSWNthsLqSHbWME",
+            "stratumPorts": {
+                "4033": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 19766,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "neox2": {
+            "walletAddress": "Gc57wNUrwwJb6iNnLDNT9FS686mxjwVCMR",
+            "stratumPorts": {
+                "4037": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "192.99.16.39",
+					"port": 9766,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "rtm1": {
+            "walletAddress": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR",
+            "stratumPorts": {
+                "4093": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "192.99.16.39",
+					"port": 10225,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "rvn1": {
+            "walletAddress": "RNDR75yLyFyjCgN87trijPCLEtgRz66z2A",
+            "stratumPorts": {
+                "4083": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 8766,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "rxd1": {
+            "walletAddress": "1Ba8y4fhWUYyJs4e5SSe5BAVRJRDddfFLZ",
+            "stratumPorts": {
+                "4993": "GPU-SMALL"
+            },
+			"daemons": [
+				{
+					"host": "192.99.16.39",
+					"port": 7332,
+					"user": "user",
+					"password": "pass"
+				}
+			]
+        },
+
+        "xmr1": {
+            "walletAddress": "48S2RQ4zps4GNp9Ym5sX3TMHBu1aKpr9BNdTpcTthMJCSnQasLEUGzWG38k9vh2UjtNyt5KbLtUe9GicSGwHmFEwNUrV2Ds",
+            "stratumPorts": {
+                "3032": "CPU Mining",
+                "3033": "GPU Mining",
+                "3034": "High-End Multi GPU Mining"
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 18081,
+					"user": "",
+					"password": ""
+				},
+				{
+					"host": "127.0.0.1",
+					"port": 18082,
+					"user": "",
+					"password": "",
+					"category": "wallet"
+				}
+			]
+        },
+
+        "zec1": {
+            "walletAddress": "t1ffvVvfKJ18RucVThxLHJ3TEY56T3meDDw",
+            "walletZAddress": "zs1y02mmzff5aq42gsxgkvhyp5e2tjhxylk2yq8vt4gk6cp8jjp2307fwrneyt84ks2240eucut8fn",
+            "stratumPorts": {
+                "3092": "",
+                "3093": ""
+            },
+			"daemons": [
+				{
+					"host": "127.0.0.1",
+					"port": 8232,
+					"user": "user",
+					"password": "pass"
+				}
+			]
         }
     }
 }

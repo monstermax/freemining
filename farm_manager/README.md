@@ -1,8 +1,8 @@
 
 
-# Farm Manager
+# FARM Manager
 
-Tous les outils pour gérer sa ferme de rigs :
+Tous les outils pour gérer une ferme de rigs :
 
 - monitoring de tous les rigs de la ferme
 - gestion distante des services (start/stop) des rigs
@@ -13,8 +13,7 @@ Tous les outils pour gérer sa ferme de rigs :
 ## Installation
 
 ```bash
-cd farm_manager
-./install.sh
+./install_farm_manager.sh
 ```
 
 

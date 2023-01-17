@@ -2,70 +2,27 @@
 
 cd `dirname $0`
 
-source ../env
+source ../rig_manager.sh
+
+set -e
 
 
 TMP_DIR=$(mktemp -d)
 
+echo "temp dir = $TMP_DIR"
 mkdir -p ${TMP_DIR}
 
+echo "miners dir = $MINERS_DIR"
+mkdir -p ${MINERS_DIR}
+
+echo
 
 
-function getCmdPath {
-    command -v $1
-}
+# install basic tools
+installBasicTools
 
-
-INSTALLS=""
-if [ "`getCmdPath curl`" = "" ]; then
-    INSTALLS="$INSTALLS curl"
-fi
-
-if [ "`getCmdPath wget`" = "" ]; then
-    INSTALLS="$INSTALLS wget"
-fi
-
-if [ "`getCmdPath jq`" = "" ]; then
-    INSTALLS="$INSTALLS jq"
-fi
-
-if [ "`getCmdPath php`" = "" ]; then
-    INSTALLS="$INSTALLS php-cli"
-fi
-
-if [ "`getCmdPath bc`" = "" ]; then
-    INSTALLS="$INSTALLS bc"
-fi
-
-if [ "`getCmdPath vim`" = "" ]; then
-    INSTALLS="$INSTALLS vim"
-fi
-
-if [ "`getCmdPath node`" = "" ]; then
-    INSTALLS="$INSTALLS nodejs npm"
-fi
-
-if [ "`getCmdPath /sbin/ifconfig`" = "" ]; then
-    INSTALLS="$INSTALLS net-tools"
-fi
-
-if [ "$INSTALLS" != "" ]; then
-    echo "Installing packages: $INSTALLS"
-    echo " => root required. Continue ? (Press Enter to continue. CTRL+C to stop)"; read
-    sudo apt-get install -y $INSTALLS
-fi
-
-
-
-if [ "`getCmdPath ts-node`" = "" ]; then
-    # install typescript
-    echo "Installing NPM packages: typescript"
-    echo " => root required. Continue ? (Press Enter to continue. CTRL+C to stop)"; read
-    sudo npm install -g typescript ts-node tslib @types/node
-fi
-
-
-
+# install nodejs + npm + typescript
+installNodejsPackages
 
 
 

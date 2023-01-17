@@ -1,5 +1,5 @@
 {
-    "rigs": {
-        
-    }
+    "farmName": "FreeMining",
+    "logsDir": "~/local/var/log/freemining",
+    "pidsDir": "~/local/var/run/freemining"
 }

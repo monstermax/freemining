@@ -1,6 +1,6 @@
 {
-    "logsDir": "~/local/var/log/rig_manager",
-    "pidsDir": "~/local/var/run/rig_manager",
+    "logsDir": "~/local/var/log/freemining",
+    "pidsDir": "~/local/var/run/freemining",
     "minersDir": "~/local/opt/miners",
     "farmServer": {
         "host": "82.64.213.186",

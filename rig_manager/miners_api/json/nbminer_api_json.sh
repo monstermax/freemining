@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../../tools/env.sh
+source ../../rig_manager.sh
 
 MINER="nbminer"
 

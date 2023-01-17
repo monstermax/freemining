@@ -2,18 +2,25 @@
 
 cd `dirname $0`
 
-if [ "$1" = "-bg" ]; then
-    # Run typescript
-    ./ts-node server.ts >/tmp/farm_server.log 2>/tmp/farm_server.err &
+source ../farm_manager.sh
 
-    # OR run javascript
-    #node server.js >/tmp/farm_server.log 2>/tmp/farm_server.err &
+
+if hasOpt -bg; then
+    if hasOpt -ts; then
+        # Run typescript
+        ${TS_NODE} server.ts $@ >${LOGS_DIR}/farm_server.log 2>${LOGS_DIR}/farm_server.err &
+    else
+        # Run javascript
+        ${NODE} server.js $@ >${LOGS_DIR}/farm_server.log 2>${LOGS_DIR}/farm_server.err &
+    fi
 
 else
-    # Run typescript
-    ./ts-node server.ts
-
-    # OR run javascript
-    #node server.js
+    if hasOpt -ts; then
+        # Run typescript
+        ${TS_NODE} server.ts $@
+    else
+        # Run javascript
+        ${NODE} server.js $@
+    fi
 fi
 

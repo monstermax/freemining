@@ -20,13 +20,14 @@ Tous les outils pour gérer son rig :
 ## Installation
 
 ```bash
-cd rig_manager
-./farm_agent/install.sh
+# Install rig manager agent
+./install_rig_manager.sh
 ```
 
 
 ## Usage
 
 ```bash
+# Run agent
 ./farm_agent/agent.sh -bg
 ```
