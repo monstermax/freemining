@@ -14,3 +14,5 @@ installNodejsPackages
 
 
 
+# install pools manager
+./pools_manager/install_pools_manager.sh

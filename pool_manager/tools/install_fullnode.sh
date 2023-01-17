@@ -195,8 +195,8 @@ function install_firo {
     cd ${TMP_DIR}
 
     coin="firo"
-    VERSION="xxx"
-    DL_URL="xxxx"
+    VERSION="0.14.12.0"
+    DL_URL="https://github.com/firoorg/firo/releases/download/v${VERSION}/firo-${VERSION}-linux64.tar.gz"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${coin}-unzipped"
     INSTALL_LOG="${USER_CONF_DIR}/nodes/${coin}/install.log"
@@ -207,7 +207,11 @@ function install_firo {
     wget -q $DL_URL
 
     echo " - Unzipping"
-    # TODO
+    tar zxf $DL_FILE
+
+    echo " - Install into ${NODES_DIR}/${coin}"
+    rm -rf ${NODES_DIR}/${coin}
+    mv firo-*/bin ${NODES_DIR}/${coin}
 }
 
 function install_flux {
@@ -223,7 +227,7 @@ function install_flux {
     echo "Installing ${coin} ${VERSION}..."
 
     echo " - Downloading ${coin}"
-    wget -q $DL_URL
+    #wget -q $DL_URL
 
     echo " - Unzipping"
     # TODO
@@ -710,6 +714,7 @@ if [ "$fullnode" = "" ]; then
     echo "  - ergo"
     echo "  - ethereum"
     echo "  - ethereum_classic"
+    echo "  - firo"
     echo "  - kaspa"
     echo "  - komodo"
     echo "  - meowcoin"
