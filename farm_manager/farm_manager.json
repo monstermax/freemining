@@ -1,5 +1,22 @@
 {
-    "farmName": "FreeMining",
+    "farmName": "FreeMining farm",
     "logsDir": "~/local/var/log/freemining",
-    "pidsDir": "~/local/var/run/freemining"
+    "pidsDir": "~/local/var/run/freemining",
+    "farmServer": {
+        "host": "0.0.0.0",
+        "port": 4200,
+
+        "wsAllowedIps": [
+            "127.0.0.1",
+            "192.168.1.110",
+            "192.168.1.113",
+            "192.168.1.254",
+            "192.99.16.39",
+            "54.39.48.214",
+            "149.56.27.32",
+            "54.37.87.166",
+            "176.31.228.62",
+            "141.94.71.90"
+        ]
+    }
 }

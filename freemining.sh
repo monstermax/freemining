@@ -7,6 +7,7 @@ CMD_ARGS=($@)
 
 NODE="node"
 TS_NODE="ts-node"
+TSC="tsc"
 
 
 ##### FUNCTIONS #####

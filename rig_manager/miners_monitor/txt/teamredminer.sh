@@ -11,7 +11,7 @@ API_HOST=localhost
 API_PORT=$(getMinerApiPort $MINER)
 
 
-SUMMARY_JSON=$(echo -n summary | nc 127.0.0.1 ${API_PORT} |sed 's/,/\n/g')
+SUMMARY_JSON=$(echo -n summary | nc 127.0.0.1 ${API_PORT} 2>/dev/null |sed 's/,/\n/g')
 
 if [ "$SUMMARY_JSON" = "" ]; then
     echo -e "miner.active: \033[0;31mfalse\033[0m"

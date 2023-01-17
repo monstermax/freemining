@@ -1,4 +1,5 @@
 {
+    "rigName": "",
     "logsDir": "~/local/var/log/freemining",
     "pidsDir": "~/local/var/run/freemining",
     "minersDir": "~/local/opt/miners",

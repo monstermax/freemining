@@ -75,6 +75,44 @@ function getMinerApiPort {
 }
 
 
+
+##### XXXX #####
+
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+
+    function usage {
+        echo "$0 [action] <params>"
+        echo
+        echo "  $0 service <params>"
+        echo "  $0 txt-monitor"
+        echo "  $0 json-monitor"
+        echo "  $0 miner-install [miner]"
+    }
+
+    if [ "$1" = "service" ]; then
+        shift
+        ./tools/service.sh $@
+
+    elif [ "$1" = "miner-install" ]; then
+        shift
+        ./tools/install_miner.sh $@
+
+    elif [ "$1" = "json-monitor" ]; then
+        shift
+        ./tools/rig_monitor_json.sh $@
+
+    elif [ "$1" = "txt-monitor" ]; then
+        shift
+        ./tools/rig_monitor_txt.sh $@
+
+    else
+        usage
+    fi
+
+fi
+
+
 ##### END #####
 
 cd $OLD_PWD

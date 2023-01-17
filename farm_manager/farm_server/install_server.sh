@@ -15,3 +15,6 @@ installNodejsPackages
 # install farm server
 npm install
 
+
+# compile typescript
+${TSC}

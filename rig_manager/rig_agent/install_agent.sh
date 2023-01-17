@@ -15,3 +15,8 @@ installNodejsPackages
 # install farm agent
 npm install
 
+
+# compile typescript
+${TSC}
+
+

@@ -28,7 +28,7 @@ function usage {
     echo "   $0 info <SERVICE>"
     echo "   $0 log <SERVICE> [once]"
     echo "   $0 ps <SERVICE>"
-    echo "   $0 ps all"
+    echo "   $0 ps"
     echo
     echo "Sample:"
     echo "   $0 start mypool.com:5555 MY-COIN-ADDRESS MY-COMPUTER-NAME AUTOLYKOS2"
@@ -41,7 +41,7 @@ if [ "$ACTION" = "" ]; then
     exit 1
 fi
 
-if [ "$SERVICE" = "" ]; then
+if [ "$SERVICE" = "" -a "$ACTION" != "ps" ]; then
     usage
     exit 1
 fi
@@ -135,7 +135,7 @@ case "$SERVICE" in
             $@"
         ;;
 
-    all)
+    "")
         if [ "$ACTION" != "ps" ]; then
             echo "Error: unknown service ${SERVICE}"
             exit 1
@@ -197,7 +197,7 @@ fi
 
 PID=""
 if test -f $PID_FILE; then
-    echo PID_FILE=$PID_FILE
+    #echo PID_FILE=$PID_FILE
     PID=$(cat $PID_FILE)
 fi
 

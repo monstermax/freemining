@@ -6,12 +6,18 @@ const { exec } = require('child_process');
 
 const config: any = require('../rig_manager.json');
 
-const wsServerHost = config.farmServer.host;
-const wsServerPort = config.farmServer.port;
-const serverConnTimeout = 10_000;
+const wsServerHost = config.farmServer?.host || 'localhost';
+const wsServerPort = config.farmServer?.port || 4200;
+
+const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
+const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
+const sendStatusInterval = 10_000; // envoie le statut du rig au farmServer toutes les x millisecondes
 
 let connectionCount = 0;
+
 const toolsDir = `${__dirname}/../tools`;
+const cmdService = `${toolsDir}/service.sh`;
+const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 
 
 function websocketConnect() {
@@ -20,23 +26,23 @@ function websocketConnect() {
 
     const connectionId = connectionCount++;
 
-    console.log(`${now()} [INFO] connecting to websocket server... [conn ${connectionId}]`);
+    console.log(`${now()} [${colors.blue('INFO')}] connecting to websocket server... [conn ${connectionId}]`);
 
     let ws: WebSocket;
     try {
         ws = new WebSocket(`ws://${wsServerHost}:${wsServerPort}/`);
 
     } catch (err: any) {
-        console.log(`${now()} [ERROR] cannot connect to websocket server [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.red('ERROR')}] cannot connect to websocket server [conn ${connectionId}]`);
         if (newConnectionTimeout === null) {
-            newConnectionTimeout = setTimeout(() => websocketConnect(), 10_000);
+            newConnectionTimeout = setTimeout(() => websocketConnect(), serverNewConnDelay);
         }
         return;
     }
 
 
     ws.on('error', function (err: any) {
-        console.log(`${now()} [ERROR] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.red('ERROR')}] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
         ws.terminate();
     });
 
@@ -53,16 +59,16 @@ function websocketConnect() {
         // Send rig status
         const rigStatus = await getRigStatus();
         if (rigStatus) {
-            console.log(`${now()} [INFO] sending rigStatus to server (open) [conn ${connectionId}]`)
+            console.log(`${now()} [${colors.blue('INFO')}] sending rigStatus to server (open) [conn ${connectionId}]`)
             ws.send( `rigStatus ${JSON.stringify(rigStatus)}`);
 
         } else {
-            console.log(`${now()} [WARNING] cannot send rigStatus to server (open) [conn ${connectionId}]`)
+            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatus to server (open) [conn ${connectionId}]`)
         }
 
         // send rig status every 10 seconds
         if (sendStatusTimeout === null) {
-            sendStatusTimeout = setTimeout(hello, 10_000);
+            sendStatusTimeout = setTimeout(hello, sendStatusInterval);
         }
     });
 
@@ -77,7 +83,7 @@ function websocketConnect() {
     // Handle incoming message from server
     ws.on('message', async function message(data: Buffer) {
         const message = data.toString();
-        console.log(`${now()} [INFO] received: ${message} [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.blue('INFO')}] received: ${message} [conn ${connectionId}]`);
 
         const args = message.split(' ');
 
@@ -96,11 +102,11 @@ function websocketConnect() {
                         params = JSON.parse(paramsJson);
 
                     } catch (err: any) {
-                        console.error(`${now()} [ERROR] cannot start service : ${err.message}`);
+                        console.error(`${now()} [${colors.red('ERROR')}] cannot start service : ${err.message}`);
                         return;
                     }
 
-                    const cmd = `${toolsDir}/service.sh start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo}`;
+                    const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo}`;
 
                     console.log(`${now()} [DEBUG] executing command: ${cmd}`)
 
@@ -120,7 +126,7 @@ function websocketConnect() {
                 const serviceName = args.shift();
 
                 if (serviceName) {
-                    const cmd = `${toolsDir}/service.sh stop ${serviceName}`;
+                    const cmd = `${cmdService} stop ${serviceName}`;
 
                     console.log(`${now()} [DEBUG] executing command: ${cmd}`)
 
@@ -140,7 +146,7 @@ function websocketConnect() {
 
     // Handle connection close
     ws.on('close', function close() {
-        console.log(`${now()} [INFO] disconnected from server [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.blue('INFO')}] disconnected from server [conn ${connectionId}]`);
 
         if (sendStatusTimeout) {
             clearTimeout(sendStatusTimeout);
@@ -164,7 +170,7 @@ function websocketConnect() {
         // Delay should be equal to the interval at which your server
         // sends out pings plus a conservative assumption of the latency.
         (this as any).pingTimeout = setTimeout(() => {
-            console.log(`${now()} [INFO] terminate connection with the server [conn ${connectionId}]`);
+            console.log(`${now()} [${colors.blue('INFO')}] terminate connection with the server [conn ${connectionId}]`);
             this.terminate();
 
             if (newConnectionTimeout === null) {
@@ -183,20 +189,20 @@ function websocketConnect() {
         if (rigStatus) {
 
             if (ws.readyState === WebSocket.OPEN) {
-                console.log(`${now()} [INFO] sending rigStatus to server (hello) [conn ${connectionId}]`);
+                console.log(`${now()} [${colors.blue('INFO')}] sending rigStatus to server (hello) [conn ${connectionId}]`);
                 ws.send( `rigStatus ${JSON.stringify(rigStatus)}`);
 
                 var debugSentData = JSON.stringify(rigStatus);
                 var debugme = 1;
 
             } else {
-                console.log(`${now()} [WARNING] cannot send rigStatus to server (hello. ws closed) [conn ${connectionId}]`);
+                console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatus to server (hello. ws closed) [conn ${connectionId}]`);
                 ws.close();
                 return;
             }
 
         } else {
-            console.log(`${now()} [WARNING] cannot send rigStatus to server (hello. no status available) [conn ${connectionId}]`)
+            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatus to server (hello. no status available) [conn ${connectionId}]`)
             ws.close();
             return;
         }
@@ -211,7 +217,7 @@ function websocketConnect() {
 
 
 async function getRigStatus(): Promise<any> {
-    const cmd = `${toolsDir}/rig_monitor_json.sh`;
+    const cmd = cmdRigMonitorJson;
 
     const statusJson = await cmdExec(cmd);
 
@@ -221,8 +227,12 @@ async function getRigStatus(): Promise<any> {
             return rigStatus;
 
         } catch (err: any) {
-            console.error(`${now()} [ERROR] cannot read rig status`);
+            console.error(`${now()} [${colors.red('ERROR')}] cannot read rig status (invalid shell response)`);
+            console.debug(statusJson);
         }
+
+    } else {
+        console.log(`${now()} [${colors.red('WAWRNING')}] cannot read rig status (no response from shell)`);
     }
 
     return null;
@@ -236,7 +246,7 @@ async function cmdExec(cmd: string) {
     await new Promise((resolve, reject) => {
         exec(cmd, (error: any, stdout: string, stderr: string) => {
             if (error) {
-                //console.error(`${now()} [ERROR] Error while running exec command : ${error.message.trim()}`);
+                //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
                 reject( error );
                 return;
             }
@@ -252,7 +262,7 @@ async function cmdExec(cmd: string) {
         ret = result;
 
     }).catch((err: any) => {
-        console.error(`${now()} [ERROR] catched while running exec command => ${colors.red(err.message)}`)
+        console.error(`${now()} [${colors.red('ERROR')}] catched while running exec command => ${colors.red(err.message)}`)
     });
 
     return ret;

@@ -2,10 +2,13 @@
 
 cd `dirname $0`
 
-#source ../env
+source ../rig_manager.sh
 
 
-SERVICES="nbminer lolminer xmrig gminer trex teamredminer"
+SERVICES=$(jq -r ".miners | keys | join(\" \")" $CONFIG_FILE)
+
+
+TXT_MONITOR_DIR="../miners_monitor/json"
 
 
 #echo "###################################### RIG ###########################################"
@@ -75,7 +78,7 @@ done <<< $(echo "$VIDEO_CARDS")
 function runService {
     service_name=$1
 
-    service_cmd="../miners_api/json/${service_name}_api_json.sh"
+    service_cmd="${TXT_MONITOR_DIR}/${service_name}.sh"
     exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
 }
 

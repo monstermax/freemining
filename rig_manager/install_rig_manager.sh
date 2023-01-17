@@ -14,4 +14,4 @@ installNodejsPackages
 
 
 # install farm agent
-./farm_agent/install_agent.sh
+./rig_agent/install_agent.sh
