@@ -137,7 +137,7 @@ case "$SERVICE" in
 
     "")
         if [ "$ACTION" != "ps" ]; then
-            echo "Error: unknown service ${SERVICE}"
+            echo "Error: missing service"
             exit 1
         fi
         CMD_EXEC="${MINERS_DIR}/nbminer/NOT_EXISING_FILE"
@@ -283,7 +283,7 @@ fi
 if [ "$ACTION" = "ps" ]; then
     PID=$(pgrep -af "$CMD_EXEC")
 
-    if [ "$SERVICE" = "all" ]; then
+    if [ "$SERVICE" = "" ]; then
         DIRNAME=$(dirname `dirname $CMD_EXEC`)
         PID=$(pgrep -af "$DIRNAME")
     fi
