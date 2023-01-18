@@ -191,23 +191,20 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         PARENT_DIR=$(dirname $BASH_SOURCE)
 
         if isRoot; then
-            echo "#!/bin/bash
-
-cd $(realpath $PARENT_DIR)
-$0 \$@
-" > /usr/local/bin/fmin
-
-            chmod +x /usr/local/bin/fmin
+            INSTALL_DIR=/usr/local/bin
         else
-            echo "#!/bin/bash
-
-cd $(realpath $PARENT_DIR)
-$0 \$@
-" > ~/local/bin/fmin
-
-            chmod +x ~/local/bin/fmin
+            INSTALL_DIR=/usr/local/bin
         fi
 
+        mkdir -p $INSTALL_DIR
+
+        echo "#!/bin/bash
+
+cd $(realpath $PARENT_DIR)
+$0 \$@
+" > ${INSTALL_DIR}/fmin
+
+        chmod +x ${INSTALL_DIR}/fmin
 
     elif [ "$1" = "modules-install" ]; then
         shift

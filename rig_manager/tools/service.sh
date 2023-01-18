@@ -100,8 +100,11 @@ case "$SERVICE" in
             ALGO="rx/0"
         fi
 
+        USER_SEP="+"
+        #USER_SEP="."
+
         CMD_ARGS="--url=${POOL_URL} \
-            --user=${POOL_ADDRESS}.${WORKER_NAME} \
+            --user=${POOL_ADDRESS}${USER_SEP}${WORKER_NAME} \
             -a ${ALGO} \
             -k \
             --donate-level 0 \
