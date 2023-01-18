@@ -8,6 +8,12 @@
     "poolsEngineDir": "~/local/opt/freemining/pools_engine",
     "poolsUiDir": "~/local/opt/freemining/pools_ui",
 
+	"poolServer": {
+		"host": "0.0.0.0",
+		"port": 4100,
+		"root": "~/local/opt/freemining/pools_ui/miningcoreWebUI"
+	},
+
 	"fullnodes": {
 		"ergo": {
 			"apiSecret": "yosecret",

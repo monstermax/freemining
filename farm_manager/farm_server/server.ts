@@ -20,6 +20,7 @@ const allowedIps = config.farmServer?.wsAllowedIps || [];
 const serverConnTimeout = 10_000;
 
 const templatesDir = `${__dirname}/web/templates`;
+const staticDir = `${__dirname}/web/public`;
 
 
 type Rig = {
@@ -61,10 +62,9 @@ const rigs: {[key:string]: Rig} = {};
 
 const wsClients: {[key:string]: wsClient} = {};
 
-//app.use(bodyParser());
 app.use(express.urlencoded());
 
-app.use(express.static(__dirname + '/web/public'));
+app.use(express.static(staticDir));
 
 
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {

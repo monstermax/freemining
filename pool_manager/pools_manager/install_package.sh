@@ -151,9 +151,14 @@ function install_miningcoreWebUI {
     echo " - Downloading ${package}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
-    # apply custom patch
+    # apply custom patchs
     cd Miningcore.WebUI
-    git apply ${POOL_APP_DIR}/pools_manager/patchs/Miningcore.WebUI.patch
+    git apply ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_patch.patch
+    git apply ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_index_patch.patch
+    ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_config.sh
+    cp -a ${POOL_APP_DIR}/pools_manager/patchs/coins_icons/*.png ./img/coin/icon
+    touch ./css/font-awesome-icons.css
+    touch ./css/bootstrap-notify.css
     cd ..
 
     echo " - Install into ${POOLS_UI_DIR}/${package}"

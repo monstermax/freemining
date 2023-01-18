@@ -149,14 +149,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$1" = "pools-engine" ]; then
         shift
-        #exec ./pools_manager/miningcore/configure.sh
-        #exec ./pools_manager/miningcore/start.sh
-        # TODO: run miningcore in background
+        exec ./pools_manager/miningcore/stop.sh
+        exec ./pools_manager/miningcore/configure.sh
+        exec ./pools_manager/miningcore/start.sh -bg -ts
 
     elif [ "$1" = "server" ]; then
         shift
         # TODO: run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
-        #exec ./pool_server/server.sh $@
+        exec ./pool_server/server.sh -ts $@
 
     elif [ "$1" = "config-firewall" ]; then
         shift
