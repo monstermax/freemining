@@ -95,14 +95,21 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install"
-        echo "  $CMD server"
+        echo "  $CMD install                     # install farm manager"
+        echo
+        echo "  $CMD json                        # show farm status (JSON formatted)"
+        echo
+        echo "  $CMD server [-bg]                # start the farm server. add -bg for background"
         echo
     }
 
     if [ "$1" = "install" ]; then
         shift
         exec ./install_farm_manager.sh $@
+
+    elif [ "$1" = "json" ]; then
+        shift
+        wget -qO- http://localhost:4200/status.json
 
     elif [ "$1" = "server" ]; then
         shift

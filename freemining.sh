@@ -148,6 +148,12 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     function usage {
         CMD=$(basename $BASH_SOURCE)
 
+        if isRoot; then
+            PREFIX="/usr/local"
+        else
+            PREFIX="~/local"
+        fi
+
         echo "=============="
         echo "| FreeMining |"
         echo "=============="
@@ -157,13 +163,13 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD rig  <params>        # manage rig"
-        echo "  $CMD farm <params>        # manage farm"
-        echo "  $CMD pool <params>        # manage pool"
+        echo "  $CMD rig  <params>                # manage rig"
+        echo "  $CMD farm <params>                # manage farm"
+        echo "  $CMD pool <params>                # manage pool"
         echo
-        echo "  $CMD bin-install          # install freemining.sh to PATH/bin/fmin"
-        echo "  $CMD modules-install      # install all modules (rig, farm, pool)"
-        echo "  $CMD compile              # compile typescript for all modules"
+        echo "  $CMD bin-install                  # install freemining.sh to ${PREFIX}/bin/fmin"
+        echo "  $CMD modules-install              # install all modules (rig, farm, pool)"
+        echo "  $CMD compile                      # compile typescript for all modules"
         echo
     }
 
@@ -231,6 +237,11 @@ $0 \$@
 
         echo " - Compiling pool_server..."
         cd pool_manager/pool_server; tsc; cd ../..
+
+    elif [ "$1" = "update" ]; then
+        shift
+        git pull
+        $BASH_SOURCE modules-install
 
     else
         usage

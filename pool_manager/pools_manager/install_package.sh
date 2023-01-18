@@ -192,12 +192,21 @@ package=$1
 
 
 if [ "$package" = "" ]; then
-    echo "Usage: $0 <package>"
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [POOL] ==> [INSTALL PACKAGE]"
+    echo "=============="
     echo
-    echo " packages list:"
-    echo "  - miningcore"
-    echo "  - miningcoreUi"
-    echo "  - miningcoreWebUI"
+
+    echo "Usage:"
+    echo
+    echo "  $CMD <package>"
+    echo
+    echo "    + packages list:"
+    echo "      - miningcore"
+    echo "      - miningcoreUi"
+    echo "      - miningcoreWebUI"
 
     exit
 fi

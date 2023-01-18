@@ -135,12 +135,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install"
-        echo "  $CMD package-install <params>"
-        echo "  $CMD fullnode-install [coin]"
-        echo "  $CMD pools-engine"
-        echo "  $CMD server"
-        echo "  $CMD config-firewall #TODO"
+        echo "  $CMD install                     # install pool manager"
+        echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
+        echo "  $CMD fullnode-install [coin]     # install a fullnode"
+        echo
+        echo "  $CMD pools-engine [-bg]          # start pool engine (miningcore). add -bg for background"
+        echo "  $CMD server [-bg]                # start the pool server. add -bg for background"
+        echo
+        echo "  $CMD config-firewall             # Not available. TODO"
         echo
     }
 
@@ -160,7 +162,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./pools_manager/miningcore/stop.sh
         exec ./pools_manager/miningcore/configure.sh
-        exec ./pools_manager/miningcore/start.sh -bg -ts
+        exec ./pools_manager/miningcore/start.sh -ts $@
 
     elif [ "$1" = "server" ]; then
         shift

@@ -133,12 +133,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install"
-        echo "  $CMD miner-install [miner]"
-        echo "  $CMD service <params>"
-        echo "  $CMD txt-monitor"
-        echo "  $CMD json-monitor"
-        echo "  $CMD agent"
+        echo "  $CMD install                     # install rig manager"
+        echo "  $CMD miner-install [miner]       # install a miner"
+        echo
+        echo "  $CMD service <params>            # maanager rig services"
+        echo "  $CMD status                      # show rig status"
+        echo "  $CMD json                        # show rig status (JSON formatted)"
+        echo
+        echo "  $CMD agent [-bg]                 # start the rig agent. add -bg for background"
         echo
     }
 
@@ -158,11 +160,11 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./tools/install_miner.sh $@
 
-    elif [ "$1" = "json-monitor" ]; then
+    elif [ "$1" = "json" ]; then
         shift
         exec ./tools/rig_monitor_json.sh $@
 
-    elif [ "$1" = "txt-monitor" ]; then
+    elif [ "$1" = "status" ]; then
         shift
         exec ./tools/rig_monitor_txt.sh $@
 
