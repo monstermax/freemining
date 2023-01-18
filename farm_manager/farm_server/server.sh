@@ -6,12 +6,16 @@ source ../farm_manager.sh
 
 
 if hasOpt -bg; then
+    echo "Running daemon"
+    echo " log: ${LOGS_DIR}/farm_manager_server.daemon.log"
+    echo " err: ${LOGS_DIR}/farm_manager_server.daemon.err"
+
     if hasOpt -ts; then
         # Run typescript
-        ${TS_NODE} server.ts $@ >${LOGS_DIR}/farm_manager_server_daemon.log 2>${LOGS_DIR}/farm_manager_server_daemon.err &
+        ${TS_NODE} server.ts $@ >${LOGS_DIR}/farm_manager_server.daemon.log 2>${LOGS_DIR}/farm_manager_server.daemon.err &
     else
         # Run javascript
-        ${NODE} server.js $@ >${LOGS_DIR}/farm_manager_server_daemon.log 2>${LOGS_DIR}/farm_manager_server_daemon.err &
+        ${NODE} server.js $@ >${LOGS_DIR}/farm_manager_server.daemon.log 2>${LOGS_DIR}/farm_manager_server.daemon.err &
     fi
 
 else

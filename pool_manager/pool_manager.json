@@ -27,6 +27,7 @@
     "pools": {
 
         "erg1": {
+			"active": true,
 			"coin": "ergo",
             "walletAddress": "9i9JiBmnMXvhbVaPDVfPogpTWuqLoNnRHwxq514Tu5xxfrJdEXT",
             "stratumPorts": {
@@ -44,6 +45,7 @@
         },
 
         "flux1": {
+			"active": false,
 			"coin": "flux",
             "walletAddress": "t1MMdtvffdYKhVhenuTnRcTrBPLfwx7jArh",
             "walletZAddress": "za17xdf0apv34s5nfjdwmw0a9aphuzfwf064d6v3pqswasws5hyynuv7x7era9dl9gczzqj776ur7m",
@@ -63,6 +65,7 @@
         },
 
         "kas1": {
+			"active": true,
 			"coin": "kaspa",
             "walletAddress": "kaspa:qqg8uhmej8g0yfvmjpu5fz5ekcgc0hmqyee8ycjgtr4jxag8alyyjqftlmnp7",
             "stratumPorts": {
@@ -81,6 +84,7 @@
         },
 
         "kmd1": {
+			"active": true,
 			"coin": "komodo",
             "walletAddress": "RSFvT6LcUb9LWsZ4MYXUHdEe7w6mNToGSz",
             "stratumPorts": {
@@ -99,6 +103,7 @@
         },
 
         "meow1": {
+			"active": true,
 			"coin": "meowcoin",
             "walletAddress": "MJxPvVq1Gbd71XMuXvprQnTmHiAH3KXi89",
             "stratumPorts": {
@@ -117,6 +122,7 @@
         },
 
         "neox1": {
+			"active": true,
 			"coin": "neoxa",
             "walletAddress": "MNoWSnWmAAVsXK6Vh5adSWNthsLqSHbWME",
             "stratumPorts": {
@@ -135,6 +141,7 @@
         },
 
         "neox2": {
+			"active": false,
 			"coin": "neoxa",
             "walletAddress": "Gc57wNUrwwJb6iNnLDNT9FS686mxjwVCMR",
             "stratumPorts": {
@@ -153,6 +160,7 @@
         },
 
         "rtm1": {
+			"active": true,
 			"coin": "raptoreum",
             "walletAddress": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR",
             "stratumPorts": {
@@ -171,6 +179,7 @@
         },
 
         "rvn1": {
+			"active": true,
 			"coin": "ravencoin",
             "walletAddress": "RNDR75yLyFyjCgN87trijPCLEtgRz66z2A",
             "stratumPorts": {
@@ -189,6 +198,7 @@
         },
 
         "rxd1": {
+			"active": true,
 			"coin": "radiant",
             "walletAddress": "1Ba8y4fhWUYyJs4e5SSe5BAVRJRDddfFLZ",
             "stratumPorts": {
@@ -207,6 +217,7 @@
         },
 
         "xmr1": {
+			"active": true,
 			"coin": "monero",
             "walletAddress": "48S2RQ4zps4GNp9Ym5sX3TMHBu1aKpr9BNdTpcTthMJCSnQasLEUGzWG38k9vh2UjtNyt5KbLtUe9GicSGwHmFEwNUrV2Ds",
             "stratumPorts": {
@@ -238,6 +249,7 @@
         },
 
         "zec1": {
+			"active": true,
 			"coin": "zcash",
             "walletAddress": "t1ffvVvfKJ18RucVThxLHJ3TEY56T3meDDw",
             "walletZAddress": "zs1y02mmzff5aq42gsxgkvhyp5e2tjhxylk2yq8vt4gk6cp8jjp2307fwrneyt84ks2240eucut8fn",

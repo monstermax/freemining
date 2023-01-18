@@ -2,6 +2,8 @@
 # Fullnodes management
 
 
+- This document is a developpement draft. Do not use
+
 
 ## Ergo
 

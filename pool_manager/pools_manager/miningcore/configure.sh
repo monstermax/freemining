@@ -53,6 +53,12 @@ if [ "$POOLS_LIST" != "" ]; then
         WALLET_ADDRESS=$(echo $POOL_ITEM | jq -r '.walletAddress')
         WALLET_ZADDRESS=$(echo $POOL_ITEM | jq -r '.walletZAddress')
 
+        POOL_ACTIVE=$(echo $POOL_ITEM | jq -r '.active')
+        POOL_ENABLED="true"
+        if [ "$POOL_ACTIVE" = "false" ]; then
+            POOL_ENABLED="false"
+        fi
+
         PORTS_LIST=$(echo $POOL_ITEM | jq -r '.stratumPorts | keys | join(" ")')
 
         DAEMONS=$(echo $POOL_ITEM | jq -r '.daemonsRpc')
@@ -129,7 +135,7 @@ _EOF
             cat <<_EOF
         {
             "id": "${POOL_ID}",
-            "enabled": true,
+            "enabled": ${POOL_ENABLED},
             "coin": "${POOL_COIN}",
             "randomXRealm": "${POOL_ID}",
             "address": "${WALLET_ADDRESS}",
