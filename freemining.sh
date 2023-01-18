@@ -145,14 +145,14 @@ function getOpt {
 
 if [ "$0" = "$BASH_SOURCE" ]; then
 
+    if isRoot; then
+        INSTALL_DIR="/usr/local/bin"
+    else
+        INSTALL_DIR="~/.local/bin"
+    fi
+
     function usage {
         CMD=$(basename $BASH_SOURCE)
-
-        if isRoot; then
-            PREFIX="/usr/local"
-        else
-            PREFIX="~/local"
-        fi
 
         echo "=============="
         echo "| FreeMining |"
@@ -167,7 +167,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD farm <params>                # manage farm"
         echo "  $CMD pool <params>                # manage pool"
         echo
-        echo "  $CMD bin-install                  # install freemining.sh to ${PREFIX}/bin/fmin"
+        echo "  $CMD bin-install                  # install freemining.sh to ${INSTALL_DIR}/fmin"
         echo "  $CMD modules-install              # install all modules (rig, farm, pool)"
         echo "  $CMD compile                      # compile typescript for all modules"
         echo
@@ -189,12 +189,6 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$1" = "bin-install" ]; then
         PARENT_DIR=$(dirname $BASH_SOURCE)
-
-        if isRoot; then
-            INSTALL_DIR=/usr/local/bin
-        else
-            INSTALL_DIR=~/local/bin
-        fi
 
         mkdir -p $INSTALL_DIR
 
