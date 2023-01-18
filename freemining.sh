@@ -152,8 +152,9 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "$0 rig <params>         # manage rig"
         echo "$0 pool <params>        # manage pool"
         echo "$0 farm <params>        # manage farm"
-        echo "$0 install              # install all submodules (rig, farm, pool)"
-        echo "$0 compile              # compile typescript for all submodules"
+        echo "$0 bin-install          # install freemining.sh to PATH/bin/fmin"
+        echo "$0 modules-install      # install all modules (rig, farm, pool)"
+        echo "$0 compile              # compile typescript for all modules"
     }
 
     if [ "$1" = "rig" ]; then
@@ -168,10 +169,32 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./pool_manager/pool_manager.sh $@
 
-    elif [ "$1" = "install" ]; then
+    elif [ "$1" = "bin-install" ]; then
+        PARENT_DIR=$(dirname $BASH_SOURCE)
+
+        if isRoot; then
+            echo "#!/bin/bash
+
+cd $(realpath $PARENT_DIR)
+$0 \$@
+" > /usr/local/bin/fmin
+
+            chmod +x /usr/local/bin/fmin
+        else
+            echo "#!/bin/bash
+
+cd $(realpath $PARENT_DIR)
+$0 \$@
+" > ~/local/bin/fmin
+
+            chmod +x ~/local/bin/fmin
+        fi
+
+
+    elif [ "$1" = "modules-install" ]; then
         shift
 
-        echo "Install submodules"
+        echo "Install modules"
 
         INSTALL_LOG=/dev/null
 
@@ -188,7 +211,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "compile" ]; then
         shift
 
-        echo "Compile typescript submodules"
+        echo "Compile typescript in each modules..."
 
         echo " - Compiling rig_agent..."
         cd rig_manager/rig_agent; tsc; cd ../..
