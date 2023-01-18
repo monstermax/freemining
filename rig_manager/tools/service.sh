@@ -21,18 +21,29 @@ shift
 
 
 function usage {
-    echo "Usage:"
-    echo "   $0 start|restart <SERVICE> <POOL_URL> <POOL_ADDRESS> <WORKER> <ALGO>"
-    echo "   $0 stop <SERVICE>"
-    echo "   $0 status <SERVICE>"
-    echo "   $0 status"
-    echo "   $0 info <SERVICE>"
-    echo "   $0 log <SERVICE> [once]"
-    echo "   $0 ps <SERVICE>"
-    echo "   $0 ps"
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [RIG] ==> [SERVICE]"
+    echo "=============="
     echo
-    echo "Sample:"
-    echo "   $0 start mypool.com:5555 MY-COIN-ADDRESS MY-COMPUTER-NAME AUTOLYKOS2"
+
+    echo "Usage:"
+    echo
+    echo "  $CMD start|restart <SERVICE> <POOL_URL> <POOL_ADDRESS> <WORKER> <ALGO>"
+    echo "  $CMD stop <SERVICE>"
+    echo
+    echo "  $CMD status <SERVICE>"
+    echo "  $CMD status"
+    echo
+    echo "  $CMD info <SERVICE>"
+    echo "  $CMD log <SERVICE> [once]"
+    echo
+    echo "  $CMD ps <SERVICE>"
+    echo "  $CMD ps"
+    echo
+    echo
+    echo "  $CMD start mypool.com:5555 MY-COIN-ADDRESS MY-COMPUTER-NAME AUTOLYKOS2"
     echo
 }
 

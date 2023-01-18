@@ -99,7 +99,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD json                        # show farm status (JSON formatted)"
         echo
-        echo "  $CMD server [-bg]                # start the farm server. add -bg for background"
+        echo "  $CMD server [-bg] [-ts]          # start the farm server. -bg for daemon. -ts for typescript exec"
         echo
     }
 

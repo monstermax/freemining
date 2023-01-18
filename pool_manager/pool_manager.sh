@@ -139,8 +139,8 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
         echo "  $CMD fullnode-install [coin]     # install a fullnode"
         echo
-        echo "  $CMD pools-engine [-bg]          # start pool engine (miningcore). add -bg for background"
-        echo "  $CMD server [-bg]                # start the pool server. add -bg for background"
+        echo "  $CMD pools-engine [-bg]          # start pool engine (miningcore). -bg for daemon"
+        echo "  $CMD server [-bg] [-ts]          # start the pool server. -bg for daemon. -ts for typescript exec"
         echo
         echo "  $CMD config-firewall             # Not available. TODO"
         echo
@@ -162,12 +162,12 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./pools_manager/miningcore/stop.sh
         exec ./pools_manager/miningcore/configure.sh
-        exec ./pools_manager/miningcore/start.sh -ts $@
+        exec ./pools_manager/miningcore/start.sh $@
 
     elif [ "$1" = "server" ]; then
         shift
         # run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
-        exec ./pool_server/server.sh -ts $@
+        exec ./pool_server/server.sh $@
 
     elif [ "$1" = "config-firewall" ]; then
         shift

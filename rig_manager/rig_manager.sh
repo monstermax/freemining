@@ -140,7 +140,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD status                      # show rig status"
         echo "  $CMD json                        # show rig status (JSON formatted)"
         echo
-        echo "  $CMD agent [-bg]                 # start the rig agent. add -bg for background"
+        echo "  $CMD agent [-bg] [-ts]           # start the rig agent. -bg for daemon. -ts for typescript exec"
         echo
     }
 
