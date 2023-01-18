@@ -130,8 +130,8 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "$0 install"
         echo "$0 package-install <params>"
         echo "$0 fullnode-install [coin]"
-        echo "$0 pools-engine #TODO"
-        echo "$0 server #TODO"
+        echo "$0 pools-engine"
+        echo "$0 server"
         echo "$0 config-firewall #TODO"
     }
 
@@ -155,7 +155,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$1" = "server" ]; then
         shift
-        # TODO: run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
+        # run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
         exec ./pool_server/server.sh -ts $@
 
     elif [ "$1" = "config-firewall" ]; then

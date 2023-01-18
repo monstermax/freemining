@@ -229,26 +229,162 @@ function install_firo {
     mv firo-*/bin ${NODES_DIR}/${coin}
 }
 
+
 function install_flux {
     cd ${TMP_DIR}
 
     coin="flux"
-    VERSION="xxx"
-    DL_URL="xxxx"
-    DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
+    VERSION=""
+    #DL_URL=""
+    #DL_FILE=$(basename $DL_URL)
+    #UNZIP_DIR="${coin}-unzipped"
     INSTALL_LOG="${USER_CONF_DIR}/fullnodes/${coin}/install.log"
+
+    zelnodePrivKey="YOUR_ZELNODE_PK"
+    zelnodeOutPoint="YOUR_COLLATERAL_TXID"
+    zelnodeIndex="TX_OUTPUT_INDEX"
+    externalIp=$(wget -qO- https://api4.my-ip.io/ip)
+    bindIp="0.0.0.0"
+
+    ipAddress="SERVER_IP_ADDRESS"
+    zelId="YOUR_ZELID"
+    cruxId="YOUR_CRUXID"
+    testNet="false"
 
     mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}
     >${INSTALL_LOG}
 
     echo "Installing ${coin} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
-    #wget -q $DL_URL
+    #echo " - Installing dependencies packages: build tools"
+    #rootRequired
 
-    echo " - Unzipping"
-    # TODO
+    #apt-get update -qq
+    #apt-get install -qq -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+    #curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/trusted.gpg.d/docker.asc >/dev/null
+    #add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    #apt-get update -qq
+    #apt-get install -qq -y docker-ce docker-ce-cli containerd.io
+
+    #sudo apt-get update -qq
+    #sudo apt-get upgrade -qq -y 
+    #sudo apt-get install -qq -y build-essential pkg-config libc6-dev m4
+    #sudo apt-get install -qq -y g++-multilib autoconf libtool ncurses-dev unzip git python
+    #sudo apt-get install -qq -y python-zmq zlib1g-dev wget curl bsdmainutils automake
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}/zelcash
+    touch ${USER_CONF_DIR}/fullnodes/${coin}/zelcash/zelcash.conf
+
+    cat << EOF > ${USER_CONF_DIR}/fullnodes/${coin}/zelcash/zelcash.conf
+rpcuser=user
+rpcpassword=pass
+rpcallowip=127.0.0.1
+#rpcallowip=172.18.0.1
+rpcport=16124
+port=16125
+#zelnode=1
+#zelnodeprivkey=${zelnodePrivKey}
+#zelnodeoutpoint=${zelnodeOutPoint}
+#zelnodeindex=${zelnodeIndex}
+server=1
+daemon=1
+txindex=1
+listen=1
+externalip=${externalIp}
+bind=${bindIp}
+addnode=explorer.zel.cash
+addnode=explorer2.zel.cash
+addnode=explorer.zel.zelcore.io
+addnode=blockbook.zel.network
+maxconnections=256
+EOF
+
+    # Bootstrap
+    #wget https://www.dropbox.com/s/kyqe8ji3g1yetfx/zel-bootstrap.zip
+    #unzip zel-bootstrap.zip -d ${USER_CONF_DIR}/fullnodes/${coin}/zelcash
+    #rm zel-bootstrap.zip
+
+    if [ "`getCmdPath mongod`" = "" ]; then
+        echo " - Installing MongoDB"
+        rootRequired
+        wget -qO- https://www.mongodb.org/static/pgp/server-4.2.asc | sudo tee /etc/apt/trusted.gpg.d/mongodb-server-4.2.asc >/dev/null
+        echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list >/dev/null
+
+        sudo apt-get update -qq
+        sudo apt-get install -qq -y mongodb-org
+        sudo service mongod start
+        sudo systemctl enable mongod
+    fi
+
+
+    #echo " - Downloading dependencies: NVM, NodeJS"
+    #VERSION="0.35.3"
+    #wget https://raw.githubusercontent.com/nvm-sh/nvm/v${VERSION}/install.sh
+    #bash install.sh
+    #source ~/.profile
+    #nvm install --lts
+
+
+    # Installing zelcashd
+    echo " - Installing ${coin}/zelcashd"
+    rootRequired
+
+    #echo 'deb https://apt.zel.cash/ all main' | sudo tee /etc/apt/sources.list.d/zelcash.list >/dev/null
+    #echo 'deb https://zelcash.github.io/aptrepo/ all main' | sudo tee /etc/apt/sources.list.d/zelcash.list
+    echo 'deb https://apt.runonflux.io/ '$(lsb_release -cs)' main' | sudo tee /etc/apt/sources.list.d/zelcash.list >/dev/null
+
+    gpg --keyserver keyserver.ubuntu.com --recv 4B69CA27A986265D >/dev/null
+    gpg --export 4B69CA27A986265D 2>/dev/null | sudo tee /etc/apt/trusted.gpg.d/zelcash.asc >/dev/null
+
+    sudo apt-get update -qq
+    sudo apt-get install -qq -y zelcash zelbench
+
+    zelcash-fetch-params.sh >/dev/null
+
+
+
+    echo " - Downloading ${coin}/zelflux"
+    git clone https://github.com/zelcash/zelflux.git >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+
+
+    mkdir -p ${USER_CONF_DIR}/fullnodes/${coin}/zelflux/config
+    touch ${USER_CONF_DIR}/fullnodes/${coin}/zelflux/config/userconfig.js
+
+    cat << EOF > ${USER_CONF_DIR}/fullnodes/${coin}/zelflux/config/userconfig.js
+module.exports = {
+    initial: {
+        ipaddress: '${ipAddress}',
+        zelid: '${zelId}',
+        cruxid: '${cruxId}',
+        testnet: ${testNet}
+    }
+}
+EOF
+
+
+    echo " - Install into ${NODES_DIR}/${coin}"
+    rm -rf ${NODES_DIR}/${coin}
+    mkdir -p ${NODES_DIR}/${coin}
+    mv zelflux ${NODES_DIR}/${coin}/
+
+
+    # Starting zelcashd
+    #zelcashd -datadir=${USER_CONF_DIR}/fullnodes/flux/zelcash >/dev/null 2>&1
+
+    # Starting zelflux
+    #cd ${NODES_DIR}/${coin}
+    #./zelflux/start.sh
+    #cd - >/dev/null
+
+    # Cli
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash getnetworkinfo
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash getconnectioncount
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash getblockchaininfo
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash getblockcount
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash getnewaddress
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash z_getnewaddress
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash dumpprivkey <address>
+    #zelcash-cli -datadir=$HOME/.freemining/fullnodes/flux/zelcash help
 }
 
 
