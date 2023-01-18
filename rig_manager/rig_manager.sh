@@ -136,7 +136,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD install                     # install rig manager"
         echo "  $CMD miner-install [miner]       # install a miner"
         echo
-        echo "  $CMD service <params>            # maanager rig services"
+        echo "  $CMD service <params>            # manager rig services"
         echo "  $CMD status                      # show rig status"
         echo "  $CMD json                        # show rig status (JSON formatted)"
         echo
