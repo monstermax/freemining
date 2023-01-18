@@ -193,7 +193,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         if isRoot; then
             INSTALL_DIR=/usr/local/bin
         else
-            INSTALL_DIR=/usr/local/bin
+            INSTALL_DIR=~/local/bin
         fi
 
         mkdir -p $INSTALL_DIR
