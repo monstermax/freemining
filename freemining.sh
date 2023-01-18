@@ -171,6 +171,8 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD modules-install              # install all modules (rig, farm, pool)"
         echo "  $CMD compile                      # compile typescript for all modules"
         echo
+        echo "  $CMD update                       # update freemining to last version"
+        echo
     }
 
     if [ "$1" = "rig" ]; then
