@@ -10,6 +10,8 @@ package="miningcore"
 MININGCORE_CONFIG_FILE=${USER_CONF_DIR}/pools_engine/${package}/config.json
 
 
+${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
+
 if hasOpt -bg; then
     echo "Running daemon"
     echo " log: ${LOGS_DIR}/pool_manager_pools_engine_${package}.daemon.log"

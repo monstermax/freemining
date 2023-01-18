@@ -11,7 +11,8 @@
 	"poolServer": {
 		"host": "0.0.0.0",
 		"port": 4100,
-		"root": "~/local/opt/freemining/pools_ui/miningcoreWebUI"
+		"root": "~/local/opt/freemining/pools_ui/miningcoreWebUI",
+		"apiUrl": "http://localhost:4000/api/"
 	},
 
 	"fullnodes": {

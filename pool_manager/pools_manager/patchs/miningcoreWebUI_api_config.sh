@@ -17,14 +17,23 @@ fi
 
 
 if grep -q "config-api-freemining" $API_FILE; then
-    echo "Already patched"
-    exit 0
+    #echo "Already patched"
+    #exit 0
+
+    #  Remove custom patches
+    grep config-api-freemining ${API_FILE} -m1 -B9999999 |head -n -1 > ${API_FILE}.tmp
+    mv ${API_FILE}.tmp ${API_FILE}
 fi
+
+
+#API_URL="http://localhost:4000/api/"
+API_URL=$(jq -r ".poolServer.apiUrl" $CONFIG_FILE)
+
 
 CODE_HTML="
 /""*"" config-api-freemining-start ""*""/
 
-API = 'http://localhost:4000/api/';
+API = '${API_URL}';
 
 /""*"" config-api-freemining-end ""*""/
 "
@@ -32,5 +41,8 @@ API = 'http://localhost:4000/api/';
 echo "$CODE_HTML" >> $API_FILE
 
 
-echo "Patched !"
+if ! hasOpt -q; then
+    echo "Patched !"
+fi
+
 
