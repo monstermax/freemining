@@ -84,11 +84,20 @@ fi
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     function usage {
-        echo "Usage:"
-        echo "$0 [action] <params>"
+        CMD=$(basename $BASH_SOURCE)
+
+        echo "=============="
+        echo "| FreeMining | ==> [FARM]"
+        echo "=============="
         echo
-        echo "$0 install"
-        echo "$0 server"
+
+        echo "Usage:"
+        echo
+        echo "  $CMD [action] <params>"
+        echo
+        echo "  $CMD install"
+        echo "  $CMD server"
+        echo
     }
 
     if [ "$1" = "install" ]; then

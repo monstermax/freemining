@@ -122,15 +122,24 @@ function getAvailableMiners {
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     function usage {
-        echo "Usage:"
-        echo "$0 [action] <params>"
+        CMD=$(basename $BASH_SOURCE)
+
+        echo "=============="
+        echo "| FreeMining | ==> [RIG]"
+        echo "=============="
         echo
-        echo "$0 install"
-        echo "$0 miner-install [miner]"
-        echo "$0 service <params>"
-        echo "$0 txt-monitor"
-        echo "$0 json-monitor"
-        echo "$0 agent"
+
+        echo "Usage:"
+        echo
+        echo "  $CMD [action] <params>"
+        echo
+        echo "  $CMD install"
+        echo "  $CMD miner-install [miner]"
+        echo "  $CMD service <params>"
+        echo "  $CMD txt-monitor"
+        echo "  $CMD json-monitor"
+        echo "  $CMD agent"
+        echo
     }
 
     if [ "$1" = "install" ]; then

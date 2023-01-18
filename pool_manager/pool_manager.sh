@@ -124,15 +124,24 @@ fi
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     function usage {
-        echo "Usage:"
-        echo "$0 [action] <params>"
+        CMD=$(basename $BASH_SOURCE)
+
+        echo "=============="
+        echo "| FreeMining | ==> [POOL]"
+        echo "=============="
         echo
-        echo "$0 install"
-        echo "$0 package-install <params>"
-        echo "$0 fullnode-install [coin]"
-        echo "$0 pools-engine"
-        echo "$0 server"
-        echo "$0 config-firewall #TODO"
+
+        echo "Usage:"
+        echo
+        echo "  $CMD [action] <params>"
+        echo
+        echo "  $CMD install"
+        echo "  $CMD package-install <params>"
+        echo "  $CMD fullnode-install [coin]"
+        echo "  $CMD pools-engine"
+        echo "  $CMD server"
+        echo "  $CMD config-firewall #TODO"
+        echo
     }
 
     if [ "$1" = "install" ]; then

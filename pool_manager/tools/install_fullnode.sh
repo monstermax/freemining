@@ -888,20 +888,30 @@ fullnode=$1
 
 
 if [ "$fullnode" = "" ]; then
-    echo "Usage: $0 <fullnode>"
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [POOL] ==> [INSTALL FULLNODE]"
+    echo "=============="
     echo
-    echo " fullnodes list:"
-    echo "  - callisto"
-    echo "  - ergo"
-    echo "  - ethereum"
-    echo "  - ethereum_classic"
-    echo "  - firo"
-    echo "  - kaspa"
-    echo "  - komodo"
-    echo "  - meowcoin"
-    echo "  - monero"
-    echo "  - neoxa"
-    echo "  - ravencoin"
+
+    echo "Usage:"
+    echo
+    echo "  $CMD <fullnode>"
+    echo
+    echo "    + fullnodes list:"
+    echo "      - callisto"
+    echo "      - ergo"
+    echo "      - ethereum"
+    echo "      - ethereum_classic"
+    echo "      - firo"
+    echo "      - kaspa"
+    echo "      - komodo"
+    echo "      - meowcoin"
+    echo "      - monero"
+    echo "      - neoxa"
+    echo "      - ravencoin"
+    echo
 
     exit
 fi

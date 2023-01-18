@@ -305,32 +305,42 @@ miner=$1
 
 
 if [ "$miner" = "" ]; then
-    echo "Usage: $0 <miner>"
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [RIG] ==> [INSTALL MINER]"
+    echo "=============="
     echo
-    echo " miners list:"
-    echo "  - lolminer"
-    echo "  - gminer"
-    echo "  - trex"
-    echo "  - nbminer"
-    echo "  - teamredminer"
-    echo "  - bzminer"
-    echo "  - claymore"
-    echo "  - nanominer"
-    echo "  - miniz"
-    echo "  - firominer_release"
-    echo "  - firominer_sources_amd"
-    echo "  - wildrig"
-    echo "  - kawpowminer_nvidia"
-    echo "  - kawpowminer_amd"
-    echo "  - bminer"
-    echo "  - ethminer"
-    echo "  - srbminer"
-    #echo "  - ccminer"
-    echo "  - autolykosv2_nvidia"
-    echo "  - autolykosv2_amd"
-    echo "  - xmrig_release"
-    echo "  - xmrig_sources_free"
-    echo "  - xmrig_nvidia_cuda_support"
+
+    echo "Usage:"
+    echo
+    echo "  $CMD <miner>"
+    echo
+    echo "    + miners list:"
+    echo "      - lolminer"
+    echo "      - gminer"
+    echo "      - trex"
+    echo "      - nbminer"
+    echo "      - teamredminer"
+    echo "      - bzminer"
+    echo "      - claymore"
+    echo "      - nanominer"
+    echo "      - miniz"
+    echo "      - firominer_release"
+    echo "      - firominer_sources_amd"
+    echo "      - wildrig"
+    echo "      - kawpowminer_nvidia"
+    echo "      - kawpowminer_amd"
+    echo "      - bminer"
+    echo "      - ethminer"
+    echo "      - srbminer"
+    #echo "      - ccminer"
+    echo "      - autolykosv2_nvidia"
+    echo "      - autolykosv2_amd"
+    echo "      - xmrig_release"
+    echo "      - xmrig_sources_free"
+    echo "      - xmrig_nvidia_cuda_support"
+    echo
 
     exit
 fi

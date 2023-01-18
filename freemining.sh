@@ -146,15 +146,25 @@ function getOpt {
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     function usage {
-        echo "Usage:"
-        echo "$0 [action] <params>"
+        CMD=$(basename $BASH_SOURCE)
+
+        echo "=============="
+        echo "| FreeMining |"
+        echo "=============="
         echo
-        echo "$0 rig <params>         # manage rig"
-        echo "$0 pool <params>        # manage pool"
-        echo "$0 farm <params>        # manage farm"
-        echo "$0 bin-install          # install freemining.sh to PATH/bin/fmin"
-        echo "$0 modules-install      # install all modules (rig, farm, pool)"
-        echo "$0 compile              # compile typescript for all modules"
+
+        echo "Usage:"
+        echo
+        echo "  $CMD [action] <params>"
+        echo
+        echo "  $CMD rig  <params>        # manage rig"
+        echo "  $CMD farm <params>        # manage farm"
+        echo "  $CMD pool <params>        # manage pool"
+        echo
+        echo "  $CMD bin-install          # install freemining.sh to PATH/bin/fmin"
+        echo "  $CMD modules-install      # install all modules (rig, farm, pool)"
+        echo "  $CMD compile              # compile typescript for all modules"
+        echo
     }
 
     if [ "$1" = "rig" ]; then
