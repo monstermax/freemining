@@ -16,11 +16,11 @@ const wsServerPort = ((_b = config.farmServer) === null || _b === void 0 ? void 
 const allowedIps = ((_c = config.farmServer) === null || _c === void 0 ? void 0 : _c.wsAllowedIps) || [];
 const serverConnTimeout = 10000;
 const templatesDir = `${__dirname}/web/templates`;
+const staticDir = `${__dirname}/web/public`;
 const rigs = {};
 const wsClients = {};
-//app.use(bodyParser());
 app.use(express_1.default.urlencoded());
-app.use(express_1.default.static(__dirname + '/web/public'));
+app.use(express_1.default.static(staticDir));
 app.get('/', (req, res, next) => {
     const opts = {
         meta: {
