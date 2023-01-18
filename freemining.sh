@@ -146,9 +146,9 @@ function getOpt {
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     if isRoot; then
-        INSTALL_DIR="/usr/local/bin"
+        INSTALL_DIR=/usr/local/bin
     else
-        INSTALL_DIR="~/.local/bin"
+        INSTALL_DIR=~/.local/bin
     fi
 
     function usage {
