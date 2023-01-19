@@ -20,6 +20,11 @@ fi
 
 ##### CONFIG #####
 
+FRM_MODULE="pool"
+
+DAEMON_LOG_DIR=~/.freemining/log/${FRM_MODULE}
+DAEMON_PID_DIR=~/.freemining/run/${FRM_MODULE}
+
 CONFIG_FILE=$(realpath ./pool_manager.json)
 POOL_APP_DIR=$(dirname $CONFIG_FILE)
 
@@ -40,6 +45,8 @@ NODES_DIR=$(eval echo `jq -r ".nodesDir" ${CONFIG_FILE} 2>/dev/null`)
 POOLS_ENGINE_DIR=$(eval echo `jq -r ".poolsEngineDir" ${CONFIG_FILE} 2>/dev/null`)
 
 POOLS_UI_DIR=$(eval echo `jq -r ".poolsUiDir" ${CONFIG_FILE} 2>/dev/null`)
+
+CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${CONFIG_FILE} 2>/dev/null`)
 
 
 
@@ -127,7 +134,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         CMD=$(basename $BASH_SOURCE)
 
         echo "=============="
-        echo "| FreeMining | ==> [POOL]"
+        echo "| FreeMining | ==> [${FRM_MODULE^^}]"
         echo "=============="
         echo
 
@@ -135,12 +142,15 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install                     # install pool manager"
+        echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
         echo "  $CMD fullnode-install [coin]     # install a fullnode"
         echo
-        echo "  $CMD pools-engine [-bg]          # start pool engine (miningcore). -bg for daemon"
-        echo "  $CMD server [-bg] [-ts]          # start the pool server. -bg for daemon. -ts for typescript exec"
+        echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
+        echo
+        echo "  $CMD fullnode                    # start/stop a fullnode"
+        echo "  $CMD miningcore                  # start/stop ${FRM_MODULE} miningcore"
+        echo "  $CMD webserver                   # start/stop the ${FRM_MODULE} webserver"
         echo
         echo "  $CMD config-firewall             # Not available. TODO"
         echo
@@ -158,16 +168,23 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./tools/install_fullnode.sh $@
 
-    elif [ "$1" = "pools-engine" ]; then
+    elif [ "$1" = "fullnode" ]; then
         shift
-        exec ./pools_manager/miningcore/stop.sh
-        exec ./pools_manager/miningcore/configure.sh
-        exec ./pools_manager/miningcore/start.sh $@
+        exec ./tools/fullnode.sh $@
 
-    elif [ "$1" = "server" ]; then
+    elif [ "$1" = "miningcore" ]; then
+        shift
+        exec ./pools_manager/miningcore/miningcore.sh $@
+
+    elif [ "$1" = "webserver" ]; then
         shift
         # run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
         exec ./pool_server/server.sh $@
+
+    elif [ "$1" = "ps" ]; then
+        shift
+        #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     elif [ "$1" = "config-firewall" ]; then
         shift

@@ -7,15 +7,12 @@ source ../rig_manager.sh
 set -e
 
 
+FRM_PACKAGE="miner_install"
+
 TMP_DIR=$(mktemp -d)
 
-echo "temp dir = $TMP_DIR"
 mkdir -p ${TMP_DIR}
-
-echo "miners dir = $MINERS_DIR"
 mkdir -p ${MINERS_DIR}
-
-echo
 
 
 # install basic tools
@@ -131,7 +128,7 @@ function install_miniz {
 }
 
 
-function install_firominer_release {
+function install_firominer {
     cd ${TMP_DIR}
     wget https://github.com/firoorg/firominer/releases/download/1.1.0/firominer-Linux.7z
     mkdir -p firominer
@@ -244,7 +241,7 @@ function install_srbminer {
 }
 
 
-function install_xmrig_release {
+function install_xmrig {
     cd ${TMP_DIR}
     wget https://github.com/xmrig/xmrig/releases/download/v6.18.1/xmrig-6.18.1-linux-x64.tar.gz
     tar zxvf xmrig-6.18.1-linux-x64.tar.gz
@@ -308,7 +305,7 @@ if [ "$miner" = "" ]; then
     CMD=$(basename $BASH_SOURCE)
 
     echo "=============="
-    echo "| FreeMining | ==> [RIG] ==> [INSTALL MINER]"
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
     echo "=============="
     echo
 
@@ -316,30 +313,34 @@ if [ "$miner" = "" ]; then
     echo
     echo "  $CMD <miner>"
     echo
-    echo "    + miners list:"
-    echo "      - lolminer"
-    echo "      - gminer"
-    echo "      - trex"
-    echo "      - nbminer"
-    echo "      - teamredminer"
-    echo "      - bzminer"
-    echo "      - claymore"
-    echo "      - nanominer"
-    echo "      - miniz"
-    echo "      - firominer_release"
-    echo "      - firominer_sources_amd"
-    echo "      - wildrig"
-    echo "      - kawpowminer_nvidia"
-    echo "      - kawpowminer_amd"
-    echo "      - bminer"
-    echo "      - ethminer"
-    echo "      - srbminer"
-    #echo "      - ccminer"
-    echo "      - autolykosv2_nvidia"
+    echo "    * installable miners"
     echo "      - autolykosv2_amd"
-    echo "      - xmrig_release"
+    echo "      - autolykosv2_nvidia"
+    echo "      - bminer"
+    echo "      - bzminer"
+    #echo "      - ccminer"
+    echo "      - claymore"
+    echo "      - ethminer"
+    echo "      - firominer"
+    echo "      - firominer_sources_amd"
+    echo "      - gminer"
+    echo "      - kawpowminer_amd"
+    echo "      - kawpowminer_nvidia"
+    echo "      - lolminer"
+    echo "      - miniz"
+    echo "      - nanominer"
+    echo "      - nbminer"
+    echo "      - srbminer"
+    echo "      - teamredminer"
+    echo "      - trex"
+    echo "      - wildrig"
+    echo "      - xmrig"
     echo "      - xmrig_sources_free"
     echo "      - xmrig_nvidia_cuda_support"
+    echo
+    echo "    * installed miners"
+
+    ( find $MINERS_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null || echo "no miner installed" ) | xargs -I '{}' basename {} | sed 's/^/      - /g' | sort
     echo
 
     exit
@@ -404,8 +405,8 @@ if [ "$miner" = "miniz" ]; then
     install_miniz
 fi
 
-if [ "$miner" = "firominer_release" ]; then
-    install_firominer_release
+if [ "$miner" = "firominer" ]; then
+    install_firominer
 fi
 
 if [ "$miner" = "firominer_sources_amd" ]; then
@@ -444,8 +445,8 @@ if [ "$miner" = "srbminer" ]; then
     install_srbminer
 fi
 
-if [ "$miner" = "xmrig_release" ]; then
-    install_xmrig_release
+if [ "$miner" = "xmrig" ]; then
+    install_xmrig
 fi
 
 if [ "$miner" = "xmrig_sources_free" ]; then

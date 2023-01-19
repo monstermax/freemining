@@ -4,17 +4,19 @@ cd `dirname $0`
 
 source ../rig_manager.sh
 
+
+FRM_PACKAGE="miner"
+
+
 ACTION=$1
 shift
-SERVICE=$1
+MINER=$1
+shift
+ALGO=$1
 shift
 POOL_URL=$1
 shift
-POOL_ADDRESS=$1
-shift
-WORKER_NAME=$1
-shift
-ALGO=$1
+POOL_ACCOUNT=$1
 shift
 
 #set -e # provoque des retours erreur dans agent.ts et provoque un throw
@@ -24,28 +26,53 @@ function usage {
     CMD=$(basename $BASH_SOURCE)
 
     echo "=============="
-    echo "| FreeMining | ==> [RIG] ==> [SERVICE]"
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
     echo "=============="
     echo
 
     echo "Usage:"
     echo
-    echo "  $CMD start|restart <SERVICE> <POOL_URL> <POOL_ADDRESS> <WORKER> <ALGO>"
-    echo "  $CMD stop <SERVICE>"
+    echo "  $CMD [action] <params>"
     echo
-    echo "  $CMD status <SERVICE>"
+    echo "  $CMD start|restart [miner] [algo] [pool_url] [pool_account]"
+    #echo "      example: $CMD start lolminer autolykos2 mypool.com:1234 MyPoolMiningAddress.MyWorkerName"
+    echo
+    echo "  $CMD stop [miner]"
+    echo
+    echo "  $CMD status [miner]"
     echo "  $CMD status"
     echo
-    echo "  $CMD info <SERVICE>"
-    echo "  $CMD log <SERVICE> [once]"
+    echo "  $CMD info [miner]"
     echo
-    echo "  $CMD ps <SERVICE>"
-    echo "  $CMD ps"
+    echo "  $CMD log [miner] <once>"
+    echo
+    echo "  $CMD ps <miner>"
     echo
     echo
-    echo "  $CMD start mypool.com:5555 MY-COIN-ADDRESS MY-COMPUTER-NAME AUTOLYKOS2"
+
+    if [ "$ACTION" = "start" ]; then
+        if [ "$MINER" = "" ]; then
+            showMinersList
+        fi
+    fi
+}
+
+
+function showMinersList {
+    echo "   + configured miners :"
+
+    if [ "$CONFIGURED_MINERS" = "" ]; then
+        echo "No miner configured"
+
+    else
+        for miner in $CONFIGURED_MINERS; do
+            echo "     - $miner"
+        done
+    fi
+
     echo
 }
+
 
 
 if [ "$ACTION" = "" ]; then
@@ -53,14 +80,14 @@ if [ "$ACTION" = "" ]; then
     exit 1
 fi
 
-if [ "$SERVICE" = "" -a "$ACTION" != "ps" -a "$ACTION" != "status" ]; then
+if [ "$MINER" = "" -a "$ACTION" != "ps" -a "$ACTION" != "status" ]; then
     usage
     exit 1
 fi
 
 
-LOG_FILE=${LOGS_DIR}/${SERVICE}.log
-PID_FILE=${PIDS_DIR}/${SERVICE}.pid
+LOG_FILE=${LOGS_DIR}/${MINER}.log
+PID_FILE=${PIDS_DIR}/${MINER}.pid
 
 mkdir -p $LOGS_DIR
 mkdir -p $PIDS_DIR
@@ -69,14 +96,14 @@ POOL_HOST=$(echo $POOL_URL |cut -d":" -f1)
 POOL_PORT=$(echo $POOL_URL |cut -d":" -f2)
 
 
-case "$SERVICE" in
+case "$MINER" in
     nbminer)
         API_PORT=$(getMinerApiPort nbminer)
         CMD_EXEC="${MINERS_DIR}/nbminer/nbminer"
 
         CMD_ARGS="-a ${ALGO} \
             -o stratum+tcp://${POOL_URL} \
-            -u ${POOL_ADDRESS}.${WORKER_NAME} \
+            -u ${POOL_ACCOUNT} \
             --api 127.0.0.1:${API_PORT} \
             $@"
         ;;
@@ -87,7 +114,7 @@ case "$SERVICE" in
 
         CMD_ARGS="--algo ${ALGO} \
             --pool ${POOL_URL} \
-            --user ${POOL_ADDRESS}.${WORKER_NAME} \
+            --user ${POOL_ACCOUNT} \
             --apihost 127.0.0.1 --apiport ${API_PORT} \
             $@"
         ;;
@@ -100,11 +127,8 @@ case "$SERVICE" in
             ALGO="rx/0"
         fi
 
-        USER_SEP="+"
-        #USER_SEP="."
-
         CMD_ARGS="--url=${POOL_URL} \
-            --user=${POOL_ADDRESS}${USER_SEP}${WORKER_NAME} \
+            --user=${POOL_ACCOUNT} \
             -a ${ALGO} \
             -k \
             --donate-level 0 \
@@ -121,7 +145,7 @@ case "$SERVICE" in
 
         CMD_ARGS="-a ${ALGO} \
             -o stratum+tcp://${POOL_URL} \
-            -u ${POOL_ADDRESS}.${WORKER_NAME} \
+            -u ${POOL_ACCOUNT} \
             -p x \
             --api_listen=0.0.0.0:${API_PORT} \
             $@"
@@ -133,7 +157,7 @@ case "$SERVICE" in
 
         CMD_ARGS="-a ${ALGO} \
             -o stratum+tcp://${POOL_URL} \
-            -u ${POOL_ADDRESS}.${WORKER_NAME} \
+            -u ${POOL_ACCOUNT} \
             -p x \
             --api-bind-http 127.0.0.1:${API_PORT} \
             $@"
@@ -143,7 +167,7 @@ case "$SERVICE" in
         API_PORT=$(getMinerApiPort gminer)
         CMD_EXEC="${MINERS_DIR}/gminer/miner"
 
-        CMD_ARGS="--user ${POOL_ADDRESS}.${WORKER_NAME} \
+        CMD_ARGS="--user ${POOL_ACCOUNT} \
             --server ${POOL_HOST} --port ${POOL_PORT} --pass x \
             --algo ${ALGO} \
             --api ${API_PORT} \
@@ -159,7 +183,7 @@ case "$SERVICE" in
         ;;
 
     *)
-        echo "Error: unknown service ${SERVICE}"
+        echo "Error: unknown service ${MINER}"
         exit 1
         ;;
 esac
@@ -192,12 +216,7 @@ if [ "$ACTION" = "start" -o "$ACTION" = "restart" ]; then
         exit 1
     fi
 
-    if [ "$POOL_ADDRESS" = "" ]; then
-        usage
-        exit 1
-    fi
-
-    if [ "$WORKER_NAME" = "" ]; then
+    if [ "$POOL_ACCOUNT" = "" ]; then
         usage
         exit 1
     fi
@@ -223,7 +242,7 @@ if [ "$ACTION" = "stop" -o "$ACTION" = "start" -o "$ACTION" = "restart" ]; then
     rm -f $PID_FILE
 
     if [ "$PID" != "" ]; then
-        echo "Stopping ${SERVICE} service"
+        echo "Stopping ${MINER} service"
         kill $PID 2>/dev/null
         pkill -P $PID 2>/dev/null
     fi
@@ -233,7 +252,7 @@ fi
 
 # START / RESTART
 if [ "$ACTION" = "start" -o "$ACTION" = "restart" ]; then
-    echo "Starting ${SERVICE} service"
+    echo "Starting ${MINER} service"
 
     $CMD_EXEC $CMD_ARGS >$LOG_FILE 2>&1 &
 
@@ -247,13 +266,13 @@ fi
 
 # STATUS
 if [ "$ACTION" = "status" ]; then
-    if [ "$SERVICE" = "" ]; then
+    if [ "$MINER" = "" ]; then
         ./rig_monitor_txt.sh
     else
         if [ "$PID" != "" ]; then
             CMD_LINE=$(ps -p $PID -o args |tail -n +2)
 
-            echo "Service ${SERVICE} is running. PID = ${PID}"
+            echo "Service ${MINER} is running. PID = ${PID}"
             echo
             echo "CMD = ${CMD_LINE}"
             echo
@@ -263,7 +282,7 @@ if [ "$ACTION" = "status" ]; then
             if [ "$CMD_LINE" = "" ]; then
                 echo
                 echo "Process seems to be crashed"
-                echo "run $0 kill ${SERVICE}"
+                echo "run $0 kill ${MINER}"
                 echo "then restart"
             fi
 
@@ -276,8 +295,7 @@ fi
 
 # INFO
 if [ "$ACTION" = "info" ]; then
-	#INFO=$(wget -qO- http://localhost:42999/rig/service/info?service=${SERVICE})
-	INFO=$(../miners_api/json/${SERVICE}_api_json.sh)
+	INFO=$(../miners_api/json/${MINER}_api_json.sh)
     echo $INFO
 fi
 
@@ -302,7 +320,7 @@ fi
 if [ "$ACTION" = "ps" ]; then
     PID=$(pgrep -af "$CMD_EXEC")
 
-    if [ "$SERVICE" = "" ]; then
+    if [ "$MINER" = "" ]; then
         DIRNAME=$(dirname `dirname $CMD_EXEC`)
         PID=$(pgrep -af "$DIRNAME")
     fi
@@ -315,7 +333,7 @@ fi
 
 # KILL
 if [ "$ACTION" = "kill" ]; then
-    echo "Killing ${SERVICE} process"
+    echo "Killing ${MINER} process"
     PID=$(pgrep -f "$CMD_EXEC")
 
     rm -f $PID_FILE

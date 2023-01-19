@@ -174,13 +174,15 @@ ${Object.entries(rig.services).map(entry => {
                     <div class="modal-body">
                         <input type="hidden" name="action" id="action" value="" />
 
+                        <!--
                         <div class="mb-3">
                             <label for="newService_coin" class="form-label">Coin</label>
                             <select id="newService_coin" name="coin" class="form-select" aria-describedby="newService_coin_Help">
                                 <option></option>
                             </select>
-                            <div id="newService_coin_Help" class="form-text">optionnal. used to suggest algos. not yet implemented. do nothing</div>
+                            <div id="newService_coin_Help" class="form-text">optional. used to suggest algos. not yet implemented. do nothing</div>
                         </div>
+                        -->
 
                         <div class="mb-3">
                             <label for="newService_miner" class="form-label">Miner<sup>*</sup></label>
@@ -196,37 +198,31 @@ ${Object.entries(rig.services).map(entry => {
                                     }
                                 }).join('')}
                             </select>
-                            <div id="newService_miner_Help" class="form-text"></div>
+                            <div id="newService_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
                         </div>
 
                         <div class="mb-3">
                             <label for="newService_algo" class="form-label">Algo<sup>*</sup></label>
-                            <input type="email" class="form-control required" id="newService_algo" name="algo" aria-describedby="newService_algo_Help">
-                            <div id="newService_algo_Help" class="form-text"></div>
+                            <input type="text" class="form-control required" id="newService_algo" name="algo" aria-describedby="newService_algo_Help">
+                            <div id="newService_algo_Help" class="form-text"> &gt; Algorithm of the coin to mine</div>
                         </div>
 
                         <div class="mb-3">
                             <label for="newService_pool_url" class="form-label">Pool url<sup>*</sup></label>
-                            <input type="email" class="form-control required" id="newService_pool_url" name="pool_url" aria-describedby="newService_pool_url_Help">
-                            <div id="newService_pool_url_Help" class="form-text">HOST:PORT only (no tcp/stratum/ssl)</div>
+                            <input type="text" class="form-control required" id="newService_pool_url" name="pool_url" aria-describedby="newService_pool_url_Help">
+                            <div id="newService_pool_url_Help" class="form-text"> &gt; HOST:PORT only (no tcp/stratum/ssl)</div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="newService_pool_account" class="form-label">Pool account/address<sup>*</sup></label>
-                            <input type="email" class="form-control required" id="newService_pool_account" name="pool_account" aria-describedby="newService_pool_account_Help">
-                            <div id="newService_pool_account_Help" class="form-text">your mining address</div>
+                            <label for="newService_pool_account" class="form-label">Pool account<sup>*</sup></label>
+                            <input type="text" class="form-control required" id="newService_pool_account" name="pool_account" aria-describedby="newService_pool_account_Help">
+                            <div id="newService_pool_account_Help" class="form-text"> &gt; your mining address + worker name<br />Example: myPoolMiningAddress.myWorkerName</div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="newService_worker_name" class="form-label">Worker name</label>
-                            <input type="email" class="form-control" id="newService_worker_name" name="worker_name" aria-describedby="newService_worker_name_Help">
-                            <div id="newService_worker_name_Help" class="form-text">defaults to hostname if empty</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="newService_optionnal_params" class="form-label">Miner optionnal parameters</label>
-                            <input type="email" class="form-control" id="newService_optionnal_params" name="optionnal_params" aria-describedby="newService_optionnal_params_Help">
-                            <div id="newService_optionnal_params_Help" class="form-text">sample: -d 0,1,2 -log</div>
+                            <label for="newService_optional_params" class="form-label">Miner optional parameters</label>
+                            <input type="text" class="form-control" id="newService_optional_params" name="optional_params" aria-describedby="newService_optional_params_Help">
+                            <div id="newService_optional_params_Help" class="form-text"> &gt; optional miner arguments<br />Example: -d 0,1,2 -log</div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -276,10 +272,9 @@ function submitForm() {
     const algo = jQuery('#newService_algo').val();
     const poolUrl = jQuery('#newService_pool_url').val();
     const poolAccount = jQuery('#newService_pool_account').val();
-    const workerName = jQuery('#newService_worker_name').val();
-    const optionnalParams = jQuery('#newService_optionnal_params').val();
+    const optionalParams = jQuery('#newService_optional_params').val();
 
-    startService(serviceName, algo, poolUrl, poolAccount, workerName, optionnalParams);
+    startService(serviceName, algo, poolUrl, poolAccount, optionalParams);
 }
 </script>
 
@@ -296,8 +291,8 @@ function testStart() {
     alertify.confirm("DEBUG/TEST - xmrig", "Do you want to start <b>xmrig</b> with the default parameters ?",
         function(){
             const poolUrl = 'xmrpool.eu:5555';
-            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH';
-            startService('xmrig', '.', poolUrl, poolAccount, '${rig.rig.hostname}', '')
+            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rig.rig.hostname}';
+            startService('xmrig', 'rx/0', poolUrl, poolAccount, '')
         },
         function(){
             //alertify.error('Cancel');
@@ -305,7 +300,7 @@ function testStart() {
     );
 }
 
-function startService(serviceName, algo, poolUrl, poolAccount, workerName=null, optionnalParams='') {
+function startService(serviceName, algo, poolUrl, poolAccount, optionalParams='') {
     if (! serviceName) return;
     if (! algo) return;
     if (! poolUrl) return;
@@ -318,8 +313,7 @@ function startService(serviceName, algo, poolUrl, poolAccount, workerName=null, 
         algo: algo,
         poolUrl,
         poolAccount,
-        workerName: workerName || '${rig.rig.hostname}',
-        optionnalParams: optionnalParams || '',
+        optionalParams: optionalParams || '',
     };
 
     jQuery.post(url, data).then(() => {

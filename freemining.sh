@@ -10,9 +10,22 @@ CMD_ARGS=($@)
 ##### CONFIG #####
 
 
-NODE="node"
-TS_NODE="ts-node"
+NODE="/usr/bin/node"
+#TS_NODE="/usr/bin/ts-node"
+TS_NODE="/usr/bin/node -r ts-node/register"
 TSC="tsc"
+USE_TS="1"
+
+DAEMON_LOG_DIR=~/.freemining/log
+DAEMON_PID_DIR=~/.freemining/run
+DAEMON_USER=""
+DAEMON_CHDIR=""
+DAEMONER_CMD="/sbin/start-stop-daemon"
+
+NO_COLOR="\e[0m"
+COLOR_RED="\e[31m"
+COLOR_GREEN="\e[32m"
+COLOR_YELLOW="\e[33m"
 
 
 ##### FUNCTIONS #####
@@ -139,6 +152,216 @@ function getOpt {
     done
 }
 
+function removeOpt {
+    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
+
+    # use like this (to remove -ts from script arguments) :
+    # x=$@ ; set -- $(removeOpt "$x" "-ts")
+}
+
+
+function daemonStart {
+    # daemonStart depends on $DAEMON_PID_DIR and $DAEMON_LOG_DIR
+
+    DAEMON_NAME=$1
+    DAEMON_CMD=$2
+    DAEMON_BG=$3
+
+    DAEMON_CMD_WITHOUT_ARGS=$(echo $DAEMON_CMD | cut -d" " -f1)
+    DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
+
+    LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+
+    DAEMONER_ARGS="--pidfile $PID_FILE --make-pidfile --remove-pidfile"
+    #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
+
+    if [ "$DAEMON_BG" = "bg" -o "$DAEMON_BG" = "background" -o "$DAEMON_BG" = "daemon" ]; then
+        DAEMONER_ARGS="$DAEMONER_ARGS --background"
+    fi
+
+    if [ "$DAEMON_USER" != "" -a "$DAEMON_USER" != "$USER" ]; then
+        DAEMONER_ARGS="$DAEMONER_ARGS --chuid $DAEMON_USER"
+    fi
+
+    if [ "$DAEMON_CHDIR" != "" ]; then
+        DAEMONER_ARGS="$DAEMONER_ARGS --chdir $DAEMON_CHDIR"
+    fi
+
+    mkdir -p $DAEMON_LOG_DIR
+    mkdir -p $DAEMON_PID_DIR
+
+    if [ "$DAEMON_DRY" = "1" ]; then
+        DAEMONER_CMD="echo ${DAEMONER_CMD}"
+        echo "Debugging daemon command : $DAEMON_CMD"
+        echo
+
+    #else
+        #echo "Starting daemon : $DAEMON_NAME"
+    fi
+
+    ${DAEMONER_CMD} --start $DAEMONER_ARGS --startas \
+        /bin/bash -- -c "exec -a \"$DAEMON_FULLNAME\" $DAEMON_CMD > $LOG_FILE 2>&1"
+    RC=$?
+
+    if [ "$DAEMON_DRY" = "1" ]; then
+        RC=-1
+        echo
+    fi
+
+    if [ "$RC" = "0" ]; then
+        echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME started"
+
+    elif [ "$RC" = "1" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME not started (nothing done)"
+
+    elif [ "$RC" = "2" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME not started (no reason)"
+
+    elif [ "$RC" = "3" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME not started"
+    fi
+
+    return $RC
+}
+
+
+function daemonStatus {
+    # daemonStatus depends on $DAEMON_PID_DIR
+
+    DAEMON_NAME=$1
+
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+
+    DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
+    #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
+
+    ${DAEMONER_CMD} --status $DAEMONER_ARGS
+    RC=$?
+
+    if [ "$RC" = "0" ]; then
+        echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME is running"
+
+    elif [ "$RC" = "1" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME is not running (but PID exists)"
+
+    elif [ "$RC" = "2" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME is not running"
+
+    elif [ "$RC" = "3" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME is unknown"
+    fi
+
+    return $RC
+}
+
+
+function daemonStop {
+    # daemonStop depends on $DAEMON_PID_DIR
+
+    DAEMON_NAME=$1
+
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+
+    DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
+    #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
+
+    ${DAEMONER_CMD} --stop $DAEMONER_ARGS
+    RC=$?
+
+    if [ "$RC" = "0" ]; then
+        echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME stopped"
+
+    elif [ "$RC" = "1" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME not stopped (nothing done)"
+
+    elif [ "$RC" = "2" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME not stopped (still running)"
+
+    elif [ "$RC" = "3" ]; then
+        echo -e "${COLOR_RED}[ERROR]${NO_COLOR} Daemon $DAEMON_NAME not stopped"
+    fi
+
+    return $RC
+}
+
+
+function daemonLog {
+    # daemonLog depends on $DAEMON_LOG_DIR
+
+    DAEMON_NAME=$1
+
+    LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+
+    if ! test -f $LOG_FILE; then
+        echo "Error: log file do not exists"
+        return 1
+    fi
+
+    tail -f $LOG_FILE
+}
+
+
+function daemonPidLog {
+    # daemonLogPid depends on $DAEMON_PID_DIR
+
+    DAEMON_NAME=$1
+
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    PID=$(cat $PID_FILE 2>/dev/null)
+
+    if [ "$PID" = "" ]; then
+        echo "Error: no PID found"
+        return 1
+    fi
+
+    if ! test -d /proc/$PID; then
+        echo "Error: PID found but proccess is not running"
+        return 1
+    fi
+
+    tail -f /proc/$PID/fd/1
+}
+
+
+function daemonLogFile {
+    # daemonLogFile depends on $DAEMON_PID_DIR
+
+    DAEMON_NAME=$1
+
+    LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+    echo $LOG_FILE
+}
+
+
+function daemonPid {
+    # daemonPid depends on $DAEMON_PID_DIR
+    DAEMON_NAME=$1
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    PID=$(cat $PID_FILE 2>/dev/null)
+    echo $PID
+}
+
+
+function daemonPidFile {
+    # daemonPidFile depends on $DAEMON_PID_DIR
+    DAEMON_NAME=$1
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    echo $PID_FILE
+}
+
+
+function daemonPidPs {
+    # daemonPidPs depends on $DAEMON_PID_DIR
+    DAEMON_NAME=$1
+    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    PID=$(cat $PID_FILE 2>/dev/null)
+
+    if [ "$PID" != "" ]; then
+        ps -o pid,pcpu,pmem,user,command $PID |grep -e '\[free[m]ining.*\]' --color -B1
+    fi
+}
+
 
 
 ##### MAIN #####
@@ -167,10 +390,11 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD farm <params>                # manage farm"
         echo "  $CMD pool <params>                # manage pool"
         echo
-        echo "  $CMD bin-install                  # install freemining.sh to ${INSTALL_DIR}/fmin"
+        echo "  $CMD bin-install                  # install freemining.sh to ${INSTALL_DIR}/frm"
         echo "  $CMD modules-install              # install all modules (rig, farm, pool)"
         echo "  $CMD compile                      # compile typescript for all modules"
         echo
+        echo "  $CMD ps                           # show all running processes"
         echo "  $CMD update                       # update freemining to last version"
         echo
     }
@@ -196,9 +420,9 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
 cd $(realpath $PARENT_DIR)
 $0 \$@
-" > ${INSTALL_DIR}/fmin
+" > ${INSTALL_DIR}/frm
 
-        chmod +x ${INSTALL_DIR}/fmin
+        chmod +x ${INSTALL_DIR}/frm
 
     elif [ "$1" = "modules-install" ]; then
         shift
@@ -235,6 +459,11 @@ $0 \$@
         shift
         git pull
         $BASH_SOURCE modules-install
+
+    elif [ "$1" = "ps" ]; then
+        shift
+        #pgrep -fa "\[freemining\." |grep -e '\[free[m]ining.*\]' --color
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     else
         usage

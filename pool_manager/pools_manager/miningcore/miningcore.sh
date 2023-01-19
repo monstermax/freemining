@@ -2,40 +2,40 @@
 
 cd `dirname $0`
 
-source ../farm_manager.sh
+source ../../pool_manager.sh
 
 
-FRM_PACKAGE="webserver"
+FRM_PACKAGE="miningcore"
 DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}"
-
-FRM_CMD_JS="${NODE} ./server.js $@"
-FRM_CMD_TS="${TS_NODE} ./server.ts $@"
 
 DAEMON_OPTS=""
 #DAEMON_OPTS="background"
 
 
+
+
 # START
-if hasOpt start || hasOpt run; then
+if hasOpt start || hasOpt run || hasOpt debug; then
     x=$@ ; set -- $(removeOpt "$x" "start")
     x=$@ ; set -- $(removeOpt "$x" "run")
+    x=$@ ; set -- $(removeOpt "$x" "debug")
 
     if hasOpt start; then
         # set background
         DAEMON_OPTS="background"
     fi
 
-    CMD="$FRM_CMD_JS"
+    DAEMON_CHDIR=$PWD
+    DAEMON_DRY=0
 
-    if test "$USE_TS" = "1" || hasOpt --ts; then
-        # use typescript
-        x=$@ ; set -- $(removeOpt "$x" "--ts")
-
-        CMD="$FRM_CMD_TS"
+    if hasOpt debug; then
+        DAEMON_DRY=1
     fi
 
-    DAEMON_CHDIR=$PWD
-    #DAEMON_DRY=1
+
+    ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
+
+    CMD="${POOLS_ENGINE_DIR}/${FRM_PACKAGE}/Miningcore -c ${USER_CONF_DIR}/${FRM_MODULE}/${FRM_PACKAGE}/config.json $@"
 
     daemonStart $DAEMON_NAME "$CMD" $DAEMON_OPTS
     exit $?
@@ -108,7 +108,6 @@ if hasOpt ps; then
     daemonPidPs $DAEMON_NAME $DAEMON_OPTS
     exit $?
 fi
-
 
 
 

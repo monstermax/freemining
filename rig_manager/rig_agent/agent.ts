@@ -71,7 +71,7 @@ let checkStatusTimeout: any = null;
 let connectionCount = 0;
 
 const toolsDir = `${__dirname}/../tools`;
-const cmdService = `${toolsDir}/service.sh`;
+const cmdService = `${toolsDir}/miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 
 let rigStatus: RigStatus | null = null;
@@ -162,7 +162,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo} ${params.optionnalParams}`;
+                    const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams}`;
 
                     console.log(`${now()} [DEBUG] executing command: ${cmd}`)
 

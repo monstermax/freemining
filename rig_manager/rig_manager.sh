@@ -20,6 +20,12 @@ fi
 
 ##### CONFIG #####
 
+FRM_MODULE="rig"
+
+DAEMON_LOG_DIR=~/.freemining/log/${FRM_MODULE}
+DAEMON_PID_DIR=~/.freemining/run/${FRM_MODULE}
+
+
 CONFIG_FILE=$(realpath ./rig_manager.json)
 RIG_APP_DIR=$(dirname $CONFIG_FILE)
 
@@ -36,6 +42,10 @@ LOGS_DIR=$(eval echo `jq -r ".logsDir" ${CONFIG_FILE} 2>/dev/null`)
 PIDS_DIR=$(eval echo `jq -r ".pidsDir" ${CONFIG_FILE} 2>/dev/null`)
 
 MINERS_DIR=$(eval echo `jq -r ".minersDir" ${CONFIG_FILE} 2>/dev/null`)
+
+CONFIGURED_MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${CONFIG_FILE} 2>/dev/null`)
+
+#INSTALLED_MINERS="" # TODO
 
 
 
@@ -125,7 +135,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         CMD=$(basename $BASH_SOURCE)
 
         echo "=============="
-        echo "| FreeMining | ==> [RIG]"
+        echo "| FreeMining | ==> [${FRM_MODULE^^}]"
         echo "=============="
         echo
 
@@ -133,14 +143,16 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install                     # install rig manager"
+        echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD miner-install [miner]       # install a miner"
         echo
-        echo "  $CMD service <params>            # manager rig services"
-        echo "  $CMD status                      # show rig status"
-        echo "  $CMD json                        # show rig status (JSON formatted)"
+        echo "  $CMD miner <params>              # manage ${FRM_MODULE} miners processes"
         echo
-        echo "  $CMD agent [-bg] [-ts]           # start the rig agent. -bg for daemon. -ts for typescript exec"
+        echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
+        echo "  $CMD status                      # show ${FRM_MODULE} status"
+        echo "  $CMD json                        # show ${FRM_MODULE} status (JSON formatted)"
+        echo
+        echo "  $CMD agent                       # start/stop the ${FRM_MODULE} agent"
         echo
     }
 
@@ -152,9 +164,9 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         ./tools/rig_monitor_txt.sh
 
-    elif [ "$1" = "service" ]; then
+    elif [ "$1" = "miner" ]; then
         shift
-        exec ./tools/service.sh $@
+        exec ./tools/miner.sh $@
 
     elif [ "$1" = "miner-install" ]; then
         shift
@@ -171,6 +183,11 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "agent" ]; then
         shift
         exec ./rig_agent/agent.sh $@
+
+    elif [ "$1" = "ps" ]; then
+        shift
+        #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     else
         usage

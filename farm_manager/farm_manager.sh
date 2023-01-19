@@ -20,6 +20,11 @@ fi
 
 ##### CONFIG #####
 
+FRM_MODULE="farm"
+
+DAEMON_LOG_DIR=~/.freemining/log/${FRM_MODULE}
+DAEMON_PID_DIR=~/.freemining/run/${FRM_MODULE}
+
 CONFIG_FILE=$(realpath ./farm_manager.json)
 FARM_APP_DIR=$(dirname $CONFIG_FILE)
 
@@ -87,7 +92,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         CMD=$(basename $BASH_SOURCE)
 
         echo "=============="
-        echo "| FreeMining | ==> [FARM]"
+        echo "| FreeMining | ==> [${FRM_MODULE^^}]"
         echo "=============="
         echo
 
@@ -95,11 +100,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install                     # install farm manager"
+        echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo
-        echo "  $CMD json                        # show farm status (JSON formatted)"
+        echo "  $CMD rigs                        # show rigs list"
         echo
-        echo "  $CMD server [-bg] [-ts]          # start the farm server. -bg for daemon. -ts for typescript exec"
+        echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
+        echo "  $CMD json                        # show ${FRM_MODULE} status (JSON formatted)"
+        echo
+        echo "  $CMD webserver                   # start/stop the ${FRM_MODULE} websocket & web servers"
         echo
     }
 
@@ -111,9 +119,18 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         wget -qO- http://localhost:4200/status.json
 
-    elif [ "$1" = "server" ]; then
+    elif [ "$1" = "webserver" ]; then
         shift
         exec ./farm_server/server.sh $@
+
+    elif [ "$1" = "rigs" ]; then
+        shift
+        wget -qO- http://localhost:4200/status.json | jq -r ". | keys | join(\" \")"
+
+    elif [ "$1" = "ps" ]; then
+        shift
+        #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     else
         usage

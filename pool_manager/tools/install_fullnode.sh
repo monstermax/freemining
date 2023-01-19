@@ -7,6 +7,8 @@ source ../pool_manager.sh
 set -e
 
 
+FRM_PACKAGE="fullnode_install"
+
 TMP_DIR=$(mktemp -d)
 
 #echo "temp dir = $TMP_DIR"
@@ -145,6 +147,8 @@ _EOF
     rm -rf ${NODES_DIR}/${coin}
     mkdir -p ${NODES_DIR}/${coin}
     cp -a *.jar *.sh ${NODES_DIR}/${coin}/
+    cd ${NODES_DIR}/${coin}
+    ln -s ${DL_FILE} ergo.jar
 }
 
 
@@ -891,7 +895,7 @@ if [ "$fullnode" = "" ]; then
     CMD=$(basename $BASH_SOURCE)
 
     echo "=============="
-    echo "| FreeMining | ==> [POOL] ==> [INSTALL FULLNODE]"
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
     echo "=============="
     echo
 
@@ -899,18 +903,26 @@ if [ "$fullnode" = "" ]; then
     echo
     echo "  $CMD <fullnode>"
     echo
-    echo "    + fullnodes list:"
+    echo "    * installable fullnodes"
     echo "      - callisto"
     echo "      - ergo"
     echo "      - ethereum"
     echo "      - ethereum_classic"
     echo "      - firo"
+    echo "      - flux"
     echo "      - kaspa"
     echo "      - komodo"
     echo "      - meowcoin"
     echo "      - monero"
     echo "      - neoxa"
+    echo "      - radiant"
+    echo "      - raptoreum"
     echo "      - ravencoin"
+    echo "      - zcash"
+    echo
+    echo "    * installed fullnodes"
+
+    ( find $NODES_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null || echo "no fullnode installed" ) | xargs -I '{}' basename {} | sed 's/^/      - /g' | sort
     echo
 
     exit
