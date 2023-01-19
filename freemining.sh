@@ -28,6 +28,68 @@ COLOR_GREEN="\e[32m"
 COLOR_YELLOW="\e[33m"
 
 
+
+CONFIG_FILE=$(realpath ./freemining.json)
+POOL_APP_DIR=$(dirname $CONFIG_FILE)
+
+if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
+    echo "Missing freemining.json configuration file"
+    exit 1
+fi
+
+frmConfDir=$(eval echo `jq -r ".frmConfDir" ${CONFIG_FILE} 2>/dev/null`)
+frmLogDir=$(eval echo `jq -r ".frmLogDir" ${CONFIG_FILE} 2>/dev/null`)
+frmPidDir=$(eval echo `jq -r ".frmPidDir" ${CONFIG_FILE} 2>/dev/null`)
+frmDataDir=$(eval echo `jq -r ".frmDataDir" ${CONFIG_FILE} 2>/dev/null`)
+
+
+
+if [ "$frmConfDir" = "" ]; then
+    #echo "Missing frmConfDir parameter. Set it in rig_manager.json"
+    #exit 1
+
+    if isRoot; then
+        frmConfDir="/etc/freemining"
+    else
+        frmConfDir="~/.freemining/conf"
+    fi
+fi
+
+if [ "$frmLogDir" = "" ]; then
+    #echo "Missing frmLogDir parameter. Set it in rig_manager.json"
+    #exit 1
+
+    if isRoot; then
+        frmLogDir="/var/log/freemining"
+    else
+        frmLogDir="~/.freemining/log"
+    fi
+fi
+
+if [ "$frmPidDir" = "" ]; then
+    #echo "Missing frmPidDir parameter. Set it in rig_manager.json"
+    #exit 1
+
+    if isRoot; then
+        frmPidDir="/var/run/freemining"
+    else
+        frmPidDir="~/.freemining/run"
+    fi
+fi
+
+if [ "$frmDataDir" = "" ]; then
+    #echo "Missing frmDataDir parameter. Set it in rig_manager.json"
+    #exit 1
+
+    if isRoot; then
+        frmDataDir="/opt/freemining"
+    else
+        frmDataDir="~/local/share/freemining"
+    fi
+fi
+
+
+
 ##### FUNCTIONS #####
 
 function getCmdPath {

@@ -44,8 +44,8 @@ echo "worker.uptime: ${UPTIME}"
 DATE=$(date "+%F %T")
 echo "worker.date: ${DATE}"
 
-LOAD_AVG=$(echo $SUMMARY_JSON |jq ".resources.load_average[0]")
-echo "worker.loadAvg: ${LOAD_AVG}"
+#LOAD_AVG=$(echo $SUMMARY_JSON |jq ".resources.load_average[0]")
+#echo "worker.loadAvg: ${LOAD_AVG}"
 
 MEM_FREE=$(echo $SUMMARY_JSON |jq ".resources.memory.free")
 MEM_FREE_MB=$(echo "$MEM_FREE / 1024 / 1024" |bc)
@@ -57,7 +57,7 @@ MEM_TOTAL_MB=$(echo "$MEM_TOTAL / 1024 / 1024" |bc)
 
 MEM_USED_MB=$(echo "$MEM_TOTAL_MB - $MEM_FREE_MB" |bc)
 #echo "worker.usedMemory: ${MEM_USED_MB}"
-echo "worker.memory: ${MEM_USED_MB}/${MEM_TOTAL_MB} MB"
+#echo "worker.memory: ${MEM_USED_MB}/${MEM_TOTAL_MB} MB"
 
 LOADAVG=$(echo $SUMMARY_JSON |jq ".hashrate.total[0]")
 echo "worker.hashRate: ${LOADAVG}"

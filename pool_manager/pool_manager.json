@@ -1,17 +1,18 @@
 {
     "poolName": "FreeMining pool",
 
-    "userConfDir": "~/.freemining",
-    "logsDir": "~/.freemining/logs",
-    "pidsDir": "~/.freemining/run",
-    "nodesDir": "~/local/opt/freemining/fullnodes",
-    "poolsEngineDir": "~/local/opt/freemining/pools_engine",
-    "poolsUiDir": "~/local/opt/freemining/pools_ui",
+    "poolConfDir": "${frmConfDir}/pool",
+    "poolLogDir": "${frmLogDir}/pool",
+	"poolPidDir": "${frmPidDir}/pool",
+	"poolDataDir": "${frmDataDir}/pool",
+    "fullnodesDir": "${poolDataDir}/fullnodes",
+    "poolsEngineDir": "${poolDataDir}/engines",
+    "poolsWebsitesDir": "${poolDataDir}/websites",
 
 	"poolServer": {
 		"host": "0.0.0.0",
 		"port": 4100,
-		"root": "~/local/opt/freemining/pools_ui/miningcoreWebUI",
+		"root": "${poolDataDir}/websites/miningcoreWebUI",
 		"apiUrl": "http://localhost:4000/api/"
 	},
 

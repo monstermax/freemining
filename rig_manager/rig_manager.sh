@@ -22,79 +22,54 @@ fi
 
 FRM_MODULE="rig"
 
-DAEMON_LOG_DIR=~/.freemining/log/${FRM_MODULE}
-DAEMON_PID_DIR=~/.freemining/run/${FRM_MODULE}
+RIG_CONFIG_FILE=$(realpath ./rig_manager.json)
+RIG_APP_DIR=$(dirname $RIG_CONFIG_FILE)
 
-
-CONFIG_FILE=$(realpath ./rig_manager.json)
-RIG_APP_DIR=$(dirname $CONFIG_FILE)
-
-if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
+if [ "$RIG_CONFIG_FILE" = "" -o ! -f "$RIG_CONFIG_FILE" ]; then
     echo "Missing rig_manager.json configuration file"
     exit 1
 fi
 
 
-USER_CONF_DIR=$(eval echo `jq -r ".userConfDir" ${CONFIG_FILE} 2>/dev/null`)
+rigConfDir=$(eval echo `jq -r ".rigConfDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
-LOGS_DIR=$(eval echo `jq -r ".logsDir" ${CONFIG_FILE} 2>/dev/null`)
+rigLogDir=$(eval echo `jq -r ".rigLogDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
-PIDS_DIR=$(eval echo `jq -r ".pidsDir" ${CONFIG_FILE} 2>/dev/null`)
+rigPidDir=$(eval echo `jq -r ".rigPidDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
-MINERS_DIR=$(eval echo `jq -r ".minersDir" ${CONFIG_FILE} 2>/dev/null`)
+rigDataDir=$(eval echo `jq -r ".rigDataDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
-CONFIGURED_MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${CONFIG_FILE} 2>/dev/null`)
-
-INSTALLED_MINERS=$(find $MINERS_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
+minersDir=$(eval echo `jq -r ".minersDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
 
 
-if [ "$USER_CONF_DIR" = "" ]; then
-    #echo "Missing userConfDir parameter. Set it in rig_manager.json"
-    #exit 1
+if [ "$rigConfDir" = "" ]; then
+    rigConfDir=${frmConfDir}/${FRM_MODULE}
+fi
 
-    if isRoot; then
-        USER_CONF_DIR="/etc/freemining"
-    else
-        USER_CONF_DIR="~/.freemining"
-    fi
+if [ "$rigLogDir" = "" ]; then
+    rigLogDir=${frmLogDir}/${FRM_MODULE}
+fi
+
+if [ "$rigPidDir" = "" ]; then
+    rigPidDir=${frmPidDir}/${FRM_MODULE}
+fi
+
+if [ "$rigDataDir" = "" ]; then
+    rigDataDir=${frmDataDir}/${FRM_MODULE}
+fi
+
+if [ "$minersDir" = "" ]; then
+    minersDir=${rigDataDir}/miners
 fi
 
 
-if [ "$LOGS_DIR" = "" ]; then
-    #echo "Missing logsDir parameter. Set it in rig_manager.json"
-    #exit 1
 
-    if isRoot; then
-        LOGS_DIR="/var/log/freemining"
-    else
-        LOGS_DIR="${USER_CONF_DIR}/logs"
-    fi
-fi
+CONFIGURED_MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
+INSTALLED_MINERS=$(find $minersDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
 
-if [ "$PIDS_DIR" = "" ]; then
-    #echo "Missing pidsDir parameter. Set it in rig_manager.json"
-    #exit 1
-
-    if isRoot; then
-        PIDS_DIR="/var/run/freemining"
-    else
-        PIDS_DIR="${USER_CONF_DIR}/pids"
-    fi
-fi
-
-if [ "$MINERS_DIR" = "" ]; then
-    #echo "Missing minersDir parameter. Set it in rig_manager.json"
-    #exit 1
-
-    if isRoot; then
-        POOLS_UI_DIR="/opt/freemining/miners"
-    else
-        POOLS_UI_DIR="~/local/opt/freemining/miners"
-    fi
-fi
-
-
+DAEMON_LOG_DIR=$rigLogDir
+DAEMON_PID_DIR=$rigPidDir
 
 ##### FUNCTIONS #####
 
@@ -102,7 +77,7 @@ fi
 function getMinerApiPort {
     miner=$1
 
-    API_PORT=$(eval echo `jq -r ".miners.${miner}.api.port" ${CONFIG_FILE} 2>/dev/null`)
+    API_PORT=$(eval echo `jq -r ".miners.${miner}.api.port" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
     if [ "$API_PORT" = "null" ]; then
         API_PORT=""
@@ -114,13 +89,13 @@ function getMinerApiPort {
 
 
 function getInstalledMiners {
-    MINERS=$(echo $(ls $MINERS_DIR))
+    MINERS=$(echo $(ls $minersDir))
     echo $MINERS
 }
 
 
 function getAvailableMiners {
-    MINERS=$(jq -r ".miners | keys | join(\" \")" $CONFIG_FILE)
+    MINERS=$(jq -r ".miners | keys | join(\" \")" $RIG_CONFIG_FILE)
     echo $MINERS
     # TODO: filtrer/conserver uniquement les miners installés (si inclus dans getInstalledMiners)
 }
@@ -183,15 +158,15 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "Uninstalling miner ${MINER}..."
         echo
 
-        echo "Deleting binaries: ${MINERS_DIR}/${MINER}"
+        echo "Deleting binaries: ${minersDir}/${MINER}"
         echo "[Press Enter to continue]"
         read
-        rm -rf ${MINERS_DIR}/${MINER}/
+        rm -rf ${minersDir}/${MINER}/
 
-        echo "Deleting data & configuration: ${USER_CONF_DIR}/rig/miner/${MINER}"
+        echo "Deleting data & configuration: ${rigConfDir}/rig/miner/${MINER}"
         echo "[Press Enter to continue]"
         read
-        rm -rf ${USER_CONF_DIR}/rig/miner/${MINER}/
+        rm -rf ${rigConfDir}/rig/miner/${MINER}/
 
     elif [ "$1" = "json" ]; then
         shift

@@ -1,9 +1,10 @@
 {
     "farmName": "FreeMining farm",
 
-    "userConfDir": "~/.freemining",
-    "logsDir": "~/.freemining/logs",
-    "pidsDir": "~/.freemining/run",
+    "farmConfDir": "${frmConfDir}/farm",
+    "farmLogDir": "${frmLogDir}/farm",
+    "farmPidDir": "${frmPidDir}/farm",
+    "farmDataDir": "${frmDataDir}/farm",
 
     "farmServer": {
         "host": "0.0.0.0",

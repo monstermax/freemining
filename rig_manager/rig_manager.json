@@ -1,10 +1,11 @@
 {
     "rigName": "",
 
-    "userConfDir": "~/.freemining",
-    "logsDir": "~/.freemining/logs",
-    "pidsDir": "~/.freemining/run",
-    "minersDir": "~/local/opt/freemining/miners",
+    "rigConfDir": "${frmConfDir}/rig",
+    "rigLogDir": "${frmLogDir}/rig",
+    "rigPidDir": "${frmPidDir}/rig",
+    "rigDataDir": "${frmDataDir}/rig",
+    "minersDir": "${rigDataDir}/miners",
 
     "farmServer": {
         "host": "82.64.213.186",

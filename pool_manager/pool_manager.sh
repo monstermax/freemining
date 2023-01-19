@@ -22,105 +22,68 @@ fi
 
 FRM_MODULE="pool"
 
-DAEMON_LOG_DIR=~/.freemining/log/${FRM_MODULE}
-DAEMON_PID_DIR=~/.freemining/run/${FRM_MODULE}
+POOL_CONFIG_FILE=$(realpath ./pool_manager.json)
+POOL_APP_DIR=$(dirname $POOL_CONFIG_FILE)
 
-CONFIG_FILE=$(realpath ./pool_manager.json)
-POOL_APP_DIR=$(dirname $CONFIG_FILE)
-
-if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
+if [ "$POOL_CONFIG_FILE" = "" -o ! -f "$POOL_CONFIG_FILE" ]; then
     echo "Missing pool_manager.json configuration file"
     exit 1
 fi
 
 
-USER_CONF_DIR=$(eval echo `jq -r ".userConfDir" ${CONFIG_FILE} 2>/dev/null`)
+poolConfDir=$(eval echo `jq -r ".poolConfDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-LOGS_DIR=$(eval echo `jq -r ".logsDir" ${CONFIG_FILE} 2>/dev/null`)
+poolLogDir=$(eval echo `jq -r ".poolLogDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-PIDS_DIR=$(eval echo `jq -r ".pidsDir" ${CONFIG_FILE} 2>/dev/null`)
+poolPidDir=$(eval echo `jq -r ".poolPidDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-NODES_DIR=$(eval echo `jq -r ".nodesDir" ${CONFIG_FILE} 2>/dev/null`)
+fullnodesDir=$(eval echo `jq -r ".fullnodesDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-POOLS_ENGINE_DIR=$(eval echo `jq -r ".poolsEngineDir" ${CONFIG_FILE} 2>/dev/null`)
+poolsEngineDir=$(eval echo `jq -r ".poolsEngineDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-POOLS_UI_DIR=$(eval echo `jq -r ".poolsUiDir" ${CONFIG_FILE} 2>/dev/null`)
+poolsWebsitesDir=$(eval echo `jq -r ".poolsWebsitesDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${CONFIG_FILE} 2>/dev/null`)
-
-INSTALLED_FULLNODES=$(find $NODES_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
+poolDataDir=$(eval echo `jq -r ".poolDataDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 
-if [ "$USER_CONF_DIR" = "" ]; then
-    #echo "Missing userConfDir parameter. Set it in pool_manager.json"
-    #exit 1
 
-    if isRoot; then
-        USER_CONF_DIR="/etc/freemining"
-    else
-        USER_CONF_DIR="~/.freemining"
-    fi
+if [ "$poolConfDir" = "" ]; then
+    poolConfDir=${frmConfDir}/${FRM_MODULE}
+fi
+
+if [ "$poolLogDir" = "" ]; then
+    poolLogDir=${frmLogDir}/${FRM_MODULE}
+fi
+
+if [ "$poolPidDir" = "" ]; then
+    poolPidDir=${frmPidDir}/${FRM_MODULE}
+fi
+
+if [ "$poolDataDir" = "" ]; then
+    poolDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
 
-if [ "$LOGS_DIR" = "" ]; then
-    #echo "Missing logsDir parameter. Set it in pool_manager.json"
-    #exit 1
-
-    if isRoot; then
-        LOGS_DIR="/var/log/freemining"
-    else
-        LOGS_DIR="${USER_CONF_DIR}/logs"
-    fi
-fi
-
-if [ "$PIDS_DIR" = "" ]; then
-    #echo "Missing pidsDir parameter. Set it in pool_manager.json"
-    #exit 1
-
-    if isRoot; then
-        PIDS_DIR="/var/run/freemining"
-    else
-        PIDS_DIR="${USER_CONF_DIR}/pids"
-    fi
+if [ "$fullnodesDir" = "" ]; then
+    fullnodesDir="${poolDataDir}/fullnodes"
 fi
 
 
-if [ "$NODES_DIR" = "" ]; then
-    #echo "Missing nodesDir parameter. Set it in pool_manager.json"
-    #exit 1
+if [ "$poolsEngineDir" = "" ]; then
+    poolsEngineDir="${poolDataDir}/engines"
+fi
 
-    if isRoot; then
-        NODES_DIR="/opt/freemining/fullnodes"
-    else
-        NODES_DIR="~/local/opt/freemining/fullnodes"
-    fi
+if [ "$poolsWebsitesDir" = "" ]; then
+    poolsWebsitesDir="${poolDataDir}/websites"
 fi
 
 
-if [ "$POOLS_ENGINE_DIR" = "" ]; then
-    #echo "Missing poolsEngineDir parameter. Set it in pool_manager.json"
-    #exit 1
 
-    if isRoot; then
-        POOLS_ENGINE_DIR="/opt/freemining/pools_engine"
-    else
-        POOLS_ENGINE_DIR="~/local/opt/freemining/pools_engine"
-    fi
-fi
+CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${POOL_CONFIG_FILE} 2>/dev/null`)
+INSTALLED_FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
 
-if [ "$POOLS_UI_DIR" = "" ]; then
-    #echo "Missing poolsUiDir parameter. Set it in pool_manager.json"
-    #exit 1
-
-    if isRoot; then
-        POOLS_UI_DIR="/opt/freemining/pools_ui"
-    else
-        POOLS_UI_DIR="~/local/opt/freemining/pools_ui"
-    fi
-fi
-
-
+DAEMON_LOG_DIR=$poolLogDir
+DAEMON_PID_DIR=$poolPidDir
 
 ##### FUNCTIONS #####
 
@@ -180,15 +143,15 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "Uninstalling fullnode ${FULLNODE}..."
         echo
 
-        echo "Deleting binaries: ${NODES_DIR}/${FULLNODE}"
+        echo "Deleting binaries: ${fullnodesDir}/${FULLNODE}"
         echo "[Press Enter to continue]"
         read
-        rm -rf ${NODES_DIR}/${FULLNODE}/
+        rm -rf ${fullnodesDir}/${FULLNODE}/
 
-        echo "Deleting data & configuration: ${USER_CONF_DIR}/pool/fullnode/${FULLNODE}"
+        echo "Deleting data & configuration: ${poolConfDir}/pool/fullnode/${FULLNODE}"
         echo "[Press Enter to continue]"
         read
-        rm -rf ${USER_CONF_DIR}/pool/fullnode/${FULLNODE}/
+        rm -rf ${poolConfDir}/pool/fullnode/${FULLNODE}/
 
     elif [ "$1" = "fullnode" ]; then
         shift

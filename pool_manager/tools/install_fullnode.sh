@@ -83,8 +83,8 @@ function install_ergo {
     CONF_DIR=${USER_CONF_DIR}/fullnodes/${coin}
     mkdir -p $CONF_DIR
 
-    poolName=$(jq '.poolName' $CONFIG_FILE)
-    apiKeyHash=$(jq '.fullnodes.ergo.apiKeyHash' $CONFIG_FILE)
+    poolName=$(jq '.poolName' $POOL_CONFIG_FILE)
+    apiKeyHash=$(jq '.fullnodes.ergo.apiKeyHash' $POOL_CONFIG_FILE)
 
     CONF_DIR_REAL=$(realpath $CONF_DIR)
 

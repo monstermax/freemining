@@ -22,61 +22,43 @@ fi
 
 FRM_MODULE="farm"
 
-DAEMON_LOG_DIR=~/.freemining/log/${FRM_MODULE}
-DAEMON_PID_DIR=~/.freemining/run/${FRM_MODULE}
+FARM_CONFIG_FILE=$(realpath ./farm_manager.json)
+FARM_APP_DIR=$(dirname $FARM_CONFIG_FILE)
 
-CONFIG_FILE=$(realpath ./farm_manager.json)
-FARM_APP_DIR=$(dirname $CONFIG_FILE)
-
-if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
+if [ "$FARM_CONFIG_FILE" = "" -o ! -f "$FARM_CONFIG_FILE" ]; then
     echo "Missing farm_manager.json configuration file"
     exit 1
 fi
 
 
-USER_CONF_DIR=$(eval echo `jq -r ".userConfDir" ${CONFIG_FILE} 2>/dev/null`)
+farmConfDir=$(eval echo `jq -r ".farmConfDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
-LOGS_DIR=$(eval echo `jq -r ".logsDir" ${CONFIG_FILE} 2>/dev/null`)
+farmLogDir=$(eval echo `jq -r ".farmLogDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
-PIDS_DIR=$(eval echo `jq -r ".pidsDir" ${CONFIG_FILE} 2>/dev/null`)
+farmPidDir=$(eval echo `jq -r ".pidDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
+
+farmDataDir=$(eval echo `jq -r ".farmDataDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
 
+if [ "$farmConfDir" = "" ]; then
+    farmConfDir=${frmConfDir}/${FRM_MODULE}
+fi
 
-if [ "$USER_CONF_DIR" = "" ]; then
-    #echo "Missing userConfDir parameter. Set it in farm_manager.json"
-    #exit 1
+if [ "$farmLogDir" = "" ]; then
+    farmLogDir=${frmLogDir}/${FRM_MODULE}
+fi
 
-    if isRoot; then
-        USER_CONF_DIR="/etc/freemining"
-    else
-        USER_CONF_DIR="~/.freemining"
-    fi
+if [ "$farmPidDir" = "" ]; then
+    farmPidDir=${frmPidDir}/${FRM_MODULE}
+fi
+
+if [ "$farmDataDir" = "" ]; then
+    farmDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
 
-if [ "$LOGS_DIR" = "" ]; then
-    #echo "Missing logsDir parameter. Set it in farm_manager.json"
-    #exit 1
-
-    if isRoot; then
-        LOGS_DIR="/var/log/freemining"
-    else
-        LOGS_DIR="${USER_CONF_DIR}/logs"
-    fi
-fi
-
-
-if [ "$PIDS_DIR" = "" ]; then
-    #echo "Missing pidsDir parameter. Set it in farm_manager.json"
-    #exit 1
-
-    if isRoot; then
-        PIDS_DIR="/var/run/freemining"
-    else
-        PIDS_DIR="${USER_CONF_DIR}/pids"
-    fi
-fi
-
+DAEMON_LOG_DIR=$farmLogDir
+DAEMON_PID_DIR=$farmPidDir
 
 
 ##### FUNCTIONS #####
