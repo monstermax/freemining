@@ -78,7 +78,8 @@ if hasOpt start || hasOpt run || hasOpt debug; then
         DAEMON_OPTS="background"
     fi
 
-    DAEMON_CHDIR=$PWD
+    #DAEMON_CHDIR=$PWD
+    DAEMON_CHDIR=${NODES_DIR}/${FULLNODE}
     DAEMON_DRY=0
 
     if hasOpt debug; then

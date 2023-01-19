@@ -462,8 +462,24 @@ $0 \$@
 
     elif [ "$1" = "ps" ]; then
         shift
-        #pgrep -fa "\[freemining\." |grep -e '\[free[m]ining.*\]' --color
-        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        #ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.") |grep -e '\[free[m]ining.*\]' --color -B1
+
+        echo "=============="
+        echo "| FreeMining | ==> all processes"
+        echo "=============="
+
+        echo
+        echo "==== RIG ===="
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1
+
+        echo
+        echo "==== FARM ===="
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.farm\.") |grep -e '\[free[m]ining.*\]' --color -B1
+
+        echo
+        echo "==== POOL ===="
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.pool\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        echo
 
     else
         usage
