@@ -43,26 +43,24 @@ function usage {
     echo
 
     showFullnodesList
-    echo
 
-    echo "    * installed fullnodes"
-
-    ( find $NODES_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null || echo "no fullnode installed" ) | xargs -I '{}' basename {} | sed 's/^/      - /g' | sort
     echo
 }
 
 function showFullnodesList {
-    echo "   * configured fullnodes"
-
-    if [ "$CONFIGURED_FULLNODES" = "" ]; then
-        echo "No fullnode configured"
-
-    else
-        for fullnode in $CONFIGURED_FULLNODES; do
-            echo "     - $fullnode"
-        done
+    _CONFIGURED_FULLNODES=$CONFIGURED_FULLNODES
+    if [ "$_CONFIGURED_FULLNODES" = "" ]; then
+        _CONFIGURED_FULLNODES="no fullnode configured"
     fi
+    echo "    * configured fullnodes: $_CONFIGURED_FULLNODES"
 
+    echo
+
+    _INSTALLED_FULLNODES=$INSTALLED_FULLNODES
+    if [ "$_INSTALLED_FULLNODES" = "" ]; then
+        _INSTALLED_FULLNODES="no fullnode installed"
+    fi
+    echo "    * installed  fullnodes: $_INSTALLED_FULLNODES"
 }
 
 

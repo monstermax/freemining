@@ -45,7 +45,7 @@ MINERS_DIR=$(eval echo `jq -r ".minersDir" ${CONFIG_FILE} 2>/dev/null`)
 
 CONFIGURED_MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${CONFIG_FILE} 2>/dev/null`)
 
-#INSTALLED_MINERS="" # TODO
+INSTALLED_MINERS=$(find $MINERS_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
 
 
 
@@ -145,6 +145,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD miner-install [miner]       # install a miner"
+        echo "  $CMD miner-uninstall [miner]     # uninstall a miner"
         echo
         echo "  $CMD miner <params>              # manage ${FRM_MODULE} miners processes"
         echo
@@ -171,6 +172,26 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "miner-install" ]; then
         shift
         exec ./tools/install_miner.sh $@
+
+    elif [ "$1" = "miner-uninstall" ]; then
+        MINER=$2
+        if [ "$MINER" = "" ]; then
+            usage
+            exit 1
+        fi
+
+        echo "Uninstalling miner ${MINER}..."
+        echo
+
+        echo "Deleting binaries: ${MINERS_DIR}/${MINER}"
+        echo "[Press Enter to continue]"
+        read
+        rm -rf ${MINERS_DIR}/${MINER}/
+
+        echo "Deleting data & configuration: ${USER_CONF_DIR}/rig/miner/${MINER}"
+        echo "[Press Enter to continue]"
+        read
+        rm -rf ${USER_CONF_DIR}/rig/miner/${MINER}/
 
     elif [ "$1" = "json" ]; then
         shift

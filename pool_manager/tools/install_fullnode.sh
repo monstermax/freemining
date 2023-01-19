@@ -886,6 +886,24 @@ function clean_tmp_dir {
 
 
 
+function showFullnodesList {
+    _INSTALLABLE_FULLNODES=$INSTALLABLE_FULLNODES
+    if [ "$_INSTALLABLE_FULLNODES" = "" ]; then
+        _INSTALLABLE_FULLNODES="no fullnode installed"
+    fi
+    echo "    * installable fullnodes: $_INSTALLABLE_FULLNODES"
+
+    echo
+
+    _INSTALLED_FULLNODES=$INSTALLED_FULLNODES
+    if [ "$_INSTALLED_FULLNODES" = "" ]; then
+        _INSTALLED_FULLNODES="no fullnode installed"
+    fi
+    echo "    * installed   fullnodes: $_INSTALLED_FULLNODES"
+
+}
+
+INSTALLABLE_FULLNODES="callisto ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin zcash"
 
 
 fullnode=$1
@@ -903,30 +921,15 @@ if [ "$fullnode" = "" ]; then
     echo
     echo "  $CMD <fullnode>"
     echo
-    echo "    * installable fullnodes"
-    echo "      - callisto"
-    echo "      - ergo"
-    echo "      - ethereum"
-    echo "      - ethereum_classic"
-    echo "      - firo"
-    echo "      - flux"
-    echo "      - kaspa"
-    echo "      - komodo"
-    echo "      - meowcoin"
-    echo "      - monero"
-    echo "      - neoxa"
-    echo "      - radiant"
-    echo "      - raptoreum"
-    echo "      - ravencoin"
-    echo "      - zcash"
     echo
-    echo "    * installed fullnodes"
 
-    ( find $NODES_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null || echo "no fullnode installed" ) | xargs -I '{}' basename {} | sed 's/^/      - /g' | sort
+    showFullnodesList
+
     echo
 
     exit
 fi
+
 
 
 

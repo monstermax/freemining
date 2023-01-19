@@ -297,6 +297,24 @@ function clean_tmp_dir {
 ##################################################################
 
 
+function showMinersList {
+    _INSTALLABLE_MINERS=$INSTALLABLE_MINERS
+    if [ "$_INSTALLABLE_MINERS" = "" ]; then
+        _INSTALLABLE_MINERS="no miner installed"
+    fi
+    echo "    * installable miners: $_INSTALLABLE_MINERS"
+
+    echo
+
+    _INSTALLED_MINERS=$INSTALLED_MINERS
+    if [ "$_INSTALLED_MINERS" = "" ]; then
+        _INSTALLED_MINERS="no miner installed"
+    fi
+    echo "    * installed   miners: $_INSTALLED_MINERS"
+}
+
+INSTALLABLE_MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
+
 
 miner=$1
 
@@ -313,34 +331,10 @@ if [ "$miner" = "" ]; then
     echo
     echo "  $CMD <miner>"
     echo
-    echo "    * installable miners"
-    echo "      - autolykosv2_amd"
-    echo "      - autolykosv2_nvidia"
-    echo "      - bminer"
-    echo "      - bzminer"
-    #echo "      - ccminer"
-    echo "      - claymore"
-    echo "      - ethminer"
-    echo "      - firominer"
-    echo "      - firominer_sources_amd"
-    echo "      - gminer"
-    echo "      - kawpowminer_amd"
-    echo "      - kawpowminer_nvidia"
-    echo "      - lolminer"
-    echo "      - miniz"
-    echo "      - nanominer"
-    echo "      - nbminer"
-    echo "      - srbminer"
-    echo "      - teamredminer"
-    echo "      - trex"
-    echo "      - wildrig"
-    echo "      - xmrig"
-    echo "      - xmrig_sources_free"
-    echo "      - xmrig_nvidia_cuda_support"
     echo
-    echo "    * installed miners"
 
-    ( find $MINERS_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null || echo "no miner installed" ) | xargs -I '{}' basename {} | sed 's/^/      - /g' | sort
+    showMinersList
+
     echo
 
     exit

@@ -48,6 +48,7 @@ POOLS_UI_DIR=$(eval echo `jq -r ".poolsUiDir" ${CONFIG_FILE} 2>/dev/null`)
 
 CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${CONFIG_FILE} 2>/dev/null`)
 
+INSTALLED_FULLNODES=$(find $NODES_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
 
 
 if [ "$USER_CONF_DIR" = "" ]; then
@@ -144,7 +145,8 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
-        echo "  $CMD fullnode-install [coin]     # install a fullnode"
+        echo "  $CMD fullnode-install [chain]    # install a fullnode"
+        echo "  $CMD fullnode-uninstall [chain]  # install a fullnode"
         echo
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo
@@ -167,6 +169,26 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "fullnode-install" ]; then
         shift
         exec ./tools/install_fullnode.sh $@
+
+    elif [ "$1" = "fullnode-uninstall" ]; then
+        FULLNODE=$2
+        if [ "$FULLNODE" = "" ]; then
+            usage
+            exit 1
+        fi
+
+        echo "Uninstalling fullnode ${FULLNODE}..."
+        echo
+
+        echo "Deleting binaries: ${NODES_DIR}/${FULLNODE}"
+        echo "[Press Enter to continue]"
+        read
+        rm -rf ${NODES_DIR}/${FULLNODE}/
+
+        echo "Deleting data & configuration: ${USER_CONF_DIR}/pool/fullnode/${FULLNODE}"
+        echo "[Press Enter to continue]"
+        read
+        rm -rf ${USER_CONF_DIR}/pool/fullnode/${FULLNODE}/
 
     elif [ "$1" = "fullnode" ]; then
         shift

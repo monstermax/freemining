@@ -40,39 +40,42 @@ function usage {
     echo "  $CMD [action] <params>"
     echo
     echo "  $CMD run|start [miner] -algo [algo] -url [pool_url] -user [pool_account] <optional args>"
+    echo "    - $CMD run   ...                          # run ${FRM_PACKAGE}"
+    echo "    - $CMD start ...                          # start ${FRM_PACKAGE} in background"
     echo
-    echo "  $CMD run   <params>                         # run ${FRM_PACKAGE}"
-    echo "  $CMD start <params>                         # start ${FRM_PACKAGE} in background"
+    echo "  $CMD stop [miner]                           # stop background ${FRM_PACKAGE}"
     echo
-    echo "  $CMD stop                                   # stop background ${FRM_PACKAGE}"
+    echo "  $CMD status [miner]                         # show ${FRM_PACKAGE} status"
     echo
-    echo "  $CMD status                                 # show ${FRM_PACKAGE} status"
-    echo "  $CMD log                                    # tail ${FRM_PACKAGE} stdout"
-    echo "  $CMD log-pid                                # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD log [miner]                            # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD log-pid [miner]                        # tail ${FRM_PACKAGE} stdout"
+    echo
+    echo "  $CMD ps                                     # show all ${FRM_PACKAGE} running processes"
+    echo
     echo
 
     showMinersList
-    echo
 
-    echo "    * installed miners"
-
-    ( find $MINERS_DIR -mindepth 1 -maxdepth 1 -type d 2>/dev/null || echo "no miner installed" ) | xargs -I '{}' basename {} | sed 's/^/      - /g' | sort
     echo
 
 }
 
 function showMinersList {
-    echo "   * configured miners"
-
-    if [ "$CONFIGURED_MINERS" = "" ]; then
-        echo "No miner configured"
-
-    else
-        for miner in $CONFIGURED_MINERS; do
-            echo "     - $miner"
-        done
+    _CONFIGURED_MINERS=$CONFIGURED_MINERS
+    if [ "$_CONFIGURED_MINERS" = "" ]; then
+        _CONFIGURED_MINERS="no miner configured"
     fi
 
+    echo "    * configured miners: $_CONFIGURED_MINERS"
+
+    echo
+
+    _INSTALLED_MINERS=$INSTALLED_MINERS
+    if [ "$_INSTALLED_MINERS" = "" ]; then
+        _INSTALLED_MINERS="no miner installed"
+    fi
+
+    echo "    * installed  miners: $_INSTALLED_MINERS"
 }
 
 
@@ -303,8 +306,9 @@ if hasOpt ps; then
     x=$@ ; set -- $(removeOpt "$x" "ps")
 
     if [ "$MINER" = "" ]; then
-        usage
-        exit 1
+        #usage
+        #exit 1
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.${FRM_PACKAGE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
     fi
 
     daemonPidPs $DAEMON_NAME $DAEMON_OPTS
