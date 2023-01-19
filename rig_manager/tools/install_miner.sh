@@ -3,14 +3,17 @@
 cd `dirname $0`
 
 source ../rig_manager.sh
-#set -e
+set -e
 
 
 FRM_PACKAGE="miner_install"
 
 TMP_DIR=$(mktemp -d)
-
 mkdir -p ${TMP_DIR}
+
+mkdir -p ${rigLogDir}/fullnodes
+mkdir -p ${rigPidDir}/fullnodes
+mkdir -p ${rigDataDir}/fullnodes
 mkdir -p ${minersDir}
 
 
@@ -36,12 +39,10 @@ function install_lolminer {
     tar zxf lolMiner_v1.65_Lin64.tar.gz -C lolminer
 
     echo " - installing..."
-    rm -rf ${minersDir}/lolminer
-    mkdir -p ${minersDir}/lolminer
-    rm -rf ${minersDir}/lolminer
-    cp -a lolminer/1.65 ${minersDir}/lolminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a lolminer/1.65 ${minersDir}/${MINER}
 
-    ${minersDir}/lolminer/lolMiner --list-device
+    ${minersDir}/${MINER}/lolMiner --list-device
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -60,10 +61,10 @@ function install_gminer {
     tar -Jxf gminer_3_24_linux64.tar.xz -C gminer
 
     echo " - installing..."
-    rm -rf ${minersDir}/gminer
+    rm -rf ${minersDir}/${MINER}
     cp -a gminer ${minersDir}
 
-    ${minersDir}/gminer/miner --list_devices
+    ${minersDir}/${MINER}/miner --list_devices
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -83,10 +84,10 @@ function install_trex {
     tar zxf t-rex-0.26.8-linux.tar.gz -C t-rex
 
     echo " - installing..."
-    rm -rf ${minersDir}/trex
-    cp -a t-rex ${minersDir}/trex
+    rm -rf ${minersDir}/${MINER}
+    cp -a t-rex ${minersDir}/${MINER}
 
-    ${minersDir}/t-rex/t-rex --devices-info
+    ${minersDir}/${MINER}/t-rex --devices-info
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -105,10 +106,10 @@ function install_nbminer {
     tar zxf NBMiner_42.3_Linux.tgz
 
     echo " - installing..."
-    rm -rf ${minersDir}/nbminer
-    cp -a NBMiner_Linux ${minersDir}/nbminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a NBMiner_Linux ${minersDir}/${MINER}
 
-    ${minersDir}/nbminer/nbminer --device-info
+    ${minersDir}/${MINER}/nbminer --device-info
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -127,10 +128,10 @@ function install_teamredminer {
     tar zxf teamredminer-v0.10.7-linux.tgz
 
     echo " - installing..."
-    rm -rf ${minersDir}/teamredminer
-    cp -a teamredminer-v0.10.7-linux ${minersDir}/teamredminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a teamredminer-v0.10.7-linux ${minersDir}/${MINER}
 
-    ${minersDir}/teamredminer/teamredminer --list_devices
+    ${minersDir}/${MINER}/teamredminer --list_devices
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -149,8 +150,8 @@ function install_bzminer {
     tar zxf bzminer_v12.2.0_linux.tar.gz
 
     echo " - installing..."
-    rm -rf ${minersDir}/bzminer
-    cp -a bzminer_v12.2.0_linux ${minersDir}/bzminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a bzminer_v12.2.0_linux ${minersDir}/${MINER}
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -169,11 +170,11 @@ function install_claymore {
     unzip Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v15.0.-.LINUX.zip
 
     echo " - installing..."
-    rm -rf ${minersDir}/claymore
-    cp -a Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v15.0.-.LINUX ${minersDir}/claymore
-    chmod +x ${minersDir}/claymore/ethdcrminer64
+    rm -rf ${minersDir}/${MINER}
+    cp -a Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v15.0.-.LINUX ${minersDir}/${MINER}
+    chmod +x ${minersDir}/${MINER}/ethdcrminer64
 
-    ${minersDir}/claymore/ethdcrminer64 -list
+    ${minersDir}/${MINER}/ethdcrminer64 -list
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -193,10 +194,10 @@ function install_nanominer {
     tar zxf nanominer-linux-3.7.6.tar.gz -C nanominer
 
     echo " - installing..."
-    rm -rf ${minersDir}/nanominer
-    cp -a nanominer ${minersDir}
+    rm -rf ${minersDir}/${MINER}
+    cp -a nanominer ${minersDir}/${MINER}
 
-    ${minersDir}/nanominer/nanominer -d
+    ${minersDir}/${MINER}/nanominer -d
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -216,10 +217,10 @@ function install_miniz {
     tar zxf miniZ_v2.0b_linux-x64.tar.gz -C miniz
 
     echo " - installing..."
-    rm -rf ${minersDir}/miniz
-    cp -a miniz ${minersDir}/
+    rm -rf ${minersDir}/${MINER}
+    cp -a miniz ${minersDir}/${MINER}
 
-    ${minersDir}/miniz/miniZ --cuda-info
+    ${minersDir}/${MINER}/miniZ --cuda-info
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -240,10 +241,10 @@ function install_firominer {
     chmod +x firominer/firominer
 
     echo " - installing..."
-    rm -rf ${minersDir}/firominer
-    cp -a firominer ${minersDir}/
+    rm -rf ${minersDir}/${MINER}
+    cp -a firominer ${minersDir}/${MINER}
 
-    ${minersDir}/firominer/firominer --list-devices
+    ${minersDir}/${MINER}/firominer --list-devices
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -266,6 +267,7 @@ function install_firominer_sources_amd {
     cd build
     cmake .. -DETHASHCUDA=OFF -DETHASHCL=ON -DAPICORE=ON
     # ERROR: cmake failed !
+    #echo "FAILED"
 
     echo " - compiling (2/2)..."
     make -sj $(nproc)
@@ -275,7 +277,7 @@ function install_firominer_sources_amd {
     #cp -a firominer ${minersDir}/firominer/firominer-amd
 
     echo
-    echo "Miner successfully installed into ${minersDir}/${MINER}"
+    #echo "Miner successfully installed into ${minersDir}/firominer"
 }
 
 
@@ -292,10 +294,10 @@ function install_wildrig {
     tar -Jxf wildrig-multi-linux-0.36.1b.tar.xz -C wildrig
 
     echo " - installing..."
-    rm -rf ${minersDir}/wildrig
-    cp -a wildrig ${minersDir}
+    rm -rf ${minersDir}/${MINER}
+    cp -a wildrig ${minersDir}/${MINER}
 
-    ${minersDir}/wildrig/wildrig-multi --print-devices
+    ${minersDir}/${MINER}/wildrig-multi --print-devices
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -315,11 +317,10 @@ function install_kawpowminer_nvidia {
 
     echo " - installing..."
     mkdir -p ${minersDir}/kawpowminer
-    rm -rf ${minersDir}/kawpowminer/kawpowminer-nvidia
     cp -a linux-ubuntu20-cuda11-1.2.4/kawpowminer ${minersDir}/kawpowminer/kawpowminer-nvidia
 
     echo
-    echo "Miner successfully installed into ${minersDir}/${MINER}"
+    echo "Miner successfully installed into ${minersDir}/kawpowminer"
 }
 
 
@@ -336,11 +337,10 @@ function install_kawpowminer_amd {
 
     echo " - installing..."
     mkdir -p ${minersDir}/kawpowminer
-    rm -rf ${minersDir}/kawpowminer/kawpowminer-amd
     cp -a linux-ubuntu20-opencl-1.2.4/kawpowminer ${minersDir}/kawpowminer/kawpowminer-amd
 
     echo
-    echo "Miner successfully installed into ${minersDir}/${MINER}"
+    echo "Miner successfully installed into ${minersDir}/kawpowminer"
 }
 
 
@@ -356,8 +356,8 @@ function install_bminer {
     tar -Jxf bminer-v16.4.11-2849b5c-amd64.tar.xz
 
     echo " - installing..."
-    rm -rf ${minersDir}/bminer
-    cp -a bminer-v16.4.11-2849b5c ${minersDir}/bminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a bminer-v16.4.11-2849b5c ${minersDir}/${MINER}
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -382,7 +382,7 @@ function install_autolykosv2_nvidia {
     cp -a NV_Miner/NV_Miner_Linux_CUDA11_4.2.0 ${minersDir}/autolykosv2/nvidia
 
     echo
-    echo "Miner successfully installed into ${minersDir}/${MINER}"
+    echo "Miner successfully installed into ${minersDir}/autolykosv2"
 }
 
 function install_autolykosv2_amd {
@@ -402,7 +402,7 @@ function install_autolykosv2_amd {
     cp -a AMD_Miner/AMD_Miner_UBUNTU_2.1 ${minersDir}/autolykosv2/amd
 
     echo
-    echo "Miner successfully installed into ${minersDir}/${MINER}"
+    echo "Miner successfully installed into ${minersDir}/autolykosv2"
 }
 
 
@@ -417,10 +417,10 @@ function install_ethminer {
     echo " - unziping..."
     mkdir -p ethminer-0.18.0-cuda-9
     tar zxf ethminer-0.18.0-cuda-9-linux-x86_64.tar.gz -C ethminer-0.18.0-cuda-9
-    rm -rf ${minersDir}/ethminer
-    cp -a ethminer-0.18.0-cuda-9/bin ${minersDir}/ethminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a ethminer-0.18.0-cuda-9/bin ${minersDir}/${MINER}
 
-    ${minersDir}/ethminer/ethminer --list-devices
+    ${minersDir}/${MINER}/ethminer --list-devices
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -439,11 +439,11 @@ function install_srbminer {
     tar -xf SRBMiner-Multi-2-0-1-Linux.tar.xz
 
     echo " - installing..."
-    rm -rf ${minersDir}/srbminer
-    cp -a SRBMiner-Multi-2-0-1 ${minersDir}/srbminer
+    rm -rf ${minersDir}/${MINER}
+    cp -a SRBMiner-Multi-2-0-1 ${minersDir}/${MINER}
 
     echo " - testing..."
-    ${minersDir}/srbminer/SRBMiner-MULTI --list-devices
+    ${minersDir}/${MINER}/SRBMiner-MULTI --list-devices
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -462,7 +462,7 @@ function install_xmrig {
     tar zxf xmrig-6.18.1-linux-x64.tar.gz
 
     echo " - installing..."
-    rm -rf ${minersDir}/${MINER}/xmrig
+    rm -rf ${minersDir}/${MINER}/${MINER}
     mkdir -p ${minersDir}/${MINER}
     cp -a xmrig-6.18.1/{xmrig,config.json} ${minersDir}/${MINER}
 
@@ -506,7 +506,7 @@ function install_xmrig_sources_free {
     ${minersDir}/xmrig/xmrig-nofees --print-platforms
 
     echo
-    echo "Miner successfully installed into ${minersDir}/${MINER}"
+    echo "Miner successfully installed into ${minersDir}/xmrig"
 }
 
 
@@ -531,7 +531,7 @@ function install_xmrig_nvidia_cuda_support {
     cp -a libxmrig-cuda.so ${minersDir}/xmrig/
 
     echo
-    echo "Cuda support for XMRig successfully installed into ${minersDir}/${MINER}"
+    echo "Cuda support for XMRig successfully installed into ${minersDir}/xmrig"
 }
 
 

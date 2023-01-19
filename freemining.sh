@@ -29,7 +29,7 @@ COLOR_YELLOW="\e[33m"
 
 
 CONFIG_FILE=$(realpath ./freemining.json)
-POOL_APP_DIR=$(dirname $CONFIG_FILE)
+frmAppDir=$(dirname $CONFIG_FILE)
 
 if [ "$CONFIG_FILE" = "" -o ! -f "$CONFIG_FILE" ]; then
     echo "Missing freemining.json configuration file"
@@ -191,50 +191,54 @@ function installNodejsPackages {
 }
 
 
-function hasOpt {
-    key=$1
-    if [[ " ${CMD_ARGS[*]} " =~ " ${key} " ]]; then
-        # has opt
-        return 0
-    else
-        # DO NOT has opt
-        return 1
-    fi
-}
+#function hasOpt {
+#    key=$1
+#    if [[ " ${CMD_ARGS[*]} " =~ " ${key} " ]]; then
+#        # has opt
+#        return 0
+#    else
+#        # DO NOT has opt
+#        return 1
+#    fi
+#}
 
-function getOpt {
-    key=$1
-    for i in "${!CMD_ARGS[@]}"; do
-        if [[ "${CMD_ARGS[$i]}" = "${key}" ]]; then
-            let $((j = i + 1))
-            echo ${CMD_ARGS[$j]}
-            break
-        fi
-    done
-}
+#function getOpt {
+#    key=$1
+#    for i in "${!CMD_ARGS[@]}"; do
+#        if [[ "${CMD_ARGS[$i]}" = "${key}" ]]; then
+#            let $((j = i + 1))
+#            echo ${CMD_ARGS[$j]}
+#            break
+#        fi
+#    done
+#}
 
-function removeOpt {
-    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
+#function removeOpt {
+#    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
+#
+#    # use like this (to remove -ts from script arguments) :
+#    # x=$@ ; set -- $(removeOpt "$x" "-ts")
+#}
 
-    # use like this (to remove -ts from script arguments) :
-    # x=$@ ; set -- $(removeOpt "$x" "-ts")
-}
+
+
+#### DAEMONS 1/3 ####
 
 
 function daemonStart {
     # daemonStart depends on $DAEMON_PID_DIR and $DAEMON_LOG_DIR
 
-    DAEMON_NAME=$1
-    DAEMON_CMD=$2
-    DAEMON_BG=$3
+    local DAEMON_NAME=$1
+    local DAEMON_CMD=$2
+    local DAEMON_BG=$3
 
-    DAEMON_CMD_WITHOUT_ARGS=$(echo $DAEMON_CMD | cut -d" " -f1)
-    DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
+    local DAEMON_CMD_WITHOUT_ARGS=$(echo $DAEMON_CMD | cut -d" " -f1)
+    local DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
 
-    LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
 
-    DAEMONER_ARGS="--pidfile $PID_FILE --make-pidfile --remove-pidfile"
+    local DAEMONER_ARGS="--pidfile $PID_FILE --make-pidfile --remove-pidfile"
     #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
 
     if [ "$DAEMON_BG" = "bg" -o "$DAEMON_BG" = "background" -o "$DAEMON_BG" = "daemon" ]; then
@@ -290,11 +294,9 @@ function daemonStart {
 function daemonStatus {
     # daemonStatus depends on $DAEMON_PID_DIR
 
-    DAEMON_NAME=$1
-
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
-
-    DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
+    local DAEMON_NAME=$1
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
     #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
 
     ${DAEMONER_CMD} --status $DAEMONER_ARGS
@@ -320,11 +322,9 @@ function daemonStatus {
 function daemonStop {
     # daemonStop depends on $DAEMON_PID_DIR
 
-    DAEMON_NAME=$1
-
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
-
-    DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
+    local DAEMON_NAME=$1
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
     #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
 
     ${DAEMONER_CMD} --stop $DAEMONER_ARGS
@@ -350,9 +350,8 @@ function daemonStop {
 function daemonLog {
     # daemonLog depends on $DAEMON_LOG_DIR
 
-    DAEMON_NAME=$1
-
-    LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+    local DAEMON_NAME=$1
+    local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
 
     if ! test -f $LOG_FILE; then
         echo "Error: log file do not exists"
@@ -366,10 +365,9 @@ function daemonLog {
 function daemonPidLog {
     # daemonLogPid depends on $DAEMON_PID_DIR
 
-    DAEMON_NAME=$1
-
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
-    PID=$(cat $PID_FILE 2>/dev/null)
+    local DAEMON_NAME=$1
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local PID=$(cat $PID_FILE 2>/dev/null)
 
     if [ "$PID" = "" ]; then
         echo "Error: no PID found"
@@ -387,42 +385,166 @@ function daemonPidLog {
 
 function daemonLogFile {
     # daemonLogFile depends on $DAEMON_PID_DIR
-
-    DAEMON_NAME=$1
-
-    LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+    local DAEMON_NAME=$1
+    local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
     echo $LOG_FILE
 }
 
 
 function daemonPid {
     # daemonPid depends on $DAEMON_PID_DIR
-    DAEMON_NAME=$1
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
-    PID=$(cat $PID_FILE 2>/dev/null)
+    local DAEMON_NAME=$1
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local PID=$(cat $PID_FILE 2>/dev/null)
     echo $PID
 }
 
 
 function daemonPidFile {
     # daemonPidFile depends on $DAEMON_PID_DIR
-    DAEMON_NAME=$1
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local DAEMON_NAME=$1
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
     echo $PID_FILE
 }
 
 
 function daemonPidPs {
     # daemonPidPs depends on $DAEMON_PID_DIR
-    DAEMON_NAME=$1
-    PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
-    PID=$(cat $PID_FILE 2>/dev/null)
+    local DAEMON_NAME=$1
+    local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
+    local PID=$(cat $PID_FILE 2>/dev/null)
 
     if [ "$PID" != "" ]; then
         ps -o pid,pcpu,pmem,user,command $PID |grep -e '\[free[m]ining.*\]' --color -B1
     fi
 }
 
+
+#### DAEMONS 2/3 ####
+
+
+function do_start {
+    local ACTION=$1
+
+    if test "$ACTION" = "start" || test "$ACTION" = "restart" || test "$ACTION" = "debug"; then
+        # set background
+        DAEMON_OPTS="background"
+    fi
+
+    if [ "$DAEMON_NAME" = "" ]; then
+        local DAEMON_NAME="freemining.anonymous"
+    fi
+
+    CMD="$DAEMON_CMD"
+
+    DAEMON_CHDIR=$PWD
+
+    if test "$ACTION" = "debug"; then
+        DAEMON_DRY=1
+    fi
+
+    daemonStart $DAEMON_NAME "$CMD" $DAEMON_OPTS
+}
+
+function do_stop {
+    daemonStop $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_status {
+    daemonStatus $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_log {
+    daemonLog $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_log_file {
+    daemonLogFile $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_pid {
+    daemonPid $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_pid_file {
+    daemonPidFile $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_pid_log {
+    daemonPidLog $DAEMON_NAME $DAEMON_OPTS
+}
+
+function do_ps {
+    daemonPidPs $DAEMON_NAME $DAEMON_OPTS
+}
+
+
+
+#### DAEMONS 3/3 ####
+
+
+function daemon_manager {
+    ACTION=$1
+
+    # STOP
+    if test "$ACTION" = "stop" || test "$ACTION" = "restart"; then
+        do_stop
+        RC=$?
+
+        if test "$ACTION" = "stop"; then
+            exit $?
+        fi
+    fi
+
+    # START
+    if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "restart" || test "$ACTION" = "debug"; then
+        do_start $ACTION
+        exit $?
+    fi
+
+    # STATUS
+    if test "$ACTION" = "status"; then
+        do_status
+        exit $?
+    fi
+
+    # LOG
+    if test "$ACTION" = "log"; then
+        do_log
+        exit $?
+    fi
+
+    # LOG-FILE
+    if test "$ACTION" = "log-file"; then
+        do_log_file
+        exit $?
+    fi
+
+    # PID
+    if test "$ACTION" = "pid"; then
+        do_pid
+        exit $?
+    fi
+
+    # PID-FILE
+    if test "$ACTION" = "pid-file"; then
+        do_pid_file
+        exit $?
+    fi
+
+    # PID-LOG
+    if test "$ACTION" = "pid-log"; then
+        do_pid_log
+        exit $?
+    fi
+
+    # PS
+    if test "$ACTION" = "ps"; then
+        do_ps
+        exit $?
+    fi
+
+}
 
 
 ##### MAIN #####
@@ -438,9 +560,9 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     function usage {
         CMD=$(basename $BASH_SOURCE)
 
-        echo "=============="
-        echo "| FreeMining |"
-        echo "=============="
+        echo "======================"
+        echo "| ⛏️   FreeMining  ⛏️  |"
+        echo "======================"
         echo
 
         echo "Usage:"
@@ -536,20 +658,19 @@ $0 \$@
 
         echo
         echo "==== RIG ===="
-        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1 || echo "No process"
 
         echo
         echo "==== FARM ===="
-        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.farm\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.farm\.") |grep -e '\[free[m]ining.*\]' --color -B1 || echo "No process"
 
         echo
         echo "==== NODE ===="
-        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.node\.") |grep -e '\[free[m]ining.*\]' --color -B1
-        echo
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.node\.") |grep -e '\[free[m]ining.*\]' --color -B1 || echo "No process"
 
         echo
         echo "==== POOL ===="
-        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.pool\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.pool\.") |grep -e '\[free[m]ining.*\]' --color -B1 || echo "No process"
         echo
 
     else

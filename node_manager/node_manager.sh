@@ -23,7 +23,7 @@ fi
 FRM_MODULE="node"
 
 NODE_CONFIG_FILE=$(realpath ./node_manager.json)
-NODE_APP_DIR=$(dirname $NODE_CONFIG_FILE)
+nodeAppDir=$(dirname $NODE_CONFIG_FILE)
 
 if [ "$NODE_CONFIG_FILE" = "" -o ! -f "$NODE_CONFIG_FILE" ]; then
     echo "Missing node_manager.json configuration file"
@@ -43,24 +43,23 @@ fullnodesDir=$(eval echo `jq -r ".fullnodesDir" ${NODE_CONFIG_FILE} 2>/dev/null`
 
 
 
-if [ "$nodeConfDir" = "" ]; then
+if [ "$nodeConfDir" = "" -o "$nodeConfDir" = "null" ]; then
     nodeConfDir=${frmConfDir}/${FRM_MODULE}
 fi
 
-if [ "$nodeLogDir" = "" ]; then
+if [ "$nodeLogDir" = "" -o "$nodeLogDir" = "null" ]; then
     nodeLogDir=${frmLogDir}/${FRM_MODULE}
 fi
 
-if [ "$nodePidDir" = "" ]; then
+if [ "$nodePidDir" = "" -o "$nodePidDir" = "null" ]; then
     nodePidDir=${frmPidDir}/${FRM_MODULE}
 fi
 
-if [ "$nodeDataDir" = "" ]; then
+if [ "$nodeDataDir" = "" -o "$nodeDataDir" = "null" ]; then
     nodeDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
-
-if [ "$fullnodesDir" = "" ]; then
+if [ "$fullnodesDir" = "" -o "$fullnodesDir" = "null" ]; then
     fullnodesDir="${nodeDataDir}/fullnodes"
 fi
 
@@ -72,6 +71,7 @@ INSTALLED_FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/
 
 DAEMON_LOG_DIR=$nodeLogDir
 DAEMON_PID_DIR=$nodePidDir
+mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
 ##### FUNCTIONS #####
 
@@ -111,7 +111,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$1" = "fullnode" ]; then
         shift
-        exec ./tools/fullnode.sh $@
+        exec ./tools/run_fullnode.sh $@
 
     elif [ "$1" = "fullnode-install" ]; then
         shift
@@ -137,13 +137,8 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         read
         rm -rf ${nodeConfDir}/fullnodes/${FULLNODE}/
 
-    elif [ "$1" = "node" ]; then
-        shift
-        exec ./tools/fullnode.sh $@
-
     elif [ "$1" = "ps" ]; then
         shift
-        #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     elif [ "$1" = "config-firewall" ]; then

@@ -91,7 +91,7 @@ function install_miningcore {
 
     # apply custom patch
     mv build/coins.json build/coins.dist.json
-    cp -a ${POOL_APP_DIR}/pools_manager/patchs/miningcore_coins.json build/coins.json
+    cp -a ${frmAppDir}/pools_manager/patchs/miningcore_coins.json build/coins.json
 
 
     echo " - Install into ${POOLS_ENGINE_DIR}/${package}"
@@ -148,10 +148,10 @@ function install_miningcoreWebUI {
 
     # apply custom patchs
     cd Miningcore.WebUI
-    git apply ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_patch.patch
-    git apply ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_index_patch.patch
-    #${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
-    cp -a ${POOL_APP_DIR}/pools_manager/patchs/coins_icons/*.png ./img/coin/icon
+    git apply ${frmAppDir}/pools_manager/patchs/miningcoreWebUI_api_patch.patch
+    git apply ${frmAppDir}/pools_manager/patchs/miningcoreWebUI_index_patch.patch
+    #${frmAppDir}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
+    cp -a ${frmAppDir}/pools_manager/patchs/coins_icons/*.png ./img/coin/icon
     touch ./css/font-awesome-icons.css
     touch ./css/bootstrap-notify.css
     cd ..

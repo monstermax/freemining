@@ -23,7 +23,7 @@ fi
 FRM_MODULE="farm"
 
 FARM_CONFIG_FILE=$(realpath ./farm_manager.json)
-FARM_APP_DIR=$(dirname $FARM_CONFIG_FILE)
+farmAppDir=$(dirname $FARM_CONFIG_FILE)
 
 if [ "$FARM_CONFIG_FILE" = "" -o ! -f "$FARM_CONFIG_FILE" ]; then
     echo "Missing farm_manager.json configuration file"
@@ -35,30 +35,31 @@ farmConfDir=$(eval echo `jq -r ".farmConfDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
 farmLogDir=$(eval echo `jq -r ".farmLogDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
-farmPidDir=$(eval echo `jq -r ".pidDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
+farmPidDir=$(eval echo `jq -r ".farmPidDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
 farmDataDir=$(eval echo `jq -r ".farmDataDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
 
-if [ "$farmConfDir" = "" ]; then
+if [ "$farmConfDir" = "" -o "$farmConfDir" = "null" ]; then
     farmConfDir=${frmConfDir}/${FRM_MODULE}
 fi
 
-if [ "$farmLogDir" = "" ]; then
+if [ "$farmLogDir" = "" -o "$farmLogDir" = "null" ]; then
     farmLogDir=${frmLogDir}/${FRM_MODULE}
 fi
 
-if [ "$farmPidDir" = "" ]; then
+if [ "$farmPidDir" = "" -o "$farmPidDir" = "null" ]; then
     farmPidDir=${frmPidDir}/${FRM_MODULE}
 fi
 
-if [ "$farmDataDir" = "" ]; then
+if [ "$farmDataDir" = "" -o "$farmDataDir" = "null" ]; then
     farmDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
 
 DAEMON_LOG_DIR=$farmLogDir
 DAEMON_PID_DIR=$farmPidDir
+mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
 
 ##### FUNCTIONS #####

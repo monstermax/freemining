@@ -23,7 +23,7 @@ fi
 FRM_MODULE="rig"
 
 RIG_CONFIG_FILE=$(realpath ./rig_manager.json)
-RIG_APP_DIR=$(dirname $RIG_CONFIG_FILE)
+rigAppDir=$(dirname $RIG_CONFIG_FILE)
 
 if [ "$RIG_CONFIG_FILE" = "" -o ! -f "$RIG_CONFIG_FILE" ]; then
     echo "Missing rig_manager.json configuration file"
@@ -43,23 +43,23 @@ minersDir=$(eval echo `jq -r ".minersDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
 
 
-if [ "$rigConfDir" = "" ]; then
+if [ "$rigConfDir" = "" -o "$rigConfDir" = "null" ]; then
     rigConfDir=${frmConfDir}/${FRM_MODULE}
 fi
 
-if [ "$rigLogDir" = "" ]; then
+if [ "$rigLogDir" = "" -o "$rigLogDir" = "null" ]; then
     rigLogDir=${frmLogDir}/${FRM_MODULE}
 fi
 
-if [ "$rigPidDir" = "" ]; then
+if [ "$rigPidDir" = "" -o "$rigPidDir" = "null" ]; then
     rigPidDir=${frmPidDir}/${FRM_MODULE}
 fi
 
-if [ "$rigDataDir" = "" ]; then
+if [ "$rigDataDir" = "" -o "$rigDataDir" = "null" ]; then
     rigDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
-if [ "$minersDir" = "" ]; then
+if [ "$minersDir" = "" -o "$minersDir" = "null" ]; then
     minersDir=${rigDataDir}/miners
 fi
 
@@ -70,6 +70,7 @@ INSTALLED_MINERS=$(find $minersDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null |
 
 DAEMON_LOG_DIR=$rigLogDir
 DAEMON_PID_DIR=$rigPidDir
+mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
 ##### FUNCTIONS #####
 
@@ -141,7 +142,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$1" = "miner" ]; then
         shift
-        exec ./tools/miner.sh $@
+        exec ./tools/run_miner.sh $@
 
     elif [ "$1" = "miner-install" ]; then
         shift
@@ -181,7 +182,6 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$1" = "ps" ]; then
         shift
-        #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     else

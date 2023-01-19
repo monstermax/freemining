@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../rig_manager.sh
+source ../farm_manager.sh
 set -e
 
 
@@ -30,12 +30,12 @@ function usage {
 
 ################################################################################
 
-FRM_PACKAGE="agent"
+FRM_PACKAGE="webserver"
 DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}"
 
-DAEMON_CMD="${NODE} ./agent.js"
+DAEMON_CMD="${NODE} ./webserver.js"
 if test "$USE_TS" = "1"; then
-    DAEMON_CMD="${TS_NODE} ./agent.ts"
+    DAEMON_CMD="${TS_NODE} ./webserver.ts"
 fi
 
 ################################################################################

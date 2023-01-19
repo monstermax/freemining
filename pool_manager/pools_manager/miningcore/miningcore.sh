@@ -34,7 +34,7 @@ if hasOpt start || hasOpt run || hasOpt debug; then
     fi
 
 
-    ${POOL_APP_DIR}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
+    ${frmAppDir}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
 
     CMD="${POOLS_ENGINE_DIR}/${FRM_PACKAGE}/Miningcore -c ${USER_CONF_DIR}/${FRM_MODULE}/${FRM_PACKAGE}/config.json $@"
 

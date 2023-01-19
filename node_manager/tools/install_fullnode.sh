@@ -9,14 +9,12 @@ set -e
 FRM_PACKAGE="fullnode_install"
 
 TMP_DIR=$(mktemp -d)
-
-#echo "temp dir = $TMP_DIR"
 mkdir -p ${TMP_DIR}
 
-#echo "nodes dir = $fullnodesDir"
+mkdir -p ${nodeLogDir}/fullnodes
+mkdir -p ${nodePidDir}/fullnodes
+mkdir -p ${nodeDataDir}/fullnodes
 mkdir -p ${fullnodesDir}
-
-#echo
 
 
 # install basic tools
@@ -36,9 +34,7 @@ function install_callisto {
     DL_URL="https://github.com/EthereumCommonwealth/go-callisto/releases/download/${VERSION}/geth-linux-amd64"
     DL_FILE=$(basename $DL_URL)
     #UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -65,9 +61,7 @@ function install_ergo {
     DL_URL="https://github.com/ergoplatform/ergo/releases/download/v${VERSION}/ergo-${VERSION}.jar"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -165,9 +159,7 @@ function install_ethereum {
     DL_URL="https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${VERSION}.tar.gz"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -195,9 +187,7 @@ function install_ethereum_classic {
     DL_URL="https://github.com/etclabscore/core-geth/releases/download/v${VERSION}/core-geth-linux-v${VERSION}.zip"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -226,9 +216,7 @@ function install_firo {
     DL_URL="https://github.com/firoorg/firo/releases/download/v${VERSION}/firo-${VERSION}-linux64.tar.gz"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -256,7 +244,7 @@ function install_flux {
     #DL_URL=""
     #DL_FILE=$(basename $DL_URL)
     #UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
 
     zelnodePrivKey="YOUR_ZELNODE_PK"
     zelnodeOutPoint="YOUR_COLLATERAL_TXID"
@@ -269,7 +257,6 @@ function install_flux {
     cruxId="YOUR_CRUXID"
     testNet="false"
 
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -417,9 +404,7 @@ function install_kaspa {
     DL_URL="https://github.com/kaspanet/kaspad/releases/download/v${VERSION}/kaspad-v${VERSION}-linux.zip"
     DL_FILE=$(basename $DL_URL)
     UNZIP_DIR="${chain}-unzipped"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -444,9 +429,7 @@ function install_komodo {
 
     chain="komodo"
     VERSION=""
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} ${VERSION}..."
@@ -455,7 +438,7 @@ function install_komodo {
     rootRequired
     sudo apt-get update -qq
     sudo apt-get upgrade -qq -y
-    sudo apt-get install -qq -y build-essential pkg-config libc6-dev m4 g++-multilib autoconf libtool ncurses-dev unzip git zlib1g-dev wget curl bsdmainutils automake cmake clang ntp ntpdate nano
+    sudo apt-get install -qq -y build-essential pkg-config libc6-dev m4 g++-multilib autoconf libtool ncurses-dev unzip git zlib1g-dev wget curl bsdmainutils automake cmake clang ntp ntpdate nano >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
 
     echo " - Downloading ${chain}"
@@ -501,9 +484,7 @@ function install_meowcoin {
 
     chain="meowcoin"
     VERSION="1.0.3"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-CLI-x86_64-linux-gnu.tar.gz"
@@ -545,9 +526,7 @@ function install_monero {
 
     chain="monero"
     VERSION=""
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     DL_URL="https://downloads.getmonero.org/cli/linux64"
@@ -690,9 +669,7 @@ function install_neoxa {
 
     chain="neoxa"
     VERSION="1.0.3"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/NeoxaChain/Neoxa/releases/download/v${VERSION}/neoxad-linux64.zip"
@@ -732,9 +709,7 @@ function install_radiant {
     cd ${TMP_DIR}
 
     chain="radiant"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     echo "Installing ${chain} sources..."
@@ -784,9 +759,7 @@ function install_raptoreum {
 
     chain="raptoreum"
     VERSION=""
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     if grep -q "Debian GNU/Linux 11" /etc/os-release; then
@@ -852,9 +825,7 @@ function install_ravencoin {
 
     chain="ravencoin"
     VERSION="4.3.2.1"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/RavenProject/Ravencoin/releases/download/v${VERSION}/raven-${VERSION}-x86_64-linux-gnu.zip"
@@ -890,9 +861,7 @@ function install_zcash {
 
     chain="zcash"
     VERSION="5.3.2"
-    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
-
-    mkdir -p ${nodeLogDir}/fullnodes/${chain}
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
     >${INSTALL_LOG}
 
     DL_URL="https://z.cash/downloads/zcash-${VERSION}-linux64-debian-buster.tar.gz"

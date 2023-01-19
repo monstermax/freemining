@@ -31,30 +31,30 @@ echo "rig.date: ${DATE}"
 echo "###################################### NBMiner #######################################"
 
 # NBMiner
-${TXT_MONITOR_DIR}/nbminer.sh
+${TXT_MONITOR_DIR}/nbminer.sh || true
 
 echo "###################################### lolMiner ######################################"
 
 # lolMiner
-${TXT_MONITOR_DIR}/lolminer.sh
+${TXT_MONITOR_DIR}/lolminer.sh || true
 
 echo "###################################### XMRig #########################################"
 
 # XMRig
-${TXT_MONITOR_DIR}/xmrig.sh
+${TXT_MONITOR_DIR}/xmrig.sh || true
 
 echo "###################################### GMiner ########################################"
 
 # GMiner
-${TXT_MONITOR_DIR}/gminer.sh
+${TXT_MONITOR_DIR}/gminer.sh || true
 
 echo "###################################### T-Rex ########################################"
 
 # T-Rex
-${TXT_MONITOR_DIR}/trex.sh
+${TXT_MONITOR_DIR}/trex.sh || true
 
 echo "###################################### TeamRedMiner #################################"
 
 # TeamRedMiner
-${TXT_MONITOR_DIR}/teamredminer.sh
+${TXT_MONITOR_DIR}/teamredminer.sh || true
 

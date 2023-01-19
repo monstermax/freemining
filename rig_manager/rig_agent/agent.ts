@@ -1,5 +1,9 @@
 
+import fs from 'fs';
+import express from 'express';
+import * as http from 'http';
 import WebSocket from 'ws';
+
 import os from 'os';
 import colors from 'colors/safe';
 const { exec } = require('child_process');
@@ -59,6 +63,35 @@ type RigStatus = {
 };
 
 
+
+// Init HTTP Webserver
+const app = express();
+const server = http.createServer(app);
+
+const httpServerHost: string = config.rigWebServer?.host || '0.0.0.0';
+const httpServerPort: number = Number(config.rigWebServer?.port || 4110);
+
+app.use(express.urlencoded());
+
+const httpServerRoot: string = config.rigWebServer?.root || '';
+if (httpServerRoot) {
+    app.use(express.static(httpServerRoot));
+}
+
+app.use(function (req: express.Request, res: express.Response, next: Function) {
+    // Error 404
+    console.log(`${now()} [${colors.yellow('WARNING')}] Error 404: ${req.method.toLocaleUpperCase()} ${req.url}`);
+
+    next();
+});
+
+server.listen(httpServerPort, httpServerHost, () => {
+    console.log(`${now()} [${colors.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
+});
+
+
+
+// Init Websocket Cliennt
 const wsServerHost = config.farmServer?.host || null;
 const wsServerPort = config.farmServer?.port || 4200;
 

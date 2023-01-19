@@ -23,7 +23,7 @@ fi
 FRM_MODULE="pool"
 
 POOL_CONFIG_FILE=$(realpath ./pool_manager.json)
-POOL_APP_DIR=$(dirname $POOL_CONFIG_FILE)
+poolAppDir=$(dirname $POOL_CONFIG_FILE)
 
 if [ "$POOL_CONFIG_FILE" = "" -o ! -f "$POOL_CONFIG_FILE" ]; then
     echo "Missing pool_manager.json configuration file"
@@ -45,33 +45,34 @@ poolDataDir=$(eval echo `jq -r ".poolDataDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 
 
-if [ "$poolConfDir" = "" ]; then
+if [ "$poolConfDir" = "" -o "$poolConfDir" = "null" ]; then
     poolConfDir=${frmConfDir}/${FRM_MODULE}
 fi
 
-if [ "$poolLogDir" = "" ]; then
+if [ "$poolLogDir" = "" -o "$poolLogDir" = "null" ]; then
     poolLogDir=${frmLogDir}/${FRM_MODULE}
 fi
 
-if [ "$poolPidDir" = "" ]; then
+if [ "$poolPidDir" = "" -o "$poolPidDir" = "null" ]; then
     poolPidDir=${frmPidDir}/${FRM_MODULE}
 fi
 
-if [ "$poolDataDir" = "" ]; then
+if [ "$poolDataDir" = "" -o "$poolDataDir" = "null" ]; then
     poolDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
-if [ "$poolsEngineDir" = "" ]; then
+if [ "$poolsEngineDir" = "" -o "$poolsEngineDir" = "null" ]; then
     poolsEngineDir="${poolDataDir}/engines"
 fi
 
-if [ "$poolsWebsitesDir" = "" ]; then
+if [ "$poolsWebsitesDir" = "" -o "$poolsWebsitesDir" = "null" ]; then
     poolsWebsitesDir="${poolDataDir}/websites"
 fi
 
 
 DAEMON_LOG_DIR=$poolLogDir
 DAEMON_PID_DIR=$poolPidDir
+mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
 ##### FUNCTIONS #####
 
@@ -120,7 +121,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "webserver" ]; then
         shift
         # run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
-        exec ./pool_server/server.sh $@
+        exec ./pool_server/webserver.sh $@
 
     elif [ "$1" = "ps" ]; then
         shift

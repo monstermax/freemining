@@ -1,14 +1,35 @@
 "use strict";
-var _a, _b;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const express_1 = tslib_1.__importDefault(require("express"));
+const http = tslib_1.__importStar(require("http"));
 const ws_1 = tslib_1.__importDefault(require("ws"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const { exec } = require('child_process');
 const config = require('../rig_manager.json');
-const wsServerHost = ((_a = config.farmServer) === null || _a === void 0 ? void 0 : _a.host) || null;
-const wsServerPort = ((_b = config.farmServer) === null || _b === void 0 ? void 0 : _b.port) || 4200;
+// Init HTTP Webserver
+const app = (0, express_1.default)();
+const server = http.createServer(app);
+const httpServerHost = ((_a = config.rigWebServer) === null || _a === void 0 ? void 0 : _a.host) || '0.0.0.0';
+const httpServerPort = Number(((_b = config.rigWebServer) === null || _b === void 0 ? void 0 : _b.port) || 4110);
+app.use(express_1.default.urlencoded());
+const httpServerRoot = ((_c = config.rigWebServer) === null || _c === void 0 ? void 0 : _c.root) || '';
+if (httpServerRoot) {
+    app.use(express_1.default.static(httpServerRoot));
+}
+app.use(function (req, res, next) {
+    // Error 404
+    console.log(`${now()} [${safe_1.default.yellow('WARNING')}] Error 404: ${req.method.toLocaleUpperCase()} ${req.url}`);
+    next();
+});
+server.listen(httpServerPort, httpServerHost, () => {
+    console.log(`${now()} [${safe_1.default.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
+});
+// Init Websocket Cliennt
+const wsServerHost = ((_d = config.farmServer) === null || _d === void 0 ? void 0 : _d.host) || null;
+const wsServerPort = ((_e = config.farmServer) === null || _e === void 0 ? void 0 : _e.port) || 4200;
 const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
 const checkStatusInterval = 10000; // verifie le statut du rig toutes les x millisecondes
@@ -16,7 +37,7 @@ const sendStatusInterval = 10000; // envoie le (dernier) statut du rig au farmSe
 let checkStatusTimeout = null;
 let connectionCount = 0;
 const toolsDir = `${__dirname}/../tools`;
-const cmdService = `${toolsDir}/service.sh`;
+const cmdService = `${toolsDir}/miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 let rigStatus = null;
 function websocketConnect() {
@@ -86,7 +107,7 @@ function websocketConnect() {
                             console.error(`${now()} [${safe_1.default.red('ERROR')}] cannot start service : ${err.message}`);
                             return;
                         }
-                        const cmd = `${cmdService} start ${serviceName} ${params.poolUrl} ${params.poolAccount} ${params.workerName} ${params.algo} ${params.optionnalParams}`;
+                        const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams}`;
                         console.log(`${now()} [DEBUG] executing command: ${cmd}`);
                         const ret = yield cmdExec(cmd);
                         console.log(`${now()} [DEBUG] command result: ${ret}`);
