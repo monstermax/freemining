@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ./fullnode_manager.sh
+source ../rig_manager.sh
 set -e
 
 
@@ -10,7 +10,9 @@ set -e
 installBasicTools
 
 # install nodejs + npm + typescript
-#installNodejs
-#installNodejsPackages
+installNodejs
+installNodejsPackages
 
 
+# install farm agent
+../rig_agent/install_agent.sh

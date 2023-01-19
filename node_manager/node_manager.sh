@@ -20,13 +20,13 @@ fi
 
 ##### CONFIG #####
 
-FRM_MODULE="fullnode"
+FRM_MODULE="node"
 
-NODE_CONFIG_FILE=$(realpath ./fullnode_manager.json)
+NODE_CONFIG_FILE=$(realpath ./node_manager.json)
 NODE_APP_DIR=$(dirname $NODE_CONFIG_FILE)
 
 if [ "$NODE_CONFIG_FILE" = "" -o ! -f "$NODE_CONFIG_FILE" ]; then
-    echo "Missing fullnode_manager.json configuration file"
+    echo "Missing node_manager.json configuration file"
     exit 1
 fi
 
@@ -96,28 +96,28 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo
-        echo "  $CMD node <params>               # start/stop a fullnode"
+        echo "  $CMD fullnode <params>           # start/stop a fullnode"
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
-        echo "  $CMD node-install [chain]    # install a fullnode"
-        echo "  $CMD node-uninstall [chain]  # install a fullnode"
+        echo "  $CMD fullnode-install [chain]    # install a fullnode"
+        echo "  $CMD fullnode-uninstall [chain]  # install a fullnode"
         #echo "  $CMD config-firewall             # Not available. TODO"
         echo
     }
 
     if [ "$1" = "install" ]; then
         shift
-        exec ./install_fullnode_manager.sh $@
+        exec ./tools/install_node_manager.sh $@
 
-    elif [ "$1" = "node" ]; then
+    elif [ "$1" = "fullnode" ]; then
         shift
         exec ./tools/fullnode.sh $@
 
-    elif [ "$1" = "node-install" ]; then
+    elif [ "$1" = "fullnode-install" ]; then
         shift
         exec ./tools/install_fullnode.sh $@
 
-    elif [ "$1" = "node-uninstall" ]; then
+    elif [ "$1" = "fullnode-uninstall" ]; then
         FULLNODE=$2
         if [ "$FULLNODE" = "" ]; then
             usage
@@ -132,12 +132,12 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         read
         rm -rf ${fullnodesDir}/${FULLNODE}/
 
-        echo "Deleting data & configuration: ${nodeConfDir}/fullnode/${FULLNODE}"
+        echo "Deleting data & configuration: ${nodeConfDir}/fullnodes/${FULLNODE}"
         echo "[Press Enter to continue]"
         read
-        rm -rf ${nodeConfDir}/fullnode/${FULLNODE}/
+        rm -rf ${nodeConfDir}/fullnodes/${FULLNODE}/
 
-    elif [ "$1" = "fullnode" ]; then
+    elif [ "$1" = "node" ]; then
         shift
         exec ./tools/fullnode.sh $@
 

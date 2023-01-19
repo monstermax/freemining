@@ -9,12 +9,48 @@
     "fullnodesDir": "${nodeDataDir}/fullnodes",
 
 	"fullnodes": {
+		"callisto": {
+
+		},
 		"ergo": {
 			"apiSecret": "yosecret",
 			"apiKeyHash": "158f937d33215503d851b9a29f81a33a9c2c0d7c9cf15b4b9887b99fa0845010"
 		},
+		"ethereum_classic": {
+
+		},
+		"firo": {
+
+		},
+		"flux": {
+
+		},
+		"kaspa": {
+
+		},
+		"komodo": {
+
+		},
+		"meowcoin": {
+
+		},
 		"monero": {
 			"walletPassword": "secret"
+		},
+		"neoxa": {
+
+		},
+		"radiant": {
+
+		},
+		"raptoreum": {
+
+		},
+		"ravencoin": {
+
+		},
+		"zcash": {
+
 		}
 	}
 

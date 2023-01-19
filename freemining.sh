@@ -447,13 +447,13 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD rig      <params>            # manage rig"
-        echo "  $CMD farm     <params>            # manage farm"
-        echo "  $CMD pool     <params>            # manage pool"
-        echo "  $CMD fullnode <params>            # manage pool"
+        echo "  $CMD rig  <params>                # manage a mining rig"
+        echo "  $CMD farm <params>                # manage a farm of mining rigs"
+        echo "  $CMD node <params>                # manage local fullnodes"
+        echo "  $CMD pool <params>                # manage a mining pool"
         echo
         echo "  $CMD bin-install                  # install freemining.sh to ${INSTALL_DIR}/frm"
-        echo "  $CMD modules-install              # install all modules (rig, farm, pool)"
+        echo "  $CMD modules-install              # install all modules (rig, farm, node, pool)"
         echo "  $CMD compile                      # compile typescript for all modules"
         echo
         echo "  $CMD ps                           # show all running processes"
@@ -473,9 +473,9 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./pool_manager/pool_manager.sh $@
 
-    elif [ "$1" = "fullnode" ]; then
+    elif [ "$1" = "node" ]; then
         shift
-        exec ./fullnode_manager/fullnode_manager.sh $@
+        exec ./node_manager/node_manager.sh $@
 
     elif [ "$1" = "bin-install" ]; then
         PARENT_DIR=$(dirname $BASH_SOURCE)
@@ -543,8 +543,8 @@ $0 \$@
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.farm\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
         echo
-        echo "==== FULLNODE ===="
-        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.fullnode\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        echo "==== NODE ===="
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.node\.") |grep -e '\[free[m]ining.*\]' --color -B1
         echo
 
         echo

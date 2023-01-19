@@ -107,7 +107,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     if [ "$1" = "install" ]; then
         shift
-        exec ./install_pool_manager.sh $@
+        exec ./tools/install_pool_manager.sh $@
 
     elif [ "$1" = "package-install" ]; then
         shift

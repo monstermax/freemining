@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ./farm_manager.sh
+source ../farm_manager.sh
 
 
 # install basic tools
@@ -14,5 +14,5 @@ installNodejsPackages
 
 
 # install farm server
-./farm_server/install_server.sh
+../farm_server/install_server.sh
 

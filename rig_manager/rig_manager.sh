@@ -133,7 +133,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     if [ "$1" = "install" ]; then
         shift
-        exec ./install_rig_manager.sh $@
+        exec ./tools/install_rig_manager.sh $@
 
     elif [ "$1" = "status" ]; then
         shift

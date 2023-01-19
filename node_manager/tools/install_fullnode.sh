@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../fullnode_manager.sh
+source ../node_manager.sh
 set -e
 
 
@@ -31,43 +31,46 @@ installNodejsPackages
 function install_callisto {
     cd ${TMP_DIR}
 
-    coin="callisto"
+    chain="callisto"
     VERSION="1.3.1"
     DL_URL="https://github.com/EthereumCommonwealth/go-callisto/releases/download/${VERSION}/geth-linux-amd64"
     DL_FILE=$(basename $DL_URL)
-    #UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    #UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
     chmod 775 ${DL_FILE}
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    mv ${DL_FILE} ${fullnodesDir}/${coin}/
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    mv ${DL_FILE} ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_ergo {
     cd ${TMP_DIR}
 
-    coin="ergo"
+    chain="ergo"
     VERSION="5.0.5"
     DL_URL="https://github.com/ergoplatform/ergo/releases/download/v${VERSION}/ergo-${VERSION}.jar"
     DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
     if [ "`getCmdPath java`" = "" ]; then
         echo " - Installing dependencies packages: Java-JDK"
@@ -75,11 +78,11 @@ function install_ergo {
         sudo apt-get install -qq default-jdk -y
     fi
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Preparing"
-    CONF_DIR=${nodeConfDir}/fullnodes/${coin}
+    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
     mkdir -p $CONF_DIR
 
     poolName=$(jq '.poolName' $POOL_CONFIG_FILE)
@@ -122,7 +125,7 @@ _EOF
     cat << _EOF > start.sh
 #!/bin/bash
 
-java -jar -Xmx4G ${fullnodesDir}/${coin}/${DL_FILE} --mainnet -c ${CONF_DIR_REAL}/ergo.conf
+java -jar -Xmx4G ${fullnodesDir}/${chain}/${DL_FILE} --mainnet -c ${CONF_DIR_REAL}/ergo.conf
 
 _EOF
 
@@ -142,106 +145,118 @@ _EOF
 
     chmod +x *.sh
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    cp -a *.jar *.sh ${fullnodesDir}/${coin}/
-    cd ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a *.jar *.sh ${fullnodesDir}/${chain}/
+    cd ${fullnodesDir}/${chain}
     ln -s ${DL_FILE} ergo.jar
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_ethereum {
     cd ${TMP_DIR}
 
-    coin="ethereum"
+    chain="ethereum"
     VERSION="1.10.26-e5eb32ac"
     DL_URL="https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${VERSION}.tar.gz"
     DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     tar zxf $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mv geth-linux-amd64-${VERSION} ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv geth-linux-amd64-${VERSION} ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_ethereum_classic {
     cd ${TMP_DIR}
 
-    coin="ethereum_classic"
+    chain="ethereum_classic"
     VERSION="1.12.8"
     DL_URL="https://github.com/etclabscore/core-geth/releases/download/v${VERSION}/core-geth-linux-v${VERSION}.zip"
     DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     unzip -q $DL_FILE -d $UNZIP_DIR
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    mv $UNZIP_DIR/* ${fullnodesDir}/${coin}/
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR/* ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_firo {
     cd ${TMP_DIR}
 
-    coin="firo"
+    chain="firo"
     VERSION="0.14.12.0"
     DL_URL="https://github.com/firoorg/firo/releases/download/v${VERSION}/firo-${VERSION}-linux64.tar.gz"
     DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     tar zxf $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mv firo-*/bin ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv firo-*/bin ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_flux {
     cd ${TMP_DIR}
 
-    coin="flux"
+    chain="flux"
     VERSION=""
     #DL_URL=""
     #DL_FILE=$(basename $DL_URL)
-    #UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    #UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
     zelnodePrivKey="YOUR_ZELNODE_PK"
     zelnodeOutPoint="YOUR_COLLATERAL_TXID"
@@ -254,10 +269,10 @@ function install_flux {
     cruxId="YOUR_CRUXID"
     testNet="false"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
     #echo " - Installing dependencies packages: build tools"
     #rootRequired
@@ -275,10 +290,10 @@ function install_flux {
     #sudo apt-get install -qq -y g++-multilib autoconf libtool ncurses-dev unzip git python
     #sudo apt-get install -qq -y python-zmq zlib1g-dev wget curl bsdmainutils automake
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}/zelcash
-    touch ${nodeConfDir}/fullnodes/${coin}/zelcash/zelcash.conf
+    mkdir -p ${nodeConfDir}/fullnodes/${chain}/zelcash
+    touch ${nodeConfDir}/fullnodes/${chain}/zelcash/zelcash.conf
 
-    cat << EOF > ${nodeConfDir}/fullnodes/${coin}/zelcash/zelcash.conf
+    cat << EOF > ${nodeConfDir}/fullnodes/${chain}/zelcash/zelcash.conf
 rpcuser=user
 rpcpassword=pass
 rpcallowip=127.0.0.1
@@ -304,7 +319,7 @@ EOF
 
     # Bootstrap
     #wget https://www.dropbox.com/s/kyqe8ji3g1yetfx/zel-bootstrap.zip
-    #unzip zel-bootstrap.zip -d ${nodeConfDir}/fullnodes/${coin}/zelcash
+    #unzip zel-bootstrap.zip -d ${nodeConfDir}/fullnodes/${chain}/zelcash
     #rm zel-bootstrap.zip
 
     if [ "`getCmdPath mongod`" = "" ]; then
@@ -329,7 +344,7 @@ EOF
 
 
     # Installing zelcashd
-    echo " - Installing ${coin}/zelcashd"
+    echo " - Installing ${chain}/zelcashd"
     rootRequired
 
     #echo 'deb https://apt.zel.cash/ all main' | sudo tee /etc/apt/sources.list.d/zelcash.list >/dev/null
@@ -346,14 +361,14 @@ EOF
 
 
 
-    echo " - Downloading ${coin}/zelflux"
+    echo " - Downloading ${chain}/zelflux"
     git clone https://github.com/zelcash/zelflux.git >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}/zelflux/config
-    touch ${nodeConfDir}/fullnodes/${coin}/zelflux/config/userconfig.js
+    mkdir -p ${nodeConfDir}/fullnodes/${chain}/zelflux/config
+    touch ${nodeConfDir}/fullnodes/${chain}/zelflux/config/userconfig.js
 
-    cat << EOF > ${nodeConfDir}/fullnodes/${coin}/zelflux/config/userconfig.js
+    cat << EOF > ${nodeConfDir}/fullnodes/${chain}/zelflux/config/userconfig.js
 module.exports = {
     initial: {
         ipaddress: '${ipAddress}',
@@ -365,17 +380,20 @@ module.exports = {
 EOF
 
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    mv zelflux ${fullnodesDir}/${coin}/
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    mv zelflux ${fullnodesDir}/${chain}/
 
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 
     # Starting zelcashd
     #zelcashd -datadir=${nodeConfDir}/fullnodes/flux/zelcash >/dev/null 2>&1
 
     # Starting zelflux
-    #cd ${fullnodesDir}/${coin}
+    #cd ${fullnodesDir}/${chain}
     #./zelflux/start.sh
     #cd - >/dev/null
 
@@ -394,41 +412,44 @@ EOF
 function install_kaspa {
     cd ${TMP_DIR}
 
-    coin="kaspa"
+    chain="kaspa"
     VERSION="0.12.11"
     DL_URL="https://github.com/kaspanet/kaspad/releases/download/v${VERSION}/kaspad-v${VERSION}-linux.zip"
     DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     unzip -q $DL_FILE -d $UNZIP_DIR
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mv $UNZIP_DIR/bin ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR/bin ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_komodo {
     cd ${TMP_DIR}
 
-    coin="komodo"
+    chain="komodo"
     VERSION=""
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
     echo " - Installing dependencies packages: build tools"
     rootRequired
@@ -437,17 +458,17 @@ function install_komodo {
     sudo apt-get install -qq -y build-essential pkg-config libc6-dev m4 g++-multilib autoconf libtool ncurses-dev unzip git zlib1g-dev wget curl bsdmainutils automake cmake clang ntp ntpdate nano
 
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     git clone https://github.com/KomodoPlatform/komodo >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     cd komodo
 
     echo " - Fetching params"
     ./zcutil/fetch-params.sh >>${INSTALL_LOG}
 
-    echo " - Compiling ${coin}"
+    echo " - Compiling ${chain}"
     ./zcutil/build.sh -j$(nproc) >>${INSTALL_LOG}
 
-    CONF_DIR=${nodeConfDir}/fullnodes/${coin}
+    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
     mkdir -p $CONF_DIR
 
     cat << _EOF > ${CONF_DIR}/komodo.conf
@@ -465,21 +486,24 @@ addnode=144.76.94.38
 addnode=148.251.44.16
 _EOF
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    cp -a src/{komodod,komodo-cli,komodo-tx} ${fullnodesDir}/${coin}/
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a src/{komodod,komodo-cli,komodo-tx} ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_meowcoin {
     cd ${TMP_DIR}
 
-    coin="meowcoin"
+    chain="meowcoin"
     VERSION="1.0.3"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-CLI-x86_64-linux-gnu.tar.gz"
@@ -488,11 +512,11 @@ function install_meowcoin {
     DL_URL_QT="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-Qt-x86_64-linux-gnu.tar.gz"
     DL_FILE_QT=$(basename $DL_URL_QT)
 
-    UNZIP_DIR="${coin}-unzipped"
+    UNZIP_DIR="${chain}-unzipped"
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -507,27 +531,30 @@ function install_meowcoin {
         unzip -q ${DL_FILE_QT} -d $UNZIP_DIR
     fi
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mv $UNZIP_DIR ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_monero {
     cd ${TMP_DIR}
 
-    coin="monero"
+    chain="monero"
     VERSION=""
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     DL_URL="https://downloads.getmonero.org/cli/linux64"
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q --content-disposition $DL_URL
     DL_FILE=$(basename monero-linux-x64-v*.tar.bz2)
 
@@ -536,7 +563,7 @@ function install_monero {
     UNZIP_DIR=$(basename monero-x86_64-linux-gnu-v*)
 
     echo " - Preparing"
-    CONF_DIR=${nodeConfDir}/fullnodes/${coin}
+    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
     mkdir -p $CONF_DIR
 
     CONF_DIR_REAL=$(realpath $CONF_DIR)
@@ -599,7 +626,7 @@ _EOF
     mkdir -p touch ${CONF_DIR}/local_wallet
     echo secret > ${CONF_DIR}/local_wallet/freemining.secret
 
-    NODE_DIR_REAL=$(realpath ${fullnodesDir}/${coin})
+    NODE_DIR_REAL=$(realpath ${fullnodesDir}/${chain})
 
     cat << _EOF > start.sh
 #!/bin/bash
@@ -648,21 +675,24 @@ _EOF
 
     chmod +x *.sh
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    cp -a *.sh ${UNZIP_DIR}/monero* ${fullnodesDir}/${coin}/
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a *.sh ${UNZIP_DIR}/monero* ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_neoxa {
     cd ${TMP_DIR}
 
-    coin="neoxa"
+    chain="neoxa"
     VERSION="1.0.3"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/NeoxaChain/Neoxa/releases/download/v${VERSION}/neoxad-linux64.zip"
@@ -671,11 +701,11 @@ function install_neoxa {
     DL_URL_QT="https://github.com/NeoxaChain/Neoxa/releases/download/v${VERSION}/neoxa-qt-linux64.zip"
     DL_FILE_QT=$(basename $DL_URL_QT)
 
-    UNZIP_DIR="${coin}-unzipped"
+    UNZIP_DIR="${chain}-unzipped"
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -689,22 +719,25 @@ function install_neoxa {
         unzip -q ${DL_FILE_QT} -d $UNZIP_DIR
     fi
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mv $UNZIP_DIR ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_radiant {
     cd ${TMP_DIR}
 
-    coin="radiant"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    chain="radiant"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
-    echo "Installing ${coin} sources..."
+    echo "Installing ${chain} sources..."
 
     echo " - Installing dependencies packages: build tools"
     rootRequired
@@ -715,24 +748,24 @@ function install_radiant {
     echo " - Downloading sources"
     git clone https://github.com/RadiantBlockchain/radiant-node >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
-    echo " - Compiling ${coin} (1/2)"
+    echo " - Compiling ${chain} (1/2)"
     mkdir radiant-node/build && cd radiant-node/build
     cmake -GNinja .. -DBUILD_RADIANT_QT=OFF >>${INSTALL_LOG}
     # OR cmake -GNinja ..
 
-    echo " - Compiling ${coin} (2/2)"
+    echo " - Compiling ${chain} (2/2)"
     ninja >>${INSTALL_LOG}
 
     echo " - Install tmp"
     rm -rf dist
     DESTDIR="dist" ninja install
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    mkdir -p ${fullnodesDir}/${coin}
-    cp -a ./dist/usr/local/* ${fullnodesDir}/${coin}/
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a ./dist/usr/local/* ${fullnodesDir}/${chain}/
 
-    cd ${fullnodesDir}/${coin}
+    cd ${fullnodesDir}/${chain}
     ln -s bin/radiantd
     ln -s bin/radiant-cli
     ln -s bin/radiant-wallet
@@ -740,17 +773,20 @@ function install_radiant {
 
     cd ..
     rm -rf build
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_raptoreum {
     cd ${TMP_DIR}
 
-    coin="raptoreum"
+    chain="raptoreum"
     VERSION=""
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     if grep -q "Debian GNU/Linux 11" /etc/os-release; then
@@ -765,24 +801,24 @@ function install_raptoreum {
     if [ "$VERSION" != "" ]; then
         DL_URL="https://github.com/Raptor3um/raptoreum/releases/download/${VERSION}/raptoreum-${VERSION_LONG}.tar.gz"
         DL_FILE=$(basename $DL_URL)
-        UNZIP_DIR="${coin}-unzipped"
+        UNZIP_DIR="${chain}-unzipped"
 
-        echo "Installing ${coin} ${VERSION} ${VERSION_LONG}..."
+        echo "Installing ${chain} ${VERSION} ${VERSION_LONG}..."
 
-        echo " - Downloading ${coin}"
+        echo " - Downloading ${chain}"
         wget -q $DL_URL
 
         echo " - Unzipping"
         mkdir $UNZIP_DIR
         tar zxf $DL_FILE -C $UNZIP_DIR
 
-        echo " - Install into ${fullnodesDir}/${coin}"
-        rm -rf ${fullnodesDir}/${coin}
-        mv $UNZIP_DIR ${fullnodesDir}/${coin}
+        echo " - Install into ${fullnodesDir}/${chain}"
+        rm -rf ${fullnodesDir}/${chain}
+        mv $UNZIP_DIR ${fullnodesDir}/${chain}
 
     else
         # install from sources
-        echo "Installing ${coin} sources..."
+        echo "Installing ${chain} sources..."
 
         echo " - Installing dependencies packages: build tools"
         rootRequired
@@ -804,28 +840,30 @@ function install_raptoreum {
         # EDIT ME
     fi
 
-
     rm -rf ${UNZIP_DIR}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
 function install_ravencoin {
     cd ${TMP_DIR}
 
-    coin="ravencoin"
+    chain="ravencoin"
     VERSION="4.3.2.1"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/RavenProject/Ravencoin/releases/download/v${VERSION}/raven-${VERSION}-x86_64-linux-gnu.zip"
     DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${coin}-unzipped"
+    UNZIP_DIR="${chain}-unzipped"
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -835,11 +873,14 @@ function install_ravencoin {
     echo " - Unzipping second archive"
     tar zxf raven-${VERSION}-x86_64-linux-gnu.tar.gz
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    cp -a ./raven-${VERSION}/bin ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    cp -a ./raven-${VERSION}/bin ${fullnodesDir}/${chain}
 
     rm -rf ${UNZIP_DIR}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 
@@ -847,28 +888,31 @@ function install_ravencoin {
 function install_zcash {
     cd ${TMP_DIR}
 
-    coin="zcash"
+    chain="zcash"
     VERSION="5.3.2"
-    INSTALL_LOG="${nodeConfDir}/fullnodes/${coin}/install.log"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}/install.log"
 
-    mkdir -p ${nodeConfDir}/fullnodes/${coin}
+    mkdir -p ${nodeLogDir}/fullnodes/${chain}
     >${INSTALL_LOG}
 
     DL_URL="https://z.cash/downloads/zcash-${VERSION}-linux64-debian-buster.tar.gz"
     DL_FILE=$(basename $DL_URL)
-    #UNZIP_DIR="${coin}-unzipped"
+    #UNZIP_DIR="${chain}-unzipped"
 
-    echo "Installing ${coin} ${VERSION}..."
+    echo "Installing ${chain} ${VERSION}..."
 
-    echo " - Downloading ${coin}"
+    echo " - Downloading ${chain}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     tar zxf $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${coin}"
-    rm -rf ${fullnodesDir}/${coin}
-    cp -a ./zcash-${VERSION}/bin ${fullnodesDir}/${coin}
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    cp -a ./zcash-${VERSION}/bin ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
 
 

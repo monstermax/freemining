@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ./pool_manager.sh
+source ../pool_manager.sh
 set -e
 
 
@@ -16,7 +16,7 @@ installNodejsPackages
 
 
 # install pool server
-./pool_server/install_server.sh
+../pool_server/install_server.sh
 
 # install pools manager
-./pools_manager/install_pools_manager.sh
+../pools_manager/install_pools_manager.sh

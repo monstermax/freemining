@@ -130,7 +130,7 @@ function usage {
     echo "  $CMD stop                      # stop ${FRM_PACKAGE}"
     echo "  $CMD status                    # show ${FRM_PACKAGE} status"
     echo "  $CMD log                       # tail ${FRM_PACKAGE} stdout"
-    echo "  $CMD log-pid                   # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD pid-log                   # tail ${FRM_PACKAGE} stdout"
     echo
 }
 
