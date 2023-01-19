@@ -82,14 +82,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install                     # install ${FRM_MODULE} manager"
-        echo
-        echo "  $CMD rigs                        # show rigs list"
-        echo
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
+        echo
+        echo "  $CMD webserver <params>          # start/stop the ${FRM_MODULE} websocket & web servers"
+        echo
+        echo "  $CMD rigs                        # show ${FRM_MODULE} rigs list"
         echo "  $CMD json                        # show ${FRM_MODULE} status (JSON formatted)"
         echo
-        echo "  $CMD webserver                   # start/stop the ${FRM_MODULE} websocket & web servers"
+        echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo
     }
 

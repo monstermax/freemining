@@ -2,8 +2,10 @@
 
 cd `dirname $0`
 
-source ../rig_manager.sh
+echo "service script is DEPRCATED"; exit 1
 
+source ../rig_manager.sh
+set -e
 
 FRM_PACKAGE="miner"
 

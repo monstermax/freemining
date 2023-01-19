@@ -3,6 +3,7 @@
 cd `dirname $0`
 
 source ../rig_manager.sh
+set -e
 
 
 ACTION=$1
@@ -191,7 +192,7 @@ if hasOpt start || hasOpt run || hasOpt debug; then
             ;;
 
         *)
-            echo "Error: unknown service ${MINER}"
+            echo "Error: unknown miner ${MINER}"
             exit 1
             ;;
     esac

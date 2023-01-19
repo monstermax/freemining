@@ -3,6 +3,7 @@
 cd `dirname $0`
 
 source ./pool_manager.sh
+set -e
 
 
 # install basic tools

@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../pool_manager.sh
+source ./fullnode_manager.sh
 set -e
 
 
@@ -10,12 +10,7 @@ set -e
 installBasicTools
 
 # install nodejs + npm + typescript
-installNodejsPackages
+#installNodejs
+#installNodejsPackages
 
 
-# install pool server
-npm install
-
-
-# compile typescript
-${TSC}

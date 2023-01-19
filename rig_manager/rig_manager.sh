@@ -118,17 +118,16 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install                     # install ${FRM_MODULE} manager"
-        echo "  $CMD miner-install [miner]       # install a miner"
-        echo "  $CMD miner-uninstall [miner]     # uninstall a miner"
-        echo
-        echo "  $CMD miner <params>              # manage ${FRM_MODULE} miners processes"
+        echo "  $CMD miner <params>              # start/stop ${FRM_MODULE} miners processes"
+        echo "  $CMD agent <params>              # start/stop the ${FRM_MODULE} agent"
         echo
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo "  $CMD status                      # show ${FRM_MODULE} status"
         echo "  $CMD json                        # show ${FRM_MODULE} status (JSON formatted)"
         echo
-        echo "  $CMD agent                       # start/stop the ${FRM_MODULE} agent"
+        echo "  $CMD install                     # install ${FRM_MODULE} manager"
+        echo "  $CMD miner-install [miner]       # install a miner"
+        echo "  $CMD miner-uninstall [miner]     # uninstall a miner"
         echo
     }
 

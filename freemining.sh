@@ -11,7 +11,6 @@ CMD_ARGS=($@)
 
 
 NODE="/usr/bin/node"
-#TS_NODE="/usr/bin/ts-node"
 TS_NODE="/usr/bin/node -r ts-node/register"
 TSC="tsc"
 USE_TS="1"
@@ -448,9 +447,10 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD rig  <params>                # manage rig"
-        echo "  $CMD farm <params>                # manage farm"
-        echo "  $CMD pool <params>                # manage pool"
+        echo "  $CMD rig      <params>            # manage rig"
+        echo "  $CMD farm     <params>            # manage farm"
+        echo "  $CMD pool     <params>            # manage pool"
+        echo "  $CMD fullnode <params>            # manage pool"
         echo
         echo "  $CMD bin-install                  # install freemining.sh to ${INSTALL_DIR}/frm"
         echo "  $CMD modules-install              # install all modules (rig, farm, pool)"
@@ -472,6 +472,10 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "pool" ]; then
         shift
         exec ./pool_manager/pool_manager.sh $@
+
+    elif [ "$1" = "fullnode" ]; then
+        shift
+        exec ./fullnode_manager/fullnode_manager.sh $@
 
     elif [ "$1" = "bin-install" ]; then
         PARENT_DIR=$(dirname $BASH_SOURCE)
@@ -537,6 +541,11 @@ $0 \$@
         echo
         echo "==== FARM ===="
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.farm\.") |grep -e '\[free[m]ining.*\]' --color -B1
+
+        echo
+        echo "==== FULLNODE ===="
+        ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.fullnode\.") |grep -e '\[free[m]ining.*\]' --color -B1
+        echo
 
         echo
         echo "==== POOL ===="

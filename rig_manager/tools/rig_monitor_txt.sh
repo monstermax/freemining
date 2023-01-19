@@ -2,7 +2,8 @@
 
 cd `dirname $0`
 
-#source ../rig_manager.sh
+source ../rig_manager.sh
+set -e
 
 TXT_MONITOR_DIR=../miners_monitor/txt
 

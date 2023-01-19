@@ -2,7 +2,7 @@
 
 # POOL Manager
 
-Tous les outils pour gérer les pools de minage
+Tous les outils pour gérer les fullnodes
 
 
 ## Installation

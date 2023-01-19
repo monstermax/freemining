@@ -2,12 +2,12 @@
 
 cd `dirname $0`
 
-source ../pool_manager.sh
+source ../fullnode_manager.sh
+set -e
 
 
 ACTION=$1
 FULLNODE=$2
-shift 2
 
 FRM_PACKAGE="fullnode"
 DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${FULLNODE}"
@@ -67,9 +67,7 @@ function showFullnodesList {
 
 # START
 if hasOpt start || hasOpt run || hasOpt debug; then
-    x=$@ ; set -- $(removeOpt "$x" "start")
-    x=$@ ; set -- $(removeOpt "$x" "run")
-    x=$@ ; set -- $(removeOpt "$x" "debug")
+    shift
 
     if hasOpt start; then
         # set background
@@ -77,7 +75,7 @@ if hasOpt start || hasOpt run || hasOpt debug; then
     fi
 
     #DAEMON_CHDIR=$PWD
-    DAEMON_CHDIR=${NODES_DIR}/${FULLNODE}
+    DAEMON_CHDIR=${fullnodesDir}/${FULLNODE}
     DAEMON_DRY=0
 
     if hasOpt debug; then
@@ -89,34 +87,32 @@ if hasOpt start || hasOpt run || hasOpt debug; then
         usage
         exit 1
     fi
+    shift
 
     CMD_EXEC=""
 
     case "$FULLNODE" in
         ergo)
-            CMD_EXEC="java"
-            CMD_ARGS="-jar -Xmx4G ${NODES_DIR}/ergo/ergo.jar --mainnet -c ${USER_CONF_DIR}/fullnodes/${FULLNODE}/ergo.conf $@"
+            CMD_EXEC="java -jar -Xmx4G ${fullnodesDir}/ergo/ergo.jar --mainnet -c ${nodeConfDir}/fullnodes/${FULLNODE}/${FULLNODE}.conf $@"
             ;;
 
         monero)
-            CMD_EXEC="${NODES_DIR}/monero/monerod"
-            CMD_ARGS="--non-interactive $@"
+            CMD_EXEC="${fullnodesDir}/monero/monerod --data-dir ${nodeConfDir}/fullnodes/${FULLNODE} --non-interactive $@"
             ;;
 
-        "")
+        firo)
+            CMD_EXEC="${fullnodesDir}/firo/firod -datadir=${nodeConfDir}/fullnodes/${FULLNODE} $@"
             ;;
 
         *)
-            echo "Error: unknown service ${FULLNODE}"
+            echo "Error: unknown fullnode ${FULLNODE}"
             exit 1
             ;;
     esac
 
 
     if [ "$CMD_EXEC" != "" ]; then
-        CMD="$CMD_EXEC $CMD_ARGS"
-
-        daemonStart "$DAEMON_NAME" "$CMD" "$DAEMON_OPTS"
+        daemonStart "$DAEMON_NAME" "$CMD_EXEC" "$DAEMON_OPTS"
         exit $?
     fi
 

@@ -37,8 +37,6 @@ poolLogDir=$(eval echo `jq -r ".poolLogDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 poolPidDir=$(eval echo `jq -r ".poolPidDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
-fullnodesDir=$(eval echo `jq -r ".fullnodesDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
-
 poolsEngineDir=$(eval echo `jq -r ".poolsEngineDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 poolsWebsitesDir=$(eval echo `jq -r ".poolsWebsitesDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
@@ -63,12 +61,6 @@ if [ "$poolDataDir" = "" ]; then
     poolDataDir=${frmDataDir}/${FRM_MODULE}
 fi
 
-
-if [ "$fullnodesDir" = "" ]; then
-    fullnodesDir="${poolDataDir}/fullnodes"
-fi
-
-
 if [ "$poolsEngineDir" = "" ]; then
     poolsEngineDir="${poolDataDir}/engines"
 fi
@@ -77,10 +69,6 @@ if [ "$poolsWebsitesDir" = "" ]; then
     poolsWebsitesDir="${poolDataDir}/websites"
 fi
 
-
-
-CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${POOL_CONFIG_FILE} 2>/dev/null`)
-INSTALLED_FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
 
 DAEMON_LOG_DIR=$poolLogDir
 DAEMON_PID_DIR=$poolPidDir
@@ -106,18 +94,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD [action] <params>"
         echo
-        echo "  $CMD install                     # install ${FRM_MODULE} manager"
-        echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
-        echo "  $CMD fullnode-install [chain]    # install a fullnode"
-        echo "  $CMD fullnode-uninstall [chain]  # install a fullnode"
-        echo
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo
-        echo "  $CMD fullnode                    # start/stop a fullnode"
-        echo "  $CMD miningcore                  # start/stop ${FRM_MODULE} miningcore"
-        echo "  $CMD webserver                   # start/stop the ${FRM_MODULE} webserver"
+        echo "  $CMD miningcore <params>         # start/stop ${FRM_MODULE} miningcore"
+        echo "  $CMD webserver  <params>         # start/stop the ${FRM_MODULE} webserver"
         echo
-        echo "  $CMD config-firewall             # Not available. TODO"
+        echo "  $CMD install                     # install ${FRM_MODULE} manager"
+        echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
+        #echo "  $CMD config-firewall             # Not available. TODO"
         echo
     }
 
@@ -128,34 +112,6 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "package-install" ]; then
         shift
         exec ./pools_manager/install_package.sh $@
-
-    elif [ "$1" = "fullnode-install" ]; then
-        shift
-        exec ./tools/install_fullnode.sh $@
-
-    elif [ "$1" = "fullnode-uninstall" ]; then
-        FULLNODE=$2
-        if [ "$FULLNODE" = "" ]; then
-            usage
-            exit 1
-        fi
-
-        echo "Uninstalling fullnode ${FULLNODE}..."
-        echo
-
-        echo "Deleting binaries: ${fullnodesDir}/${FULLNODE}"
-        echo "[Press Enter to continue]"
-        read
-        rm -rf ${fullnodesDir}/${FULLNODE}/
-
-        echo "Deleting data & configuration: ${poolConfDir}/pool/fullnode/${FULLNODE}"
-        echo "[Press Enter to continue]"
-        read
-        rm -rf ${poolConfDir}/pool/fullnode/${FULLNODE}/
-
-    elif [ "$1" = "fullnode" ]; then
-        shift
-        exec ./tools/fullnode.sh $@
 
     elif [ "$1" = "miningcore" ]; then
         shift

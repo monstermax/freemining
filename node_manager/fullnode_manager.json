@@ -1,0 +1,21 @@
+{
+    "nodeName": "",
+
+    "nodeConfDir": "${frmConfDir}/node",
+    "nodeLogDir": "${frmLogDir}/node",
+	"nodePidDir": "${frmPidDir}/node",
+
+	"nodeDataDir": "${frmDataDir}/node",
+    "fullnodesDir": "${nodeDataDir}/fullnodes",
+
+	"fullnodes": {
+		"ergo": {
+			"apiSecret": "yosecret",
+			"apiKeyHash": "158f937d33215503d851b9a29f81a33a9c2c0d7c9cf15b4b9887b99fa0845010"
+		},
+		"monero": {
+			"walletPassword": "secret"
+		}
+	}
+
+}

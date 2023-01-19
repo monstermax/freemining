@@ -3,6 +3,7 @@
 cd `dirname $0`
 
 source ../pool_manager.sh
+set -e
 
 TMP_DIR=$(mktemp -d)
 chmod o+x $TMP_DIR
@@ -14,9 +15,9 @@ function install_miningcore {
 
     package="miningcore"
     VERSION="sources"
-    INSTALL_LOG="${USER_CONF_DIR}/pools_engine/${package}/install.log"
+    INSTALL_LOG="${poolLogDir}/engines/${package}/install.log"
 
-    mkdir -p ${USER_CONF_DIR}/pools_engine/${package}
+    mkdir -p ${poolLogDir}/engines/${package}
     >${INSTALL_LOG}
 
     DB_NAME="miningcore"
@@ -28,8 +29,6 @@ function install_miningcore {
     #UNZIP_DIR="${package}-unzipped"
 
     echo "Installing ${package} ${VERSION}..."
-
-    mkdir -p ${USER_CONF_DIR}/pools_engine/${package}
 
     echo " - Downloading ${package}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
@@ -107,9 +106,9 @@ function install_miningcoreUi {
 
     package="miningcoreUi"
     VERSION="sources"
-    INSTALL_LOG="${USER_CONF_DIR}/pools_ui/${package}/install.log"
+    INSTALL_LOG="${poolLogDir}/websites/${package}/install.log"
 
-    mkdir -p ${USER_CONF_DIR}/pools_ui/${package}
+    mkdir -p ${poolLogDir}/websites/${package}
     >${INSTALL_LOG}
 
     DL_URL="https://gitlab.com/calvintam236/miningcore-ui"
@@ -117,8 +116,6 @@ function install_miningcoreUi {
     #UNZIP_DIR="${package}-unzipped"
 
     echo "Installing ${package} ${VERSION}..."
-
-    mkdir -p ${USER_CONF_DIR}/pools_ui/${package}
 
     echo " - Downloading ${package}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
@@ -135,9 +132,9 @@ function install_miningcoreWebUI {
 
     package="miningcoreWebUI"
     VERSION="sources"
-    INSTALL_LOG="${USER_CONF_DIR}/pools_ui/${package}/install.log"
+    INSTALL_LOG="${poolLogDir}/websites/${package}/install.log"
 
-    mkdir -p ${USER_CONF_DIR}/pools_ui/${package}
+    mkdir -p ${poolLogDir}/websites/${package}
     >${INSTALL_LOG}
 
     DL_URL="https://github.com/minernl/Miningcore.WebUI"
@@ -145,8 +142,6 @@ function install_miningcoreWebUI {
     #UNZIP_DIR="${package}-unzipped"
 
     echo "Installing ${package} ${VERSION}..."
-
-    mkdir -p ${USER_CONF_DIR}/pools_ui/${package}
 
     echo " - Downloading ${package}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
@@ -235,17 +230,14 @@ fi
 
 
 if [ "$package" = "miningcore" ]; then
-    mkdir -p ${USER_CONF_DIR}/pools_engine
     install_miningcore
 fi
 
 if [ "$package" = "miningcoreUi" ]; then
-    mkdir -p ${USER_CONF_DIR}/pools_ui
     install_miningcoreUi
 fi
 
 if [ "$package" = "miningcoreWebUI" ]; then
-    mkdir -p ${USER_CONF_DIR}/pools_ui
     install_miningcoreWebUI
 fi
 

@@ -4,6 +4,7 @@
     "rigConfDir": "${frmConfDir}/rig",
     "rigLogDir": "${frmLogDir}/rig",
     "rigPidDir": "${frmPidDir}/rig",
+
     "rigDataDir": "${frmDataDir}/rig",
     "minersDir": "${rigDataDir}/miners",
 

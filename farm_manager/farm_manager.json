@@ -4,6 +4,7 @@
     "farmConfDir": "${frmConfDir}/farm",
     "farmLogDir": "${frmLogDir}/farm",
     "farmPidDir": "${frmPidDir}/farm",
+
     "farmDataDir": "${frmDataDir}/farm",
 
     "farmServer": {

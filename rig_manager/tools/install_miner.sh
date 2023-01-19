@@ -3,7 +3,6 @@
 cd `dirname $0`
 
 source ../rig_manager.sh
-
 set -e
 
 

@@ -3,17 +3,12 @@
 cd `dirname $0`
 
 source ../../pool_manager.sh
+set -e
 
 
 package="miningcore"
 
-MININGCORE_CONFIG_FILE=${USER_CONF_DIR}/pools_engine/${package}/config.json
-
-
-mkdir -p ${USER_CONF_DIR}/pools_engine/${package}
-
-touch $MININGCORE_CONFIG_FILE
-
+MININGCORE_CONFIG_FILE=${poolConfDir}/engines/${package}/config.json
 
 SMTP_HOST=""
 SMTP_PORT="587"
@@ -26,6 +21,12 @@ ADMIN_EMAIL="webmaster@freemining.fr"
 
 API_HOST="0.0.0.0"
 API_PORT="4000"
+
+
+
+mkdir -p ${poolConfDir}/engines/${package}
+mkdir -p ${poolLogDir}/engines/${package}
+touch $MININGCORE_CONFIG_FILE
 
 
 POOLS_JSON=""
@@ -182,7 +183,7 @@ ${POOL_JSON}"
 fi
 
 
-cat << _EOF > ${USER_CONF_DIR}/pools_engine/${package}/config.json
+cat << _EOF > ${poolConfDir}/engines/${package}/config.json
 {
     "logging": {
         "level": "info",
@@ -190,7 +191,7 @@ cat << _EOF > ${USER_CONF_DIR}/pools_engine/${package}/config.json
         "enableConsoleColors": true,
         "logFile": "core.log",
         "apiLogFile": "api.log",
-        "logBaseDirectory": "${USER_CONF_DIR}/pools_engine/${package}/logs",
+        "logBaseDirectory": "${poolLogDir}/engines/${package}",
         "perPoolLogFile": false
     },
     "banning": {

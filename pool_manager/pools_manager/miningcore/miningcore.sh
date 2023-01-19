@@ -3,6 +3,7 @@
 cd `dirname $0`
 
 source ../../pool_manager.sh
+set -e
 
 
 FRM_PACKAGE="miningcore"
