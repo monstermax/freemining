@@ -5,6 +5,13 @@ cd `dirname $0`
 source ../node_manager.sh
 set -e
 
+# Usage:
+# ./run_fullnode.sh ps
+# or
+# ./run_fullnode.sh {ACTION} {CHAIN}
+
+# Actions: run start stop status debug log pid-log log-file pid-file pid ps
+
 
 ACTION=$1
 FULLNODE=$2
@@ -12,17 +19,6 @@ shift 2 || true
 
 FRM_PACKAGE="fullnode"
 DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${FULLNODE}"
-
-DAEMON_OPTS=""
-#DAEMON_OPTS="background"
-
-
-DAEMON_LOG_DIR=$nodeLogDir/fullnodes
-DAEMON_PID_DIR=$nodePidDir/fullnodes
-mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
-
-
-IP_CRYPTO="51.255.67.45"
 
 
 function usage {
@@ -37,22 +33,36 @@ function usage {
     echo
     echo "  $CMD [action] <params>"
     echo
-    echo "  $CMD run|start [chain]"
+    echo "    - $CMD run [chain]               # run ${FRM_PACKAGE}"
+    echo "    - $CMD start [chain]             # start ${FRM_PACKAGE} in background"
+    echo "    - $CMD restart [chain]           # start ${FRM_PACKAGE} in background"
     echo
-    echo "  $CMD run       [chain]          # run ${FRM_PACKAGE}"
-    echo "  $CMD start     [chain]          # start ${FRM_PACKAGE} in background"
+    echo "  $CMD stop [chain]                  # stop background ${FRM_PACKAGE}"
     echo
-    echo "  $CMD stop      [chain]          # stop background ${FRM_PACKAGE}"
+    echo "  $CMD status [chain]                # show ${FRM_PACKAGE} status"
     echo
-    echo "  $CMD status    [chain]          # show ${FRM_PACKAGE} status"
-    echo "  $CMD log       [chain]          # tail ${FRM_PACKAGE} stdout"
-    echo "  $CMD log-pid   [chain]          # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD log [chain]                   # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD log-pid [chain]               # tail ${FRM_PACKAGE} stdout"
+    echo
+    echo "  $CMD ps                            # show all ${FRM_PACKAGE} running processes"
     echo
 
     showFullnodesList
 
     echo
 }
+
+
+################################################################################
+
+
+DAEMON_LOG_DIR=$nodeLogDir/fullnodes
+DAEMON_PID_DIR=$nodePidDir/fullnodes
+mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
+
+
+################################################################################
+
 
 function showFullnodesList {
     _CONFIGURED_FULLNODES=$CONFIGURED_FULLNODES
@@ -71,10 +81,13 @@ function showFullnodesList {
 }
 
 
+################################################################################
+
+
 
 if [ "$ACTION" = "" ]; then
     usage
-    exit 1
+    exit 0
 fi
 
 if [ "$FULLNODE" = "" ]; then
@@ -86,8 +99,20 @@ fi
 
 
 
+# STOP
+if test "$ACTION" = "stop" || test "$ACTION" = "restart"; then
+    daemonStop $DAEMON_NAME $DAEMON_OPTS
+
+    if test "$ACTION" = "stop"; then
+        exit $?
+    fi
+fi
+
+
+
 # START
-if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug"; then
+if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "restart" || test "$ACTION" = "debug"; then
+
     if test "$ACTION" = "start"; then
         # set background
         DAEMON_OPTS="background"
@@ -191,13 +216,7 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
         exit $?
     fi
 
-fi
-
-
-# STOP
-if test "$ACTION" = "stop"; then
-    daemonStop $DAEMON_NAME $DAEMON_OPTS
-    exit $?
+    exit 1
 fi
 
 

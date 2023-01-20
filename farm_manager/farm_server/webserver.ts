@@ -5,22 +5,11 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import colors from 'colors/safe';
 
-
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
 
 
-const config: any = require('../farm_manager.json');
 
-const wsServerHost = config.farmServer?.host || '0.0.0.0';
-const wsServerPort = config.farmServer?.port || 4200;
-
-const allowedIps = config.farmServer?.wsAllowedIps || [];
-const serverConnTimeout = 10_000;
-
-const templatesDir = `${__dirname}/web/templates`;
-const staticDir = `${__dirname}/web/public`;
+/* ############################## TYPES ##################################### */
 
 
 type Rig = {
@@ -58,32 +47,64 @@ type RigDeviceGpu = {
 type wsClient = any;
 
 
+
+/* ############################## MAIN ###################################### */
+
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+
+const configFarm: any = require('../farm_manager.json');
+const configFrm: any = require('../../freemining.json');
+
+const wsServerHost = configFarm.farmServer?.host || '0.0.0.0';
+const wsServerPort = configFarm.farmServer?.port || 4200;
+
+const allowedIps = configFarm.farmServer?.wsAllowedIps || [];
+const serverConnTimeout = 10_000;
+
+let staticDir = configFarm.farmServer?.root || `${__dirname}/web/public`;
+let templatesDir = configFarm.farmServer?.templates || `${__dirname}/web/templates`;
+
+const farmAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/farm';
+const ctx: any = {
+    ...configFrm,
+    ...configFarm,
+    farmAppDir,
+};
+templatesDir = stringTemplate(templatesDir, ctx, false, true, true);
+staticDir = stringTemplate(staticDir, ctx, false, true, true);
+
+
+
 const rigs: {[key:string]: Rig} = {};
 
 const wsClients: {[key:string]: wsClient} = {};
 
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
+console.log(`${now()} [${colors.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express.static(staticDir));
 
 
+function applyLayout(req: express.Request, content: string, opts: any={}) {
+    const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
+
+    opts = opts || {};
+    opts.body = opts.body || {};
+    opts.body.content = content;
+    opts.currentUrl = req.url;
+
+    return applyHtmlLayout(layoutPath, opts);
+}
+
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {
+    const content = "Farm management";
+    const pageContent = applyLayout(req, content, {});
 
-    const opts = {
-        meta: {
-            title: '',
-            noIndex: false,
-        },
-        currentUrl: req.url,
-        body: {
-            content: 'welcome',
-        }
-    };
-
-    const layoutTemplate = fs.readFileSync(`${templatesDir}/layout.html`).toString();
-    let pageContent = stringTemplate(layoutTemplate, opts);
-
-    res.send( pageContent );
+    res.send(pageContent);
     res.end();
 });
 
@@ -141,7 +162,7 @@ app.get('/rigs/', (req: express.Request, res: express.Response, next: Function) 
         }
     };
 
-    const layoutTemplate = fs.readFileSync(`${templatesDir}/layout.html`).toString();
+    const layoutTemplate = fs.readFileSync(`${templatesDir}/layout_farm_webserver.html`).toString();
     let pageContent = stringTemplate(layoutTemplate, opts);
 
     res.send( pageContent );
@@ -178,7 +199,7 @@ app.get('/rigs/rig', (req: express.Request, res: express.Response, next: Functio
             }
         };
 
-        const layoutTemplate = fs.readFileSync(`${templatesDir}/layout.html`).toString();
+        const layoutTemplate = fs.readFileSync(`${templatesDir}/layout_farm_webserver.html`).toString();
         let pageContent = stringTemplate(layoutTemplate, opts);
 
         res.send( pageContent );
@@ -407,6 +428,12 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
 });
 
 
+server.listen(wsServerPort, wsServerHost, () => {
+    console.log(`${now()} [${colors.blue('INFO')}] Server started on ${wsServerHost}:${wsServerPort}`);
+});
+
+
+
 
 // Handle connections heartbeat
 const interval = setInterval(function pings() {
@@ -430,11 +457,6 @@ const interval = setInterval(function pings() {
 
 
 
-server.listen(wsServerPort, wsServerHost, () => {
-    console.log(`${now()} [${colors.blue('INFO')}] Server started on ${wsServerHost}:${wsServerPort}`);
-});
-
-
 // Send a message every x seconds to all clients
 //setInterval(function hello() {
 //    wss.clients.forEach(function ping(ws: any) {
@@ -444,38 +466,7 @@ server.listen(wsServerPort, wsServerHost, () => {
 
 
 
-
-function stringTemplate(text: string, params: any, ignoreErrors=false) {
-    params.formatNumber = formatNumber;
-
-    try {
-        const names = Object.keys(params);
-        const vals = Object.values(params);
-        return new Function(...names, `return \`${text}\`;`)(...vals);
-
-    } catch (err) {
-        if (ignoreErrors) {
-            return null;
-        }
-        throw err;
-    }
-}
-
-
-function formatNumber(n: number) {
-    return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 }).format(n);
-}
-
-
-
-function now(): string {
-    const options: {hour:string|any, minute:string|any, second:string|any} = {
-        /* year: "numeric", month: "2-digit", day: "2-digit", */
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-    }
-    return new Date().toLocaleTimeString("fr-FR", options);
-}
-
+/* ############################ FUNCTIONS ################################### */
 
 
 function getMiners() {
@@ -489,3 +480,5 @@ function getMiners() {
     ];
     return miners;
 }
+
+

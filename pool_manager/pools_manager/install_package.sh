@@ -5,8 +5,42 @@ cd `dirname $0`
 source ../pool_manager.sh
 set -e
 
+# Usage:
+# ./install_package.sh ps
+
+
+FRM_PACKAGE="package_install"
+
+
+function usage {
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
+    echo "=============="
+    echo
+
+    echo "Usage:"
+    echo
+    echo "  $CMD <package>"
+    echo
+    echo
+
+    showMinersList
+
+    echo
+}
+
+
+################################################################################
+
+
 TMP_DIR=$(mktemp -d)
-chmod o+x $TMP_DIR
+mkdir -p ${TMP_DIR}
+#chmod o+x $TMP_DIR
+
+mkdir -p ${poolsEngineDir}
+mkdir -p ${poolsWebsitesDir}
 
 
 
@@ -39,13 +73,13 @@ function install_miningcore {
     rootRequired
 
     if grep -q "Debian GNU/Linux 11" /etc/os-release; then
-        ./build-debian-11.sh >>${INSTALL_LOG}
+        ./build-debian-11.sh >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
     elif grep -q "Ubuntu 21.04" /etc/os-release; then
-        ./build-ubuntu-20.04.sh >>${INSTALL_LOG}
+        ./build-ubuntu-20.04.sh >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
     elif grep -q "Ubuntu 20.04" /etc/os-release; then
-        ./build-ubuntu-21.04.sh >>${INSTALL_LOG}
+        ./build-ubuntu-21.04.sh >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     else
         echo "Error: the install script for the package '${package}' is not compatible with your OS"
         exit 1
@@ -59,45 +93,49 @@ function install_miningcore {
     if [ "`getCmdPath psql`" = "" ]; then
         echo " - Installing dependencies packages: postgresql"
         rootRequired
-        sudo apt-get install -qq -y postgresql
+        sudo apt-get install -qq -y postgresql >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     fi
 
     echo " - Preparing postgresql"
     rootRequired
 
+    # give access TMP_DIR to postgres user
+    chmod o+rx ${TMP_DIR}
+
     if ! sudo -u postgres psql postgres -tXAc  "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" | grep -q 1; then
         # create role
         #sudo -u postgres psql -c "CREATE ROLE ${DB_USER} WITH LOGIN ENCRYPTED PASSWORD '${DB_PASS}'"
-        sudo -u postgres psql -c "CREATE ROLE ${DB_USER} WITH PASSWORD '${DB_PASS}'"
+
+        sudo -u postgres psql -c "CREATE ROLE ${DB_USER} WITH PASSWORD '${DB_PASS}'" >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
         #ALTER ROLE ${DB_USER} WITH PASSWORD '${DB_PASS}';
     fi
 
     if ! sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw ${DB_NAME}; then
         # create db
-        sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}"
+        sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}" >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     #fi
 
     #if ! sudo -u postgres psql -d ${DB_NAME} -c "" 2>/dev/null; then
         echo " - Importing postgresql dump"
         # import db
-        sudo -u postgres psql -d ${DB_NAME} -f ./src/Miningcore/Persistence/Postgres/Scripts/createdb.sql
+        sudo -u postgres psql -d ${DB_NAME} -f ./src/Miningcore/Persistence/Postgres/Scripts/createdb.sql >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     fi
 
     #sudo -u postgres psql -d ${DB_NAME} -f ./src/Miningcore/Persistence/Postgres/Scripts/createdb_postgresql_11_appendix.sql
     #for each active pool...
     #  sudo -u postgres psql -c "CREATE TABLE shares_xxx1 PARTITION OF shares FOR VALUES IN ('xxx1')"
 
-
     # apply custom patch
     mv build/coins.json build/coins.dist.json
-    cp -a ${frmAppDir}/pools_manager/patchs/miningcore_coins.json build/coins.json
 
+    cp -a ${poolAppDir}/pools_manager/patchs/miningcore_coins.json build/coins.json
+    #cp -a build/config.json ${poolConfDir}/engines/miningcore/
 
-    echo " - Install into ${POOLS_ENGINE_DIR}/${package}"
-    mkdir -p ${POOLS_ENGINE_DIR}
-    rm -rf ${POOLS_ENGINE_DIR}/${package}
-    mv build ${POOLS_ENGINE_DIR}/${package}
+    echo " - Install into ${poolsEngineDir}/${package}"
+    mkdir -p ${poolsEngineDir}
+    rm -rf ${poolsEngineDir}/${package}
+    mv build ${poolsEngineDir}/${package}
 }
 
 
@@ -120,10 +158,10 @@ function install_miningcoreUi {
     echo " - Downloading ${package}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
-    echo " - Install into ${POOLS_UI_DIR}/${package}"
-    mkdir -p ${POOLS_UI_DIR}
-    rm -rf ${POOLS_UI_DIR}/${package}
-    mv miningcore-ui ${POOLS_UI_DIR}/${package}
+    echo " - Install into ${poolsWebsitesDir}/${package}"
+    mkdir -p ${poolsWebsitesDir}
+    rm -rf ${poolsWebsitesDir}/${package}
+    mv miningcore-ui ${poolsWebsitesDir}/${package}
 }
 
 
@@ -148,18 +186,18 @@ function install_miningcoreWebUI {
 
     # apply custom patchs
     cd Miningcore.WebUI
-    git apply ${frmAppDir}/pools_manager/patchs/miningcoreWebUI_api_patch.patch
-    git apply ${frmAppDir}/pools_manager/patchs/miningcoreWebUI_index_patch.patch
-    #${frmAppDir}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
-    cp -a ${frmAppDir}/pools_manager/patchs/coins_icons/*.png ./img/coin/icon
+    git apply ${poolAppDir}/pools_manager/patchs/miningcoreWebUI_api_patch.patch
+    git apply ${poolAppDir}/pools_manager/patchs/miningcoreWebUI_index_patch.patch
+    #${poolAppDir}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q
+    cp -a ${poolAppDir}/pools_manager/patchs/coins_icons/*.png ./img/coin/icon
     touch ./css/font-awesome-icons.css
     touch ./css/bootstrap-notify.css
     cd ..
 
-    echo " - Install into ${POOLS_UI_DIR}/${package}"
-    mkdir -p ${POOLS_UI_DIR}
-    rm -rf ${POOLS_UI_DIR}/${package}
-    mv Miningcore.WebUI ${POOLS_UI_DIR}/${package}
+    echo " - Install into ${poolsWebsitesDir}/${package}"
+    mkdir -p ${poolsWebsitesDir}
+    rm -rf ${poolsWebsitesDir}/${package}
+    mv Miningcore.WebUI ${poolsWebsitesDir}/${package}
 }
 
 

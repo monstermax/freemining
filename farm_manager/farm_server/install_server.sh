@@ -9,6 +9,7 @@ source ../farm_manager.sh
 installBasicTools
 
 # install nodejs + npm + typescript
+installNodejs
 installNodejsPackages
 
 

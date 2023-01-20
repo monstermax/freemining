@@ -39,6 +39,7 @@ nodePidDir=$(eval echo `jq -r ".nodePidDir" ${NODE_CONFIG_FILE} 2>/dev/null`)
 
 nodeDataDir=$(eval echo `jq -r ".nodeDataDir" ${NODE_CONFIG_FILE} 2>/dev/null`)
 
+
 fullnodesDir=$(eval echo `jq -r ".fullnodesDir" ${NODE_CONFIG_FILE} 2>/dev/null`)
 
 

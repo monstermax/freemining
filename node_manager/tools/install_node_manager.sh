@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../fullnode_manager.sh
+source ../node_manager.sh
 set -e
 
 

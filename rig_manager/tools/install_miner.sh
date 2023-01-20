@@ -5,8 +5,35 @@ cd `dirname $0`
 source ../rig_manager.sh
 set -e
 
+# Usage:
+# ./install_miner.sh ps
+
 
 FRM_PACKAGE="miner_install"
+
+
+function usage {
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
+    echo "=============="
+    echo
+
+    echo "Usage:"
+    echo
+    echo "  $CMD <miner>"
+    echo
+    echo
+
+    showMinersList
+
+    echo
+}
+
+
+################################################################################
+
 
 TMP_DIR=$(mktemp -d)
 mkdir -p ${TMP_DIR}
@@ -24,6 +51,7 @@ installBasicTools
 installNodejsPackages
 
 
+################################################################################
 
 
 function install_lolminer {
@@ -535,14 +563,13 @@ function install_xmrig_nvidia_cuda_support {
 }
 
 
+################
+
+
+
 function clean_tmp_dir {
     rm -rf $TMP_DIR
 }
-
-
-
-
-##################################################################
 
 
 function showMinersList {
@@ -561,33 +588,20 @@ function showMinersList {
     echo "    * installed   miners: $_INSTALLED_MINERS"
 }
 
-INSTALLABLE_MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
 
+
+################################################################################
+
+
+
+INSTALLABLE_MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
 
 miner=$1
 
-
 if [ "$miner" = "" ]; then
-    CMD=$(basename $BASH_SOURCE)
-
-    echo "=============="
-    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
-    echo "=============="
-    echo
-
-    echo "Usage:"
-    echo
-    echo "  $CMD <miner>"
-    echo
-    echo
-
-    showMinersList
-
-    echo
-
-    exit
+    usage
+    exit 0
 fi
-
 
 
 if ! test -d ${minersDir}; then
@@ -608,95 +622,75 @@ if ! test -d ${minersDir}; then
 fi
 
 
-
-
-
 if [ "$miner" = "lolminer" ]; then
     install_lolminer
-fi
 
-if [ "$miner" = "gminer" ]; then
+elif [ "$miner" = "gminer" ]; then
     install_gminer
-fi
 
-if [ "$miner" = "trex" ]; then
+elif [ "$miner" = "trex" ]; then
     install_trex
-fi
 
-if [ "$miner" = "nbminer" ]; then
+elif [ "$miner" = "nbminer" ]; then
     install_nbminer
-fi
 
-if [ "$miner" = "teamredminer" ]; then
+elif [ "$miner" = "teamredminer" ]; then
     install_teamredminer
-fi
 
-if [ "$miner" = "bzminer" ]; then
+elif [ "$miner" = "bzminer" ]; then
     install_bzminer
-fi
 
-if [ "$miner" = "claymore" ]; then
+elif [ "$miner" = "claymore" ]; then
     install_claymore
-fi
 
-if [ "$miner" = "nanominer" ]; then
+elif [ "$miner" = "nanominer" ]; then
     install_nanominer
-fi
 
-if [ "$miner" = "miniz" ]; then
+elif [ "$miner" = "miniz" ]; then
     install_miniz
-fi
 
-if [ "$miner" = "firominer" ]; then
+elif [ "$miner" = "firominer" ]; then
     install_firominer
-fi
 
-if [ "$miner" = "firominer_sources_amd" ]; then
+elif [ "$miner" = "firominer_sources_amd" ]; then
     install_firominer_sources_amd
-fi
 
-if [ "$miner" = "wildrig" ]; then
+elif [ "$miner" = "wildrig" ]; then
     install_wildrig
-fi
 
-if [ "$miner" = "kawpowminer_nvidia" ]; then
+elif [ "$miner" = "kawpowminer_nvidia" ]; then
     install_kawpowminer_nvidia
-fi
 
-if [ "$miner" = "kawpowminer_amd" ]; then
+elif [ "$miner" = "kawpowminer_amd" ]; then
     install_kawpowminer_amd
-fi
 
-if [ "$miner" = "bminer" ]; then
+elif [ "$miner" = "bminer" ]; then
     install_bminer
-fi
 
-if [ "$miner" = "autolykosv2_nvidia" ]; then
+elif [ "$miner" = "autolykosv2_nvidia" ]; then
     install_autolykosv2_nvidia
-fi
 
-if [ "$miner" = "autolykosv2_amd" ]; then
+elif [ "$miner" = "autolykosv2_amd" ]; then
     install_autolykosv2_amd
-fi
 
-if [ "$miner" = "ethminer" ]; then
+elif [ "$miner" = "ethminer" ]; then
     install_ethminer
-fi
 
-if [ "$miner" = "srbminer" ]; then
+elif [ "$miner" = "srbminer" ]; then
     install_srbminer
-fi
 
-if [ "$miner" = "xmrig" ]; then
+elif [ "$miner" = "xmrig" ]; then
     install_xmrig
-fi
 
-if [ "$miner" = "xmrig_sources_free" ]; then
+elif [ "$miner" = "xmrig_sources_free" ]; then
     install_xmrig_sources_free
-fi
 
-if [ "$miner" = "xmrig_nvidia_cuda_support" ]; then
+elif [ "$miner" = "xmrig_nvidia_cuda_support" ]; then
     install_xmrig_nvidia_cuda_support
+
+else
+    usage
+    exit 1
 fi
 
 

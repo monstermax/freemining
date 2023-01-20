@@ -5,8 +5,35 @@ cd `dirname $0`
 source ../node_manager.sh
 set -e
 
+# Usage:
+# ./install_fullnode.sh ps
+
 
 FRM_PACKAGE="fullnode_install"
+
+
+function usage {
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
+    echo "=============="
+    echo
+
+    echo "Usage:"
+    echo
+    echo "  $CMD <fullnode>"
+    echo
+    echo
+
+    showFullnodesList
+
+    echo
+}
+
+
+################################################################################
+
 
 TMP_DIR=$(mktemp -d)
 mkdir -p ${TMP_DIR}
@@ -24,6 +51,7 @@ installBasicTools
 installNodejsPackages
 
 
+################################################################################
 
 
 function install_callisto {
@@ -885,17 +913,13 @@ function install_zcash {
 }
 
 
+################
+
 
 
 function clean_tmp_dir {
     rm -rf $TMP_DIR
 }
-
-
-
-
-##################################################################
-
 
 
 function showFullnodesList {
@@ -915,34 +939,20 @@ function showFullnodesList {
 
 }
 
-INSTALLABLE_FULLNODES="callisto ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin zcash"
 
+
+################################################################################
+
+
+
+INSTALLABLE_FULLNODES="callisto ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin zcash"
 
 fullnode=$1
 
-
-if [ "$fullnode" = "" ]; then
-    CMD=$(basename $BASH_SOURCE)
-
-    echo "=============="
-    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
-    echo "=============="
-    echo
-
-    echo "Usage:"
-    echo
-    echo "  $CMD <fullnode>"
-    echo
-    echo
-
-    showFullnodesList
-
-    echo
-
-    exit
+if test "$fullnode" = ""; then
+    usage
+    exit 0
 fi
-
-
 
 
 if ! test -d ${fullnodesDir}; then
@@ -963,67 +973,54 @@ if ! test -d ${fullnodesDir}; then
 fi
 
 
-
-
-
 if [ "$fullnode" = "callisto" ]; then
     install_callisto
-fi
 
-if [ "$fullnode" = "ergo" ]; then
+elif [ "$fullnode" = "ergo" ]; then
     install_ergo
-fi
 
-if [ "$fullnode" = "ethereum" ]; then
+elif [ "$fullnode" = "ethereum" ]; then
     install_ethereum
-fi
 
-if [ "$fullnode" = "ethereum_classic" ]; then
+elif [ "$fullnode" = "ethereum_classic" ]; then
     install_ethereum_classic
-fi
 
-if [ "$fullnode" = "firo" ]; then
+elif [ "$fullnode" = "firo" ]; then
     install_firo
-fi
 
-if [ "$fullnode" = "flux" ]; then
+elif [ "$fullnode" = "flux" ]; then
     install_flux
-fi
 
-if [ "$fullnode" = "kaspa" ]; then
+elif [ "$fullnode" = "kaspa" ]; then
     install_kaspa
-fi
 
-if [ "$fullnode" = "komodo" ]; then
+elif [ "$fullnode" = "komodo" ]; then
     install_komodo
-fi
 
-if [ "$fullnode" = "meowcoin" ]; then
+elif [ "$fullnode" = "meowcoin" ]; then
     install_meowcoin
-fi
 
-if [ "$fullnode" = "monero" ]; then
+elif [ "$fullnode" = "monero" ]; then
     install_monero
-fi
 
-if [ "$fullnode" = "neoxa" ]; then
+elif [ "$fullnode" = "neoxa" ]; then
     install_neoxa
-fi
 
-if [ "$fullnode" = "radiant" ]; then
+elif [ "$fullnode" = "radiant" ]; then
     install_radiant
-fi
 
-if [ "$fullnode" = "raptoreum" ]; then
+elif [ "$fullnode" = "raptoreum" ]; then
     install_raptoreum
-fi
 
-if [ "$fullnode" = "ravencoin" ]; then
+elif [ "$fullnode" = "ravencoin" ]; then
     install_ravencoin
-fi
 
-if [ "$fullnode" = "zcash" ]; then
+elif [ "$fullnode" = "zcash" ]; then
     install_zcash
+
+else
+    usage
+    exit 1
 fi
 
 

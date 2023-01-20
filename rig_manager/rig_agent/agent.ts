@@ -7,7 +7,11 @@ import WebSocket from 'ws';
 import os from 'os';
 import colors from 'colors/safe';
 const { exec } = require('child_process');
-const config: any = require('../rig_manager.json');
+
+import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
+
+
+/* ############################## TYPES ##################################### */
 
 
 type Rig = {
@@ -64,19 +68,55 @@ type RigStatus = {
 
 
 
+/* ############################## MAIN ###################################### */
+
+
+const configRig: any = require('../rig_manager.json');
+const configFrm: any = require('../../freemining.json');
+
+
 // Init HTTP Webserver
 const app = express();
 const server = http.createServer(app);
 
-const httpServerHost: string = config.rigWebServer?.host || '0.0.0.0';
-const httpServerPort: number = Number(config.rigWebServer?.port || 4110);
+const httpServerHost: string = configRig.rigWebServer?.host || '0.0.0.0';
+const httpServerPort: number = Number(configRig.rigWebServer?.port || 4300);
 
-app.use(express.urlencoded());
+let staticDir = configRig.rigWebServer?.root || `${__dirname}/web/public`;
+let templatesDir = configRig.rigWebServer?.templates || `${__dirname}/web/templates`;
 
-const httpServerRoot: string = config.rigWebServer?.root || '';
-if (httpServerRoot) {
-    app.use(express.static(httpServerRoot));
-}
+const rigAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/rig';
+const ctx: any = {
+    ...configFrm,
+    ...configRig,
+    rigAppDir,
+};
+templatesDir = stringTemplate(templatesDir, ctx, false, true, true);
+staticDir = stringTemplate(staticDir, ctx, false, true, true);
+
+
+app.use(express.urlencoded({ extended: true }));
+
+console.log(`${now()} [${colors.blue('INFO')}] Using static folder ${staticDir}`);
+app.use(express.static(staticDir));
+
+
+
+app.get('/', (req: express.Request, res: express.Response, next: Function) => {
+    const content = 'Rig management';
+    const pageContent = applyLayout(req, content, {});
+    res.send( pageContent );
+    res.end();
+});
+
+
+app.get('/status.json', (req: express.Request, res: express.Response, next: Function) => {
+    res.header({'Content-Type': 'application/json'});
+
+    res.send( JSON.stringify(rigStatus) );
+    res.end();
+});
+
 
 app.use(function (req: express.Request, res: express.Response, next: Function) {
     // Error 404
@@ -92,8 +132,8 @@ server.listen(httpServerPort, httpServerHost, () => {
 
 
 // Init Websocket Cliennt
-const wsServerHost = config.farmServer?.host || null;
-const wsServerPort = config.farmServer?.port || 4200;
+const wsServerHost = configRig.farmServer?.host || null;
+const wsServerPort = configRig.farmServer?.port || 4200;
 
 const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
@@ -104,10 +144,47 @@ let checkStatusTimeout: any = null;
 let connectionCount = 0;
 
 const toolsDir = `${__dirname}/../tools`;
-const cmdService = `${toolsDir}/miner.sh`;
+const cmdService = `${toolsDir}/run_miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 
 let rigStatus: RigStatus | null = null;
+
+
+
+main();
+
+
+/* ############################ FUNCTIONS ################################### */
+
+
+
+async function main() {
+    await checkStatus();
+
+    if (wsServerHost) {
+        // connect to websocket server
+        websocketConnect();
+    }
+
+    if (false) {
+        // run local webserver
+        // TODO
+    }
+}
+
+
+
+function applyLayout(req: express.Request, content: string, opts: any={}) {
+    const layoutPath = `${templatesDir}/layout_rig_agent.html`;
+
+    opts = opts || {};
+    opts.body = opts.body || {};
+    opts.body.content = content;
+    opts.currentUrl = req.url;
+
+    return applyHtmlLayout(layoutPath, opts);
+}
+
 
 
 function websocketConnect() {
@@ -195,14 +272,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams}`;
-
-                    console.log(`${now()} [DEBUG] executing command: ${cmd}`)
-
-                    const ret = await cmdExec(cmd);
-
-                    console.log(`${now()} [DEBUG] command result: ${ret}`)
-
+                    const ok = startRigService(serviceName, params);
                     var debugme = 1;
 
                 }
@@ -215,14 +285,7 @@ function websocketConnect() {
                 const serviceName = args.shift();
 
                 if (serviceName) {
-                    const cmd = `${cmdService} stop ${serviceName}`;
-
-                    console.log(`${now()} [DEBUG] executing command: ${cmd}`)
-
-                    const ret = await cmdExec(cmd);
-
-                    console.log(`${now()} [DEBUG] command result: ${ret}`)
-
+                    const ok = stopRigService(serviceName);
                     var debugme = 1;
 
                 }
@@ -302,6 +365,45 @@ function websocketConnect() {
 }
 
 
+async function startRigService(serviceName: string, params: any) {
+    // TODO: prevoir une version full nodejs (et compatible windows)
+
+    const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" -- ${params.optionalParams}`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+
+    }
+
+    return !!ret;
+}
+
+
+async function stopRigService(serviceName: string) {
+    // TODO: prevoir une version full nodejs (et compatible windows)
+
+    const cmd = `${cmdService} stop ${serviceName}`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+
+    }
+
+    return !!ret;
+}
+
 
 async function getRigStatus(): Promise<RigStatus | null> {
     const cmd = cmdRigMonitorJson;
@@ -356,14 +458,6 @@ async function cmdExec(cmd: string) {
 }
 
 
-function now(): string {
-    const options: {hour:string|any, minute:string|any, second:string|any} = {
-        /* year: "numeric", month: "2-digit", day: "2-digit", */
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-    }
-    return new Date().toLocaleTimeString("fr-FR", options);
-}
-
 
 async function checkStatus() {
     console.log(`${now()} [${colors.blue('INFO')}] refreshing rigStatus`)
@@ -373,22 +467,4 @@ async function checkStatus() {
     // poll services every x seconds
     checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
 }
-
-
-async function main() {
-    await checkStatus();
-
-    if (wsServerHost) {
-        // connect to websocket server
-        websocketConnect();
-    }
-
-    if (false) {
-        // run local webserver
-        // TODO
-    }
-}
-
-
-main();
 

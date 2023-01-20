@@ -7,16 +7,16 @@
     <meta name="color-scheme" content="dark light">
     <link rel="icon" type="image/png" href="/img/logo_64x64.png" />
     <!-- analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1N8B5G6R0W"></script>
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-1N8B5G6R0W"></script> -->
     <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-1N8B5G6R0W');
+    //window.dataLayer = window.dataLayer || [];
+    //function gtag(){dataLayer.push(arguments);}
+    //gtag('js', new Date());
+    //gtag('config', 'G-1N8B5G6R0W');
     </script>
     <!-- css libs -->
     <link href="/css/bootstrap-5.2.3.min.css" rel="stylesheet">
-    <link href="/css/farm_server.css" rel="stylesheet">
+    <link href="/css/pool_server.css" rel="stylesheet">
     <link href="/css/alertify/alertify.min.css" rel="stylesheet">
     ${meta.noIndex ? `<meta name="robots" content="noindex">` : ""}
 </head>
@@ -27,7 +27,7 @@
                 <a class="navbar-brand" href="/">
                     <img src="/img/logo_64x64.png" style="height:30px; border-radius:5px;" />
                     FreeMining
-                    <small style="font-size:.7em;">/ Farm Manager</small>
+                    <small style="font-size:.7em;">/ Pool Manager</small>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -35,10 +35,7 @@
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <ul class="navbar-nav me-auto mb-2 mb-md-0">
                         <li class="nav-item">
-                            <a class="nav-link ${currentUrl.startsWith('/rigs/') ? 'active' : ''}" href="/rigs/">Rigs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/status.json">API</a>
+                            
                         </li>
                     </ul>
                     <a href="javascript:void(0)" onclick="toggleDarkMode()" title="Dark mode" class="mt-2 dark-icon">🌙</a>
@@ -69,7 +66,7 @@
     <script src="/js/bootstrap-5.2.3.bundle.min.js"></script>
     <script src="/js/jquery-3.6.1.min.js"></script>
     <script src="/js/alertify.min.js"></script>
-    <script src="/js/farm_server.js"></script>
+    <script src="/js/pool_server.js"></script>
 
 
     <!-- dark mode -->

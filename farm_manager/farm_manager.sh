@@ -37,6 +37,7 @@ farmLogDir=$(eval echo `jq -r ".farmLogDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
 farmPidDir=$(eval echo `jq -r ".farmPidDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
+
 farmDataDir=$(eval echo `jq -r ".farmDataDir" ${FARM_CONFIG_FILE} 2>/dev/null`)
 
 
@@ -61,6 +62,11 @@ DAEMON_LOG_DIR=$farmLogDir
 DAEMON_PID_DIR=$farmPidDir
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
+
+FARM_SERVER_PORT=$(eval echo `jq -r ".farmServer.port" ${FARM_CONFIG_FILE} 2>/dev/null`)
+if test "$FARM_SERVER_PORT" = "" || test "$FARM_SERVER_PORT" = "null"; then
+    FARM_SERVER_PORT=4200
+fi
 
 ##### FUNCTIONS #####
 
@@ -94,25 +100,22 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
     }
 
-    if [ "$1" = "install" ]; then
-        shift
-        exec ./install_farm_manager.sh $@
+    ACTION=$1
+    shift || true
 
-    elif [ "$1" = "json" ]; then
-        shift
-        wget -qO- http://localhost:4200/status.json
+    if test "$ACTION" = "install"; then
+        exec ./tools/install_farm_manager.sh $@
 
-    elif [ "$1" = "webserver" ]; then
-        shift
-        exec ./farm_server/server.sh $@
+    elif test "$ACTION" = "json"; then
+        wget -qO- http://localhost:${FARM_SERVER_PORT}/status.json
 
-    elif [ "$1" = "rigs" ]; then
-        shift
-        wget -qO- http://localhost:4200/status.json | jq -r ". | keys | join(\" \")"
+    elif test "$ACTION" = "webserver"; then
+        exec ./farm_server/webserver.sh $@
 
-    elif [ "$1" = "ps" ]; then
-        shift
-        #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
+    elif test "$ACTION" = "rigs"; then
+        wget -qO- http://localhost:${FARM_SERVER_PORT}/status.json | jq -r ". | keys | join(\" \")"
+
+    elif test "$ACTION" = "ps"; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     else

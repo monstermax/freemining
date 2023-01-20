@@ -9,6 +9,7 @@ source ../rig_manager.sh
 installBasicTools
 
 # install nodejs + npm + typescript
+installNodejs
 installNodejsPackages
 
 

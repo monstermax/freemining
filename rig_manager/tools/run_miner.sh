@@ -6,15 +6,60 @@ source ../rig_manager.sh
 set -e
 
 # Usage:
-# ./miner.sh {ACTION} {MINER} -algo {ALGO} -url {POOL_URL} -user {POOL_ACCOUNT}
+# ./run_miner.sh ps
+# or
+# ./run_miner.sh run|start|restart {MINER} -algo {ALGO} -url {POOL_URL} -user {POOL_ACCOUNT}
+# or
+# ./run_miner.sh {ACTION} {MINER}
 
-# Actions: start stop status log pid-log log-file pid-file pid ps
+# Actions: run start stop status debug log pid-log log-file pid-file pid ps
 
 
 ACTION=$1
 MINER=$2
-shift || true
-shift || true
+shift 2 || true
+
+FRM_PACKAGE="miner"
+DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${MINER}"
+
+
+function usage {
+    CMD=$(basename $BASH_SOURCE)
+
+    echo "=============="
+    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
+    echo "=============="
+    echo
+
+    echo "Usage:"
+    echo
+    echo "  $CMD [action] <params>"
+    echo
+    echo "  $CMD run|start [miner] -algo {algo} -url {pool_url} -user {pool_account} [ -- {optional args} ]"
+    echo "    - $CMD run [miner] ...                    # run ${FRM_PACKAGE}"
+    echo "    - $CMD start [miner] ...                  # start ${FRM_PACKAGE} in background"
+    echo
+    echo "  $CMD stop [miner]                           # stop background ${FRM_PACKAGE}"
+    echo
+    echo "  $CMD status [miner]                         # show ${FRM_PACKAGE} status"
+    echo "  $CMD status-txt [miner]                     # show ${FRM_PACKAGE} detailed status"
+    echo "  $CMD status-json [miner]                    # show ${FRM_PACKAGE} detailed status JSON formatted"
+    echo
+    echo "  $CMD log [miner]                            # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD log-pid [miner]                        # tail ${FRM_PACKAGE} stdout"
+    echo
+    echo "  $CMD ps                                     # show all ${FRM_PACKAGE} running processes"
+    echo
+    echo
+
+    showMinersList
+
+    echo
+}
+
+
+################################################################################
+
 
 ALGO=""
 POOL_URL=""
@@ -59,48 +104,11 @@ done
 
 
 
-FRM_PACKAGE="miner"
-DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${MINER}"
-
-
 DAEMON_LOG_DIR=$rigLogDir/miners
 DAEMON_PID_DIR=$rigPidDir/miners
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
 
-
-function usage {
-    CMD=$(basename $BASH_SOURCE)
-
-    echo "=============="
-    echo "| FreeMining | ==> [${FRM_MODULE^^}] ==> [${FRM_PACKAGE^^}]"
-    echo "=============="
-    echo
-
-    echo "Usage:"
-    echo
-    echo "  $CMD [action] <params>"
-    echo
-    echo "  $CMD run|start [miner] -algo [algo] -url [pool_url] -user [pool_account] <optional args>"
-    echo "    - $CMD run   ...                          # run ${FRM_PACKAGE}"
-    echo "    - $CMD start ...                          # start ${FRM_PACKAGE} in background"
-    echo
-    echo "  $CMD stop [miner]                           # stop background ${FRM_PACKAGE}"
-    echo
-    echo "  $CMD status [miner]                         # show ${FRM_PACKAGE} status"
-    echo
-    echo "  $CMD log [miner]                            # tail ${FRM_PACKAGE} stdout"
-    echo "  $CMD log-pid [miner]                        # tail ${FRM_PACKAGE} stdout"
-    echo
-    echo "  $CMD ps                                     # show all ${FRM_PACKAGE} running processes"
-    echo
-    echo
-
-    showMinersList
-
-    echo
-
-}
 
 function showMinersList {
     _CONFIGURED_MINERS=$CONFIGURED_MINERS
@@ -320,6 +328,28 @@ if test "$ACTION" = "ps"; then
 fi
 
 
+
+# STATUS JSON
+if test "$ACTION" = "status-json"; then
+    if ! test -x ../miners_monitor/json/${MINER}.sh; then
+        echo "Error: ${MINER} is not  a valid miner"
+        exit 1
+    fi
+
+    ../miners_monitor/json/${MINER}.sh
+    exit $?
+fi
+
+# STATUS TXT
+if test "$ACTION" = "status-txt"; then
+    if ! test -x ../miners_monitor/txt/${MINER}.sh; then
+        echo "Error: ${MINER} is not  a valid miner"
+        exit 1
+    fi
+
+    ../miners_monitor/txt/${MINER}.sh
+    exit $?
+fi
 
 
 

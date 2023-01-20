@@ -23,6 +23,8 @@ API_HOST="0.0.0.0"
 API_PORT="4000"
 
 
+echo "Generating miningcore config..."
+
 
 mkdir -p ${poolConfDir}/engines/${package}
 mkdir -p ${poolLogDir}/engines/${package}
@@ -32,7 +34,7 @@ touch $MININGCORE_CONFIG_FILE
 POOLS_JSON=""
 
 
-POOLS_LIST=$(jq -r '.pools | keys | join(" ")' $CONFIG_FILE)
+POOLS_LIST=$(jq -r '.pools | keys | join(" ")' $POOL_CONFIG_FILE)
 #echo POOLS_LIST=$POOLS_LIST
 
 if [ "$POOLS_LIST" != "" ]; then
@@ -46,7 +48,7 @@ if [ "$POOLS_LIST" != "" ]; then
 "
         fi
 
-        POOL_ITEM=$(jq ".pools.${POOL_SLUG}" $CONFIG_FILE)
+        POOL_ITEM=$(jq ".pools.${POOL_SLUG}" $POOL_CONFIG_FILE)
         #echo "POOL_ITEM[$POOL_SLUG]=$POOL_ITEM"
 
         POOL_ID=$POOL_SLUG
@@ -101,7 +103,7 @@ if [ "$POOLS_LIST" != "" ]; then
 _EOF
             )
 
-            let $((PORT_IDX++))
+            let "PORT_IDX++" || true
         done
 
         DAEMONS_JSON=""
@@ -128,7 +130,7 @@ _EOF
 _EOF
             )
 
-            let $((DAEMON_IDX++))
+            let "DAEMON_IDX++" || true
         done
 
 
@@ -178,7 +180,7 @@ _EOF
         POOLS_JSON="${POOLS_JSON}
 ${POOL_JSON}"
 
-        let $((POOL_IDX++))
+        let "POOL_IDX++" || true
     done
 fi
 
@@ -252,3 +254,5 @@ cat << _EOF > ${poolConfDir}/engines/${package}/config.json
 }
 _EOF
 
+
+echo "Config written to ${poolConfDir}/engines/${package}/config.json"

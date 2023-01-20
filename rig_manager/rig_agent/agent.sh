@@ -5,6 +5,15 @@ cd `dirname $0`
 source ../rig_manager.sh
 set -e
 
+# Usage:
+# ./agent.sh {ACTION}
+
+# Actions: run start stop status debug log pid-log log-file pid-file pid ps
+
+
+FRM_PACKAGE="agent"
+DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}"
+
 
 function usage {
     CMD=$(basename $BASH_SOURCE)
@@ -25,26 +34,20 @@ function usage {
     echo "  $CMD status                    # show ${FRM_PACKAGE} status"
     echo "  $CMD log                       # tail ${FRM_PACKAGE} stdout"
     echo "  $CMD pid-log                   # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD ps                        # show ${FRM_PACKAGE} running process"
     echo
 }
 
+
 ################################################################################
 
-FRM_PACKAGE="agent"
-DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}"
 
 DAEMON_CMD="${NODE} ./agent.js"
 if test "$USE_TS" = "1"; then
     DAEMON_CMD="${TS_NODE} ./agent.ts"
 fi
 
-################################################################################
-
-
-DAEMON_OPTS=""
-#DAEMON_OPTS="background"
-
-daemon_manager $1
+daemon_manager $@
 
 usage
 

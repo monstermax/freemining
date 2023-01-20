@@ -10,6 +10,7 @@ set -e
 installBasicTools
 
 # install nodejs + npm + typescript
+installNodejs
 installNodejsPackages
 
 

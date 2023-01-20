@@ -37,11 +37,12 @@ poolLogDir=$(eval echo `jq -r ".poolLogDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 poolPidDir=$(eval echo `jq -r ".poolPidDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
+poolDataDir=$(eval echo `jq -r ".poolDataDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
+
+
 poolsEngineDir=$(eval echo `jq -r ".poolsEngineDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 poolsWebsitesDir=$(eval echo `jq -r ".poolsWebsitesDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
-
-poolDataDir=$(eval echo `jq -r ".poolDataDir" ${POOL_CONFIG_FILE} 2>/dev/null`)
 
 
 
@@ -97,7 +98,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo
-        echo "  $CMD miningcore <params>         # start/stop ${FRM_MODULE} miningcore"
+        echo "  $CMD engine     <params>         # start/stop ${FRM_MODULE} engine (miningcore)"
         echo "  $CMD webserver  <params>         # start/stop the ${FRM_MODULE} webserver"
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
@@ -114,7 +115,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./pools_manager/install_package.sh $@
 
-    elif [ "$1" = "miningcore" ]; then
+    elif [ "$1" = "engine" ]; then
         shift
         exec ./pools_manager/miningcore/miningcore.sh $@
 

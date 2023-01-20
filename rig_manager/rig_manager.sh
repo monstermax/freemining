@@ -39,6 +39,7 @@ rigPidDir=$(eval echo `jq -r ".rigPidDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
 rigDataDir=$(eval echo `jq -r ".rigDataDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
+
 minersDir=$(eval echo `jq -r ".minersDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
 
@@ -175,6 +176,10 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "status" ]; then
         shift
         exec ./tools/rig_monitor_txt.sh $@
+
+    elif [ "$1" = "config" ]; then
+        shift
+        exec ./tools/rig_config.sh $@
 
     elif [ "$1" = "agent" ]; then
         shift

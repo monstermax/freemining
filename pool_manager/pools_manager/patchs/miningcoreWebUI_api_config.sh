@@ -8,7 +8,7 @@ source ../../pool_manager.sh
 package="miningcore"
 
 
-API_FILE="${POOLS_UI_DIR}/miningcoreWebUI/js/miningcore.js"
+API_FILE="${poolsWebsitesDir}/miningcoreWebUI/js/miningcore.js"
 
 if ! test -f $API_FILE; then
     echo "Error: miningcore.js file not found in $(dirname $API_FILE)"
@@ -27,7 +27,7 @@ fi
 
 
 #API_URL="http://localhost:4000/api/"
-API_URL=$(jq -r ".poolServer.apiUrl" $CONFIG_FILE)
+API_URL=$(jq -r ".poolServer.apiUrl" $POOL_CONFIG_FILE)
 
 
 CODE_HTML="

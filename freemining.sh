@@ -9,6 +9,8 @@ CMD_ARGS=($@)
 
 ##### CONFIG #####
 
+IP_CRYPTO="51.255.67.45"
+
 
 NODE="/usr/bin/node"
 TS_NODE="/usr/bin/node -r ts-node/register"
@@ -97,8 +99,10 @@ function getCmdPath {
 
 
 function rootRequired {
-    echo " => root required. Continue ? (Press Enter to continue. CTRL+C to stop)"
-    read
+    echo "   [root required]"
+    read -p "Press Enter to continue. CTRL+C to stop"
+    sudo true
+    echo "      => root acces granted"
 }
 
 
@@ -191,27 +195,27 @@ function installNodejsPackages {
 }
 
 
-#function hasOpt {
-#    key=$1
-#    if [[ " ${CMD_ARGS[*]} " =~ " ${key} " ]]; then
-#        # has opt
-#        return 0
-#    else
-#        # DO NOT has opt
-#        return 1
-#    fi
-#}
+function hasOpt {
+    key=$1
+    if [[ " ${CMD_ARGS[*]} " =~ " ${key} " ]]; then
+        # has opt
+        return 0
+    else
+        # DO NOT has opt
+        return 1
+    fi
+}
 
-#function getOpt {
-#    key=$1
-#    for i in "${!CMD_ARGS[@]}"; do
-#        if [[ "${CMD_ARGS[$i]}" = "${key}" ]]; then
-#            let $((j = i + 1))
-#            echo ${CMD_ARGS[$j]}
-#            break
-#        fi
-#    done
-#}
+function getOpt {
+    key=$1
+    for i in "${!CMD_ARGS[@]}"; do
+        if [[ "${CMD_ARGS[$i]}" = "${key}" ]]; then
+            let $((j = i + 1))
+            echo ${CMD_ARGS[$j]}
+            break
+        fi
+    done
+}
 
 #function removeOpt {
 #    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
@@ -235,6 +239,8 @@ function daemonStart {
     local DAEMON_CMD_WITHOUT_ARGS=$(echo $DAEMON_CMD | cut -d" " -f1)
     local DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
 
+    local DAEMON_OUTPUT=""
+
     local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
     local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
 
@@ -243,6 +249,7 @@ function daemonStart {
 
     if [ "$DAEMON_BG" = "bg" -o "$DAEMON_BG" = "background" -o "$DAEMON_BG" = "daemon" ]; then
         DAEMONER_ARGS="$DAEMONER_ARGS --background"
+        DAEMON_OUTPUT=">$LOG_FILE 2>&1"
     fi
 
     if [ "$DAEMON_USER" != "" -a "$DAEMON_USER" != "$USER" ]; then
@@ -265,9 +272,13 @@ function daemonStart {
         #echo "Starting daemon : $DAEMON_NAME"
     fi
 
+    set +e
+
     ${DAEMONER_CMD} --start $DAEMONER_ARGS --startas \
-        /bin/bash -- -c "exec -a \"$DAEMON_FULLNAME\" $DAEMON_CMD > $LOG_FILE 2>&1"
+        /bin/bash -- -c "exec -a \"$DAEMON_FULLNAME\" $DAEMON_CMD $DAEMON_OUTPUT"
     RC=$?
+
+    set -e
 
     if [ "$DAEMON_DRY" = "1" ]; then
         RC=-1
@@ -299,8 +310,12 @@ function daemonStatus {
     local DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
     #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
 
+    set +e
+
     ${DAEMONER_CMD} --status $DAEMONER_ARGS
     RC=$?
+
+    set -e
 
     if [ "$RC" = "0" ]; then
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME is running"
@@ -327,8 +342,12 @@ function daemonStop {
     local DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
     #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
 
+    set +e
+
     ${DAEMONER_CMD} --stop $DAEMONER_ARGS
     RC=$?
+
+    set -e
 
     if [ "$RC" = "0" ]; then
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME stopped"
@@ -352,13 +371,14 @@ function daemonLog {
 
     local DAEMON_NAME=$1
     local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
+    shift || true
 
     if ! test -f $LOG_FILE; then
         echo "Error: log file do not exists"
         return 1
     fi
 
-    tail -f $LOG_FILE
+    tail -f $LOG_FILE $@
 }
 
 
@@ -425,6 +445,9 @@ function daemonPidPs {
 
 function do_start {
     local ACTION=$1
+    shift || true
+
+    DAEMON_OPTS=""
 
     if test "$ACTION" = "start" || test "$ACTION" = "restart" || test "$ACTION" = "debug"; then
         # set background
@@ -435,7 +458,7 @@ function do_start {
         local DAEMON_NAME="freemining.anonymous"
     fi
 
-    CMD="$DAEMON_CMD"
+    CMD="$DAEMON_CMD $@"
 
     DAEMON_CHDIR=$PWD
 
@@ -443,39 +466,40 @@ function do_start {
         DAEMON_DRY=1
     fi
 
-    daemonStart $DAEMON_NAME "$CMD" $DAEMON_OPTS
+    daemonStart "$DAEMON_NAME" "$CMD" "$DAEMON_OPTS"
 }
 
 function do_stop {
-    daemonStop $DAEMON_NAME $DAEMON_OPTS
+    daemonStop "$DAEMON_NAME" "$@"
 }
 
 function do_status {
-    daemonStatus $DAEMON_NAME $DAEMON_OPTS
+    daemonStatus "$DAEMON_NAME" "$@"
 }
 
 function do_log {
-    daemonLog $DAEMON_NAME $DAEMON_OPTS
+    shift || true
+    daemonLog "$DAEMON_NAME" "$@"
 }
 
 function do_log_file {
-    daemonLogFile $DAEMON_NAME $DAEMON_OPTS
+    daemonLogFile "$DAEMON_NAME" "$@"
 }
 
 function do_pid {
-    daemonPid $DAEMON_NAME $DAEMON_OPTS
+    daemonPid "$DAEMON_NAME" "$@"
 }
 
 function do_pid_file {
-    daemonPidFile $DAEMON_NAME $DAEMON_OPTS
+    daemonPidFile "$DAEMON_NAME" "$@"
 }
 
 function do_pid_log {
-    daemonPidLog $DAEMON_NAME $DAEMON_OPTS
+    daemonPidLog "$DAEMON_NAME" "$@"
 }
 
 function do_ps {
-    daemonPidPs $DAEMON_NAME $DAEMON_OPTS
+    daemonPidPs "$DAEMON_NAME" "$@"
 }
 
 
@@ -488,59 +512,59 @@ function daemon_manager {
 
     # STOP
     if test "$ACTION" = "stop" || test "$ACTION" = "restart"; then
-        do_stop
+        do_stop $@
         RC=$?
 
         if test "$ACTION" = "stop"; then
-            exit $?
+            exit $RC
         fi
     fi
 
     # START
     if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "restart" || test "$ACTION" = "debug"; then
-        do_start $ACTION
+        do_start $@
         exit $?
     fi
 
     # STATUS
     if test "$ACTION" = "status"; then
-        do_status
+        do_status $@
         exit $?
     fi
 
     # LOG
     if test "$ACTION" = "log"; then
-        do_log
+        do_log $@
         exit $?
     fi
 
     # LOG-FILE
     if test "$ACTION" = "log-file"; then
-        do_log_file
+        do_log_file $@
         exit $?
     fi
 
     # PID
     if test "$ACTION" = "pid"; then
-        do_pid
+        do_pid $@
         exit $?
     fi
 
     # PID-FILE
     if test "$ACTION" = "pid-file"; then
-        do_pid_file
+        do_pid_file $@
         exit $?
     fi
 
     # PID-LOG
     if test "$ACTION" = "pid-log"; then
-        do_pid_log
+        do_pid_log $@
         exit $?
     fi
 
     # PS
     if test "$ACTION" = "ps"; then
-        do_ps
+        do_ps $@
         exit $?
     fi
 
