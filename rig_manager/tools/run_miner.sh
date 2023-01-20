@@ -36,6 +36,7 @@ function usage {
     echo "  $CMD [action] <params>"
     echo
     echo "  $CMD run|start [miner] -algo {algo} -url {pool_url} -user {pool_account} [ -- {optional args} ]"
+    echo "  $CMD run|start [miner] -conf {confName}     # run/start a predefined configuration"
     echo "    - $CMD run [miner] ...                    # run ${FRM_PACKAGE}"
     echo "    - $CMD start [miner] ...                  # start ${FRM_PACKAGE} in background"
     echo
@@ -61,6 +62,7 @@ function usage {
 ################################################################################
 
 
+CONF_NAME=""
 ALGO=""
 POOL_URL=""
 POOL_ACCOUNT=""
@@ -68,6 +70,11 @@ POOL_ACCOUNT=""
 while [ : ]; do
 
     case "$1" in
+        -conf)
+            CONF_NAME="$2"
+            shift 2 || echo "Error: missing argument"
+            ;;
+
         -algo)
             ALGO="$2"
             shift 2 || echo "Error: missing argument"
@@ -103,11 +110,18 @@ while [ : ]; do
 done
 
 
-
 DAEMON_LOG_DIR=$rigLogDir/miners
 DAEMON_PID_DIR=$rigPidDir/miners
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
+
+
+if [ "$CONF_NAME" != "" ]; then
+    # load config and set variables
+    ALGO=$(jq -r ".pools.${CONF_NAME}.algo" $RIG_CONFIG_FILE)
+    POOL_URL=$(jq -r ".pools.${CONF_NAME}.poolUrl" $RIG_CONFIG_FILE)
+    POOL_ACCOUNT=$(jq -r ".pools.${CONF_NAME}.poolAccount" $RIG_CONFIG_FILE)
+fi
 
 
 function showMinersList {
@@ -161,13 +175,13 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
     fi
 
 
-    if [ "$POOL_ACCOUNT" = "" -o "$ALGO" = "" ]; then
+    if [ "$POOL_ACCOUNT" = "" -o "$ALGO" = "" -o "$POOL_URL" = "" -o "$POOL_ACCOUNT" = "" ]; then
         usage
         exit 1
     fi
 
-    POOL_HOST=$(echo $POOL_URL |cut -d":" -f1)
-    POOL_PORT=$(echo $POOL_URL |cut -d":" -f2)
+    POOL_HOST=$(echo "$POOL_URL" |cut -d":" -f1)
+    POOL_PORT=$(echo "$POOL_URL" |cut -d":" -f2)
 
     CMD_EXEC=""
 

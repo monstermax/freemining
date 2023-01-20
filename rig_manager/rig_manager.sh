@@ -128,6 +128,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD json                        # show ${FRM_MODULE} status (JSON formatted)"
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
+        echo "  $CMD config                      # show/edit ${FRM_MODULE} manager config"
         echo "  $CMD miner-install [miner]       # install a miner"
         echo "  $CMD miner-uninstall [miner]     # uninstall a miner"
         echo

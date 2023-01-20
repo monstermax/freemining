@@ -1,28 +1,24 @@
 {
-    "rigName": "",
-
-    "rigConfDir": "${frmConfDir}/rig",
-    "rigLogDir": "${frmLogDir}/rig",
-    "rigPidDir": "${frmPidDir}/rig",
-
-    "rigDataDir": "${frmDataDir}/rig",
-    "minersDir": "${rigDataDir}/miners",
-
-    "farmServer": {
-        "host": "82.64.213.186",
-        "port": 4200
-    },
-
+	"rigName": "",
+	"rigConfDir": "${frmConfDir}/rig",
+	"rigLogDir": "${frmLogDir}/rig",
+	"rigPidDir": "${frmPidDir}/rig",
+	"rigDataDir": "${frmDataDir}/rig",
+	"minersDir": "${rigDataDir}/miners",
+	"farmServer": {
+		"host": "82.64.213.186",
+		"port": 4200
+	},
 	"rigWebServer": {
 		"host": "0.0.0.0",
 		"port": 4300,
 		"root": "${rigAppDir}/rig_agent/web/public",
 		"templates": "${rigAppDir}/rig_agent/web/templates"
 	},
+	"pools": {
 
-    "coinsPools": {
-        "monero": [
-            {
+		"freemining": {
+            "monero": {
                 "name": "Monero @ FreeMining [CPU]",
                 "miner": "xmrig",
                 "algo": "rx/0",
@@ -30,80 +26,77 @@
                 "poolAccount": "46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH.maxomatic",
                 "args": ""
             },
-            {
-                "name": "Monero @ XmrPool",
-                "miner": "xmrig",
-                "algo": "rx/0",
-                "poolUrl": "xmrpool.eu:5555",
-                "poolAccount": "46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+maxomatic",
-                "args": ""
-            }
-        ],
-        "ergo": [
-            {
-                "name": "Ergo @ FreeMining [GPU]",
-                "miner": "trex",
-                "algo": "autolykos2",
-                "poolUrl": "freemining.fr:4013",
-                "poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.maxomatic",
-                "args": "-d 0"
+            "ergo": {
+				"name": "Ergo @ FreeMining [GPU]",
+				"miner": "trex",
+				"algo": "autolykos2",
+				"poolUrl": "freemining.fr:4013",
+				"poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.maxomatic",
+				"args": "-d 0"
             },
-            {
-                "name": "Ergo @ JJPool [GPU]",
-                "miner": "trex",
-                "algo": "autolykos2",
-                "poolUrl": "eu.jjpool.fr:3056",
-                "poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.maxomatic",
-                "args": "-d 0"
-            }
-        ],
-        "raptoreum": [
-            {
-                "name": "Raptoreum @ FreeMining [CPU]",
-                "miner": "xmrig",
-                "algo": "ghostrider",
-                "poolUrl": "freemining.fr:4093",
-                "poolAccount": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.maxomatic",
-                "args": ""
-            }
-        ]
-    },
-
-    "miners": {
-        "nbminer": {
-            "api": {
-                "port": 42001
+            "raptoreum": {
+				"name": "Raptoreum @ FreeMining [CPU]",
+				"miner": "xmrig",
+				"algo": "ghostrider",
+				"poolUrl": "freemining.fr:4093",
+				"poolAccount": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.maxomatic",
+				"args": ""
             }
         },
 
-        "lolminer": {
-            "api": {
-                "port": 42002
+		"xmrpool": {
+            "monero": {
+				"name": "Monero @ XmrPool",
+				"miner": "xmrig",
+				"algo": "rx/0",
+				"poolUrl": "xmrpool.eu:5555",
+				"poolAccount": "46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+maxomatic",
+				"args": ""
             }
         },
 
-        "xmrig": {
-            "api": {
-                "port": 42003
-            }
-        },
-
-        "teamredminer": {
-            "api": {
-                "port": 42004
-            }
-        },
-
-        "trex": {
-            "api": {
-                "port": 42005
-            }
-        },
-
-        "gminer": {
-            "api": {
-                "port": 42006
+		"jjpool": {
+            "ergo": {
+				"name": "Ergo @ JJPool [GPU]",
+				"miner": "trex",
+				"algo": "autolykos2",
+				"poolUrl": "eu.jjpool.fr:3056",
+				"poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.maxomatic",
+				"args": "-d 0"
             }
         }
-    }
+
+	},
+	"miners": {
+		"nbminer": {
+			"api": {
+				"port": 42001
+			}
+		},
+		"lolminer": {
+			"api": {
+				"port": 42002
+			}
+		},
+		"xmrig": {
+			"api": {
+				"port": 42003
+			}
+		},
+		"teamredminer": {
+			"api": {
+				"port": 42004
+			}
+		},
+		"trex": {
+			"api": {
+				"port": 42005
+			}
+		},
+		"gminer": {
+			"api": {
+				"port": 42006
+			}
+		}
+	}
 }
