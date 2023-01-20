@@ -3,6 +3,8 @@ import fs from 'fs';
 import express from 'express';
 import * as http from 'http';
 import colors from 'colors/safe';
+import fetch from 'node-fetch';
+
 
 import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
 
@@ -13,12 +15,13 @@ const server = http.createServer(app);
 const configPool: any = require('../pool_manager.json');
 const configFrm: any = require('../../freemining.json');
 
-const httpServerHost: string = configPool.poolServer?.host || '0.0.0.0';
-const httpServerPort: number = Number(configPool.poolServer?.port || 4100);
+const engineApiUrl: string = configPool.poolWebserver?.apiProxyUrl || 'http://localhost:4000/api/';
+const httpServerHost: string = configPool.poolWebserver?.host || '0.0.0.0';
+const httpServerPort: number = Number(configPool.poolWebserver?.port || 4100);
 
-let staticDir: string = configPool.poolServer?.root || `${__dirname}/web/public`;
-let templatesDir: string = configPool.poolServer?.templates || `${__dirname}/web/templates`;
-let engineWebsiteDir: string = configPool.poolServer?.poolsSiteDir || `${__dirname}/web/public`;
+let staticDir: string = configPool.poolWebserver?.root || `${__dirname}/web/public`;
+let templatesDir: string = configPool.poolWebserver?.templates || `${__dirname}/web/templates`;
+let engineWebsiteDir: string = configPool.poolWebserver?.poolsSiteDir || `${__dirname}/web/public`;
 
 
 const poolAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/pool';
@@ -42,6 +45,7 @@ if (staticDir) {
     console.log(`${now()} [${colors.blue('INFO')}] Using static folder ${staticDir}`);
     console.log(`${now()} [${colors.blue('INFO')}] Using templates folder ${templatesDir}`);
     console.log(`${now()} [${colors.blue('INFO')}] Using engineWebsite folder ${engineWebsiteDir}`);
+    console.log(`${now()} [${colors.blue('INFO')}] Using engineApiUrl folder ${engineApiUrl}`);
     app.use(express.static(staticDir));
 }
 
@@ -56,6 +60,23 @@ app.get('/', (req: express.Request, res: express.Response, next: Function) => {
 
 
 app.use('/pools', express.static(engineWebsiteDir));
+
+
+app.use('/api/', async function (req: express.Request, res: express.Response) {
+    // Proxy to miningcore API
+    try {
+        const url = (engineApiUrl.endsWith('/') ? engineApiUrl.slice(0, -1) : engineApiUrl) + req.url
+        const response = await fetch(url);
+        const content = await response.text();
+        res.send(content);
+
+    } catch (err: any) {
+        console.log(`ERROR: ${err.message}`);
+        res.send('ERROR');
+    }
+
+    res.end();
+});
 
 
 app.use(function (req: express.Request, res: express.Response, next: Function) {

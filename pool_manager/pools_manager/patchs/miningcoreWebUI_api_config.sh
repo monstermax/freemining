@@ -27,7 +27,7 @@ fi
 
 
 #API_URL="http://localhost:4000/api/"
-API_URL=$(jq -r ".poolServer.apiUrl" $POOL_CONFIG_FILE)
+API_URL=$(jq -r ".poolWebserver.apiPublicUrl" $POOL_CONFIG_FILE)
 
 
 CODE_HTML="

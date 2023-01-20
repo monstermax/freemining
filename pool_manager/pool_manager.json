@@ -9,12 +9,13 @@
     "poolsEngineDir": "${poolDataDir}/engines",
     "poolsWebsitesDir": "${poolDataDir}/websites",
 
-	"poolServer": {
+	"poolWebserver": {
 		"host": "0.0.0.0",
 		"port": 4100,
 		"root": null,
 		"poolsSiteDir": "${poolDataDir}/websites/miningcoreWebUI",
-		"apiUrl": "http://localhost:4000/api/"
+		"apiPublicUrl": "http://127.0.0.1:4000/api/",
+		"apiProxyUrl": "http://127.0.0.1:4000/api/"
 	},
 
     "pools": {

@@ -98,6 +98,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo
         echo "  $CMD fullnode <params>           # start/stop a fullnode"
+        echo "  $CMD webserver  <params>         # start/stop the ${FRM_MODULE} webserver"
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD fullnode-install [chain]    # install a fullnode"
@@ -137,6 +138,11 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "[Press Enter to continue]"
         read
         rm -rf ${nodeConfDir}/fullnodes/${FULLNODE}/
+
+    elif [ "$1" = "webserver" ]; then
+        shift
+        exec ./node_webserver/webserver.sh $@
+
 
     elif [ "$1" = "ps" ]; then
         shift

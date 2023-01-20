@@ -2,7 +2,8 @@
 
 cd `dirname $0`
 
-source ../farm_manager.sh
+source ../pool_manager.sh
+set -e
 
 
 # install basic tools
@@ -13,9 +14,11 @@ installNodejs
 installNodejsPackages
 
 
-# install farm server
+# install pool server
 npm install
 
 
 # compile typescript
 ${TSC}
+
+

@@ -647,10 +647,13 @@ $0 \$@
         ./rig_manager/rig_agent/install_agent.sh >${INSTALL_LOG}
 
         echo " - Installing farm_server..."
-        ./farm_manager/farm_server/install_server.sh >${INSTALL_LOG}
+        ./farm_manager/farm_server/install_webserver.sh >${INSTALL_LOG}
 
         echo " - Installing pool_server..."
-        ./pool_manager/pool_server/install_server.sh >${INSTALL_LOG}
+        ./pool_manager/pool_server/install_webserver.sh >${INSTALL_LOG}
+
+        echo " - Installing node_server..."
+        ./node_manager/node_server/install_webserver.sh >${INSTALL_LOG}
 
 
     elif [ "$1" = "compile" ]; then
@@ -661,11 +664,14 @@ $0 \$@
         echo " - Compiling rig_agent..."
         cd rig_manager/rig_agent; tsc; cd ../..
 
-        echo " - Compiling farm_server..."
-        cd farm_manager/farm_server; tsc; cd ../..
+        echo " - Compiling farm_webserver..."
+        cd farm_manager/farm_webserver; tsc; cd ../..
 
-        echo " - Compiling pool_server..."
-        cd pool_manager/pool_server; tsc; cd ../..
+        echo " - Compiling pool_webserver..."
+        cd pool_manager/pool_webserver; tsc; cd ../..
+
+        echo " - Compiling node_webserver..."
+        cd pool_manager/node_webserver; tsc; cd ../..
 
     elif [ "$1" = "update" ]; then
         shift
