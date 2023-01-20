@@ -671,7 +671,7 @@ $0 \$@
         cd pool_manager/pool_webserver; tsc; cd ../..
 
         echo " - Compiling node_webserver..."
-        cd pool_manager/node_webserver; tsc; cd ../..
+        cd node_manager/node_webserver; tsc; cd ../..
 
     elif [ "$1" = "update" ]; then
         shift
