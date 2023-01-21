@@ -300,13 +300,13 @@ $0 \$@
         ./rig_manager/rig_agent/install_agent.sh >${INSTALL_LOG}
 
         echo " - Installing farm_server..."
-        ./farm_manager/farm_server/install_webserver.sh >${INSTALL_LOG}
+        ./farm_manager/farm_webserver/install_webserver.sh >${INSTALL_LOG}
 
         echo " - Installing pool_server..."
-        ./pool_manager/pool_server/install_webserver.sh >${INSTALL_LOG}
+        ./pool_manager/pool_webserver/install_webserver.sh >${INSTALL_LOG}
 
         echo " - Installing node_server..."
-        ./node_manager/node_server/install_webserver.sh >${INSTALL_LOG}
+        ./node_manager/node_webserver/install_webserver.sh >${INSTALL_LOG}
 
 
     elif [ "$1" = "compile" ]; then
