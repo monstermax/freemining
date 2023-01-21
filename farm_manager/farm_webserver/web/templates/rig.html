@@ -153,11 +153,12 @@ ${Object.entries(rig.services).map(entry => {
 
 <input type="button" value="Start new service..." class="btn btn-warning" onclick="startServiceModal()" />
 
+<!--
 <br />
 <br />
 
 <input type="button" value="Start xmrig" class="btn btn-warning" onclick="testStart()" />
-
+-->
 
 
 <div id="modals">
@@ -306,7 +307,7 @@ function startService(serviceName, algo, poolUrl, poolAccount, optionalParams=''
     if (! poolUrl) return;
     if (! poolAccount) return;
 
-    const url = '/rigs/rig/service/start';
+    const url = '/api/rigs/rig/service/start';
     const data = {
         rig: '${rig.rig.hostname}',
         service: serviceName,
@@ -339,7 +340,7 @@ function stopService(serviceName) {
             const $service = jQuery('#rig-service-' + serviceName);
             $service.addClass('opacity-25');
 
-            const url = '/rigs/rig/service/stop';
+            const url = '/api/rigs/rig/service/stop';
             const data = {
                 rig: '${rig.rig.hostname}',
                 service: serviceName,

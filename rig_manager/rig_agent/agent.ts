@@ -104,7 +104,21 @@ app.use(express.static(staticDir));
 
 
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+    if (! rigStatus) {
+        res.send(`Rig not initialized`);
+        res.end();
+        return;
+    }
+
+    const presets = configRig.pools;
+
+    const opts = {
+        rig: rigStatus,
+        miners: getMiners(),
+        rigs:[],
+        presets,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });
@@ -115,6 +129,36 @@ app.get('/status.json', (req: express.Request, res: express.Response, next: Func
 
     res.send( JSON.stringify(rigStatus) );
     res.end();
+});
+
+
+app.post('/api/rig/service/start', async (req: express.Request, res: express.Response, next: Function) => {
+    //const rigName = req.body.rig;
+    const serviceName = req.body.service;
+
+    const algo = req.body.algo || '';
+    const service = req.body.service || '';
+    const poolUrl = req.body.poolUrl || '';
+    const poolAccount = req.body.poolAccount || '';
+    const optionnalParams = req.body.optionnalParams || '';
+
+    const params = {
+        //coin: '',
+        algo,
+        service,
+        poolUrl,
+        poolAccount,
+        optionnalParams,
+    };
+    //const paramsJson = JSON.stringify(params);
+
+    const ok = await startRigService(serviceName, params);
+});
+
+
+app.post('/api/rig/service/stop', async (req: express.Request, res: express.Response, next: Function) => {
+    const serviceName = req.body.service;
+    const ok = await stopRigService(serviceName);
 });
 
 
@@ -274,7 +318,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const ok = startRigService(serviceName, params);
+                    const ok = await startRigService(serviceName, params);
                     var debugme = 1;
 
                 }
@@ -468,5 +512,18 @@ async function checkStatus() {
 
     // poll services every x seconds
     checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
+}
+
+
+function getMiners() {
+    const miners = [
+        'gminer',
+        'lolminer',
+        'nbminer',
+        'teamredminer',
+        'trex',
+        'xmrig',
+    ];
+    return miners;
 }
 

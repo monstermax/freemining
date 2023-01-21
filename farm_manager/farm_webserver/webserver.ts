@@ -200,7 +200,7 @@ app.get('/rigs/rig', (req: express.Request, res: express.Response, next: Functio
 
 
 
-app.post('/rigs/rig/service/start', (req: express.Request, res: express.Response, next: Function) => {
+app.post('/api/rigs/rig/service/start', (req: express.Request, res: express.Response, next: Function) => {
     // TODO: check client ip
 
     const rigName = req.body.rig;
@@ -234,7 +234,7 @@ app.post('/rigs/rig/service/start', (req: express.Request, res: express.Response
 });
 
 
-app.post('/rigs/rig/service/stop', (req: express.Request, res: express.Response, next: Function) => {
+app.post('/api/rigs/rig/service/stop', (req: express.Request, res: express.Response, next: Function) => {
     // TODO: check client ip
 
     const rigName = req.body.rig;
@@ -251,23 +251,6 @@ app.post('/rigs/rig/service/stop', (req: express.Request, res: express.Response,
     res.send('KO');
 });
 
-
-app.post('/rigs/rig/service/kill', (req: express.Request, res: express.Response, next: Function) => {
-    // TODO: check client ip
-
-    const rigName = req.body.rig;
-    const serviceName = req.body.service;
-
-    const wsClient = Object.values(wsClients).filter(_wsClient => _wsClient.rigName === rigName).shift();
-
-    if (wsClient && serviceName) {
-        wsClient.ws.send(`service kill ${serviceName}`);
-
-        res.send('OK');
-        return;
-    }
-    res.send('KO');
-});
 
 
 function getWsClientIp(req: express.Request) {
