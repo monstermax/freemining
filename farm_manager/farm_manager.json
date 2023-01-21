@@ -34,7 +34,19 @@
                 "poolUrl": "flux-eu.minerpool.pro",
                 "poolAccount": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.${workerName}",
                 "args": "--pers ZelProof"
+            },
+
+            "jjpool": {
+                "ergo": {
+                    "name": "Ergo @ JJPool [GPU]",
+                    "miner": "teamredminer",
+                    "algo": "ergo",
+                    "poolUrl": "eu.jjpool.fr:3056",
+                    "poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.${rigName}",
+                    "args": ""
+                }
             }
+
         }
     }
 }
