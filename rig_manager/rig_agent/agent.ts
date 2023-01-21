@@ -95,6 +95,8 @@ staticDir = stringTemplate(staticDir, ctx, false, true, true);
 
 const layoutPath = `${templatesDir}/layout_rig_agent.html`;
 
+const rigName = configRig.rigName || os.hostname();
+
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -113,6 +115,7 @@ app.get('/', (req: express.Request, res: express.Response, next: Function) => {
     const presets = configRig.pools || {};
 
     const opts = {
+        rigName,
         rig: rigStatus,
         miners: getMiners(),
         rigs:[],
@@ -133,7 +136,6 @@ app.get('/status.json', (req: express.Request, res: express.Response, next: Func
 
 
 app.post('/api/rig/service/start', async (req: express.Request, res: express.Response, next: Function) => {
-    //const rigName = req.body.rig;
     const serviceName = req.body.service;
 
     const algo = req.body.algo || '';
@@ -263,8 +265,6 @@ function websocketConnect() {
     ws.on('open', async function open() {
         // Prepare connection heartbeat
         heartbeat.call(this);
-
-        const rigName = os.hostname();
 
         // Send auth
         ws.send(`auth ${rigName} xxx`);

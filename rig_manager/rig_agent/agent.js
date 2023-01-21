@@ -25,6 +25,7 @@ const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configRig)
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true);
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
 const layoutPath = `${templatesDir}/layout_rig_agent.html`;
+const rigName = configRig.rigName || os_1.default.hostname();
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
@@ -36,6 +37,7 @@ app.get('/', (req, res, next) => {
     }
     const presets = configRig.pools || {};
     const opts = {
+        rigName,
         rig: rigStatus,
         miners: getMiners(),
         rigs: [],
@@ -51,7 +53,6 @@ app.get('/status.json', (req, res, next) => {
     res.end();
 });
 app.post('/api/rig/service/start', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    //const rigName = req.body.rig;
     const serviceName = req.body.service;
     const algo = req.body.algo || '';
     const service = req.body.service || '';
@@ -143,7 +144,6 @@ function websocketConnect() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // Prepare connection heartbeat
             heartbeat.call(this);
-            const rigName = os_1.default.hostname();
             // Send auth
             ws.send(`auth ${rigName} xxx`);
             // Send rig config

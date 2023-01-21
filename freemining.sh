@@ -292,9 +292,12 @@ $0 \$@
     elif [ "$1" = "modules-install" ]; then
         shift
 
-        echo "Install modules"
+        echo "Install modules" # JS modules
 
         INSTALL_LOG=/dev/null
+
+        echo " - Installing common..."
+        ./common/javascript/install_common.sh >${INSTALL_LOG}
 
         echo " - Installing rig_agent..."
         ./rig_manager/rig_agent/install_agent.sh >${INSTALL_LOG}
