@@ -23,7 +23,7 @@ fi
 FRM_MODULE="rig"
 
 RIG_CONFIG_FILE=${frmConfDir}/rig/rig_manager.json
-if ! test -f $RIG_CONFIG_FILE; then
+if ! test -s $RIG_CONFIG_FILE; then
     RIG_CONFIG_FILE=$(realpath ./rig_manager.json)
 fi
 

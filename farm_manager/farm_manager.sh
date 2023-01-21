@@ -23,7 +23,7 @@ fi
 FRM_MODULE="farm"
 
 FARM_CONFIG_FILE=${frmConfDir}/farm/farm_manager.json
-if ! test -f $FARM_CONFIG_FILE; then
+if ! test -s $FARM_CONFIG_FILE; then
     FARM_CONFIG_FILE=$(realpath ./farm_manager.json)
 fi
 
