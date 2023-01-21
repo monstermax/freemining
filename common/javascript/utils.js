@@ -1,19 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.now = exports.formatNumber = exports.stringTemplate = exports.applyHtmlLayout = void 0;
+exports.loadTemplate = exports.applyHtmlLayout = exports.now = exports.formatNumber = exports.stringTemplate = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
-function applyHtmlLayout(layoutPath = '', opts = {}) {
-    opts.meta = opts.meta || {};
-    opts.meta.title = opts.meta.title || ''; // set page title
-    opts.meta.noIndex = opts.meta.noIndex || false;
-    opts.body = opts.body || {};
-    opts.body.content = opts.body.content || ''; // set page content
-    const layoutTemplate = fs_1.default.readFileSync(layoutPath).toString();
-    let pageContent = stringTemplate(layoutTemplate, opts);
-    return pageContent;
-}
-exports.applyHtmlLayout = applyHtmlLayout;
 function stringTemplate(text, params, ignoreErrors = false, recursive = true, expandTild = false, maxDepth = 50) {
     const HOME = process.env.HOME;
     params.formatNumber = formatNumber;
@@ -49,3 +38,26 @@ function now() {
     return new Date().toLocaleTimeString("fr-FR", options);
 }
 exports.now = now;
+function applyHtmlLayout(content, opts = {}, layoutPath = '', currentUrl = '') {
+    opts = opts || {};
+    opts.currentUrl = currentUrl;
+    opts.meta = opts.meta || {};
+    opts.meta.title = opts.meta.title || ''; // set page title
+    opts.meta.noIndex = opts.meta.noIndex || false;
+    opts.body = opts.body || {};
+    opts.body.content = opts.body.content || content; // set page content
+    const layoutTemplate = fs_1.default.readFileSync(layoutPath).toString();
+    let pageContent = stringTemplate(layoutTemplate, opts);
+    return pageContent;
+}
+exports.applyHtmlLayout = applyHtmlLayout;
+function loadTemplate(templatesDir, tplFile, data = {}) {
+    const tplPath = `${templatesDir}/${tplFile}`;
+    if (!fs_1.default.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+    let tplContent = stringTemplate(layoutTemplate, data);
+    return tplContent;
+}
+exports.loadTemplate = loadTemplate;

@@ -22,8 +22,8 @@ let staticDir = ((_d = configFarm.farmServer) === null || _d === void 0 ? void 0
 let templatesDir = ((_e = configFarm.farmServer) === null || _e === void 0 ? void 0 : _e.templates) || `${__dirname}/web/templates`;
 const farmAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/farm';
 const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configFarm), { farmAppDir });
-templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true);
-staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
+templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
+staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 const rigs = {};
 const wsClients = {};
 app.use(express_1.default.urlencoded({ extended: true }));
@@ -38,7 +38,7 @@ function applyLayout(req, content, opts = {}) {
     return (0, utils_1.applyHtmlLayout)(layoutPath, opts);
 }
 app.get('/', (req, res, next) => {
-    const content = "Farm management";
+    const content = loadTemplate('index.html');
     const pageContent = applyLayout(req, content, {});
     res.send(pageContent);
     res.end();

@@ -1,25 +1,9 @@
 
 import fs from 'fs';
 
-import type express from 'express';
 
 
-export function applyHtmlLayout(layoutPath: string='', opts: any={}): string {
-    opts.meta = opts.meta || {};
-    opts.meta.title = opts.meta.title || ''; // set page title
-    opts.meta.noIndex = opts.meta.noIndex || false;
-
-    opts.body = opts.body || {};
-    opts.body.content = opts.body.content || ''; // set page content
-
-    const layoutTemplate = fs.readFileSync(layoutPath).toString();
-    let pageContent = stringTemplate(layoutTemplate, opts);
-
-    return pageContent;
-}
-
-
-export function stringTemplate(text: string, params: any, ignoreErrors=false, recursive=true, expandTild=false, maxDepth=50) {
+export function stringTemplate(text: string, params: any, ignoreErrors=false, recursive=true, expandTild=false, maxDepth=50): string | null {
     const HOME = process.env.HOME;
     params.formatNumber = formatNumber;
 
@@ -61,3 +45,34 @@ export function now(): string {
     return new Date().toLocaleTimeString("fr-FR", options);
 }
 
+
+
+export function applyHtmlLayout(content: string, opts: any={}, layoutPath: string='', currentUrl: string=''): string | null {
+    opts = opts || {};
+    opts.currentUrl = currentUrl;
+
+    opts.meta = opts.meta || {};
+    opts.meta.title = opts.meta.title || ''; // set page title
+    opts.meta.noIndex = opts.meta.noIndex || false;
+
+    opts.body = opts.body || {};
+    opts.body.content = opts.body.content || content; // set page content
+
+    const layoutTemplate = fs.readFileSync(layoutPath).toString();
+    let pageContent = stringTemplate(layoutTemplate, opts);
+
+    return pageContent;
+}
+
+
+//export function loadTemplate(templatesDir: string, tplFile: string, data: any={}): string | null {
+//    const tplPath = `${templatesDir}/${tplFile}`;
+//
+//    if (! fs.existsSync(tplPath)) {
+//        return null;
+//    }
+//    const layoutTemplate = fs.readFileSync(tplPath).toString();
+//    let tplContent = stringTemplate(layoutTemplate, data);
+//
+//    return tplContent;
+//}

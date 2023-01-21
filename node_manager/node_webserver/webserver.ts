@@ -7,6 +7,9 @@ import colors from 'colors/safe';
 import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
+/* ############################## MAIN ###################################### */
+
+
 const app = express();
 const server = http.createServer(app);
 
@@ -26,11 +29,10 @@ const ctx: any = {
     ...configNode,
     nodeAppDir,
 };
-templatesDir = stringTemplate(templatesDir, ctx, false, true, true);
-staticDir = stringTemplate(staticDir, ctx, false, true, true);
+templatesDir = stringTemplate(templatesDir, ctx, false, true, true) || '';
+staticDir = stringTemplate(staticDir, ctx, false, true, true) || '';
 
-
-/* ############################## MAIN ###################################### */
+const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -44,9 +46,7 @@ if (staticDir) {
 
 
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const content = "Node management";
-    const pageContent = applyLayout(req, content, {});
-
+    const pageContent = loadTemplate('index.html', {}, req.url);
     res.send( pageContent );
     res.end();
 });
@@ -67,14 +67,17 @@ server.listen(httpServerPort, httpServerHost, () => {
 
 /* ############################ FUNCTIONS ################################### */
 
-function applyLayout(req: express.Request, content: string, opts: any={}) {
-    const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
+function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
+    const tplPath = `${templatesDir}/${tplFile}`;
 
-    return applyHtmlLayout(layoutPath, opts);
+    if (! fs.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs.readFileSync(tplPath).toString();
+    let content = stringTemplate(layoutTemplate, data) || '';
+
+    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
+    return pageContent;
 }
 

@@ -110,7 +110,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         wget -qO- http://localhost:${FARM_SERVER_PORT}/status.json
 
     elif test "$ACTION" = "webserver"; then
-        exec ./farm_server/webserver.sh $@
+        exec ./farm_webserver/webserver.sh $@
 
     elif test "$ACTION" = "rigs"; then
         wget -qO- http://localhost:${FARM_SERVER_PORT}/status.json | jq -r ". | keys | join(\" \")"

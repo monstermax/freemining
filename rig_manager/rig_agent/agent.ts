@@ -70,7 +70,6 @@ type RigStatus = {
 
 /* ############################## MAIN ###################################### */
 
-
 const configRig: any = require('../rig_manager.json');
 const configFrm: any = require('../../freemining.json');
 
@@ -94,6 +93,8 @@ const ctx: any = {
 templatesDir = stringTemplate(templatesDir, ctx, false, true, true);
 staticDir = stringTemplate(staticDir, ctx, false, true, true);
 
+const layoutPath = `${templatesDir}/layout_rig_agent.html`;
+
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -103,8 +104,7 @@ app.use(express.static(staticDir));
 
 
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const content = 'Rig management';
-    const pageContent = applyLayout(req, content, {});
+    const pageContent = loadTemplate('index.html', {}, req.url);
     res.send( pageContent );
     res.end();
 });
@@ -174,15 +174,17 @@ async function main() {
 
 
 
-function applyLayout(req: express.Request, content: string, opts: any={}) {
-    const layoutPath = `${templatesDir}/layout_rig_agent.html`;
+function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
+    const tplPath = `${templatesDir}/${tplFile}`;
 
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
+    if (! fs.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs.readFileSync(tplPath).toString();
+    let content = stringTemplate(layoutTemplate, data) || '';
 
-    return applyHtmlLayout(layoutPath, opts);
+    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
+    return pageContent;
 }
 
 

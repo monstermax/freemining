@@ -9,6 +9,10 @@ import fetch from 'node-fetch';
 import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
+
+/* ############################## MAIN ###################################### */
+
+
 const app = express();
 const server = http.createServer(app);
 
@@ -23,19 +27,17 @@ let staticDir: string = configPool.poolWebserver?.root || `${__dirname}/web/publ
 let templatesDir: string = configPool.poolWebserver?.templates || `${__dirname}/web/templates`;
 let engineWebsiteDir: string = configPool.poolWebserver?.poolsSiteDir || `${__dirname}/web/public`;
 
-
 const poolAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/pool';
 const ctx: any = {
     ...configFrm,
     ...configPool,
     poolAppDir,
 };
-templatesDir = stringTemplate(templatesDir, ctx, false, true, true);
-staticDir = stringTemplate(staticDir, ctx, false, true, true);
-engineWebsiteDir = stringTemplate(engineWebsiteDir, ctx, false, true, true);
+templatesDir = stringTemplate(templatesDir, ctx, false, true, true) || '';
+staticDir = stringTemplate(staticDir, ctx, false, true, true) || '';
+engineWebsiteDir = stringTemplate(engineWebsiteDir, ctx, false, true, true) || '';
 
-
-/* ############################## MAIN ###################################### */
+const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -51,9 +53,7 @@ if (staticDir) {
 
 
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const content = "Pool management";
-    const pageContent = applyLayout(req, content, {});
-
+    const pageContent = loadTemplate('index.html', {}, req.url);
     res.send( pageContent );
     res.end();
 });
@@ -93,14 +93,18 @@ server.listen(httpServerPort, httpServerHost, () => {
 
 /* ############################ FUNCTIONS ################################### */
 
-function applyLayout(req: express.Request, content: string, opts: any={}) {
-    const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
 
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
 
-    return applyHtmlLayout(layoutPath, opts);
+function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
+    const tplPath = `${templatesDir}/${tplFile}`;
+
+    if (! fs.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs.readFileSync(tplPath).toString();
+    let content = stringTemplate(layoutTemplate, data) || '';
+
+    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
+    return pageContent;
 }
 

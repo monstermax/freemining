@@ -27,7 +27,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
 app.get('/', (req, res, next) => {
-    const content = 'Rig management';
+    const content = loadTemplate('index.html');
     const pageContent = applyLayout(req, content, {});
     res.send(pageContent);
     res.end();

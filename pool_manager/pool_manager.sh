@@ -122,7 +122,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     elif [ "$1" = "webserver" ]; then
         shift
         # run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
-        exec ./pool_server/webserver.sh $@
+        exec ./pool_webserver/webserver.sh $@
 
     elif [ "$1" = "ps" ]; then
         shift

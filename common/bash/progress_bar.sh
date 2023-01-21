@@ -33,7 +33,7 @@ function show_progress {
 }
 
 
-if false; then
+if test "$0" = "$BASH_SOURCE"; then
     # Usage example: 
 
     show_progress 0 100

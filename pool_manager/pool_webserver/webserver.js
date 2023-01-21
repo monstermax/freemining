@@ -19,9 +19,10 @@ let templatesDir = ((_e = configPool.poolWebserver) === null || _e === void 0 ? 
 let engineWebsiteDir = ((_f = configPool.poolWebserver) === null || _f === void 0 ? void 0 : _f.poolsSiteDir) || `${__dirname}/web/public`;
 const poolAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/pool';
 const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configPool), { poolAppDir });
-templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true);
-staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
-engineWebsiteDir = (0, utils_1.stringTemplate)(engineWebsiteDir, ctx, false, true, true);
+templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
+staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
+engineWebsiteDir = (0, utils_1.stringTemplate)(engineWebsiteDir, ctx, false, true, true) || '';
+const poolLayoutPath = `${templatesDir}/layout_pool_webserver.html`;
 /* ############################## MAIN ###################################### */
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
@@ -32,8 +33,7 @@ if (staticDir) {
     app.use(express_1.default.static(staticDir));
 }
 app.get('/', (req, res, next) => {
-    const content = "Pool management";
-    const pageContent = applyLayout(req, content, {});
+    const pageContent = loadPoolTemplate('index.html');
     res.send(pageContent);
     res.end();
 });
@@ -63,11 +63,19 @@ server.listen(httpServerPort, httpServerHost, () => {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
 });
 /* ############################ FUNCTIONS ################################### */
-function applyLayout(req, content, opts = {}) {
-    const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
-    return (0, utils_1.applyHtmlLayout)(layoutPath, opts);
+function loadPoolTemplate(tplFile, data = {}, currentUrl = '') {
+    const content = loadTemplate(templatesDir, tplFile) || '';
+    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, poolLayoutPath, currentUrl);
+    return pageContent;
 }
+//export function loadTemplate(templatesDir: string, tplFile: string, data: any={}): string | null {
+//    const tplPath = `${templatesDir}/${tplFile}`;
+//
+//    if (! fs.existsSync(tplPath)) {
+//        return null;
+//    }
+//    const layoutTemplate = fs.readFileSync(tplPath).toString();
+//    let tplContent = stringTemplate(layoutTemplate, data);
+//
+//    return tplContent;
+//}

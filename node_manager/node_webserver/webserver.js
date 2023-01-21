@@ -16,8 +16,8 @@ let staticDir = ((_c = configNode.nodeServer) === null || _c === void 0 ? void 0
 let templatesDir = ((_d = configNode.nodeServer) === null || _d === void 0 ? void 0 : _d.templates) || `${__dirname}/web/templates`;
 const nodeAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/node';
 const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configNode), { nodeAppDir });
-templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true);
-staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
+templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
+staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 /* ############################## MAIN ###################################### */
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
@@ -26,7 +26,7 @@ if (staticDir) {
     app.use(express_1.default.static(staticDir));
 }
 app.get('/', (req, res, next) => {
-    const content = "Node management";
+    const content = loadTemplate('index.html');
     const pageContent = applyLayout(req, content, {});
     res.send(pageContent);
     res.end();
