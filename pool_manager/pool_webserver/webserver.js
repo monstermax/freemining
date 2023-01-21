@@ -2,11 +2,13 @@
 var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const fs_1 = tslib_1.__importDefault(require("fs"));
 const express_1 = tslib_1.__importDefault(require("express"));
 const http = tslib_1.__importStar(require("http"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const utils_1 = require("./common/utils");
+/* ############################## MAIN ###################################### */
 const app = (0, express_1.default)();
 const server = http.createServer(app);
 const configPool = require('../pool_manager.json');
@@ -22,8 +24,7 @@ const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configPool
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 engineWebsiteDir = (0, utils_1.stringTemplate)(engineWebsiteDir, ctx, false, true, true) || '';
-const poolLayoutPath = `${templatesDir}/layout_pool_webserver.html`;
-/* ############################## MAIN ###################################### */
+const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
@@ -33,7 +34,7 @@ if (staticDir) {
     app.use(express_1.default.static(staticDir));
 }
 app.get('/', (req, res, next) => {
-    const pageContent = loadPoolTemplate('index.html');
+    const pageContent = loadTemplate('index.html', {}, req.url);
     res.send(pageContent);
     res.end();
 });
@@ -63,19 +64,13 @@ server.listen(httpServerPort, httpServerHost, () => {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
 });
 /* ############################ FUNCTIONS ################################### */
-function loadPoolTemplate(tplFile, data = {}, currentUrl = '') {
-    const content = loadTemplate(templatesDir, tplFile) || '';
-    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, poolLayoutPath, currentUrl);
+function loadTemplate(tplFile, data = {}, currentUrl = '') {
+    const tplPath = `${templatesDir}/${tplFile}`;
+    if (!fs_1.default.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
     return pageContent;
 }
-//export function loadTemplate(templatesDir: string, tplFile: string, data: any={}): string | null {
-//    const tplPath = `${templatesDir}/${tplFile}`;
-//
-//    if (! fs.existsSync(tplPath)) {
-//        return null;
-//    }
-//    const layoutTemplate = fs.readFileSync(tplPath).toString();
-//    let tplContent = stringTemplate(layoutTemplate, data);
-//
-//    return tplContent;
-//}

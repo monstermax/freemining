@@ -38,9 +38,9 @@ function usage {
 TMP_DIR=$(mktemp -d)
 mkdir -p ${TMP_DIR}
 
-mkdir -p ${rigLogDir}/fullnodes
-mkdir -p ${rigPidDir}/fullnodes
-mkdir -p ${rigDataDir}/fullnodes
+mkdir -p ${rigLogDir}/miners
+mkdir -p ${rigPidDir}/miners
+mkdir -p ${rigDataDir}/miners
 mkdir -p ${minersDir}
 
 

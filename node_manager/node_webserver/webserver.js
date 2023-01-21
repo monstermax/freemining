@@ -2,10 +2,12 @@
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const fs_1 = tslib_1.__importDefault(require("fs"));
 const express_1 = tslib_1.__importDefault(require("express"));
 const http = tslib_1.__importStar(require("http"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const utils_1 = require("./common/utils");
+/* ############################## MAIN ###################################### */
 const app = (0, express_1.default)();
 const server = http.createServer(app);
 const configNode = require('../node_manager.json');
@@ -18,7 +20,7 @@ const nodeAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/node';
 const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configNode), { nodeAppDir });
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
-/* ############################## MAIN ###################################### */
+const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
@@ -26,8 +28,7 @@ if (staticDir) {
     app.use(express_1.default.static(staticDir));
 }
 app.get('/', (req, res, next) => {
-    const content = loadTemplate('index.html');
-    const pageContent = applyLayout(req, content, {});
+    const pageContent = loadTemplate('index.html', {}, req.url);
     res.send(pageContent);
     res.end();
 });
@@ -40,11 +41,13 @@ server.listen(httpServerPort, httpServerHost, () => {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
 });
 /* ############################ FUNCTIONS ################################### */
-function applyLayout(req, content, opts = {}) {
-    const layoutPath = `${templatesDir}/layout_node_webserver.html`;
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
-    return (0, utils_1.applyHtmlLayout)(layoutPath, opts);
+function loadTemplate(tplFile, data = {}, currentUrl = '') {
+    const tplPath = `${templatesDir}/${tplFile}`;
+    if (!fs_1.default.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
+    return pageContent;
 }

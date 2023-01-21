@@ -186,9 +186,54 @@ ${Object.entries(rig.services).map(entry => {
                         -->
 
                         <div class="mb-3">
-                            <label for="newService_miner" class="form-label">Miner<sup>*</sup></label>
-                            <select id="newService_miner" name="service" class="form-select required" aria-describedby="newService_miner_Help">
+                            <label for="newService_preset" class="form-label">Load config</label>
+                            <select id="newService_preset" name="preset" class="form-select" aria-describedby="newService_preset_Help" onchange="loadConfig(this.value)">
                                 <option></option>
+
+                                <optgroup label="____________ Farm Configs ____________"></optgroup>
+                                ${Object.entries(presets).map(entry => {
+                                    const [poolName, poolConfigs] = entry;
+
+                                    let poolHtml = '';
+                                    poolHtml += '<optgroup label="' + poolName + '">';
+
+                                    poolHtml += Object.entries(poolConfigs).map(entry2 => {
+                                        const [coinName, preset] = entry2;
+                                        let coinHtml = '<option value="farm.' + poolName + '.' + coinName + '">' + coinName + '&gt; ' + preset.name + '</option>';
+                                        return coinHtml;
+                                    }).join('');
+
+                                    poolHtml += '</optgroup>';
+
+                                    return poolHtml;
+                                }).join('')}
+                                <option disabled></option>
+
+                                <optgroup label="____________ Rig Configs ____________"></optgroup>
+                                ${Object.entries(rigPresets).map(entry => {
+                                    const [poolName, poolConfigs] = entry;
+
+                                    let poolHtml = '';
+                                    poolHtml += '<optgroup label="' + poolName + '">';
+
+                                    poolHtml += Object.entries(poolConfigs).map(entry2 => {
+                                        const [coinName, preset] = entry2;
+                                        let coinHtml = '<option value="rig.' + poolName + '.' + coinName + '">' + coinName + '&gt; ' + preset.name + '</option>';
+                                        return coinHtml;
+                                    }).join('');
+
+                                    poolHtml += '</optgroup>';
+
+                                    return poolHtml;
+                                }).join('')}
+                            </select>
+                            <div id="newService_preset_Help" class="form-text"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newService_miner" class="form-label">Miner<sup>*</sup></label>
+                            <select id="newService_miner" name="miner" class="form-select required" aria-describedby="newService_miner_Help">
+                                <option value=""></option>
 
                                 ${miners.map(miner => {
                                     if (miner in rig.services) {
@@ -364,6 +409,38 @@ function stopService(serviceName) {
     );
 
 }
+
+
+function loadConfig(selectedPreset) {
+    //const $presetsSelect = jQuery('#newService_preset');
+    const parts = selectedPreset.split('.');
+
+    if (parts.length != 3) {
+        jQuery('#newService_miner').val('');
+        jQuery('#newService_algo').val('');
+        jQuery('#newService_pool_url').val('');
+        jQuery('#newService_pool_account').val('');
+        jQuery('#newService_optional_params').val('');
+        return;
+    }
+    const [part0, part1, part2] = parts;
+
+    let config;
+    if (part0 == 'rig') {
+        config = rigPresets[part1][part2];
+    } else {
+        config = presets[part1][part2];
+    }
+
+    jQuery('#newService_miner').val(config.miner);
+    jQuery('#newService_algo').val(config.algo);
+    jQuery('#newService_pool_url').val(config.poolUrl);
+    jQuery('#newService_pool_account').val(config.poolAccount);
+    jQuery('#newService_optional_params').val(config.args);
+}
+
+const presets = ${JSON.stringify(presets)};
+const rigPresets = ${JSON.stringify(rigPresets)};
 
 
 //setInterval(() => {

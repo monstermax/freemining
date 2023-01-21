@@ -110,7 +110,7 @@ app.get('/', (req: express.Request, res: express.Response, next: Function) => {
         return;
     }
 
-    const presets = configRig.pools;
+    const presets = configRig.pools || {};
 
     const opts = {
         rig: rigStatus,
@@ -268,6 +268,11 @@ function websocketConnect() {
 
         // Send auth
         ws.send(`auth ${rigName} xxx`);
+
+        // Send rig config
+        console.log(`${now()} [${colors.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`)
+        ws.send( `rigConfig ${JSON.stringify(configRig)}`);
+
 
         // Send rig status
         if (rigStatus) {

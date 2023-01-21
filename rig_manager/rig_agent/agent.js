@@ -2,6 +2,7 @@
 var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const fs_1 = tslib_1.__importDefault(require("fs"));
 const express_1 = tslib_1.__importDefault(require("express"));
 const http = tslib_1.__importStar(require("http"));
 const ws_1 = tslib_1.__importDefault(require("ws"));
@@ -23,12 +24,24 @@ const rigAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/rig';
 const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configRig), { rigAppDir });
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true);
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
+const layoutPath = `${templatesDir}/layout_rig_agent.html`;
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
 app.get('/', (req, res, next) => {
-    const content = loadTemplate('index.html');
-    const pageContent = applyLayout(req, content, {});
+    if (!rigStatus) {
+        res.send(`Rig not initialized`);
+        res.end();
+        return;
+    }
+    const presets = configRig.pools || {};
+    const opts = {
+        rig: rigStatus,
+        miners: getMiners(),
+        rigs: [],
+        presets,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
 });
@@ -37,6 +50,29 @@ app.get('/status.json', (req, res, next) => {
     res.send(JSON.stringify(rigStatus));
     res.end();
 });
+app.post('/api/rig/service/start', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    //const rigName = req.body.rig;
+    const serviceName = req.body.service;
+    const algo = req.body.algo || '';
+    const service = req.body.service || '';
+    const poolUrl = req.body.poolUrl || '';
+    const poolAccount = req.body.poolAccount || '';
+    const optionnalParams = req.body.optionnalParams || '';
+    const params = {
+        //coin: '',
+        algo,
+        service,
+        poolUrl,
+        poolAccount,
+        optionnalParams,
+    };
+    //const paramsJson = JSON.stringify(params);
+    const ok = yield startRigService(serviceName, params);
+}));
+app.post('/api/rig/service/stop', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const serviceName = req.body.service;
+    const ok = yield stopRigService(serviceName);
+}));
 app.use(function (req, res, next) {
     // Error 404
     console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] Error 404: ${req.method.toLocaleUpperCase()} ${req.url}`);
@@ -73,13 +109,15 @@ function main() {
         }
     });
 }
-function applyLayout(req, content, opts = {}) {
-    const layoutPath = `${templatesDir}/layout_rig_agent.html`;
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
-    return (0, utils_1.applyHtmlLayout)(layoutPath, opts);
+function loadTemplate(tplFile, data = {}, currentUrl = '') {
+    const tplPath = `${templatesDir}/${tplFile}`;
+    if (!fs_1.default.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
+    return pageContent;
 }
 function websocketConnect() {
     let sendStatusTimeout = null;
@@ -108,6 +146,9 @@ function websocketConnect() {
             const rigName = os_1.default.hostname();
             // Send auth
             ws.send(`auth ${rigName} xxx`);
+            // Send rig config
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`);
+            ws.send(`rigConfig ${JSON.stringify(configRig)}`);
             // Send rig status
             if (rigStatus) {
                 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigStatus to server (open) [conn ${connectionId}]`);
@@ -148,7 +189,7 @@ function websocketConnect() {
                             console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] cannot start service : ${err.message}`);
                             return;
                         }
-                        const ok = startRigService(serviceName, params);
+                        const ok = yield startRigService(serviceName, params);
                         var debugme = 1;
                     }
                 }
@@ -299,4 +340,15 @@ function checkStatus() {
         // poll services every x seconds
         checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
     });
+}
+function getMiners() {
+    const miners = [
+        'gminer',
+        'lolminer',
+        'nbminer',
+        'teamredminer',
+        'trex',
+        'xmrig',
+    ];
+    return miners;
 }

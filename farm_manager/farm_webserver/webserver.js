@@ -24,22 +24,15 @@ const farmAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/farm';
 const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configFarm), { farmAppDir });
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
+const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
 const rigs = {};
+const rigsConfigs = {};
 const wsClients = {};
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
-function applyLayout(req, content, opts = {}) {
-    const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
-    opts = opts || {};
-    opts.body = opts.body || {};
-    opts.body.content = content;
-    opts.currentUrl = req.url;
-    return (0, utils_1.applyHtmlLayout)(layoutPath, opts);
-}
 app.get('/', (req, res, next) => {
-    const content = loadTemplate('index.html');
-    const pageContent = applyLayout(req, content, {});
+    const pageContent = loadTemplate('index.html', {}, req.url);
     res.send(pageContent);
     res.end();
 });
@@ -93,8 +86,12 @@ app.get('/rigs/rig', (req, res, next) => {
         const rig = rigs[rigName];
         const tplData = {
             rig,
+            presets: configFarm.pools || {},
+            rigPresets: (rigsConfigs[rigName] || {}).pools || {},
             rigs,
             miners,
+            rigName,
+            workerName: rigName,
         };
         const tplHtml = fs_1.default.readFileSync(`${templatesDir}/rig.html`).toString();
         const content = (0, utils_1.stringTemplate)(tplHtml, tplData);
@@ -116,7 +113,7 @@ app.get('/rigs/rig', (req, res, next) => {
     }
     res.end();
 });
-app.post('/rigs/rig/service/start', (req, res, next) => {
+app.post('/api/rigs/rig/service/start', (req, res, next) => {
     // TODO: check client ip
     const rigName = req.body.rig;
     const serviceName = req.body.service;
@@ -142,25 +139,13 @@ app.post('/rigs/rig/service/start', (req, res, next) => {
     }
     res.send('KO');
 });
-app.post('/rigs/rig/service/stop', (req, res, next) => {
+app.post('/api/rigs/rig/service/stop', (req, res, next) => {
     // TODO: check client ip
     const rigName = req.body.rig;
     const serviceName = req.body.service;
     const wsClient = Object.values(wsClients).filter(_wsClient => _wsClient.rigName === rigName).shift();
     if (wsClient && serviceName) {
         wsClient.ws.send(`service stop ${serviceName}`);
-        res.send('OK');
-        return;
-    }
-    res.send('KO');
-});
-app.post('/rigs/rig/service/kill', (req, res, next) => {
-    // TODO: check client ip
-    const rigName = req.body.rig;
-    const serviceName = req.body.service;
-    const wsClient = Object.values(wsClients).filter(_wsClient => _wsClient.rigName === rigName).shift();
-    if (wsClient && serviceName) {
-        wsClient.ws.send(`service kill ${serviceName}`);
         res.send('OK');
         return;
     }
@@ -247,6 +232,21 @@ wss.on('connection', function connection(ws, req) {
             ws.close();
             //setRigOffline(clientIP??); // TODO
         }
+        else if (action === 'rigConfig') {
+            try {
+                // parse status an,d store into 'rigs' variable
+                const rigConfig = JSON.parse(argsStr);
+                if (!rigConfig) {
+                    console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid config from ${clientIP}`);
+                    return;
+                }
+                rigConfig.dateFarm = Math.round((new Date).getTime() / 1000);
+                rigsConfigs[rigName] = rigConfig;
+            }
+            catch (err) {
+                console.error(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid rigConfig from ${clientIP} => ${err.message}`);
+            }
+        }
         else if (action === 'rigStatus') {
             try {
                 // parse status an,d store into 'rigs' variable
@@ -315,4 +315,14 @@ function getMiners() {
         'xmrig',
     ];
     return miners;
+}
+function loadTemplate(tplFile, data = {}, currentUrl = '') {
+    const tplPath = `${templatesDir}/${tplFile}`;
+    if (!fs_1.default.existsSync(tplPath)) {
+        return null;
+    }
+    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
+    return pageContent;
 }

@@ -23,5 +23,18 @@
             "176.31.228.62",
             "141.94.71.90"
         ]
+    },
+
+    "pools": {
+        "minerpoolpro": {
+            "flux": {
+                "name": "Flux @ minerpool.pro [GPU]",
+                "miner": "gminer",
+                "algo": "125_4",
+                "poolUrl": "flux-eu.minerpool.pro",
+                "poolAccount": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.${workerName}",
+                "args": "--pers ZelProof"
+            }
+        }
     }
 }

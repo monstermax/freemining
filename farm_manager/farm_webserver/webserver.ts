@@ -81,6 +81,7 @@ const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
 
 
 const rigs: {[key:string]: Rig} = {};
+const rigsConfigs: {[key:string]: any} = {};
 
 const wsClients: {[key:string]: wsClient} = {};
 
@@ -168,8 +169,12 @@ app.get('/rigs/rig', (req: express.Request, res: express.Response, next: Functio
 
         const tplData = {
             rig,
+            presets: configFarm.pools || {},
+            rigPresets: (rigsConfigs[rigName] || {}).pools || {},
             rigs,
             miners,
+            rigName,
+            workerName: rigName,
         };
 
         const tplHtml = fs.readFileSync(`${templatesDir}/rig.html`).toString();
@@ -353,6 +358,22 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
             console.log(`${now()} [${colors.yellow('WARNING')}]: ejecting client ${clientIP} for kick`);
             ws.close();
             //setRigOffline(clientIP??); // TODO
+
+        } else if (action === 'rigConfig') {
+            try {
+                // parse status an,d store into 'rigs' variable
+                const rigConfig = JSON.parse(argsStr);
+                if (! rigConfig) {
+                    console.log(`${now()} [${colors.yellow('WARNING')}] received invalid config from ${clientIP}`);
+                    return;
+                }
+
+                rigConfig.dateFarm = Math.round((new Date).getTime() / 1000);
+                rigsConfigs[rigName] = rigConfig;
+
+            } catch(err: any) {
+                console.error(`${now()} [${colors.yellow('WARNING')}] received invalid rigConfig from ${clientIP} => ${err.message}`);
+            }
 
         } else if (action === 'rigStatus') {
             try {

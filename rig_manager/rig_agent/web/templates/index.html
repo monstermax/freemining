@@ -193,7 +193,7 @@ ${Object.entries(rig.services).map(entry => {
                         <div class="mb-3">
                             <label for="newService_preset" class="form-label">Load config</label>
                             <select id="newService_preset" name="preset" class="form-select" aria-describedby="newService_preset_Help" onchange="loadConfig(this.value)">
-                                <option></option>
+                                <option value=""></option>
 
                                 ${Object.entries(presets).map(entry => {
                                     const [poolName, poolConfigs] = entry;
@@ -398,7 +398,15 @@ function stopService(serviceName) {
 function loadConfig(selectedPreset) {
     //const $presetsSelect = jQuery('#newService_preset');
     const parts = selectedPreset.split('.');
-    if (parts.length != 2) return;
+
+    if (parts.length != 2) {
+        jQuery('#newService_miner').val('');
+        jQuery('#newService_algo').val('');
+        jQuery('#newService_pool_url').val('');
+        jQuery('#newService_pool_account').val('');
+        jQuery('#newService_optional_params').val('');
+        return;
+    }
     const [part1, part2] = parts;
 
     const config = presets[part1][part2];
@@ -410,13 +418,13 @@ function loadConfig(selectedPreset) {
     jQuery('#newService_optional_params').val(config.args);
 }
 
+const presets = ${JSON.stringify(presets)};
+
+
 //setInterval(() => {
 //    const age = jQuery('#dataAge').text();
 //    jQuery('#dataAge').text(age*1 + 1);
 //}, 1000);
-
-const presets = ${JSON.stringify(presets)};
-
 
 </script>
 
