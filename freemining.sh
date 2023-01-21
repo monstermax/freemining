@@ -214,6 +214,21 @@ function getOpt {
     done
 }
 
+function getArrayOpt {
+    key="$1"
+    shift
+    array=($@)
+
+    for i in "${!array[@]}"; do
+
+        if [[ "${array[$i]}" = "${key}" ]]; then
+            let $((j = i + 1)) || true
+            echo ${array[$j]}
+            break
+        fi
+    done
+}
+
 #function removeOpt {
 #    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
 #
