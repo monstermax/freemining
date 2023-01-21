@@ -12,31 +12,18 @@ SERVICES=$(getAvailableMiners)
 JSON_MONITOR_DIR="../miners_monitor/json"
 
 
-#echo "###################################### RIG ###########################################"
-
-RIG_NAME=$(hostname)
-#echo "rig.hostname: $RIG_NAME"
-
+RIG_NAME=$rigName
+RIG_HOSTNAME=$(hostname)
 LOCAL_IP=$(hostname -I | cut -d' ' -f1)
-#echo "rig.ip: ${LOCAL_IP}"
 
 OS_VERSION=$(grep PRETTY_NAME /etc/os-release |cut -d'"' -f2)
-#echo "rig.os: ${OS_VERSION}"
-
 UPTIME=$(cat /proc/uptime |cut -d" " -f1 |cut -d"." -f1)
-#echo "rig.uptime: ${UPTIME}"
-
 LOAD_AVG=$(cat /proc/loadavg |cut -d" " -f1)
-#echo "rig.loadAvg: ${LOAD_AVG}"
+DATE=$(date +%s)
 
 MEM=$(free --mega -t |tail -n1 |tr -s ' ')
 MEM_TOTAL=$(echo $MEM |cut -d" " -f2)
 MEM_USED=$(echo $MEM |cut -d" " -f3)
-#echo "rig.memory: ${MEM_USED}/${MEM_TOTAL} MB"
-
-#DATE=$(date "+%F %T")
-DATE=$(date +%s)
-#echo "rig.date: ${DATE}"
 
 
 CPU_INFO=$(cat /proc/cpuinfo |grep "^model name" |cut -d":" -f2 |sort |uniq -c |head -n1 |tr -s " " " " |sed 's/^\s*//g')
@@ -124,7 +111,8 @@ rm -rf $DATA_DIR
 cat <<_EOF
 {
     "rig": {
-        "hostname": "${RIG_NAME}",
+        "name": "${RIG_NAME}",
+        "hostname": "${RIG_HOSTNAME}",
         "ip": "${LOCAL_IP}",
         "os": "${OS_VERSION}",
         "uptime": "${UPTIME}",

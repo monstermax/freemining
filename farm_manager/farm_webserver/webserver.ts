@@ -79,6 +79,8 @@ staticDir = stringTemplate(staticDir, ctx, false, true, true) || '';
 
 const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
 
+const websocketPassword = 'xxx'; // password required to connect to the websocket
+
 
 const rigs: {[key:string]: Rig} = {};
 const rigsConfigs: {[key:string]: any} = {};
@@ -171,6 +173,7 @@ app.get('/rigs/rig', (req: express.Request, res: express.Response, next: Functio
             rig,
             presets: configFarm.pools || {},
             rigPresets: (rigsConfigs[rigName] || {}).pools || {},
+            farmRigPresets: ((configFarm.rigs || {})[rigName] || {}).pools || {},
             rigs,
             miners,
             rigName,
@@ -320,7 +323,7 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
                 //setRigOffline(clientIP??); // TODO
             }
 
-            if (rigName && rigPass) {
+            if (rigName && rigPass == websocketPassword) {
                 wsClients[rigName] = (ws as any).auth = {
                     rigName: rigName,
                     ip: clientIP,
@@ -384,13 +387,9 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
                     return;
                 }
 
-                const rigHostname = status.rig.hostname;
+                const rigName = status.rig.name || status.rig.hostname;
 
-                if (rigHostname != wsClients[rigHostname].rigName) {
-                    var debugme = 1;
-                }
-
-                if (rigName != rigHostname) {
+                if (rigName != wsClients[rigName].rigName) {
                     var debugme = 1;
                 }
 

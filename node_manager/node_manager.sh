@@ -22,7 +22,11 @@ fi
 
 FRM_MODULE="node"
 
-NODE_CONFIG_FILE=$(realpath ./node_manager.json)
+NODE_CONFIG_FILE=${frmConfDir}/node/node_manager.json
+if ! test -f $NODE_CONFIG_FILE; then
+    NODE_CONFIG_FILE=$(realpath ./node_manager.json)
+fi
+
 nodeAppDir=$(dirname $NODE_CONFIG_FILE)
 
 if [ "$NODE_CONFIG_FILE" = "" -o ! -f "$NODE_CONFIG_FILE" ]; then

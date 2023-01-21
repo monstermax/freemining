@@ -11,8 +11,13 @@ const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const { exec } = require('child_process');
 const utils_1 = require("./common/utils");
 /* ############################## MAIN ###################################### */
-const configRig = require('../rig_manager.json');
 const configFrm = require('../../freemining.json');
+let rigConfigPath = configFrm.frmConfDir + '/rig/rig_manager.json';
+rigConfigPath = (0, utils_1.stringTemplate)(rigConfigPath, {}, false, true, true) || '';
+if (!fs_1.default.existsSync(rigConfigPath)) {
+    rigConfigPath = '../rig_manager.json';
+}
+const configRig = require(rigConfigPath);
 // Init HTTP Webserver
 const app = (0, express_1.default)();
 const server = http.createServer(app);
@@ -26,6 +31,8 @@ templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true)
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
 const layoutPath = `${templatesDir}/layout_rig_agent.html`;
 const rigName = configRig.rigName || os_1.default.hostname();
+const websocketPassword = 'xxx'; // password to access farm websocket server
+console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Starting Rig ${rigName}`);
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
@@ -145,7 +152,7 @@ function websocketConnect() {
             // Prepare connection heartbeat
             heartbeat.call(this);
             // Send auth
-            ws.send(`auth ${rigName} xxx`);
+            ws.send(`auth ${rigName} ${websocketPassword}`);
             // Send rig config
             console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`);
             ws.send(`rigConfig ${JSON.stringify(configRig)}`);

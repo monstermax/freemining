@@ -27,7 +27,7 @@
                 "args": ""
             },
             "ergo": {
-				"name": "Ergo @ FreeMining [GPU]",
+				"name": "Ergo @ FreeMining",
 				"miner": "trex",
 				"algo": "autolykos2",
 				"poolUrl": "freemining.fr:4013",
@@ -57,7 +57,7 @@
 
 		"jjpool": {
             "ergo": {
-				"name": "Ergo @ JJPool [GPU]",
+				"name": "Ergo @ JJPool (trex Nvidia)",
 				"miner": "trex",
 				"algo": "autolykos2",
 				"poolUrl": "eu.jjpool.fr:3056",

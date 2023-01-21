@@ -28,17 +28,32 @@
     "pools": {
         "minerpoolpro": {
             "flux": {
-                "name": "Flux @ minerpool.pro [GPU]",
+                "name": "Flux @ minerpool.pro",
                 "miner": "gminer",
                 "algo": "125_4",
                 "poolUrl": "flux-eu.minerpool.pro",
                 "poolAccount": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.${workerName}",
                 "args": "--pers ZelProof"
-            },
+            }
+        },
 
+        "ergo": {
             "jjpool": {
-                "ergo": {
-                    "name": "Ergo @ JJPool [GPU]",
+                "name": "Ergo @ JJPool (teamredminer AMD)",
+                "miner": "teamredminer",
+                "algo": "ergo",
+                "poolUrl": "eu.jjpool.fr:3056",
+                "poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.${rigName}",
+                "args": ""
+            }
+        }
+    },
+
+    "rigs": {
+        "zalman": {
+            "ergo": {
+                "jjpool": {
+                    "name": "Ergo @ JJPool (teamredminer AMD) -- zalman",
                     "miner": "teamredminer",
                     "algo": "ergo",
                     "poolUrl": "eu.jjpool.fr:3056",
@@ -46,7 +61,6 @@
                     "args": ""
                 }
             }
-
         }
     }
 }

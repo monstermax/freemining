@@ -18,6 +18,7 @@
 <thead class="table-dark">
     <tr>
         <th>Rig name</th>
+        <th>Host name</th>
         <th>IP</th>
         <th>Operating system</th>
         <th class="text-end">Uptime</th>
@@ -31,7 +32,8 @@
     ${Object.entries(rigs).map(entry => {
         const rig = entry[1];
         return `<tr class="${rig.dataAge > 10 ? 'text-danger' : (Object.keys(entry[1].services).length === 0 ? 'text-warning' : 'text-success')}">
-            <td><a href="./rig?rig=${rig.rig.hostname}">${rig.rig.hostname}</a></td>
+            <td><a href="./rig?rig=${rig.rig.name || rig.rig.hostname}">${rig.rig.name || rig.rig.hostname}</a></td>
+            <td>${rig.rig.hostname}</td>
             <td>${rig.rig.ip}</td>
             <td>${rig.rig.os}</td>
             <td class="text-end">${formatNumber(rig.rig.uptime)} sec.</td>

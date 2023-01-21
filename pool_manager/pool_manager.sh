@@ -22,7 +22,11 @@ fi
 
 FRM_MODULE="pool"
 
-POOL_CONFIG_FILE=$(realpath ./pool_manager.json)
+POOL_CONFIG_FILE=${frmConfDir}/pool/pool_manager.json
+if ! test -f $POOL_CONFIG_FILE; then
+    POOL_CONFIG_FILE=$(realpath ./pool_manager.json)
+fi
+
 poolAppDir=$(dirname $POOL_CONFIG_FILE)
 
 if [ "$POOL_CONFIG_FILE" = "" -o ! -f "$POOL_CONFIG_FILE" ]; then

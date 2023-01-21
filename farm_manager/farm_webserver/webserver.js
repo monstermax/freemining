@@ -25,6 +25,7 @@ const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configFarm
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
+const websocketPassword = 'xxx'; // password required to connect to the websocket
 const rigs = {};
 const rigsConfigs = {};
 const wsClients = {};
@@ -88,6 +89,7 @@ app.get('/rigs/rig', (req, res, next) => {
             rig,
             presets: configFarm.pools || {},
             rigPresets: (rigsConfigs[rigName] || {}).pools || {},
+            farmRigPresets: ((configFarm.rigs || {})[rigName] || {}).pools || {},
             rigs,
             miners,
             rigName,
@@ -197,7 +199,7 @@ wss.on('connection', function connection(ws, req) {
                 ws.close();
                 //setRigOffline(clientIP??); // TODO
             }
-            if (rigName && rigPass) {
+            if (rigName && rigPass == websocketPassword) {
                 wsClients[rigName] = ws.auth = {
                     rigName: rigName,
                     ip: clientIP,
@@ -255,11 +257,8 @@ wss.on('connection', function connection(ws, req) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid status from ${clientIP}`);
                     return;
                 }
-                const rigHostname = status.rig.hostname;
-                if (rigHostname != wsClients[rigHostname].rigName) {
-                    var debugme = 1;
-                }
-                if (rigName != rigHostname) {
+                const rigName = status.rig.name || status.rig.hostname;
+                if (rigName != wsClients[rigName].rigName) {
                     var debugme = 1;
                 }
                 status.dateFarm = Math.round((new Date).getTime() / 1000);

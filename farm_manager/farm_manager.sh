@@ -22,7 +22,11 @@ fi
 
 FRM_MODULE="farm"
 
-FARM_CONFIG_FILE=$(realpath ./farm_manager.json)
+FARM_CONFIG_FILE=${frmConfDir}/farm/farm_manager.json
+if ! test -f $FARM_CONFIG_FILE; then
+    FARM_CONFIG_FILE=$(realpath ./farm_manager.json)
+fi
+
 farmAppDir=$(dirname $FARM_CONFIG_FILE)
 
 if [ "$FARM_CONFIG_FILE" = "" -o ! -f "$FARM_CONFIG_FILE" ]; then
@@ -97,6 +101,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD json                        # show ${FRM_MODULE} status (JSON formatted)"
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
+        echo "  $CMD config                      # show/edit ${FRM_MODULE} manager config"
         echo
     }
 
@@ -114,6 +119,9 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif test "$ACTION" = "rigs"; then
         wget -qO- http://localhost:${FARM_SERVER_PORT}/status.json | jq -r ". | keys | join(\" \")"
+
+    elif test "$ACTION" = "config"; then
+        exec ./tools/farm_config.sh $@
 
     elif test "$ACTION" = "ps"; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1

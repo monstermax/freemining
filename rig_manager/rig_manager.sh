@@ -22,7 +22,11 @@ fi
 
 FRM_MODULE="rig"
 
-RIG_CONFIG_FILE=$(realpath ./rig_manager.json)
+RIG_CONFIG_FILE=${frmConfDir}/rig/rig_manager.json
+if ! test -f $RIG_CONFIG_FILE; then
+    RIG_CONFIG_FILE=$(realpath ./rig_manager.json)
+fi
+
 rigAppDir=$(dirname $RIG_CONFIG_FILE)
 
 if [ "$RIG_CONFIG_FILE" = "" -o ! -f "$RIG_CONFIG_FILE" ]; then
@@ -41,6 +45,12 @@ rigDataDir=$(eval echo `jq -r ".rigDataDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
 
 minersDir=$(eval echo `jq -r ".minersDir" ${RIG_CONFIG_FILE} 2>/dev/null`)
+
+
+rigName=$(eval echo `jq -r ".rigName" ${RIG_CONFIG_FILE} 2>/dev/null`)
+if test -z $rigName; then
+    rigName=$(hostname)
+fi
 
 
 
@@ -134,23 +144,23 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
     }
 
-    if [ "$1" = "install" ]; then
-        shift
+    ACTION=$1
+    shift || true
+
+
+    if [ "$ACTION" = "install" ]; then
         exec ./tools/install_rig_manager.sh $@
 
-    elif [ "$1" = "status" ]; then
-        shift
+    elif [ "$ACTION" = "status" ]; then
         ./tools/rig_monitor_txt.sh
 
-    elif [ "$1" = "miner" ]; then
-        shift
+    elif [ "$ACTION" = "miner" ]; then
         exec ./tools/run_miner.sh $@
 
-    elif [ "$1" = "miner-install" ]; then
-        shift
+    elif [ "$ACTION" = "miner-install" ]; then
         exec ./tools/install_miner.sh $@
 
-    elif [ "$1" = "miner-uninstall" ]; then
+    elif [ "$ACTION" = "miner-uninstall" ]; then
         MINER=$2
         if [ "$MINER" = "" ]; then
             usage
@@ -170,24 +180,19 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         read
         rm -rf ${rigConfDir}/rig/miner/${MINER}/
 
-    elif [ "$1" = "json" ]; then
-        shift
+    elif [ "$ACTION" = "json" ]; then
         exec ./tools/rig_monitor_json.sh $@
 
-    elif [ "$1" = "status" ]; then
-        shift
+    elif [ "$ACTION" = "status" ]; then
         exec ./tools/rig_monitor_txt.sh $@
 
-    elif [ "$1" = "config" ]; then
-        shift
+    elif [ "$ACTION" = "config" ]; then
         exec ./tools/rig_config.sh $@
 
-    elif [ "$1" = "agent" ]; then
-        shift
+    elif [ "$ACTION" = "agent" ]; then
         exec ./rig_agent/agent.sh $@
 
-    elif [ "$1" = "ps" ]; then
-        shift
+    elif [ "$ACTION" = "ps" ]; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
     else

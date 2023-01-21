@@ -46,7 +46,10 @@ if (staticDir) {
 
 
 app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+    const opts = {
+        configNode,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });

@@ -28,7 +28,10 @@ if (staticDir) {
     app.use(express_1.default.static(staticDir));
 }
 app.get('/', (req, res, next) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+    const opts = {
+        configNode,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
 });

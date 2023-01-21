@@ -15,6 +15,7 @@ import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 type Rig = {
+    name: string,
     hostname: string,
     ip: string,
     os: string,
@@ -70,8 +71,15 @@ type RigStatus = {
 
 /* ############################## MAIN ###################################### */
 
-const configRig: any = require('../rig_manager.json');
 const configFrm: any = require('../../freemining.json');
+
+let rigConfigPath: string = configFrm.frmConfDir + '/rig/rig_manager.json';
+rigConfigPath = stringTemplate(rigConfigPath, {}, false, true, true) || '';
+if (! fs.existsSync(rigConfigPath)) {
+    rigConfigPath = '../rig_manager.json';
+}
+
+const configRig: any = require(rigConfigPath);
 
 
 // Init HTTP Webserver
@@ -96,6 +104,11 @@ staticDir = stringTemplate(staticDir, ctx, false, true, true);
 const layoutPath = `${templatesDir}/layout_rig_agent.html`;
 
 const rigName = configRig.rigName || os.hostname();
+
+const websocketPassword = 'xxx'; // password to access farm websocket server
+
+
+console.log(`${now()} [${colors.blue('INFO')}] Starting Rig ${rigName}`);
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -267,7 +280,7 @@ function websocketConnect() {
         heartbeat.call(this);
 
         // Send auth
-        ws.send(`auth ${rigName} xxx`);
+        ws.send(`auth ${rigName} ${websocketPassword}`);
 
         // Send rig config
         console.log(`${now()} [${colors.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`)

@@ -2,7 +2,7 @@
 <div>
 
     <h1 class="d-inline-block">
-        RIG: <b>${rig.rig.hostname}</b>
+        RIG: <b>${rigName}</b>
     </h1>
 
     <div class="d-inline-block h3 ms-3">
@@ -13,7 +13,7 @@
         }
     </div>
     <div class="d-inline-block h3 ms-3">
-        <a href="./rig?rig=${rig.rig.hostname}" class="btn btn-secondary">🌀 refresh</a>
+        <a href="./rig?rig=${rigName}" class="btn btn-secondary">🌀 refresh</a>
     </div>
 
     <small class="d-inline-block ms-3">
@@ -190,7 +190,7 @@ ${Object.entries(rig.services).map(entry => {
                             <select id="newService_preset" name="preset" class="form-select" aria-describedby="newService_preset_Help" onchange="loadConfig(this.value)">
                                 <option></option>
 
-                                <optgroup label="____________ Farm Configs ____________"></optgroup>
+                                <optgroup label="________ Farm common configs ________"></optgroup>
                                 ${Object.entries(presets).map(entry => {
                                     const [poolName, poolConfigs] = entry;
 
@@ -200,6 +200,25 @@ ${Object.entries(rig.services).map(entry => {
                                     poolHtml += Object.entries(poolConfigs).map(entry2 => {
                                         const [coinName, preset] = entry2;
                                         let coinHtml = '<option value="farm.' + poolName + '.' + coinName + '">' + coinName + '&gt; ' + preset.name + '</option>';
+                                        return coinHtml;
+                                    }).join('');
+
+                                    poolHtml += '</optgroup>';
+
+                                    return poolHtml;
+                                }).join('')}
+                                <option disabled></option>
+
+                                <optgroup label="____ Farm Configs for ${rigName} ____"></optgroup>
+                                ${Object.entries(farmRigPresets).map(entry => {
+                                    const [poolName, poolConfigs] = entry;
+
+                                    let poolHtml = '';
+                                    poolHtml += '<optgroup label="' + poolName + '">';
+
+                                    poolHtml += Object.entries(poolConfigs).map(entry2 => {
+                                        const [coinName, preset] = entry2;
+                                        let coinHtml = '<option value="farmRig.' + poolName + '.' + coinName + '">' + coinName + '&gt; ' + preset.name + '</option>';
                                         return coinHtml;
                                     }).join('');
 
@@ -337,7 +356,7 @@ function testStart() {
     alertify.confirm("DEBUG/TEST - xmrig", "Do you want to start <b>xmrig</b> with the default parameters ?",
         function(){
             const poolUrl = 'xmrpool.eu:5555';
-            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rig.rig.hostname}';
+            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rig.rig.name}';
             startService('xmrig', 'rx/0', poolUrl, poolAccount, '')
         },
         function(){
@@ -354,7 +373,7 @@ function startService(serviceName, algo, poolUrl, poolAccount, optionalParams=''
 
     const url = '/api/rigs/rig/service/start';
     const data = {
-        rig: '${rig.rig.hostname}',
+        rig: '${rig.rig.name}',
         service: serviceName,
         algo: algo,
         poolUrl,
@@ -387,7 +406,7 @@ function stopService(serviceName) {
 
             const url = '/api/rigs/rig/service/stop';
             const data = {
-                rig: '${rig.rig.hostname}',
+                rig: '${rig.rig.name}',
                 service: serviceName,
             };
             jQuery.post(url, data).then(() => {
@@ -428,6 +447,10 @@ function loadConfig(selectedPreset) {
     let config;
     if (part0 == 'rig') {
         config = rigPresets[part1][part2];
+
+    } else if (part0 == 'farmRig') {
+        config = farmRigPresets[part1][part2];
+
     } else {
         config = presets[part1][part2];
     }
@@ -441,6 +464,7 @@ function loadConfig(selectedPreset) {
 
 const presets = ${JSON.stringify(presets)};
 const rigPresets = ${JSON.stringify(rigPresets)};
+const farmRigPresets = ${JSON.stringify(farmRigPresets)};
 
 
 //setInterval(() => {

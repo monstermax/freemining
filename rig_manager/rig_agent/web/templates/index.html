@@ -7,7 +7,7 @@
 <div>
 
     <h1 class="d-inline-block">
-        RIG: <b>${rig.rig.hostname}</b>
+        RIG: <b>${rigName}</b>
     </h1>
 
     <div class="d-inline-block h3 ms-3">
@@ -18,7 +18,7 @@
         }
     </div>
     <div class="d-inline-block h3 ms-3">
-        <a href="./rig?rig=${rig.rig.hostname}" class="btn btn-secondary">🌀 refresh</a>
+        <a href="./rig?rig=${rigName}" class="btn btn-secondary">🌀 refresh</a>
     </div>
 
     <small class="d-inline-block ms-3">
@@ -322,7 +322,7 @@ function testStart() {
     alertify.confirm("DEBUG/TEST - xmrig", "Do you want to start <b>xmrig</b> with the default parameters ?",
         function(){
             const poolUrl = 'xmrpool.eu:5555';
-            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rig.rig.hostname}';
+            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rigName}';
             startService('xmrig', 'rx/0', poolUrl, poolAccount, '')
         },
         function(){
@@ -339,7 +339,7 @@ function startService(serviceName, algo, poolUrl, poolAccount, optionalParams=''
 
     const url = '/api/rig/service/start';
     const data = {
-        rig: '${rig.rig.hostname}',
+        rig: '${rigName}',
         service: serviceName,
         algo: algo,
         poolUrl,
@@ -372,7 +372,7 @@ function stopService(serviceName) {
 
             const url = '/api/rig/service/stop';
             const data = {
-                rig: '${rig.rig.hostname}',
+                rig: '${rigName}',
                 service: serviceName,
             };
             jQuery.post(url, data).then(() => {
