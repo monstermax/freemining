@@ -208,7 +208,7 @@ app.get('/miners/miner', async (req: express.Request, res: express.Response, nex
 
 
 app.post('/api/rig/service/start', async (req: express.Request, res: express.Response, next: Function) => {
-    const serviceName = req.body.service;
+    const minerName = req.body.service;
 
     const algo = req.body.algo || '';
     const service = req.body.service || '';
@@ -226,13 +226,13 @@ app.post('/api/rig/service/start', async (req: express.Request, res: express.Res
     };
     //const paramsJson = JSON.stringify(params);
 
-    const ok = await startRigService(serviceName, params);
+    const ok = await startRigService(minerName, params);
 });
 
 
 app.post('/api/rig/service/stop', async (req: express.Request, res: express.Response, next: Function) => {
-    const serviceName = req.body.service;
-    const ok = await stopRigService(serviceName);
+    const minerName = req.body.service;
+    const ok = await stopRigService(minerName);
 });
 
 
@@ -381,9 +381,9 @@ function websocketConnect() {
             if (args[1] === 'start') {
                 args.shift();
                 args.shift();
-                const serviceName = args.shift();
+                const minerName = args.shift();
 
-                if (serviceName && args.length > 0) {
+                if (minerName && args.length > 0) {
                     const paramsJson = args.join(' ');
 
                     let params: any;
@@ -395,7 +395,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const ok = await startRigService(serviceName, params);
+                    const ok = await startRigService(minerName, params);
                     var debugme = 1;
 
                 }
@@ -405,10 +405,10 @@ function websocketConnect() {
             if (args[1] === 'stop') {
                 args.shift();
                 args.shift();
-                const serviceName = args.shift();
+                const minerName = args.shift();
 
-                if (serviceName) {
-                    const ok = stopRigService(serviceName);
+                if (minerName) {
+                    const ok = stopRigService(minerName);
                     var debugme = 1;
 
                 }
@@ -488,10 +488,10 @@ function websocketConnect() {
 }
 
 
-async function startRigService(serviceName: string, params: any) {
+async function startRigService(minerName: string, params: any) {
     // TODO: prevoir une version full nodejs (et compatible windows)
 
-    const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
+    const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd);
@@ -508,10 +508,10 @@ async function startRigService(serviceName: string, params: any) {
 }
 
 
-async function stopRigService(serviceName: string) {
+async function stopRigService(minerName: string) {
     // TODO: prevoir une version full nodejs (et compatible windows)
 
-    const cmd = `${cmdService} stop ${serviceName}`;
+    const cmd = `${cmdService} ${minerName} stop`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd);
@@ -529,10 +529,10 @@ async function stopRigService(serviceName: string) {
 
 
 
-async function getRigServiceStatus(serviceName: string, option:string=''): Promise<string> {
+async function getRigServiceStatus(minerName: string, option:string=''): Promise<string> {
     // TODO: prevoir une version full nodejs (et compatible windows)
 
-    const cmd = `${cmdService} status${option} ${serviceName}`;
+    const cmd = `${cmdService} ${minerName} status${option}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     let ret: string = (await cmdExec(cmd)) || '';

@@ -13,8 +13,8 @@ set -e
 # Actions: run start stop status debug log pid-log log-file pid-file pid ps
 
 
-ACTION=$1
-FULLNODE=$2
+FULLNODE=$1
+ACTION=$2
 shift 2 || true
 
 FRM_PACKAGE="fullnode"
@@ -31,20 +31,24 @@ function usage {
 
     echo "Usage:"
     echo
-    echo "  $CMD [action] <params>"
+    echo "  $CMD {chain} {action} <params>"
     echo
-    echo "    - $CMD run [chain]               # run ${FRM_PACKAGE}"
-    echo "    - $CMD start [chain]             # start ${FRM_PACKAGE} in background"
-    echo "    - $CMD restart [chain]           # start ${FRM_PACKAGE} in background"
+    echo "  $CMD {chain} run                         # run ${FRM_PACKAGE}"
+    echo "  $CMD {chain} start                       # start ${FRM_PACKAGE} in background"
+    echo "  $CMD {chain} restart                     # start ${FRM_PACKAGE} in background"
     echo
-    echo "  $CMD stop [chain]                  # stop background ${FRM_PACKAGE}"
+    echo "  $CMD {chain} stop                        # stop background ${FRM_PACKAGE}"
     echo
-    echo "  $CMD status [chain]                # show ${FRM_PACKAGE} status"
+    echo "  $CMD {chain} status                      # show ${FRM_PACKAGE} status"
     echo
-    echo "  $CMD log [chain]                   # tail ${FRM_PACKAGE} stdout"
-    echo "  $CMD log-pid [chain]               # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD {chain} log                         # tail ${FRM_PACKAGE} stdout"
+    #echo "  $CMD {chain} log-pid                     # tail ${FRM_PACKAGE} stdout"
     echo
-    echo "  $CMD ps                            # show all ${FRM_PACKAGE} running processes"
+    echo "  $CMD {miner} ps                          # show ${FRM_PACKAGE} {chain} running process"
+    echo
+    echo "  $CMD ps                                  # show all ${FRM_PACKAGE} running processes"
+    echo "  $CMD ps {chain}                          # show ${FRM_PACKAGE} {chain} running process"
+    echo "  $CMD ps                                  # show all ${FRM_PACKAGE} running processes"
     echo
 
     showFullnodesList
@@ -84,18 +88,12 @@ function showFullnodesList {
 ################################################################################
 
 
-
-if [ "$ACTION" = "" ]; then
+if [ "$FULLNODE" != "ps" -a "$ACTION" = "" ]; then
+    # for "ps", FULLNODE and ACTION are switched
     usage
-    exit 0
+    exit 1
 fi
 
-if [ "$FULLNODE" = "" ]; then
-    if [ "$ACTION" != "ps" ]; then
-        usage
-        exit 1
-    fi
-fi
 
 
 
@@ -259,7 +257,12 @@ if test "$ACTION" = "pid"; then
 fi
 
 # PS
-if test "$ACTION" = "ps"; then
+if test "$FULLNODE" = "ps" || test "$ACTION" = "ps"; then
+    # for "ps", FULLNODE and ACTION are switched
+    if test "$FULLNODE" = "ps"; then
+        FULLNODE=$ACTION
+        DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${FULLNODE}"
+    fi
     if [ "$FULLNODE" = "" ]; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.${FRM_PACKAGE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
         exit $?

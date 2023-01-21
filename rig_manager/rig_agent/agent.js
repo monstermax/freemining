@@ -107,7 +107,7 @@ app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, v
     res.end();
 }));
 app.post('/api/rig/service/start', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    const serviceName = req.body.service;
+    const minerName = req.body.service;
     const algo = req.body.algo || '';
     const service = req.body.service || '';
     const poolUrl = req.body.poolUrl || '';
@@ -122,11 +122,11 @@ app.post('/api/rig/service/start', (req, res, next) => tslib_1.__awaiter(void 0,
         optionalParams,
     };
     //const paramsJson = JSON.stringify(params);
-    const ok = yield startRigService(serviceName, params);
+    const ok = yield startRigService(minerName, params);
 }));
 app.post('/api/rig/service/stop', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    const serviceName = req.body.service;
-    const ok = yield stopRigService(serviceName);
+    const minerName = req.body.service;
+    const ok = yield stopRigService(minerName);
 }));
 app.use(function (req, res, next) {
     // Error 404
@@ -232,8 +232,8 @@ function websocketConnect() {
                 if (args[1] === 'start') {
                     args.shift();
                     args.shift();
-                    const serviceName = args.shift();
-                    if (serviceName && args.length > 0) {
+                    const minerName = args.shift();
+                    if (minerName && args.length > 0) {
                         const paramsJson = args.join(' ');
                         let params;
                         try {
@@ -243,16 +243,16 @@ function websocketConnect() {
                             console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] cannot start service : ${err.message}`);
                             return;
                         }
-                        const ok = yield startRigService(serviceName, params);
+                        const ok = yield startRigService(minerName, params);
                         var debugme = 1;
                     }
                 }
                 if (args[1] === 'stop') {
                     args.shift();
                     args.shift();
-                    const serviceName = args.shift();
-                    if (serviceName) {
-                        const ok = stopRigService(serviceName);
+                    const minerName = args.shift();
+                    if (minerName) {
+                        const ok = stopRigService(minerName);
                         var debugme = 1;
                     }
                 }
@@ -312,10 +312,10 @@ function websocketConnect() {
     }
     return ws;
 }
-function startRigService(serviceName, params) {
+function startRigService(minerName, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // TODO: prevoir une version full nodejs (et compatible windows)
-        const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
+        const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield (0, utils_1.cmdExec)(cmd);
         if (ret) {
@@ -327,10 +327,10 @@ function startRigService(serviceName, params) {
         return !!ret;
     });
 }
-function stopRigService(serviceName) {
+function stopRigService(minerName) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // TODO: prevoir une version full nodejs (et compatible windows)
-        const cmd = `${cmdService} stop ${serviceName}`;
+        const cmd = `${cmdService} ${minerName} stop`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield (0, utils_1.cmdExec)(cmd);
         if (ret) {
@@ -342,10 +342,10 @@ function stopRigService(serviceName) {
         return !!ret;
     });
 }
-function getRigServiceStatus(serviceName, option = '') {
+function getRigServiceStatus(minerName, option = '') {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // TODO: prevoir une version full nodejs (et compatible windows)
-        const cmd = `${cmdService} status${option} ${serviceName}`;
+        const cmd = `${cmdService} ${minerName} status${option}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         let ret = (yield (0, utils_1.cmdExec)(cmd)) || '';
         if (ret) {

@@ -15,9 +15,10 @@ set -e
 # Actions: run start stop status debug log pid-log log-file pid-file pid ps
 
 
-ACTION=$1
-MINER=$2
+MINER=$1
+ACTION=$2
 shift 2 || true
+
 
 FRM_PACKAGE="miner"
 DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${MINER}"
@@ -33,23 +34,26 @@ function usage {
 
     echo "Usage:"
     echo
-    echo "  $CMD [action] <params>"
+    echo "  $CMD {miner} {action} <params>"
     echo
-    echo "  $CMD run|start [miner] -algo {algo} -url {pool_url} -user {pool_account} [ -- {optional args} ]"
-    echo "  $CMD run|start [miner] -conf {confName}     # run/start a predefined configuration"
-    echo "    - $CMD run [miner] ...                    # run ${FRM_PACKAGE}"
-    echo "    - $CMD start [miner] ...                  # start ${FRM_PACKAGE} in background"
+    echo "  $CMD {miner} run|start -algo {algo} -url {pool_url} -user {pool_account} [ -- {optional args} ]"
+    echo "  $CMD {miner} run|start -conf {confName}              # run/start a predefined configuration"
+    echo "  $CMD {miner} run ...                                 # run ${FRM_PACKAGE}"
+    echo "  $CMD {miner} start ...                               # start ${FRM_PACKAGE} in background"
     echo
-    echo "  $CMD stop [miner]                           # stop background ${FRM_PACKAGE}"
+    echo "  $CMD {miner} stop                                    # stop background ${FRM_PACKAGE}"
     echo
-    echo "  $CMD status [miner]                         # show ${FRM_PACKAGE} status"
-    echo "  $CMD status-txt [miner]                     # show ${FRM_PACKAGE} detailed status"
-    echo "  $CMD status-json [miner]                    # show ${FRM_PACKAGE} detailed status JSON formatted"
+    echo "  $CMD {miner} status                                  # show ${FRM_PACKAGE} status"
+    echo "  $CMD {miner} status-txt                              # show ${FRM_PACKAGE} detailed status"
+    echo "  $CMD {miner} status-json                             # show ${FRM_PACKAGE} detailed status JSON formatted"
     echo
-    echo "  $CMD log [miner]                            # tail ${FRM_PACKAGE} stdout"
-    echo "  $CMD log-pid [miner]                        # tail ${FRM_PACKAGE} stdout"
+    echo "  $CMD {miner} log                                     # tail ${FRM_PACKAGE} stdout"
+    #echo "  $CMD {miner} log-pid                                 # tail ${FRM_PACKAGE} stdout"
     echo
-    echo "  $CMD ps                                     # show all ${FRM_PACKAGE} running processes"
+    echo "  $CMD {miner} ps                                      # show ${FRM_PACKAGE} {miner} running process"
+    echo
+    echo "  $CMD ps                                              # show all ${FRM_PACKAGE} running processes"
+    echo "  $CMD ps {miner}                                      # show ${FRM_PACKAGE} {miner} running process"
     echo
     echo
 
@@ -60,6 +64,7 @@ function usage {
 
 
 ################################################################################
+
 
 
 CONF_NAME=""
@@ -144,16 +149,10 @@ function showMinersList {
 
 
 
-if [ "$ACTION" = "" ]; then
+if [ "$MINER" != "ps" -a "$ACTION" = "" ]; then
+    # for "ps", MINER and ACTION are switched
     usage
     exit 1
-fi
-
-if [ "$MINER" = "" ]; then
-    if [ "$ACTION" != "ps" ]; then
-        usage
-        exit 1
-    fi
 fi
 
 
@@ -331,7 +330,12 @@ if test "$ACTION" = "pid"; then
 fi
 
 # PS
-if test "$ACTION" = "ps"; then
+if test "$MINER" = "ps" || test "$ACTION" = "ps"; then
+    # for "ps", MINER and ACTION are switched
+    if test "$MINER" = "ps"; then
+        MINER=$ACTION
+        DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${MINER}"
+    fi
     if [ "$MINER" = "" ]; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.${FRM_PACKAGE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
         exit $?
