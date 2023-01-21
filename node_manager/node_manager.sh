@@ -33,7 +33,7 @@ if ! test -s $NODE_CONFIG_FILE; then
     NODE_CONFIG_FILE=$(realpath ./node_manager.json)
 fi
 
-nodeAppDir=$(dirname $NODE_CONFIG_FILE)
+nodeAppDir=$(dirname $BASH_SOURCE)
 
 if [ "$NODE_CONFIG_FILE" = "" -o ! -f "$NODE_CONFIG_FILE" ]; then
     echo "Missing node_manager.json configuration file"
@@ -111,23 +111,26 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD fullnode-install {chain}    # install a fullnode"
         echo "  $CMD fullnode-uninstall {chain}  # install a fullnode"
-        #echo "  $CMD config-firewall             # Not available. TODO"
         echo
+        echo "  $CMD dir                         # show ${FRM_MODULE} folders"
+        echo
+        #echo "  $CMD config-firewall             # Not available. TODO"
     }
 
-    if [ "$1" = "install" ]; then
-        shift
+    ACTION=$1
+    shift || true
+
+
+    if [ "$ACTION" = "install" ]; then
         exec ./tools/install_node_manager.sh $@
 
-    elif [ "$1" = "fullnode" ]; then
-        shift
+    elif [ "$ACTION" = "fullnode" ]; then
         exec ./tools/run_fullnode.sh $@
 
-    elif [ "$1" = "fullnode-install" ]; then
-        shift
+    elif [ "$ACTION" = "fullnode-install" ]; then
         exec ./tools/install_fullnode.sh $@
 
-    elif [ "$1" = "fullnode-uninstall" ]; then
+    elif [ "$ACTION" = "fullnode-uninstall" ]; then
         FULLNODE=$2
         if [ "$FULLNODE" = "" ]; then
             usage
@@ -147,18 +150,23 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         read
         rm -rf ${nodeConfDir}/fullnodes/${FULLNODE}/
 
-    elif [ "$1" = "webserver" ]; then
-        shift
+    elif [ "$ACTION" = "webserver" ]; then
         exec ./node_webserver/webserver.sh $@
 
 
-    elif [ "$1" = "ps" ]; then
-        shift
+    elif [ "$ACTION" = "ps" ]; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
-    elif [ "$1" = "config-firewall" ]; then
-        shift
+    elif [ "$ACTION" = "config-firewall" ]; then
         # TODO: add iptables rules for each stratum, rpc and/or daemons
+        true
+
+    elif [ "$ACTION" = "dir" ]; then
+        echo "App: ${nodeDataDir} [$((du -hs ${nodeDataDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${nodeConfDir} [$((du -hs ${nodeConfDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${nodeLogDir} [$((du -hs ${nodeLogDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${nodePidDir} [$((du -hs ${nodePidDir} 2>/dev/null || echo 0) |cut -f1)]"
+        exit $?
 
     else
         usage

@@ -29,7 +29,7 @@ if ! test -s $POOL_CONFIG_FILE; then
     POOL_CONFIG_FILE=$(realpath ./pool_manager.json)
 fi
 
-poolAppDir=$(dirname $POOL_CONFIG_FILE)
+poolAppDir=$(dirname $BASH_SOURCE)
 
 if [ "$POOL_CONFIG_FILE" = "" -o ! -f "$POOL_CONFIG_FILE" ]; then
     echo "Missing pool_manager.json configuration file"
@@ -109,35 +109,44 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD package-install <params>    # install a package (miningcore, miningcoreUi, miningcoreWebUI)"
-        #echo "  $CMD config-firewall             # Not available. TODO"
         echo
+        echo "  $CMD dir                         # show ${FRM_MODULE} folders"
+        echo
+        #echo "  $CMD config-firewall             # Not available. TODO"
     }
 
-    if [ "$1" = "install" ]; then
-        shift
+    ACTION=$1
+    shift || true
+
+
+    if [ "$ACTION" = "install" ]; then
         exec ./tools/install_pool_manager.sh $@
 
-    elif [ "$1" = "package-install" ]; then
-        shift
+    elif [ "$ACTION" = "package-install" ]; then
         exec ./pools_manager/install_package.sh $@
 
-    elif [ "$1" = "engine" ]; then
-        shift
+    elif [ "$ACTION" = "engine" ]; then
         exec ./pools_manager/miningcore/miningcore.sh $@
 
-    elif [ "$1" = "webserver" ]; then
-        shift
+    elif [ "$ACTION" = "webserver" ]; then
         # run server nodejs (or use an external webserver like apache or nginx) to serve pools_ui static pages
         exec ./pool_webserver/webserver.sh $@
 
-    elif [ "$1" = "ps" ]; then
-        shift
+    elif [ "$ACTION" = "ps" ]; then
         #pgrep -fa "\[freemining\.${FRM_MODULE}\." |grep -e '\[free[m]ining.*\]' --color
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
-    elif [ "$1" = "config-firewall" ]; then
-        shift
+    elif [ "$ACTION" = "dir" ]; then
+        echo "System: ${poolAppDir} [$((du -hs ${poolAppDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "App: ${poolDataDir} [$((du -hs ${poolDataDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${poolConfDir} [$((du -hs ${poolConfDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${poolLogDir} [$((du -hs ${poolLogDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${poolPidDir} [$((du -hs ${poolPidDir} 2>/dev/null || echo 0) |cut -f1)]"
+        exit $?
+
+    elif [ "$ACTION" = "config-firewall" ]; then
         # TODO: add iptables rules for each stratum, rpc and/or daemons
+        true
 
     else
         usage

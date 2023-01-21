@@ -50,11 +50,11 @@ function _frm_completions {
     else
         # FRM / *
 
-        #if [ "${#COMP_WORDS[@]}" -gt "2" ]; then
-        #    return
-        #fi
+        if [ "${#COMP_WORDS[@]}" -gt "2" ]; then
+            return
+        fi
 
-        values="rig farm pool node bin-install modules-install compile ps update miner fullnode"
+        values="rig farm pool node bin-install modules-install compile ps update miner fullnode dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 
@@ -88,7 +88,7 @@ function _rig_completions {
         if [ "${#COMP_WORDS[@]}" -gt "2" ]; then
             return
         fi
-        values="ps json install miner-install miner-uninstall config miner agent status"
+        values="ps json install miner-install miner-uninstall config miner agent status dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 }
@@ -100,8 +100,8 @@ function _rig_miners_completions {
     #COMP_LINE: the current command line
 
     LAST_WORD=${COMP_WORDS[-1]}
-    PREV_WORD=${COMP_WORDS[-2]}
-    NB_WORDS=${#COMP_WORDS[@]}
+    PREV_WORD=""
+    #NB_WORDS=${#COMP_WORDS[@]}
     ALL_EXCEPT_LAST=${COMP_WORDS[@]::${#COMP_WORDS[@]}-1}
 
     if [ "${COMP_WORDS[1]}" = "ps" ]; then
@@ -112,9 +112,18 @@ function _rig_miners_completions {
         values="${CONFIGURED_MINERS}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
+    elif [ "${COMP_WORDS[1]}" = "dir" ]; then
+        # FRM / RIG / MINER / DIR
+        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
+            return
+        fi
+        values="${CONFIGURED_MINERS}"
+        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
+
     elif [[ " $CONFIGURED_MINERS " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
         # FRM / RIG / MINER / {MINER}
         if [ "${COMP_WORDS[2]}" = "start" ]; then
+            PREV_WORD=${COMP_WORDS[-2]}
             values=""
 
             if [ "$PREV_WORD" = "-algo" ]; then
@@ -180,12 +189,12 @@ function _rig_miners_completions {
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
-        values="$_frm_completions_daemon status-json status-txt"
+        values="$_frm_completions_daemon dir status-json status-txt"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
     else
         # FRM / RIG / MINER / *
-        values="${CONFIGURED_MINERS} ps"
+        values="${CONFIGURED_MINERS} ps dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 
@@ -214,7 +223,7 @@ function _farm_completions {
         if [ "${#COMP_WORDS[@]}" -gt "2" ]; then
             return
         fi
-        values="ps rigs json install config webserver"
+        values="ps rigs json install config webserver dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 }
@@ -262,7 +271,7 @@ function _node_completions {
         if [ "${#COMP_WORDS[@]}" -gt "2" ]; then
             return
         fi
-        values="ps json install fullnode fullnode-install fullnode-uninstall webserver"
+        values="ps json install fullnode fullnode-install fullnode-uninstall webserver dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 }
@@ -279,17 +288,25 @@ function _node_fullnodes_completions {
         values="${CONFIGURED_FULLNODES}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
+    elif [ "${COMP_WORDS[1]}" = "dir" ]; then
+        # FRM / NODE / FULLNODE / DIR
+        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
+            return
+        fi
+        values="${CONFIGURED_FULLNODES}"
+        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
+
     elif [[ " $CONFIGURED_FULLNODES " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
         # FRM / NODE / FULLNODE / {FULLNODE}
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
-        values="$_frm_completions_daemon"
+        values="$_frm_completions_daemon dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
     else
         # FRM / NODE / FULLNODE / *
-        values="${CONFIGURED_FULLNODES} ps"
+        values="${CONFIGURED_FULLNODES} ps dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 
@@ -326,7 +343,7 @@ function _pool_completions {
         if [ "${#COMP_WORDS[@]}" -gt "2" ]; then
             return
         fi
-        values="ps install package-install engine webserver"
+        values="ps install package-install engine webserver dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 }

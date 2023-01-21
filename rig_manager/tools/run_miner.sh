@@ -149,8 +149,8 @@ function showMinersList {
 
 
 
-if [ "$MINER" != "ps" -a "$ACTION" = "" ]; then
-    # for "ps", MINER and ACTION are switched
+if [ "$MINER" != "ps" -a "$MINER" != "dir" -a "$ACTION" = "" ]; then
+    # for "ps" & "dir", MINER and ACTION are switched
     usage
     exit 1
 fi
@@ -174,6 +174,12 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
     fi
 
 
+    if ! test -d ${minersDir}/${MINER}; then
+        echo "Error: Miner ${MINER} is not installed"
+        exit 1
+    fi
+
+
     if [ "$POOL_ACCOUNT" = "" -o "$ALGO" = "" -o "$POOL_URL" = "" -o "$POOL_ACCOUNT" = "" ]; then
         usage
         exit 1
@@ -186,8 +192,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
 
     case "$MINER" in
         nbminer)
-            API_PORT=$(getMinerApiPort nbminer)
-            CMD_EXEC="${minersDir}/nbminer/nbminer"
+            API_PORT=$(getMinerApiPort ${MINER})
+            CMD_EXEC="${minersDir}/${MINER}/nbminer"
 
             CMD_ARGS="-a ${ALGO} \
                 -o stratum+tcp://${POOL_URL} \
@@ -197,8 +203,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
             ;;
 
         lolminer)
-            API_PORT=$(getMinerApiPort lolminer)
-            CMD_EXEC="${minersDir}/lolminer/lolMiner"
+            API_PORT=$(getMinerApiPort ${MINER})
+            CMD_EXEC="${minersDir}/${MINER}/lolMiner"
 
             CMD_ARGS="--algo ${ALGO} \
                 --pool ${POOL_URL} \
@@ -208,8 +214,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
             ;;
 
         xmrig)
-            API_PORT=$(getMinerApiPort xmrig)
-            CMD_EXEC="${minersDir}/xmrig/xmrig-nofees"
+            API_PORT=$(getMinerApiPort ${MINER})
+            CMD_EXEC="${minersDir}/${MINER}/xmrig-nofees"
 
             if [ "$ALGO" = "" ]; then
                 ALGO="rx/0"
@@ -230,8 +236,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
             ;;
 
         teamredminer)
-            API_PORT=$(getMinerApiPort teamredminer)
-            CMD_EXEC="${minersDir}/teamredminer/teamredminer"
+            API_PORT=$(getMinerApiPort ${MINER})
+            CMD_EXEC="${minersDir}/${MINER}/teamredminer"
 
             CMD_ARGS="-a ${ALGO} \
                 -o stratum+tcp://${POOL_URL} \
@@ -242,8 +248,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
             ;;
 
         trex)
-            API_PORT=$(getMinerApiPort trex)
-            CMD_EXEC="${minersDir}/trex/t-rex"
+            API_PORT=$(getMinerApiPort ${MINER})
+            CMD_EXEC="${minersDir}/${MINER}/t-rex"
 
             CMD_ARGS="-a ${ALGO} \
                 -o stratum+tcp://${POOL_URL} \
@@ -254,8 +260,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
             ;;
 
         gminer)
-            API_PORT=$(getMinerApiPort gminer)
-            CMD_EXEC="${minersDir}/gminer/miner"
+            API_PORT=$(getMinerApiPort ${MINER})
+            CMD_EXEC="${minersDir}/${MINER}/miner"
 
             CMD_ARGS="--user ${POOL_ACCOUNT} \
                 --server ${POOL_HOST} --port ${POOL_PORT} --pass x \
@@ -342,6 +348,29 @@ if test "$MINER" = "ps" || test "$ACTION" = "ps"; then
     fi
 
     daemonPidPs $DAEMON_NAME $DAEMON_OPTS
+    exit $?
+fi
+
+
+# DIR
+if test "$MINER" = "dir" || test "$ACTION" = "dir"; then
+    # for "ps", MINER and ACTION are switched
+    if test "$MINER" = "dir"; then
+        MINER=$ACTION
+        DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${MINER}"
+    fi
+
+    if [ "$MINER" = "" ]; then
+        echo "App: ${minersDir} [$((du -hs ${minersDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${rigConfDir}/miners [$((du -hs ${rigConfDir}/miners 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${rigLogDir}/miners [$((du -hs ${rigLogDir}/miners 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${rigPidDir}/miners [$((du -hs ${rigPidDir}/miners 2>/dev/null || echo 0) |cut -f1)]"
+    else
+        echo "App: ${minersDir}/${MINER} [$((du -hs ${minersDir}/${MINER} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${rigConfDir}/miners/${MINER} [$((du -hs ${rigConfDir}/miners/${MINER} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${rigLogDir}/miners/${MINER}* [$((du -hsc ${rigLogDir}/miners/${MINER}* 2>/dev/null || echo 0) |tail -n1 |cut -f1)]"
+        echo "Pid: ${rigPidDir}/miners/freemining.rig.fullnode.${MINER}.pid [$((du -hs ${rigPidDir}/miners/freemining.rig.fullnode.${MINER}.pid 2>/dev/null || echo 0) |cut -f1)]"
+    fi
     exit $?
 fi
 

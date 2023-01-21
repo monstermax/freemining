@@ -29,7 +29,7 @@ if ! test -s $FARM_CONFIG_FILE; then
     FARM_CONFIG_FILE=$(realpath ./farm_manager.json)
 fi
 
-farmAppDir=$(dirname $FARM_CONFIG_FILE)
+farmAppDir=$(dirname $BASH_SOURCE)
 
 if [ "$FARM_CONFIG_FILE" = "" -o ! -f "$FARM_CONFIG_FILE" ]; then
     echo "Missing farm_manager.json configuration file"
@@ -105,10 +105,13 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
         echo "  $CMD config <params>             # show/edit ${FRM_MODULE} manager config"
         echo
+        echo "  $CMD dir                         # show ${FRM_MODULE} folders"
+        echo
     }
 
     ACTION=$1
     shift || true
+
 
     if test "$ACTION" = "install"; then
         exec ./tools/install_farm_manager.sh $@
@@ -127,6 +130,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif test "$ACTION" = "ps"; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
+
+    elif [ "$ACTION" = "dir" ]; then
+        echo "System: ${farmAppDir} [$((du -hs ${farmAppDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "App: ${farmDataDir} [$((du -hs ${farmDataDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${farmConfDir} [$((du -hs ${farmConfDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${farmLogDir} [$((du -hs ${farmLogDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${farmPidDir} [$((du -hs ${farmPidDir} 2>/dev/null || echo 0) |cut -f1)]"
+        exit $?
 
     else
         usage

@@ -90,6 +90,53 @@ function install_bitcoincash {
 }
 
 
+function install_bitcoinsv {
+    cd ${TMP_DIR}
+
+    chain="bitcoinsv"
+    VERSION="source"
+    DL_URL="https://github.com/bitcoin-sv/bitcoin-sv"
+    #DL_FILE=$(basename $DL_URL)
+    #UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Installing dependencies packages: build tools"
+    rootRequired
+
+    sudo apt-get install -qq -y build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
+    sudo apt-get install -qq -y libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
+    sudo apt-get install -qq -y libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev
+    sudo apt-get install -qq -y libgoogle-perftools-dev libzmq3-dev
+
+    echo " - Downloading ${chain}"
+    git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+    cd bitcoin-sv
+
+    echo " - Compiling 1/3"
+    ./autogen.sh >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+
+    echo " - Compiling 2/3"
+    mkdir build
+    cd build
+    ../configure >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+
+    echo " - Compiling 2/3 (about 1 hour remaining...)"
+    make >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+    # 1 hour compilation...
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a ./src/{bitcoind,bitcoin-cli,bitcoin-miner,bitcoin-tx} ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
+
 function install_callisto {
     cd ${TMP_DIR}
 
@@ -956,6 +1003,35 @@ function install_ravencoin {
 
 
 
+function install_siacoin {
+
+    cd ${TMP_DIR}
+
+    chain="siacoin"
+    VERSION="1.5.9"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    DL_URL="https://sia.tech/releases/siad/Sia-v${VERSION}-linux-amd64.zip"
+    DL_FILE=$(basename $DL_URL)
+    #UNZIP_DIR="${chain}-unzipped"
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    unzip -q $DL_FILE
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    cp -a ./Sia-v${VERSION}-linux-amd64 ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
 function install_zcash {
     cd ${TMP_DIR}
 
@@ -1017,7 +1093,7 @@ function showFullnodesList {
 
 
 
-INSTALLABLE_FULLNODES="bitcoincash callisto dogecoin ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin zcash"
+INSTALLABLE_FULLNODES="bitcoincash bitcoinsv callisto dogecoin ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin siacoin zcash"
 
 fullnode=$1
 
@@ -1047,6 +1123,9 @@ fi
 
 if [ "$fullnode" = "bitcoincash" ]; then
     install_bitcoincash
+
+elif [ "$fullnode" = "bitcoinsv" ]; then
+    install_bitcoinsv
 
 elif [ "$fullnode" = "callisto" ]; then
     install_callisto
@@ -1092,6 +1171,9 @@ elif [ "$fullnode" = "raptoreum" ]; then
 
 elif [ "$fullnode" = "ravencoin" ]; then
     install_ravencoin
+
+elif [ "$fullnode" = "siacoin" ]; then
+    install_siacoin
 
 elif [ "$fullnode" = "zcash" ]; then
     install_zcash

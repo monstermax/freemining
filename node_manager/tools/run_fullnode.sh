@@ -44,11 +44,13 @@ function usage {
     echo "  $CMD {chain} log                         # tail ${FRM_PACKAGE} stdout"
     #echo "  $CMD {chain} log-pid                     # tail ${FRM_PACKAGE} stdout"
     echo
-    echo "  $CMD {miner} ps                          # show ${FRM_PACKAGE} {chain} running process"
+    echo "  $CMD {chain} ps                          # show ${FRM_PACKAGE} {chain} running process"
     echo
     echo "  $CMD ps                                  # show all ${FRM_PACKAGE} running processes"
     echo "  $CMD ps {chain}                          # show ${FRM_PACKAGE} {chain} running process"
     echo "  $CMD ps                                  # show all ${FRM_PACKAGE} running processes"
+    echo
+    echo "  $CMD dir {chain}                         # show ${FRM_PACKAGE} folders"
     echo
 
     showFullnodesList
@@ -88,8 +90,8 @@ function showFullnodesList {
 ################################################################################
 
 
-if [ "$FULLNODE" != "ps" -a "$ACTION" = "" ]; then
-    # for "ps", FULLNODE and ACTION are switched
+if [ "$FULLNODE" != "ps" -a "$FULLNODE" != "dir" -a "$ACTION" = "" ]; then
+    # for "ps" & "dir", FULLNODE and ACTION are switched
     usage
     exit 1
 fi
@@ -125,6 +127,12 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
     fi
 
 
+    if ! test -d ${fullnodesDir}/${FULLNODE}; then
+        echo "Error: Fullnode ${FULLNODE} is not installed"
+        exit 1
+    fi
+
+
     mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}
 
 
@@ -136,6 +144,12 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
         bitcoincash)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/bitcoind -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
             CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
+            ;;
+
+        bitcoinsv)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/bitcoind -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
+            # TODO
             ;;
 
         callisto)
@@ -206,6 +220,11 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
         ravencoin)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
             CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcbind=127.0.0.1 -rpcport=8766 -rpcallowip=127.0.0.1 -maxconnections=100 $@"
+            ;;
+
+        siacoin)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/siad --sia-directory ${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_ARGS="--rpc-addr 127.0.0.1:9981 $@"
             ;;
 
         zcash)
@@ -283,6 +302,28 @@ if test "$FULLNODE" = "ps" || test "$ACTION" = "ps"; then
     exit $?
 fi
 
+
+# DIR
+if test "$FULLNODE" = "dir" || test "$ACTION" = "dir"; then
+    # for "ps", FULLNODE and ACTION are switched
+    if test "$FULLNODE" = "dir"; then
+        FULLNODE=$ACTION
+        DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${FULLNODE}"
+    fi
+
+    if [ "$FULLNODE" = "" ]; then
+        echo "App: ${fullnodesDir} [$((du -hs ${fullnodesDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${nodeConfDir}/fullnodes [$((du -hs ${nodeConfDir}/fullnodes 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${nodeLogDir}/fullnodes [$((du -hs ${nodeLogDir}/fullnodes 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${nodePidDir}/fullnodes [$((du -hs ${nodePidDir}/fullnodes 2>/dev/null || echo 0) |cut -f1)]"
+    else
+        echo "App: ${fullnodesDir}/${FULLNODE} [$((du -hs ${fullnodesDir}/${FULLNODE} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${nodeConfDir}/fullnodes/${FULLNODE} [$((du -hs ${nodeConfDir}/fullnodes/${FULLNODE} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${nodeLogDir}/fullnodes/${FULLNODE}* [$((du -hsc ${nodeLogDir}/fullnodes/${FULLNODE}* 2>/dev/null || echo 0) |tail -n1 |cut -f1)]"
+        echo "Pid: ${nodePidDir}/fullnodes/freemining.node.fullnode.${FULLNODE}.pid [$((du -hs ${nodePidDir}/fullnodes/freemining.node.fullnode.${FULLNODE}.pid 2>/dev/null || echo 0) |cut -f1)]"
+    fi
+    exit $?
+fi
 
 
 

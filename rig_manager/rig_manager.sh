@@ -29,7 +29,7 @@ if ! test -s $RIG_CONFIG_FILE; then
     RIG_CONFIG_FILE=$(realpath ./rig_manager.json)
 fi
 
-rigAppDir=$(dirname $RIG_CONFIG_FILE)
+rigAppDir=$(dirname $BASH_SOURCE)
 
 if [ "$RIG_CONFIG_FILE" = "" -o ! -f "$RIG_CONFIG_FILE" ]; then
     echo "Missing rig_manager.json configuration file"
@@ -144,6 +144,8 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD miner-install {miner}       # install a miner"
         echo "  $CMD miner-uninstall {miner}     # uninstall a miner"
         echo
+        echo "  $CMD dir                         # show ${FRM_MODULE} folders"
+        echo
     }
 
     ACTION=$1
@@ -154,7 +156,7 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         exec ./tools/install_rig_manager.sh $@
 
     elif [ "$ACTION" = "status" ]; then
-        ./tools/rig_monitor_txt.sh
+        exec ./tools/rig_monitor_txt.sh
 
     elif [ "$ACTION" = "miner" ]; then
         exec ./tools/run_miner.sh $@
@@ -196,6 +198,14 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 
     elif [ "$ACTION" = "ps" ]; then
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.${FRM_MODULE}\.") |grep -e '\[free[m]ining.*\]' --color -B1
+
+    elif [ "$ACTION" = "dir" ]; then
+        echo "System: ${rigAppDir} [$((du -hs ${rigAppDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "App: ${rigDataDir} [$((du -hs ${rigDataDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${rigConfDir} [$((du -hs ${rigConfDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${rigLogDir} [$((du -hs ${rigLogDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${rigPidDir} [$((du -hs ${rigPidDir} 2>/dev/null || echo 0) |cut -f1)]"
+        exit $?
 
     else
         usage

@@ -272,36 +272,35 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo
         echo "  $CMD ps                           # show all running processes"
         echo "  $CMD update                       # update freemining to last version"
+        echo "  $CMD dir                          # show freemining folders"
         echo
     }
 
-    if [ "$1" = "rig" ]; then
-        shift
+    ACTION=$1
+    shift || true
+
+
+    if [ "$ACTION" = "rig" ]; then
         exec ./rig_manager/rig_manager.sh $@
 
-    elif [ "$1" = "farm" ]; then
-        shift
+    elif [ "$ACTION" = "farm" ]; then
         exec ./farm_manager/farm_manager.sh $@
 
-    elif [ "$1" = "pool" ]; then
-        shift
+    elif [ "$ACTION" = "pool" ]; then
         exec ./pool_manager/pool_manager.sh $@
 
-    elif [ "$1" = "node" ]; then
-        shift
+    elif [ "$ACTION" = "node" ]; then
         exec ./node_manager/node_manager.sh $@
 
-    elif [ "$1" = "miner" ]; then
+    elif [ "$ACTION" = "miner" ]; then
         # shortcut to rig/miner
-        shift
         exec ./rig_manager/tools/run_miner.sh $@
 
-    elif [ "$1" = "fullnode" ]; then
+    elif [ "$ACTION" = "fullnode" ]; then
         # shortcut to node/fullnode
-        shift
         exec ./node_manager/tools/run_fullnode.sh $@
 
-    elif [ "$1" = "bin-install" ]; then
+    elif [ "$ACTION" = "bin-install" ]; then
         PARENT_DIR=$(dirname $BASH_SOURCE)
 
         mkdir -p $INSTALL_DIR
@@ -321,9 +320,7 @@ $0 \$@
             echo "source $AUTOCOMPLETION_SCRIPT" >> ~/.bashrc
         fi
 
-    elif [ "$1" = "modules-install" ]; then
-        shift
-
+    elif [ "$ACTION" = "modules-install" ]; then
         echo "Install modules" # JS modules
 
         INSTALL_LOG=/dev/null
@@ -344,9 +341,7 @@ $0 \$@
         ./node_manager/node_webserver/install_webserver.sh >${INSTALL_LOG}
 
 
-    elif [ "$1" = "compile" ]; then
-        shift
-
+    elif [ "$ACTION" = "compile" ]; then
         echo "Compile typescript in each modules..."
 
         echo " - Compiling common..."
@@ -364,13 +359,11 @@ $0 \$@
         echo " - Compiling node_webserver..."
         cd node_manager/node_webserver; tsc; cd ../..
 
-    elif [ "$1" = "update" ]; then
-        shift
+    elif [ "$ACTION" = "update" ]; then
         git pull
         $BASH_SOURCE modules-install
 
-    elif [ "$1" = "ps" ]; then
-        shift
+    elif [ "$ACTION" = "ps" ]; then
         #ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.") |grep -e '\[free[m]ining.*\]' --color -B1
 
         echo "=============="
@@ -393,6 +386,15 @@ $0 \$@
         echo "==== POOL ===="
         ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.pool\.") |grep -e '\[free[m]ining.*\]' --color -B1 || echo "No process"
         echo
+
+    elif [ "$ACTION" = "dir" ]; then
+        echo "System: ${frmAppDir} [$((du -hs ${frmAppDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "App: ${frmDataDir} [$((du -hs ${frmDataDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Data: ${frmConfDir} [$((du -hs ${frmConfDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Log: ${frmLogDir} [$((du -hs ${frmLogDir} 2>/dev/null || echo 0) |cut -f1)]"
+        echo "Pid: ${frmPidDir} [$((du -hs ${frmPidDir} 2>/dev/null || echo 0) |cut -f1)]"
+        exit $?
+
 
     else
         usage
