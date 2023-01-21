@@ -54,6 +54,42 @@ installNodejsPackages
 ################################################################################
 
 
+
+function install_bitcoincash {
+    cd ${TMP_DIR}
+
+    chain="bitcoincash"
+    VERSION="26.0.0"
+    DL_URL="https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${VERSION}/bitcoin-cash-node-${VERSION}-x86_64-linux-gnu.tar.gz"
+    DL_FILE=$(basename $DL_URL)
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    tar zxvf bitcoin-cash-node-${VERSION}-x86_64-linux-gnu.tar.gz
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    cd bitcoin-cash-node-${VERSION}
+    ln -s bin/bitcoind
+    ln -s bin/bitcoin-cli
+    ln -s bin/bitcoin-qt
+    ln -s bin/bitcoin-tx
+    cd ..
+
+    rm -rf ${fullnodesDir}/${chain}
+    mv bitcoin-cash-node-${VERSION} ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
+
 function install_callisto {
     cd ${TMP_DIR}
 
@@ -75,6 +111,42 @@ function install_callisto {
     rm -rf ${fullnodesDir}/${chain}
     mkdir -p ${fullnodesDir}/${chain}
     mv ${DL_FILE} ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
+
+
+function install_dogecoin {
+    cd ${TMP_DIR}
+
+    chain="dogecoin"
+    VERSION="1.14.6"
+    DL_URL="https://github.com/dogecoin/dogecoin/releases/download/v${VERSION}/dogecoin-${VERSION}-x86_64-linux-gnu.tar.gz"
+    DL_FILE=$(basename $DL_URL)
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    tar zxvf dogecoin-${VERSION}-x86_64-linux-gnu.tar.gz
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    cd dogecoin-${VERSION}
+    ln -s bin/dogecoind
+    ln -s bin/dogecoin-cli
+    ln -s bin/dogecoin-qt
+    ln -s bin/dogecoin-tx
+    cd ..
+
+    rm -rf ${fullnodesDir}/${chain}
+    mv dogecoin-${VERSION} ${fullnodesDir}/${chain}
 
     echo
     echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
@@ -945,7 +1017,7 @@ function showFullnodesList {
 
 
 
-INSTALLABLE_FULLNODES="callisto ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin zcash"
+INSTALLABLE_FULLNODES="bitcoincash callisto dogecoin ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin zcash"
 
 fullnode=$1
 
@@ -973,8 +1045,14 @@ if ! test -d ${fullnodesDir}; then
 fi
 
 
-if [ "$fullnode" = "callisto" ]; then
+if [ "$fullnode" = "bitcoincash" ]; then
+    install_bitcoincash
+
+elif [ "$fullnode" = "callisto" ]; then
     install_callisto
+
+elif [ "$fullnode" = "dogecoin" ]; then
+    install_dogecoin
 
 elif [ "$fullnode" = "ergo" ]; then
     install_ergo

@@ -9,7 +9,13 @@
     "fullnodesDir": "${nodeDataDir}/fullnodes",
 
 	"fullnodes": {
+		"bitcoincash": {
+
+		},
 		"callisto": {
+
+		},
+		"dogecoin": {
 
 		},
 		"ergo": {

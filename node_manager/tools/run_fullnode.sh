@@ -132,9 +132,20 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
     CMD_ARGS=""
 
     case "$FULLNODE" in
+
+        bitcoincash)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/bitcoind -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
+            ;;
+
         callisto)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/geth-linux-amd64 --datadir ${nodeConfDir}/fullnodes/${FULLNODE}"
             CMD_ARGS="--port 30303 --http.addr 0.0.0.0 --http.port 8545 --ws.addr 0.0.0.0 --ws.port 8546 $@"
+            ;;
+
+        dogecoin)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
+            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=22555 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=22556 $@"
             ;;
 
         ergo)
@@ -148,7 +159,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             ;;
 
         firo)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
             CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8888 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8168 $@"
             ;;
 
@@ -168,7 +179,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             ;;
 
         meowcoin)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
             CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcport=9766 $@"
             ;;
 
@@ -178,7 +189,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             ;;
 
         neoxa)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
             CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=9766 -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 $@"
             ;;
 
@@ -188,7 +199,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             ;;
 
         raptoreum)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
             CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 -rpcbind=0.0.0.0 -rpcport=10225 $@"
             ;;
 
