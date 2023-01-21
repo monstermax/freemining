@@ -215,7 +215,7 @@ app.post('/api/rigs/rig/service/start', (req: express.Request, res: express.Resp
     const service = req.body.service || '';
     const poolUrl = req.body.poolUrl || '';
     const poolAccount = req.body.poolAccount || '';
-    const optionnalParams = req.body.optionnalParams || '';
+    const optionalParams = req.body.optionalParams || '';
 
     const wsClient = Object.values(wsClients).filter(_wsClient => _wsClient.rigName === rigName).shift();
 
@@ -225,7 +225,7 @@ app.post('/api/rigs/rig/service/start', (req: express.Request, res: express.Resp
         service,
         poolUrl,
         poolAccount,
-        optionnalParams,
+        optionalParams,
     };
     const paramsJson = JSON.stringify(params);
 

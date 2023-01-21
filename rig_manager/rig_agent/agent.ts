@@ -142,7 +142,7 @@ app.post('/api/rig/service/start', async (req: express.Request, res: express.Res
     const service = req.body.service || '';
     const poolUrl = req.body.poolUrl || '';
     const poolAccount = req.body.poolAccount || '';
-    const optionnalParams = req.body.optionnalParams || '';
+    const optionalParams = req.body.optionalParams || '';
 
     const params = {
         //coin: '',
@@ -150,7 +150,7 @@ app.post('/api/rig/service/start', async (req: express.Request, res: express.Res
         service,
         poolUrl,
         poolAccount,
-        optionnalParams,
+        optionalParams,
     };
     //const paramsJson = JSON.stringify(params);
 
@@ -419,7 +419,7 @@ function websocketConnect() {
 async function startRigService(serviceName: string, params: any) {
     // TODO: prevoir une version full nodejs (et compatible windows)
 
-    const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" -- ${params.optionalParams}`;
+    const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd);

@@ -58,14 +58,14 @@ app.post('/api/rig/service/start', (req, res, next) => tslib_1.__awaiter(void 0,
     const service = req.body.service || '';
     const poolUrl = req.body.poolUrl || '';
     const poolAccount = req.body.poolAccount || '';
-    const optionnalParams = req.body.optionnalParams || '';
+    const optionalParams = req.body.optionalParams || '';
     const params = {
         //coin: '',
         algo,
         service,
         poolUrl,
         poolAccount,
-        optionnalParams,
+        optionalParams,
     };
     //const paramsJson = JSON.stringify(params);
     const ok = yield startRigService(serviceName, params);
@@ -261,7 +261,7 @@ function websocketConnect() {
 function startRigService(serviceName, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // TODO: prevoir une version full nodejs (et compatible windows)
-        const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" -- ${params.optionalParams}`;
+        const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield cmdExec(cmd);
         if (ret) {
