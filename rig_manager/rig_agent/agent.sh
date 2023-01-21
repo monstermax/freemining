@@ -42,6 +42,10 @@ function usage {
 ################################################################################
 
 
+export CONFIGURED_MINERS
+export INSTALLED_MINERS
+
+
 DAEMON_CMD="${NODE} ./agent.js"
 if test "$USE_TS" = "1"; then
     DAEMON_CMD="${TS_NODE} ./agent.ts"

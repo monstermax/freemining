@@ -42,17 +42,37 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
         res.end();
         return;
     }
-    const presets = configRig.pools || {};
     const activeProcesses = yield getRigProcesses();
+    const installedMiners = (process.env.CONFIGURED_MINERS || '').split(' ');
+    const installablesMiners = (process.env.INSTALLED_MINERS || '').split(' ');
+    const opts = {
+        rigName,
+        rig: rigStatus,
+        miners: getMiners(),
+        rigs: [],
+        activeProcesses,
+        installedMiners,
+        installablesMiners,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
+app.get('/status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    if (!rigStatus) {
+        res.send(`Rig not initialized`);
+        res.end();
+        return;
+    }
+    const presets = configRig.pools || {};
     const opts = {
         rigName,
         rig: rigStatus,
         miners: getMiners(),
         rigs: [],
         presets,
-        activeProcesses,
     };
-    const pageContent = loadTemplate('index.html', opts, req.url);
+    const pageContent = loadTemplate('status.html', opts, req.url);
     res.send(pageContent);
     res.end();
 }));
@@ -61,6 +81,31 @@ app.get('/status.json', (req, res, next) => {
     res.send(JSON.stringify(rigStatus));
     res.end();
 });
+app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const miner = req.query.miner || '';
+    const asJson = req.query.json === "1";
+    const rawOutput = req.query.raw === "1";
+    const minerStatus = yield getRigServiceStatus(miner, asJson ? '-json' : '-txt');
+    if (rawOutput) {
+        if (asJson) {
+            res.header({ "Content-Type": "application/json" });
+        }
+        else {
+            res.header({ "Content-Type": "text/plain" });
+        }
+        res.send(minerStatus);
+        res.end();
+        return;
+    }
+    const opts = {
+        configRig,
+        miner,
+        minerStatus,
+    };
+    const pageContent = loadTemplate('miner.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
 app.post('/api/rig/service/start', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const serviceName = req.body.service;
     const algo = req.body.algo || '';
@@ -295,6 +340,18 @@ function stopRigService(serviceName) {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
         }
         return !!ret;
+    });
+}
+function getRigServiceStatus(serviceName, option = '') {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        // TODO: prevoir une version full nodejs (et compatible windows)
+        const cmd = `${cmdService} status${option} ${serviceName}`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        let ret = (yield (0, utils_1.cmdExec)(cmd)) || '';
+        if (ret) {
+            ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
+        }
+        return ret || '';
     });
 }
 function getRigStatus() {

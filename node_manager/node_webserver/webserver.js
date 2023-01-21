@@ -42,6 +42,16 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
     res.send(pageContent);
     res.end();
 }));
+app.get('/fullnodes/node', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const chain = req.query.chain;
+    const opts = {
+        configNode,
+        chain,
+    };
+    const pageContent = loadTemplate('node.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
 app.use(function (req, res, next) {
     // Error 404
     console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] Error 404: ${req.method.toLocaleUpperCase()} ${req.url}`);

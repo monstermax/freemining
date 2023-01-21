@@ -16,6 +16,13 @@
     - frm rig miner-install
     - frm rig miner-uninstall
 
+    ### Rig config
+    - frm rig config
+        - frm rig config show
+        - frm rig config set
+        - frm rig config {}
+        - frm rig config []
+
     ### Rig miners management
     - frm rig miner
         - frm rig miner start
@@ -35,6 +42,13 @@
     - frm farm rigs
     - frm farm json 
     - frm farm install
+
+    ### Farm config
+    - frm farm config
+        - frm farm config show
+        - frm farm config set
+        - frm farm config {}
+        - frm farm config []
 
     ### Farm webserver
     - frm farm webserver

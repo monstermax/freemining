@@ -65,6 +65,19 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 });
 
 
+app.get('/fullnodes/node', async (req: express.Request, res: express.Response, next: Function) => {
+    const chain = req.query.chain;
+
+    const opts = {
+        configNode,
+        chain,
+    };
+    const pageContent = loadTemplate('node.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
 
 app.use(function (req: express.Request, res: express.Response, next: Function) {
     // Error 404
