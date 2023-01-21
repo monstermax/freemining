@@ -1,5 +1,5 @@
 "use strict";
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
@@ -7,33 +7,39 @@ const express_1 = tslib_1.__importDefault(require("express"));
 const http = tslib_1.__importStar(require("http"));
 const WebSocket = tslib_1.__importStar(require("ws"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
+const utils_1 = require("./common/utils");
+/* ############################## MAIN ###################################### */
 const app = (0, express_1.default)();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-const config = require('../farm_manager.json');
-const wsServerHost = ((_a = config.farmServer) === null || _a === void 0 ? void 0 : _a.host) || '0.0.0.0';
-const wsServerPort = ((_b = config.farmServer) === null || _b === void 0 ? void 0 : _b.port) || 4200;
-const allowedIps = ((_c = config.farmServer) === null || _c === void 0 ? void 0 : _c.wsAllowedIps) || [];
+const configFarm = require('../farm_manager.json');
+const configFrm = require('../../freemining.json');
+const wsServerHost = ((_a = configFarm.farmServer) === null || _a === void 0 ? void 0 : _a.host) || '0.0.0.0';
+const wsServerPort = ((_b = configFarm.farmServer) === null || _b === void 0 ? void 0 : _b.port) || 4200;
+const allowedIps = ((_c = configFarm.farmServer) === null || _c === void 0 ? void 0 : _c.wsAllowedIps) || [];
 const serverConnTimeout = 10000;
-const templatesDir = `${__dirname}/web/templates`;
-const staticDir = `${__dirname}/web/public`;
+let staticDir = ((_d = configFarm.farmServer) === null || _d === void 0 ? void 0 : _d.root) || `${__dirname}/web/public`;
+let templatesDir = ((_e = configFarm.farmServer) === null || _e === void 0 ? void 0 : _e.templates) || `${__dirname}/web/templates`;
+const farmAppDir = __dirname + '/..'; // configFrm.frmDataDir + '/farm';
+const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configFarm), { farmAppDir });
+templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true);
+staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
 const rigs = {};
 const wsClients = {};
-app.use(express_1.default.urlencoded());
+app.use(express_1.default.urlencoded({ extended: true }));
+console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
+function applyLayout(req, content, opts = {}) {
+    const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
+    opts = opts || {};
+    opts.body = opts.body || {};
+    opts.body.content = content;
+    opts.currentUrl = req.url;
+    return (0, utils_1.applyHtmlLayout)(layoutPath, opts);
+}
 app.get('/', (req, res, next) => {
-    const opts = {
-        meta: {
-            title: '',
-            noIndex: false,
-        },
-        currentUrl: req.url,
-        body: {
-            content: 'welcome',
-        }
-    };
-    const layoutTemplate = fs_1.default.readFileSync(`${templatesDir}/layout.html`).toString();
-    let pageContent = stringTemplate(layoutTemplate, opts);
+    const content = "Farm management";
+    const pageContent = applyLayout(req, content, {});
     res.send(pageContent);
     res.end();
 });
@@ -53,7 +59,7 @@ app.get('/rigs/', (req, res, next) => {
         rigs,
     };
     const tplHtml = fs_1.default.readFileSync(`${templatesDir}/rigs.html`).toString();
-    const content = stringTemplate(tplHtml, tplData);
+    const content = (0, utils_1.stringTemplate)(tplHtml, tplData);
     const rigsTmp = {} = {};
     let rigsName;
     for (rigsName in rigs) {
@@ -75,8 +81,8 @@ app.get('/rigs/', (req, res, next) => {
             rigs: rigsTmp,
         }
     };
-    const layoutTemplate = fs_1.default.readFileSync(`${templatesDir}/layout.html`).toString();
-    let pageContent = stringTemplate(layoutTemplate, opts);
+    const layoutTemplate = fs_1.default.readFileSync(`${templatesDir}/layout_farm_webserver.html`).toString();
+    let pageContent = (0, utils_1.stringTemplate)(layoutTemplate, opts);
     res.send(pageContent);
     res.end();
 });
@@ -91,7 +97,7 @@ app.get('/rigs/rig', (req, res, next) => {
             miners,
         };
         const tplHtml = fs_1.default.readFileSync(`${templatesDir}/rig.html`).toString();
-        const content = stringTemplate(tplHtml, tplData);
+        const content = (0, utils_1.stringTemplate)(tplHtml, tplData);
         const opts = {
             meta: {
                 title: '',
@@ -103,8 +109,8 @@ app.get('/rigs/rig', (req, res, next) => {
             },
             data: {}
         };
-        const layoutTemplate = fs_1.default.readFileSync(`${templatesDir}/layout.html`).toString();
-        let pageContent = stringTemplate(layoutTemplate, opts);
+        const layoutTemplate = fs_1.default.readFileSync(`${templatesDir}/layout_farm_webserver.html`).toString();
+        let pageContent = (0, utils_1.stringTemplate)(layoutTemplate, opts);
         res.send(pageContent);
         res.end();
     }
@@ -178,7 +184,7 @@ wss.on('connection', function connection(ws, req) {
     if (allowedIps.length > 0 && !allowedIps.includes(clientIP)) {
         //ws.send('ERROR: not authorized');
         //setRigOffline(clientIP??); // TODO
-        console.log(`${now()} [${safe_1.default.yellow('WARNING')}] rejecting client ${clientIP} for non allowed IP`);
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] rejecting client ${clientIP} for non allowed IP`);
         ws.close();
         return;
     }
@@ -191,7 +197,7 @@ wss.on('connection', function connection(ws, req) {
         var _a;
         const message = data.toString();
         const tmpRigName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.rigName) || 'anonymous';
-        console.log(`${now()} [${safe_1.default.blue('INFO')}] received message of ${message.length} characters from ${safe_1.default.cyan(tmpRigName)} (${clientIP})`);
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] received message of ${message.length} characters from ${safe_1.default.cyan(tmpRigName)} (${clientIP})`);
         //console.log(`${now()} [${colors.blue('INFO')}] received message of ${message.length} characters from ${clientIP}`);
         const args = message.split(' ');
         const action = args.shift();
@@ -202,7 +208,7 @@ wss.on('connection', function connection(ws, req) {
             const rigPass = args[1];
             const isNameValid = /^[a-zA-Z0-9_][a-zA-Z0-9_.-]+$/.test(rigName);
             if (!isNameValid) {
-                console.log(`${now()} [${safe_1.default.yellow('WARNING')}] refusing client ${clientIP} for invalid name`);
+                console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] refusing client ${clientIP} for invalid name`);
                 ws.close();
                 //setRigOffline(clientIP??); // TODO
             }
@@ -216,7 +222,7 @@ wss.on('connection', function connection(ws, req) {
                 // TODO: empecher les multiples connexions d'un meme rig/agent
             }
             else {
-                console.log(`${now()} [${safe_1.default.yellow('WARNING')}] refusing client ${clientIP} for invalid credentials`);
+                console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] refusing client ${clientIP} for invalid credentials`);
                 ws.send('ERROR: missing credentials');
                 ws.close();
                 //setRigOffline(clientIP??); // TODO
@@ -229,7 +235,7 @@ wss.on('connection', function connection(ws, req) {
         }
         else if (action !== 'auth' && !ws.auth) {
             // error: not auth
-            console.log(`${now()} [${safe_1.default.yellow('WARNING')}] refusing client ${clientIP} for message before auth`);
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] refusing client ${clientIP} for message before auth`);
             ws.send('ERROR: missing auth');
             ws.close();
             //setRigOffline(clientIP??); // TODO
@@ -237,7 +243,7 @@ wss.on('connection', function connection(ws, req) {
         }
         const rigName = ws.auth.rigName;
         if (action === 'kick') {
-            console.log(`${now()} [${safe_1.default.yellow('WARNING')}]: ejecting client ${clientIP} for kick`);
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}]: ejecting client ${clientIP} for kick`);
             ws.close();
             //setRigOffline(clientIP??); // TODO
         }
@@ -246,7 +252,7 @@ wss.on('connection', function connection(ws, req) {
                 // parse status an,d store into 'rigs' variable
                 const status = JSON.parse(argsStr);
                 if (!status) {
-                    console.log(`${now()} [${safe_1.default.yellow('WARNING')}] received invalid status from ${clientIP}`);
+                    console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid status from ${clientIP}`);
                     return;
                 }
                 const rigHostname = status.rig.hostname;
@@ -262,17 +268,20 @@ wss.on('connection', function connection(ws, req) {
                 //fs.writeFileSync('/tmp/farm_rig_' + rigName + '.json', JSON.stringify(status));
             }
             catch (err) {
-                console.error(`${now()} [${safe_1.default.yellow('WARNING')}] received invalid rigStatus from ${clientIP} => ${err.message}`);
+                console.error(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid rigStatus from ${clientIP} => ${err.message}`);
             }
         }
     });
     // Handle connection close
     ws.on('close', function message(data) {
-        console.log(`${now()} [${safe_1.default.blue('INFO')}] client ${clientIP} disconnected`);
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] client ${clientIP} disconnected`);
         //setRigOffline(clientIP??); // TODO
     });
     // Send a welcome message
     ws.send('info Welcome on OpenMine websocket. Please auth first');
+});
+server.listen(wsServerPort, wsServerHost, () => {
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Server started on ${wsServerHost}:${wsServerPort}`);
 });
 // Handle connections heartbeat
 const interval = setInterval(function pings() {
@@ -280,7 +289,7 @@ const interval = setInterval(function pings() {
     wss.clients.forEach(function ping(ws) {
         let clientIP = ws._socket.remoteAddress;
         if (ws.pongOk === false) {
-            console.log(`${now()} [${safe_1.default.yellow('WARNING')}] ejecting client for inactivity`);
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] ejecting client for inactivity`);
             //console.log(`${now()} [${colors.yellow('WARNING')}] ejecting client ${ws.ip} for inactivity`);
             //setRigOffline(clientIP??); // TODO
             return ws.terminate();
@@ -289,39 +298,13 @@ const interval = setInterval(function pings() {
         ws.ping();
     });
 }, serverConnTimeout);
-server.listen(wsServerPort, wsServerHost, () => {
-    console.log(`${now()} [${safe_1.default.blue('INFO')}] Server started on ${wsServerHost}:${wsServerPort}`);
-});
 // Send a message every x seconds to all clients
 //setInterval(function hello() {
 //    wss.clients.forEach(function ping(ws: any) {
 //        ws.send(`hello client, are you fine ?`);
 //    });
 //}, 7_000);
-function stringTemplate(text, params, ignoreErrors = false) {
-    params.formatNumber = formatNumber;
-    try {
-        const names = Object.keys(params);
-        const vals = Object.values(params);
-        return new Function(...names, `return \`${text}\`;`)(...vals);
-    }
-    catch (err) {
-        if (ignoreErrors) {
-            return null;
-        }
-        throw err;
-    }
-}
-function formatNumber(n) {
-    return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 }).format(n);
-}
-function now() {
-    const options = {
-        /* year: "numeric", month: "2-digit", day: "2-digit", */
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-    };
-    return new Date().toLocaleTimeString("fr-FR", options);
-}
+/* ############################ FUNCTIONS ################################### */
 function getMiners() {
     const miners = [
         'gminer',
