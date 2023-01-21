@@ -13,13 +13,11 @@ Tous les outils pour gérer une ferme de rigs :
 ## Installation
 
 ```bash
-./install_farm_manager.sh
+./tools/install_farm_manager.sh
 ```
-
 
 ## Usage
 
 ```bash
-cd farm_manager
-./farm_agent/agent.sh -bg
+./farm_manager.sh
 ```

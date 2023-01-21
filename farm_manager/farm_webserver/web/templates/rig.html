@@ -190,16 +190,16 @@ ${Object.entries(rig.services).map(entry => {
                             <select id="newService_preset" name="preset" class="form-select" aria-describedby="newService_preset_Help" onchange="loadConfig(this.value)">
                                 <option></option>
 
-                                <optgroup label="________ Farm common configs ________"></optgroup>
+                                <optgroup label="######## Farm common configs ########" class="${Object.keys(presets).length == 0 ? "d-none" : ""}"></optgroup>
                                 ${Object.entries(presets).map(entry => {
                                     const [poolName, poolConfigs] = entry;
 
                                     let poolHtml = '';
-                                    poolHtml += '<optgroup label="' + poolName + '">';
+                                    poolHtml += '<optgroup label="+ ' + poolName + '">';
 
                                     poolHtml += Object.entries(poolConfigs).map(entry2 => {
                                         const [coinName, preset] = entry2;
-                                        let coinHtml = '<option value="farm.' + poolName + '.' + coinName + '">' + coinName + '&gt; ' + preset.name + '</option>';
+                                        let coinHtml = '<option value="farm.' + poolName + '.' + coinName + '"> * ' + coinName + '&gt; ' + preset.name + '</option>';
                                         return coinHtml;
                                     }).join('');
 
@@ -209,7 +209,7 @@ ${Object.entries(rig.services).map(entry => {
                                 }).join('')}
                                 <option disabled></option>
 
-                                <optgroup label="____ Farm Configs for ${rigName} ____"></optgroup>
+                                <optgroup label="#### Farm Configs for ${rigName} ####" class="${Object.keys(farmRigPresets).length == 0 ? "d-none" : ""}"></optgroup>
                                 ${Object.entries(farmRigPresets).map(entry => {
                                     const [poolName, poolConfigs] = entry;
 
@@ -228,7 +228,7 @@ ${Object.entries(rig.services).map(entry => {
                                 }).join('')}
                                 <option disabled></option>
 
-                                <optgroup label="____________ Rig Configs ____________"></optgroup>
+                                <optgroup label="############ Rig Configs ############" class="${Object.keys(rigPresets).length == 0 ? "d-none" : ""}"></optgroup>
                                 ${Object.entries(rigPresets).map(entry => {
                                     const [poolName, poolConfigs] = entry;
 

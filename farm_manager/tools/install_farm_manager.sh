@@ -14,5 +14,5 @@ installNodejsPackages
 
 
 # install farm server
-../farm_server/install_webserver.sh
+../farm_webserver/install_webserver.sh
 

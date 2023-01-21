@@ -195,15 +195,20 @@ ${Object.entries(rig.services).map(entry => {
                             <select id="newService_preset" name="preset" class="form-select" aria-describedby="newService_preset_Help" onchange="loadConfig(this.value)">
                                 <option value=""></option>
 
-                                ${Object.entries(presets).map(entry => {
+                                ${Object.entries(presets).map((entry, idx) => {
                                     const [poolName, poolConfigs] = entry;
 
                                     let poolHtml = '';
-                                    poolHtml += '<optgroup label="' + poolName + '">';
+
+                                    if (idx > 0) {
+                                        poolHtml += '<option value=""></option>';
+                                    }
+
+                                    poolHtml += '<optgroup label="+ ' + poolName + '">';
 
                                     poolHtml += Object.entries(poolConfigs).map(entry2 => {
                                         const [coinName, preset] = entry2;
-                                        let coinHtml = '<option value="' + poolName + '.' + coinName + '">' + coinName + '&gt; ' + preset.name + '</option>';
+                                        let coinHtml = '<option value="' + poolName + '.' + coinName + '"> * ' + coinName + '&gt; ' + preset.name + '</option>';
                                         return coinHtml;
                                     }).join('');
 

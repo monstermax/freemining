@@ -14,3 +14,7 @@ installBasicTools
 #installNodejsPackages
 
 
+
+# install node server
+../node_webserver/install_webserver.sh
+

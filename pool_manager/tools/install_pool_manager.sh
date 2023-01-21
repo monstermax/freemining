@@ -16,7 +16,7 @@ installNodejsPackages
 
 
 # install pool server
-../pool_server/install_webserver.sh
+../pool_webserver/install_webserver.sh
 
 # install pools manager
 #../pools_manager/install_pools_manager.sh

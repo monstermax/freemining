@@ -106,11 +106,11 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         echo "  $CMD ps                          # show ${FRM_MODULE} running processes"
         echo
         echo "  $CMD fullnode <params>           # start/stop a fullnode"
-        echo "  $CMD webserver  <params>         # start/stop the ${FRM_MODULE} webserver"
+        echo "  $CMD webserver <params>          # start/stop the ${FRM_MODULE} webserver"
         echo
         echo "  $CMD install                     # install ${FRM_MODULE} manager"
-        echo "  $CMD fullnode-install [chain]    # install a fullnode"
-        echo "  $CMD fullnode-uninstall [chain]  # install a fullnode"
+        echo "  $CMD fullnode-install {chain}    # install a fullnode"
+        echo "  $CMD fullnode-uninstall {chain}  # install a fullnode"
         #echo "  $CMD config-firewall             # Not available. TODO"
         echo
     }

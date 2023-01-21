@@ -276,6 +276,16 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         shift
         exec ./node_manager/node_manager.sh $@
 
+    elif [ "$1" = "miner" ]; then
+        # shortcut to rig/miner
+        shift
+        exec ./rig_manager/tools/run_miner.sh $@
+
+    elif [ "$1" = "fullnode" ]; then
+        # shortcut to node/fullnode
+        shift
+        exec ./node_manager/tools/run_fullnode.sh $@
+
     elif [ "$1" = "bin-install" ]; then
         PARENT_DIR=$(dirname $BASH_SOURCE)
 
@@ -288,6 +298,13 @@ $0 \$@
 " > ${INSTALL_DIR}/frm
 
         chmod +x ${INSTALL_DIR}/frm
+
+        # install autosuggest
+        AUTOCOMPLETION_SCRIPT=$(realpath ./common/bash/frm_autocompletion.sh)
+
+        if ! grep -q frm_autocompletion ~/.bashrc 2>/dev/null; then
+            echo "source $AUTOCOMPLETION_SCRIPT" >> ~/.bashrc
+        fi
 
     elif [ "$1" = "modules-install" ]; then
         shift

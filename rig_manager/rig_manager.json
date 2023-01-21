@@ -17,33 +17,6 @@
 	},
 	"pools": {
 
-		"freemining": {
-            "monero": {
-                "name": "Monero @ FreeMining [CPU]",
-                "miner": "xmrig",
-                "algo": "rx/0",
-                "poolUrl": "freemining.fr:3032",
-                "poolAccount": "46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH.${rigName}",
-                "args": ""
-            },
-            "ergo": {
-				"name": "Ergo @ FreeMining",
-				"miner": "trex",
-				"algo": "autolykos2",
-				"poolUrl": "freemining.fr:4013",
-				"poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.${rigName}",
-				"args": "-d 0"
-            },
-            "raptoreum": {
-				"name": "Raptoreum @ FreeMining [CPU]",
-				"miner": "xmrig",
-				"algo": "ghostrider",
-				"poolUrl": "freemining.fr:4093",
-				"poolAccount": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.${rigName}",
-				"args": ""
-            }
-        },
-
 		"xmrpool": {
             "monero": {
 				"name": "Monero @ XmrPool",
