@@ -4,3 +4,36 @@
 
 <hr />
 
+<h2 class="h4">Active processes</h2>
+<pre>
+${activeProcesses}
+</pre>
+
+<br />
+<br />
+
+
+<h2 class="h4">Installed fullnodes</h2>
+<ul>
+    ${installedFullnodes.map(nodeName => {
+        if (! nodeName.trim()) return;
+        return '<li>' + nodeName + '</li>';
+    }).join('')}
+</ul>
+
+
+<br />
+<br />
+
+<h2 class="h4">Installable fullnodes</h2>
+<ul>
+    ${installablesFullnodes.map(nodeName => {
+        if (! nodeName.trim()) return;
+        return '<li>' + nodeName + '</li>';
+    }).join('')}
+</ul>
+
+
+<br />
+<br />
+

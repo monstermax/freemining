@@ -42,6 +42,10 @@ function usage {
 ################################################################################
 
 
+export CONFIGURED_FULLNODES
+export INSTALLED_FULLNODES
+
+
 DAEMON_CMD="${NODE} ./webserver.js"
 if test "$USE_TS" = "1"; then
     DAEMON_CMD="${TS_NODE} ./webserver.ts"

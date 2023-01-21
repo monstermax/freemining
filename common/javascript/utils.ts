@@ -1,6 +1,36 @@
 
 import fs from 'fs';
+import colors from 'colors/safe';
+const { exec } = require('child_process');
 
+
+export async function cmdExec(cmd: string): Promise<string | null> {
+    let ret: string | null = null;
+
+    await new Promise((resolve, reject) => {
+        exec(cmd, (error: any, stdout: string, stderr: string) => {
+            if (error) {
+                //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
+                reject( error );
+                return;
+            }
+
+            if (stderr) {
+                reject( { message: stderr, code: 500 } );
+                return;
+            }
+            resolve(stdout);
+        });
+
+    }).then((result: any) => {
+        ret = result;
+
+    }).catch((err: any) => {
+        console.error(`${now()} [${colors.red('ERROR')}] catched while running exec command => ${colors.red(err.message)}`)
+    });
+
+    return ret;
+}
 
 
 export function stringTemplate(text: string, params: any, ignoreErrors=false, recursive=true, expandTild=false, maxDepth=50): string | null {
@@ -31,7 +61,7 @@ export function stringTemplate(text: string, params: any, ignoreErrors=false, re
 }
 
 
-export function formatNumber(n: number) {
+export function formatNumber(n: number): string {
     return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 }).format(n);
 }
 

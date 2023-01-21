@@ -21,20 +21,27 @@ const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configNode
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 const layoutPath = `${templatesDir}/layout_node_webserver.html`;
+const nodeManagerCmd = `${__dirname}/../node_manager.sh ps`;
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using templates folder ${templatesDir}`);
     app.use(express_1.default.static(staticDir));
 }
-app.get('/', (req, res, next) => {
+app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const installablesFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+    const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+    const activeProcesses = yield getNodeProcesses();
     const opts = {
         configNode,
+        activeProcesses,
+        installablesFullnodes,
+        installedFullnodes,
     };
     const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
-});
+}));
 app.use(function (req, res, next) {
     // Error 404
     console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] Error 404: ${req.method.toLocaleUpperCase()} ${req.url}`);
@@ -53,4 +60,11 @@ function loadTemplate(tplFile, data = {}, currentUrl = '') {
     let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
     const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
     return pageContent;
+}
+function getNodeProcesses() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = nodeManagerCmd;
+        const result = yield (0, utils_1.cmdExec)(cmd);
+        return result || '';
+    });
 }

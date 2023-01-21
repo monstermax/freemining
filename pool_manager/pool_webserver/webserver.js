@@ -25,6 +25,7 @@ templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true)
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 engineWebsiteDir = (0, utils_1.stringTemplate)(engineWebsiteDir, ctx, false, true, true) || '';
 const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
+const poolManagerCmd = `${__dirname}/../pool_manager.sh ps`;
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
@@ -33,11 +34,16 @@ if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using engineApiUrl folder ${engineApiUrl}`);
     app.use(express_1.default.static(staticDir));
 }
-app.get('/', (req, res, next) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const activeProcesses = yield getPoolProcesses();
+    const opts = {
+        configPool,
+        activeProcesses,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
-});
+}));
 app.use('/pools', express_1.default.static(engineWebsiteDir));
 app.use('/api/', function (req, res) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -73,4 +79,11 @@ function loadTemplate(tplFile, data = {}, currentUrl = '') {
     let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
     const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
     return pageContent;
+}
+function getPoolProcesses() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = poolManagerCmd;
+        const result = yield (0, utils_1.cmdExec)(cmd);
+        return result || '';
+    });
 }

@@ -1,8 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applyHtmlLayout = exports.now = exports.formatNumber = exports.stringTemplate = void 0;
+exports.applyHtmlLayout = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
+const safe_1 = tslib_1.__importDefault(require("colors/safe"));
+const { exec } = require('child_process');
+function cmdExec(cmd) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        let ret = null;
+        yield new Promise((resolve, reject) => {
+            exec(cmd, (error, stdout, stderr) => {
+                if (error) {
+                    //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
+                    reject(error);
+                    return;
+                }
+                if (stderr) {
+                    reject({ message: stderr, code: 500 });
+                    return;
+                }
+                resolve(stdout);
+            });
+        }).then((result) => {
+            ret = result;
+        }).catch((err) => {
+            console.error(`${now()} [${safe_1.default.red('ERROR')}] catched while running exec command => ${safe_1.default.red(err.message)}`);
+        });
+        return ret;
+    });
+}
+exports.cmdExec = cmdExec;
 function stringTemplate(text, params, ignoreErrors = false, recursive = true, expandTild = false, maxDepth = 50) {
     const HOME = process.env.HOME;
     params.formatNumber = formatNumber;

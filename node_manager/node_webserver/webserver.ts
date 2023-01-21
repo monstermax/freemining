@@ -4,7 +4,7 @@ import express from 'express';
 import * as http from 'http';
 import colors from 'colors/safe';
 
-import { now, stringTemplate, applyHtmlLayout } from './common/utils';
+import { now, cmdExec, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 /* ############################## MAIN ###################################### */
@@ -34,6 +34,9 @@ staticDir = stringTemplate(staticDir, ctx, false, true, true) || '';
 
 const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 
+const nodeManagerCmd = `${__dirname}/../node_manager.sh ps`;
+
+
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -45,9 +48,16 @@ if (staticDir) {
 }
 
 
-app.get('/', (req: express.Request, res: express.Response, next: Function) => {
+app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
+    const installablesFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+    const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+    const activeProcesses: string = await getNodeProcesses();
+
     const opts = {
         configNode,
+        activeProcesses,
+        installablesFullnodes,
+        installedFullnodes,
     };
     const pageContent = loadTemplate('index.html', opts, req.url);
     res.send( pageContent );
@@ -82,5 +92,12 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
 
     const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
     return pageContent;
+}
+
+
+async function getNodeProcesses(): Promise<string> {
+    const cmd = nodeManagerCmd;
+    const result = await cmdExec(cmd);
+    return result || '';
 }
 

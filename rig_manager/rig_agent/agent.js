@@ -8,7 +8,6 @@ const http = tslib_1.__importStar(require("http"));
 const ws_1 = tslib_1.__importDefault(require("ws"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
-const { exec } = require('child_process');
 const utils_1 = require("./common/utils");
 /* ############################## MAIN ###################################### */
 const configFrm = require('../../freemining.json');
@@ -32,28 +31,31 @@ staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true);
 const layoutPath = `${templatesDir}/layout_rig_agent.html`;
 const rigName = configRig.rigName || os_1.default.hostname();
 const websocketPassword = 'xxx'; // password to access farm websocket server
+const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Starting Rig ${rigName}`);
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
-app.get('/', (req, res, next) => {
+app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     if (!rigStatus) {
         res.send(`Rig not initialized`);
         res.end();
         return;
     }
     const presets = configRig.pools || {};
+    const activeProcesses = yield getRigProcesses();
     const opts = {
         rigName,
         rig: rigStatus,
         miners: getMiners(),
         rigs: [],
         presets,
+        activeProcesses,
     };
     const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
-});
+}));
 app.get('/status.json', (req, res, next) => {
     res.header({ 'Content-Type': 'application/json' });
     res.send(JSON.stringify(rigStatus));
@@ -270,7 +272,7 @@ function startRigService(serviceName, params) {
         // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} start ${serviceName} -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
-        const ret = yield cmdExec(cmd);
+        const ret = yield (0, utils_1.cmdExec)(cmd);
         if (ret) {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
         }
@@ -285,7 +287,7 @@ function stopRigService(serviceName) {
         // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} stop ${serviceName}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
-        const ret = yield cmdExec(cmd);
+        const ret = yield (0, utils_1.cmdExec)(cmd);
         if (ret) {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
         }
@@ -298,7 +300,7 @@ function stopRigService(serviceName) {
 function getRigStatus() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const cmd = cmdRigMonitorJson;
-        const statusJson = yield cmdExec(cmd);
+        const statusJson = yield (0, utils_1.cmdExec)(cmd);
         if (statusJson) {
             try {
                 const _rigStatus = JSON.parse(statusJson);
@@ -313,30 +315,6 @@ function getRigStatus() {
             console.log(`${(0, utils_1.now)()} [${safe_1.default.red('WAWRNING')}] cannot read rig status (no response from shell)`);
         }
         return null;
-    });
-}
-function cmdExec(cmd) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let ret = null;
-        yield new Promise((resolve, reject) => {
-            exec(cmd, (error, stdout, stderr) => {
-                if (error) {
-                    //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
-                    reject(error);
-                    return;
-                }
-                if (stderr) {
-                    reject({ message: stderr, code: 500 });
-                    return;
-                }
-                resolve(stdout);
-            });
-        }).then((result) => {
-            ret = result;
-        }).catch((err) => {
-            console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] catched while running exec command => ${safe_1.default.red(err.message)}`);
-        });
-        return ret;
     });
 }
 function checkStatus() {
@@ -358,4 +336,11 @@ function getMiners() {
         'xmrig',
     ];
     return miners;
+}
+function getRigProcesses() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = rigManagerCmd;
+        const result = yield (0, utils_1.cmdExec)(cmd);
+        return result || '';
+    });
 }

@@ -1,5 +1,11 @@
+#!/bin/bash
+
 
 ##### START #####
+
+if test -z "$BASH_SOURCE"; then
+    BASH_SOURCE=$0
+fi
 
 NODE_OLD_PWD=$PWD
 cd `dirname $BASH_SOURCE`
@@ -67,8 +73,6 @@ fi
 if [ "$fullnodesDir" = "" -o "$fullnodesDir" = "null" ]; then
     fullnodesDir="${nodeDataDir}/fullnodes"
 fi
-
-
 
 
 CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${NODE_CONFIG_FILE} 2>/dev/null`)

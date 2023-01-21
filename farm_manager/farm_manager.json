@@ -51,14 +51,16 @@
 
     "rigs": {
         "zalman": {
-            "ergo": {
-                "jjpool": {
-                    "name": "Ergo @ JJPool (teamredminer AMD) -- zalman",
-                    "miner": "teamredminer",
-                    "algo": "ergo",
-                    "poolUrl": "eu.jjpool.fr:3056",
-                    "poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.${rigName}",
-                    "args": ""
+            "pools": {
+                "ergo": {
+                    "jjpool": {
+                        "name": "Ergo @ JJPool (teamredminer AMD) -- zalman",
+                        "miner": "teamredminer",
+                        "algo": "ergo",
+                        "poolUrl": "eu.jjpool.fr:3056",
+                        "poolAccount": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.${rigName}",
+                        "args": ""
+                    }
                 }
             }
         }

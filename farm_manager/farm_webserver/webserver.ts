@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import colors from 'colors/safe';
 
-import { now, stringTemplate, applyHtmlLayout } from './common/utils';
+import { now, cmdExec, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 
@@ -79,6 +79,8 @@ staticDir = stringTemplate(staticDir, ctx, false, true, true) || '';
 
 const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
 
+const farmManagerCmd = `${__dirname}/../farm_manager.sh ps`;
+
 const websocketPassword = 'xxx'; // password required to connect to the websocket
 
 
@@ -94,8 +96,15 @@ app.use(express.static(staticDir));
 
 
 
-app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
+    const activeProcesses: string = await getFarmProcesses();
+
+    const opts = {
+        configFarm,
+        activeProcesses,
+    };
+
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
 });
@@ -488,4 +497,11 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
     return pageContent;
 }
 
+
+
+async function getFarmProcesses(): Promise<string> {
+    const cmd = farmManagerCmd;
+    const result = await cmdExec(cmd);
+    return result || '';
+}
 

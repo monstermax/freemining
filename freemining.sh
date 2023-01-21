@@ -317,6 +317,9 @@ $0 \$@
 
         echo "Compile typescript in each modules..."
 
+        echo " - Compiling common..."
+        cd common/javascript; tsc; cd ../..
+
         echo " - Compiling rig_agent..."
         cd rig_manager/rig_agent; tsc; cd ../..
 

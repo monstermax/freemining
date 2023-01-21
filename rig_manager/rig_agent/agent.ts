@@ -6,9 +6,8 @@ import WebSocket from 'ws';
 
 import os from 'os';
 import colors from 'colors/safe';
-const { exec } = require('child_process');
 
-import { now, stringTemplate, applyHtmlLayout } from './common/utils';
+import { now, cmdExec, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 /* ############################## TYPES ##################################### */
@@ -107,6 +106,9 @@ const rigName = configRig.rigName || os.hostname();
 
 const websocketPassword = 'xxx'; // password to access farm websocket server
 
+const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
+
+
 
 console.log(`${now()} [${colors.blue('INFO')}] Starting Rig ${rigName}`);
 
@@ -118,7 +120,7 @@ app.use(express.static(staticDir));
 
 
 
-app.get('/', (req: express.Request, res: express.Response, next: Function) => {
+app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
     if (! rigStatus) {
         res.send(`Rig not initialized`);
         res.end();
@@ -126,6 +128,7 @@ app.get('/', (req: express.Request, res: express.Response, next: Function) => {
     }
 
     const presets = configRig.pools || {};
+    const activeProcesses: string = await getRigProcesses();
 
     const opts = {
         rigName,
@@ -133,6 +136,7 @@ app.get('/', (req: express.Request, res: express.Response, next: Function) => {
         miners: getMiners(),
         rigs:[],
         presets,
+        activeProcesses,
     };
     const pageContent = loadTemplate('index.html', opts, req.url);
     res.send( pageContent );
@@ -493,36 +497,6 @@ async function getRigStatus(): Promise<RigStatus | null> {
 
 
 
-async function cmdExec(cmd: string) {
-    let ret: any = null;
-
-    await new Promise((resolve, reject) => {
-        exec(cmd, (error: any, stdout: string, stderr: string) => {
-            if (error) {
-                //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
-                reject( error );
-                return;
-            }
-
-            if (stderr) {
-                reject( { message: stderr, code: 500 } );
-                return;
-            }
-            resolve(stdout);
-        });
-
-    }).then((result: any) => {
-        ret = result;
-
-    }).catch((err: any) => {
-        console.error(`${now()} [${colors.red('ERROR')}] catched while running exec command => ${colors.red(err.message)}`)
-    });
-
-    return ret;
-}
-
-
-
 async function checkStatus() {
     console.log(`${now()} [${colors.blue('INFO')}] refreshing rigStatus`)
     checkStatusTimeout = null;
@@ -544,4 +518,12 @@ function getMiners() {
     ];
     return miners;
 }
+
+
+async function getRigProcesses(): Promise<string> {
+    const cmd = rigManagerCmd;
+    const result = await cmdExec(cmd);
+    return result || '';
+}
+
 

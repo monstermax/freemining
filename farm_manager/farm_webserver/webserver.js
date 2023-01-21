@@ -25,6 +25,7 @@ const ctx = Object.assign(Object.assign(Object.assign({}, configFrm), configFarm
 templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true) || '';
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 const layoutPath = `${templatesDir}/layout_farm_webserver.html`;
+const farmManagerCmd = `${__dirname}/../farm_manager.sh ps`;
 const websocketPassword = 'xxx'; // password required to connect to the websocket
 const rigs = {};
 const rigsConfigs = {};
@@ -32,11 +33,16 @@ const wsClients = {};
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
-app.get('/', (req, res, next) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const activeProcesses = yield getFarmProcesses();
+    const opts = {
+        configFarm,
+        activeProcesses,
+    };
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
     res.end();
-});
+}));
 app.get('/status.json', (req, res, next) => {
     res.header({ 'Content-Type': 'application/json' });
     let rigsName;
@@ -324,4 +330,11 @@ function loadTemplate(tplFile, data = {}, currentUrl = '') {
     let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
     const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
     return pageContent;
+}
+function getFarmProcesses() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = farmManagerCmd;
+        const result = yield (0, utils_1.cmdExec)(cmd);
+        return result || '';
+    });
 }

@@ -6,7 +6,7 @@ import colors from 'colors/safe';
 import fetch from 'node-fetch';
 
 
-import { now, stringTemplate, applyHtmlLayout } from './common/utils';
+import { now, cmdExec, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 
@@ -39,6 +39,8 @@ engineWebsiteDir = stringTemplate(engineWebsiteDir, ctx, false, true, true) || '
 
 const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
 
+const poolManagerCmd = `${__dirname}/../pool_manager.sh ps`;
+
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,8 +54,15 @@ if (staticDir) {
 }
 
 
-app.get('/', (req: express.Request, res: express.Response, next: Function) => {
-    const pageContent = loadTemplate('index.html', {}, req.url);
+app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
+    const activeProcesses: string = await getPoolProcesses();
+
+    const opts = {
+        configPool,
+        activeProcesses,
+    };
+
+    const pageContent = loadTemplate('index.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });
@@ -106,5 +115,12 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
 
     const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
     return pageContent;
+}
+
+
+async function getPoolProcesses(): Promise<string> {
+    const cmd = poolManagerCmd;
+    const result = await cmdExec(cmd);
+    return result || '';
 }
 
