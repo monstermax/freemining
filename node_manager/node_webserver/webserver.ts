@@ -4,7 +4,7 @@ import express from 'express';
 import * as http from 'http';
 import colors from 'colors/safe';
 
-import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
+import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 const app = express();

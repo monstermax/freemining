@@ -8,7 +8,7 @@ import os from 'os';
 import colors from 'colors/safe';
 const { exec } = require('child_process');
 
-import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
+import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 /* ############################## TYPES ##################################### */

@@ -6,7 +6,7 @@ import colors from 'colors/safe';
 import fetch from 'node-fetch';
 
 
-import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
+import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 const app = express();

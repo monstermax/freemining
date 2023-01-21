@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import colors from 'colors/safe';
 
-import { now, stringTemplate, applyHtmlLayout } from '../../common/javascript/utils';
+import { now, stringTemplate, applyHtmlLayout } from './common/utils';
 
 
 
