@@ -182,6 +182,11 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcport=16124 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=16125 $@"
             ;;
 
+        kadena)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/chainweb-node --database-directory ${nodeConfDir}/fullnodes/${FULLNODE} --config-file ${nodeConfDir}/fullnodes/${FULLNODE}/kadena.conf"
+            CMD_ARGS="$@"
+            ;;
+
         kaspa)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d --appdir=${nodeConfDir}/fullnodes/${FULLNODE}"
             CMD_ARGS="--utxoindex --rpclisten=16110 $@"

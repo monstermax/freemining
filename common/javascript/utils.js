@@ -53,8 +53,44 @@ function stringTemplate(text, params, ignoreErrors = false, recursive = true, ex
     }
 }
 exports.stringTemplate = stringTemplate;
-function formatNumber(n) {
-    return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 }).format(n);
+function fixedRound(precision = 0) {
+    return function (val) {
+        return Math.round(val * 10 ** precision) / 10 ** precision;
+    };
+}
+function formatNumber(n, type = '') {
+    let ret = '';
+    const round = fixedRound(1);
+    if (type === 'size') {
+        if (n > 10 ** 21) {
+            ret = round(n / 10 ** 21).toString() + ' Y';
+        }
+        else if (n > 10 ** 18) {
+            ret = round(n / 10 ** 18).toString() + ' Z';
+        }
+        else if (n > 10 ** 15) {
+            ret = round(n / 10 ** 15).toString() + ' E';
+        }
+        else if (n > 10 ** 12) {
+            ret = round(n / 10 ** 12).toString() + ' T';
+        }
+        else if (n > 10 ** 9) {
+            ret = round(n / 10 ** 9).toString() + ' G';
+        }
+        else if (n > 10 ** 6) {
+            ret = round(n / 10 ** 6).toString() + ' M';
+        }
+        else if (n > 10 ** 3) {
+            ret = round(n / 10 ** 3).toString() + ' K';
+        }
+        else {
+            ret = round(n).toString() + ' ';
+        }
+    }
+    else {
+        ret = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 }).format(n);
+    }
+    return ret;
 }
 exports.formatNumber = formatNumber;
 function now() {

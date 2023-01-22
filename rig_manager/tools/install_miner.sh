@@ -593,9 +593,6 @@ function showMinersList {
 ################################################################################
 
 
-
-INSTALLABLE_MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
-
 miner=$1
 
 if [ "$miner" = "" ]; then

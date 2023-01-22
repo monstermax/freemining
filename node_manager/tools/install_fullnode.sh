@@ -543,6 +543,53 @@ EOF
 }
 
 
+function install_kadena {
+    cd ${TMP_DIR}
+
+    chain="kadena"
+
+    if grep -q "Ubuntu 20.04" /etc/os-release || grep -q "Debian GNU/Linux 11" /etc/os-release; then
+        VERSION="2.17.2"
+        VERSION_LONG="2.17.2.ghc-8.10.7.ubuntu-20.04.aa36983"
+
+    elif grep -q "Ubuntu 22.04" /etc/os-release; then
+        VERSION="2.17.2"
+        VERSION_LONG="2.17.2.ghc-8.10.7.ubuntu-22.04.aa36983"
+    fi
+
+    if [ "$VERSION" != "" ]; then
+        DL_URL="https://github.com/kadena-io/chainweb-node/releases/download/${VERSION}/chainweb-${VERSION_LONG}.tar.gz"
+        DL_FILE=$(basename $DL_URL)
+        UNZIP_DIR="${chain}-unzipped"
+
+        echo "Installing ${chain} ${VERSION} ${VERSION_LONG}..."
+
+        echo " - Downloading ${chain}"
+        wget -q $DL_URL
+
+        echo " - Unzipping"
+        mkdir $UNZIP_DIR
+        tar zxf $DL_FILE -C $UNZIP_DIR
+
+        echo " - Preparing"
+        CONF_DIR=${nodeConfDir}/fullnodes/${chain}
+        mkdir -p $CONF_DIR
+
+        $UNZIP_DIR/chainweb-node --database-directory ${nodeConfDir}/fullnodes/${chain} --print-config > ${nodeConfDir}/fullnodes/${chain}/kadena.conf
+
+        echo " - Install into ${fullnodesDir}/${chain}"
+        rm -rf ${fullnodesDir}/${chain}
+        mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    else
+        # install from sources
+        false
+        # not available => see https://github.com/kadena-io/chainweb-node#building-from-source
+    fi
+
+
+}
+
 function install_kaspa {
     cd ${TMP_DIR}
 
@@ -1092,9 +1139,6 @@ function showFullnodesList {
 ################################################################################
 
 
-
-INSTALLABLE_FULLNODES="bitcoincash bitcoinsv callisto dogecoin ergo ethereum ethereum_classic firo flux kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin siacoin zcash"
-
 fullnode=$1
 
 if test "$fullnode" = ""; then
@@ -1147,6 +1191,9 @@ elif [ "$fullnode" = "firo" ]; then
 
 elif [ "$fullnode" = "flux" ]; then
     install_flux
+
+elif [ "$fullnode" = "kadena" ]; then
+    install_kadena
 
 elif [ "$fullnode" = "kaspa" ]; then
     install_kaspa

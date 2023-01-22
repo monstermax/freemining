@@ -14,11 +14,11 @@
 <br />
 <br />
 
-<table class="table table-bordered table-hover">
+<table class="table table-bordered table-hover table-sm">
 <thead class="table-dark">
     <tr>
-        <th>Rig name</th>
-        <th>Host name</th>
+        <th>Rig</th>
+        <th>Hostname</th>
         <th>IP</th>
         <th>Operating system</th>
         <th class="text-end">Uptime</th>
@@ -30,9 +30,18 @@
 </thead>
 <tbody>
     ${Object.entries(rigs).map(entry => {
-        const rig = entry[1];
-        return `<tr class="${rig.dataAge > 10 ? 'text-danger' : (Object.keys(entry[1].services).length === 0 ? 'text-warning' : 'text-success')}">
-            <td><a href="./rig?rig=${rig.rig.name || rig.rig.hostname}">${rig.rig.name || rig.rig.hostname}</a></td>
+        const [rigName, rig] = entry;
+        //const dataAge = rig.rig.dataAge;
+        const dataAge = Date.now()/1000 - rig.rig.dateRig;
+        const isSuccess = (dataAge < 20) && (Object.keys(rig.services).length > 0);
+        const isError = (dataAge > 30);
+        const isWarning = (! isSuccess && ! isError);
+        const colorClass = isSuccess ? 'bg-success' : (isError ? 'bg-danger' : 'bg-warning');
+
+        return `<tr class="bg-light" style="font-size:.9em; font-weight:bold;">
+            <td rowspan="2" class="${colorClass} text-center" style="vertical-align:middle;">
+                <a class="text-light" href="./rig?rig=${rig.rig.name || rig.rig.hostname}">${rig.rig.name || rig.rig.hostname}</a>
+            </td>
             <td>${rig.rig.hostname}</td>
             <td>${rig.rig.ip}</td>
             <td>${rig.rig.os}</td>
@@ -40,8 +49,53 @@
             <td class="text-end">${rig.rig.loadAvg}</td>
             <td class="text-end">${formatNumber(rig.rig.memory.used)}/${formatNumber(rig.rig.memory.total)} MB</td>
             <td class="text-end">${Object.keys(rig.services).length}</td>
-            <td class="text-end"><span class="dataAge">${Math.round(Date.now()/1000 - rig.rig.dateRig)}</span> sec. ago</td>
-        </tr>`
+            <td class="text-end"><span class="dataAge">${Math.round(dataAge)}</span> sec. ago</td>
+        </tr>
+        <tr class="bg-light">
+            <td colspan="8" class="">
+                ${Object.entries(rig.services).map(entry => {
+                    const [minerName, service] = entry;
+
+                    let html = '';
+
+                    html += service.cpu.map(cpu => {
+                        let cpuHtml = '';
+                        cpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
+                        //cpuHtml += '    <div class="col-12 text-start">';
+                        cpuHtml += '        <div class="badge col-4 text-start text-truncate">CPU [<b class="text-warning">' + cpu.name + '</b>]</div>';
+                        cpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
+                        cpuHtml += '        <div class="badge col-2 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
+                        cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
+                        cpuHtml += '        <div class="badge col-2 text-end"><b>hashRate</b>: <span class="text-warning">' + formatNumber(cpu.hashRate, 'size') + 'H/s</span></div>';
+                        //cpuHtml += '    </div>';
+                        cpuHtml += '</div>';
+                        return cpuHtml;
+                    }).join('');
+                    html += service.gpu.map(gpu => {
+                        const gpuSuffix = (service.gpu.length > 1) ? ('.' + gpu.id) : '';
+                        let gpuHtml = '';
+                        gpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
+                        //gpuHtml += '    <div class="col-12 text-start">';
+                        gpuHtml += '        <div class="badge col-4 text-start text-truncate">GPU' + gpuSuffix + ' [<b class="text-warning">' + gpu.name + '</b>]</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>temp.</b>: <span class="text-info">' + gpu.temperature + '°</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>fan</b>: <span class="text-info">' + gpu.fanSpeed + '%</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-end"><b>hashRate</b>: <span class="text-warning">' + formatNumber(gpu.hashRate, 'size') + 'H/s</span></div>';
+                        //gpuHtml += '    </div>';
+                        gpuHtml += '</div>';
+                        return gpuHtml;
+                    }).join('');
+
+                    return html; //'<li>GPU</li>';
+                }).join('')}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="9" class="py-2"></td>
+        </tr>
+        `
     }).join('')}
 </tbody>
 </table>

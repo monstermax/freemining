@@ -78,6 +78,10 @@ fi
 CONFIGURED_FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${NODE_CONFIG_FILE} 2>/dev/null`)
 INSTALLED_FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
 
+# TODO: do not hardcode this list
+INSTALLABLE_FULLNODES="bitcoincash bitcoinsv callisto dogecoin ergo ethereum ethereum_classic firo flux kadena kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin siacoin zcash"
+
+
 DAEMON_LOG_DIR=$nodeLogDir
 DAEMON_PID_DIR=$nodePidDir
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR

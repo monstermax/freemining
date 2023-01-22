@@ -10,7 +10,9 @@ Tools for manage your rig
 ## Farm Manager
 Tools for manage your rigs farm
 
-## Pool Manager
-Tools for manage your fullnodes & mining pools
+## Node Manager
+Tools for manage your fullnodes
 
+## Pool Manager
+Tools for manage your mining pools
 
