@@ -2,15 +2,15 @@
 
 cd `dirname $0`
 
-#source ../common.sh
+source ../common.sh
 
 
 # install basic tools
-#installBasicTools
+installBasicTools
 
 # install nodejs + npm + typescript
-#installNodejs
-#installNodejsPackages
+installNodejs
+installNodejsPackages
 
 
 # install farm server
