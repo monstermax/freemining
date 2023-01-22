@@ -73,7 +73,18 @@ export function formatNumber(n: number, type:string=''): string {
 
     const round = fixedRound(1);
 
-    if (type === 'size') {
+    if (type === 'seconds') {
+        if (n > 24 * 60 * 60) {
+            ret = round(n / (24 * 60 * 60)).toString() + ' day';
+        } else if (n > 60 * 60) {
+            ret = round(n / (60 * 60)).toString() + ' hour';
+        } else if (n > 60) {
+            ret = round(n / 60).toString() + ' min';
+        } else {
+            ret = round(n).toString() + ' sec';
+        }
+
+    } else if (type === 'size') {
         if (n > 10 ** 21) {
             ret = round(n / 10 ** 21).toString() + ' Y';
         } else if (n > 10 ** 18) {

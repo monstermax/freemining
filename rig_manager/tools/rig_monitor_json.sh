@@ -15,6 +15,7 @@ JSON_MONITOR_DIR="../miners_monitor/json"
 RIG_NAME=$rigName
 RIG_HOSTNAME=$(hostname)
 LOCAL_IP=$(hostname -I | cut -d' ' -f1)
+RIG_MOTHERBOARD=$(echo `cat /sys/devices/virtual/dmi/id/board_{name,vendor}`)
 
 OS_VERSION=$(grep PRETTY_NAME /etc/os-release |cut -d'"' -f2)
 UPTIME=$(cat /proc/uptime |cut -d" " -f1 |cut -d"." -f1)
@@ -122,6 +123,7 @@ cat <<_EOF
             "total": "${MEM_TOTAL}"
         },
         "devices": {
+            "motherboard": "${RIG_MOTHERBOARD}",
             "cpu": {
                 "name": "${CPU_NAME}",
                 "threads": "${CPU_COUNT}"

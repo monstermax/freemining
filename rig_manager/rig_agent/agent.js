@@ -360,6 +360,7 @@ function getRigStatus() {
         const statusJson = yield (0, utils_1.cmdExec)(cmd);
         if (statusJson) {
             try {
+                console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] checking rig status`);
                 const _rigStatus = JSON.parse(statusJson);
                 return _rigStatus;
             }

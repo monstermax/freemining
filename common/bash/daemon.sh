@@ -1,3 +1,5 @@
+#!/bin/bash
+
 
 DAEMON_LOG_DIR=~/.freemining/log
 DAEMON_PID_DIR=~/.freemining/run

@@ -33,7 +33,7 @@
         <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> ${rig.rig.ip}</div>
         <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> ${rig.rig.os}</div>
         <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> ${rig.rig.loadAvg}</div>
-        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> ${formatNumber(rig.rig.uptime)} sec.</div>
+        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> ${formatNumber(rig.rig.uptime, 'seconds')} sec.</div>
         <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> ${formatNumber(rig.rig.memory.used)} / ${formatNumber(rig.rig.memory.total)} MB</div>
     </div>
 </div>
@@ -123,7 +123,7 @@ ${Object.entries(rig.services).map(entry => {
                 <div class="col-12 col-lg-2 text-truncate"><div class="alert alert-dark h4 text-center">${serviceName}</div></div>
                 <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.worker.algo}</div>
                 <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.worker.name}</div>
-                <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.worker.uptime)} sec.</div>
+                <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.worker.uptime, 'seconds')} sec.</div>
                 <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.worker.hashRate)}/sec.</div>
                 <div class="col-12 col-lg-1">
                     <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopService('${serviceName}')" />

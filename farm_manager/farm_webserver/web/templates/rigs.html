@@ -17,7 +17,7 @@
 <table class="table table-bordered table-hover table-sm">
 <thead class="table-dark">
     <tr>
-        <th>Rig</th>
+        <th class="text-center">Rig</th>
         <th>Hostname</th>
         <th>IP</th>
         <th>Operating system</th>
@@ -45,7 +45,7 @@
             <td>${rig.rig.hostname}</td>
             <td>${rig.rig.ip}</td>
             <td>${rig.rig.os}</td>
-            <td class="text-end">${formatNumber(rig.rig.uptime)} sec.</td>
+            <td class="text-end">${formatNumber(rig.rig.uptime, 'seconds')}</td>
             <td class="text-end">${rig.rig.loadAvg}</td>
             <td class="text-end">${formatNumber(rig.rig.memory.used)}/${formatNumber(rig.rig.memory.total)} MB</td>
             <td class="text-end">${Object.keys(rig.services).length}</td>
@@ -62,12 +62,13 @@
                         let cpuHtml = '';
                         cpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
                         //cpuHtml += '    <div class="col-12 text-start">';
-                        cpuHtml += '        <div class="badge col-4 text-start text-truncate">CPU [<b class="text-warning">' + cpu.name + '</b>]</div>';
+                        cpuHtml += '        <div class="badge col-3 text-start text-truncate">CPU [<b class="text-warning">' + cpu.name + '</b>]</div>';
                         cpuHtml += '        <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning">' + formatNumber(cpu.hashRate, 'size') + 'H/s</span></div>';
                         cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
                         cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
                         cpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
-                        cpuHtml += '        <div class="badge col-2 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        cpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        cpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.worker.uptime, 'seconds') + '</span></div>';
                         //cpuHtml += '    </div>';
                         cpuHtml += '</div>';
                         return cpuHtml;
@@ -77,12 +78,13 @@
                         let gpuHtml = '';
                         gpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
                         //gpuHtml += '    <div class="col-12 text-start">';
-                        gpuHtml += '        <div class="badge col-4 text-start text-truncate">GPU' + gpuSuffix + ' [<b class="text-warning">' + gpu.name + '</b>]</span></div>';
+                        gpuHtml += '        <div class="badge col-3 text-start text-truncate">GPU' + gpuSuffix + ' [<b class="text-warning">' + gpu.name + '</b>]</span></div>';
                         gpuHtml += '        <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning">' + formatNumber(gpu.hashRate, 'size') + 'H/s</span></div>';
                         gpuHtml += '        <div class="badge col-1 text-start"><b>temp.</b>: <span class="text-info">' + gpu.temperature + '°</span></div>';
                         gpuHtml += '        <div class="badge col-1 text-start"><b>fan</b>: <span class="text-info">' + gpu.fanSpeed + '%</span></div>';
                         gpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
-                        gpuHtml += '        <div class="badge col-2 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.worker.uptime, 'seconds') + '</span></div>';
                         //gpuHtml += '    </div>';
                         gpuHtml += '</div>';
                         return gpuHtml;
