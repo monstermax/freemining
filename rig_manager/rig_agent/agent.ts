@@ -553,6 +553,7 @@ async function getRigStatus(): Promise<RigStatus | null> {
 
     if (statusJson) {
         try {
+            console.log(`${now()} [${colors.blue('INFO')}] checking rig status`)
             const _rigStatus = JSON.parse(statusJson);
             return _rigStatus;
 
