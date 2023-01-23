@@ -34,6 +34,9 @@ const websocketPassword = 'xxx'; // password to access farm websocket server
 const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 let ws;
 let sendStatusTimeout = null;
+const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
+const installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
+const configuredMiners = (process.env.CONFIGURED_MINERS || '').split(' ');
 const wsServerHost = ((_e = configRig.farmServer) === null || _e === void 0 ? void 0 : _e.host) || null;
 const wsServerPort = ((_f = configRig.farmServer) === null || _f === void 0 ? void 0 : _f.port) || 4200;
 const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
@@ -51,12 +54,15 @@ const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
 let rigStatusJson = null;
 let rigStatusTxt = null;
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Starting Rig ${rigName}`);
+app.use(function (req, res, next) {
+    // Log http request
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+    next();
+});
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
 app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
-    const installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
     const activeProcesses = yield getRigProcesses();
     const opts = {
         rigName,
@@ -101,14 +107,51 @@ app.get('/status.txt', (req, res, next) => tslib_1.__awaiter(void 0, void 0, voi
     res.end();
 }));
 app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    // TODO
+    const minerName = req.query.miner || '';
+    const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner_install.html', opts, req.url);
+    res.send(pageContent);
     res.end();
 }));
 app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    // TODO
+    const minerName = req.query.miner || '';
+    const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
+    res.send(pageContent);
     res.end();
 }));
 app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const minerName = req.query.miner || '';
+    const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
+app.get('/miners/miner-status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const miner = req.query.miner || '';
     const asJson = req.query.json === "1";
     const rawOutput = req.query.raw === "1";
@@ -129,7 +172,7 @@ app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, v
         miner,
         minerStatus,
     };
-    const pageContent = loadTemplate('miner.html', opts, req.url);
+    const pageContent = loadTemplate('miner_status.html', opts, req.url);
     res.send(pageContent);
     res.end();
 }));

@@ -21,13 +21,8 @@ ${activeProcesses}
 <ul>
     ${installedMiners.map(minerName => {
         if (! minerName.trim()) return;
-
-        //if (minerName in rig.services) {
-        //    // service is running
-            return '<li><a href="miners/miner?miner=' + minerName + '">' + minerName + '</a></li>';
-        //} else {
-        //    return '<li>' + minerName + '</li>';
-        //}
+        //const isRunning = (minerName in rig.services);
+        return '<li><a href="miners/miner?miner=' + minerName + '">' + minerName + '</a></li>';
     }).join('')}
 </ul>
 
@@ -37,6 +32,6 @@ ${activeProcesses}
 <ul>
     ${installablesMiners.map(minerName => {
         if (! minerName.trim()) return;
-        return '<li>' + minerName + '</li>';
+        return '<li><a href="miners/miner?miner=' + minerName + '">' + minerName + '</a></li>';
     }).join('')}
 </ul>

@@ -36,6 +36,11 @@ const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 
 const nodeManagerCmd = `${__dirname}/../node_manager.sh ps`;
 
+const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
+const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+const configuredFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+
+
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -66,27 +71,110 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 
 
 
-app.get('/fullnodes/node-install', async (req: express.Request, res: express.Response, next: Function) => {
-    // TODO
+
+
+app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express.Response, next: Function) => {
+    const fullnodeName = req.query.chain as string || '';
+
+    const fullnodeStatus = null; // TODO
+
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+    };
+    const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
+    res.send( pageContent );
     res.end();
 });
 
 
-app.get('/fullnodes/node-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
-    // TODO
+app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+    const fullnodeName = req.query.chain as string || '';
+
+    const fullnodeStatus = null; // TODO
+
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+    };
+    const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
+    res.send( pageContent );
     res.end();
 });
+
+
+app.get('/fullnodes/fullnode', async (req: express.Request, res: express.Response, next: Function) => {
+    const fullnodeName = req.query.chain as string || '';
+
+    const fullnodeStatus = null; // TODO
+
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+    };
+    const pageContent = loadTemplate('fullnode.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+app.get('/fullnodes/fullnode-status', async (req: express.Request, res: express.Response, next: Function) => {
+    const fullnodeName = req.query.chain as string || '';
+    const asJson = req.query.json === "1";
+    const rawOutput = req.query.raw === "1";
+
+    const fullnodeStatus = null; // TODO
+
+    if (rawOutput) {
+        if (asJson) {
+            res.header( {"Content-Type": "application/json"} );
+        } else {
+            res.header( {"Content-Type": "text/plain"} );
+        }
+        res.send( fullnodeStatus );
+        res.end();
+        return;
+    }
+
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+    };
+    const pageContent = loadTemplate('fullnode_status.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
 
 
 
 app.get('/fullnodes/node', async (req: express.Request, res: express.Response, next: Function) => {
-    const chain = req.query.chain;
+    const fullnodeName = req.query.chain;
+
+    const fullnodeStatus = null; // TODO
 
     const opts = {
         configNode,
-        chain,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
     };
-    const pageContent = loadTemplate('node.html', opts, req.url);
+    const pageContent = loadTemplate('fullnode.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });
@@ -114,8 +202,15 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
     if (! fs.existsSync(tplPath)) {
         return null;
     }
-    const layoutTemplate = fs.readFileSync(tplPath).toString();
-    let content = stringTemplate(layoutTemplate, data) || '';
+
+    let content = '';
+    try {
+        const layoutTemplate = fs.readFileSync(tplPath).toString();
+        content = stringTemplate(layoutTemplate, data) || '';
+
+    } catch (err: any) {
+        content = `Error: ${err.message}`;
+    }
 
     const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
     return pageContent;

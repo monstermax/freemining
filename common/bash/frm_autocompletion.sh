@@ -1,14 +1,8 @@
 #!/bin/bash
 
-# import rig_manager to access to $CONFIGURED_MINERS
-source `dirname $BASH_SOURCE`/../../rig_manager/rig_manager.sh
-
-# import node_manager to access to $CONFIGURED_FULLNODES
-source `dirname $BASH_SOURCE`/../../node_manager/node_manager.sh
-
-# import farm_manager to access to $FARM_CONFIG_FILE
-source `dirname $BASH_SOURCE`/../../farm_manager/farm_manager.sh
-
+if [ "$commonBashDir" = "" ]; then
+    commonBashDir=$(dirname $BASH_SOURCE)
+fi
 
 # https://iridakos.com/programming/2018/03/01/bash-programmable-completion-tutorial
 
@@ -98,6 +92,13 @@ function _rig_miners_completions {
     #COMP_WORDS: an array of all the words typed after the name of the program the compspec belongs to
     #COMP_CWORD: an index of the COMP_WORDS array pointing to the word the current cursor is at - in other words, the index of the word the cursor was when the tab key was pressed
     #COMP_LINE: the current command line
+
+    # import farm_manager to access to $FARM_CONFIG_FILE
+    source ${commonBashDir}/../../farm_manager/farm_manager.sh
+
+    # import rig_manager to access to $CONFIGURED_MINERS
+    source ${commonBashDir}/../../rig_manager/rig_manager.sh
+
 
     LAST_WORD=${COMP_WORDS[-1]}
     PREV_WORD=""
@@ -230,6 +231,9 @@ function _farm_completions {
 
 
 function _node_completions {
+    # import node_manager to access to $CONFIGURED_FULLNODES
+    source ${commonBashDir}/../../node_manager/node_manager.sh
+
     if [ "${COMP_WORDS[1]}" = "config" ]; then
         # FRM / NODE / CONFIG
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then

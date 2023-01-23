@@ -502,8 +502,15 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
     if (! fs.existsSync(tplPath)) {
         return null;
     }
-    const layoutTemplate = fs.readFileSync(tplPath).toString();
-    let content = stringTemplate(layoutTemplate, data) || '';
+
+    let content = '';
+    try {
+        const layoutTemplate = fs.readFileSync(tplPath).toString();
+        content = stringTemplate(layoutTemplate, data) || '';
+
+    } catch (err: any) {
+        content = `Error: ${err.message}`;
+    }
 
     const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
     return pageContent;

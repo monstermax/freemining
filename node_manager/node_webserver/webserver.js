@@ -22,6 +22,9 @@ templatesDir = (0, utils_1.stringTemplate)(templatesDir, ctx, false, true, true)
 staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || '';
 const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 const nodeManagerCmd = `${__dirname}/../node_manager.sh ps`;
+const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
+const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+const configuredFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
@@ -42,21 +45,88 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
     res.send(pageContent);
     res.end();
 }));
-app.get('/fullnodes/node-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    // TODO
+app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const fullnodeName = req.query.chain || '';
+    const fullnodeStatus = null; // TODO
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+    };
+    const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
+    res.send(pageContent);
     res.end();
 }));
-app.get('/fullnodes/node-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    // TODO
+app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const fullnodeName = req.query.chain || '';
+    const fullnodeStatus = null; // TODO
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+    };
+    const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
+app.get('/fullnodes/fullnode', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const fullnodeName = req.query.chain || '';
+    const fullnodeStatus = null; // TODO
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+    };
+    const pageContent = loadTemplate('fullnode.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
+app.get('/fullnodes/fullnode-status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const fullnodeName = req.query.chain || '';
+    const asJson = req.query.json === "1";
+    const rawOutput = req.query.raw === "1";
+    const fullnodeStatus = null; // TODO
+    if (rawOutput) {
+        if (asJson) {
+            res.header({ "Content-Type": "application/json" });
+        }
+        else {
+            res.header({ "Content-Type": "text/plain" });
+        }
+        res.send(fullnodeStatus);
+        res.end();
+        return;
+    }
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+    };
+    const pageContent = loadTemplate('fullnode_status.html', opts, req.url);
+    res.send(pageContent);
     res.end();
 }));
 app.get('/fullnodes/node', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    const chain = req.query.chain;
+    const fullnodeName = req.query.chain;
+    const fullnodeStatus = null; // TODO
     const opts = {
         configNode,
-        chain,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
     };
-    const pageContent = loadTemplate('node.html', opts, req.url);
+    const pageContent = loadTemplate('fullnode.html', opts, req.url);
     res.send(pageContent);
     res.end();
 }));
@@ -74,8 +144,14 @@ function loadTemplate(tplFile, data = {}, currentUrl = '') {
     if (!fs_1.default.existsSync(tplPath)) {
         return null;
     }
-    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
-    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    let content = '';
+    try {
+        const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+        content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    }
+    catch (err) {
+        content = `Error: ${err.message}`;
+    }
     const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
     return pageContent;
 }

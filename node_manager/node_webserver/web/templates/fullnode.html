@@ -1,0 +1,90 @@
+
+Fullnode ${chain}
+
+<hr />
+
+
+<br />
+
+
+<h3>Status</h3>
+${(() => {
+    let html = '';
+
+    if (configuredFullnodes.includes(chain)) {
+        html += chain + ' is configured';
+
+    } else {
+        html += chain + ' is not configured';
+    }
+
+    return html;
+})()}
+<br />
+${(() => {
+    let html = '';
+
+    //if (fullnodeStatus) {
+    //    html += chain + ' is running';
+    //    html += '&nbsp; <a class="btn btn-secondary btn-sm" href="fullnode-status?chain=${chain}">status</a>';
+    //    html += '&nbsp; <a class="btn btn-warning btn-sm" href="/status">stop</a>';
+    //
+    //} else {
+    //    html += chain + ' is not running';
+    //    if (installedFullnodes.includes(chain)) {
+    //        html += '&nbsp; <a class="btn btn-success btn-sm" href="/status">start</a>';
+    //    }
+    //}
+
+    return html;
+})()}
+
+<br />
+<br />
+
+<h3>Install</h3>
+${(() => {
+    let html = '';
+    let installTxt = 'install';
+
+    if (installedFullnodes.includes(chain)) {
+        html += chain + ' is installed';
+        installTxt = 're-install';
+
+    } else {
+        html += chain + ' is not installed';
+    }
+    html += '<br />';
+
+    if (installablesFullnodes.includes(chain)) {
+        html += chain + ' is installable';
+        html += '&nbsp; <a class="btn btn-primary btn-sm" href="fullnode-install?chain=${chain}">' + installTxt + '</a>';
+
+    } else {
+        html += chain + ' is not installable';
+        //html += '<a>uninstall</a>';
+    }
+
+    return html;
+})()}
+
+<br />
+<br />
+
+
+<h3>Uninstall</h3>
+${(() => {
+    let html = '';
+
+    if (installedFullnodes.includes(chain)) {
+        html += chain + ' is installed';
+        html += '&nbsp; <a class="btn btn-danger btn-sm" href="fullnode-uninstall?chain=${chain}">uninstall</a>';
+
+    } else {
+        html += chain + ' is not installed';
+        //html += '<a>uninstall</a>';
+    }
+
+    return html;
+})()}
+

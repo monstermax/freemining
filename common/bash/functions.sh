@@ -94,7 +94,7 @@ function installNodejsPackages {
 
 
 function hasOpt {
-    key=$1
+    local key=$1
     if [[ " ${CMD_ARGS[*]} " =~ " ${key} " ]]; then
         # has opt
         return 0
@@ -105,7 +105,7 @@ function hasOpt {
 }
 
 function getOpt {
-    key=$1
+    local key=$1
     for i in "${!CMD_ARGS[@]}"; do
         if [[ "${CMD_ARGS[$i]}" = "${key}" ]]; then
             let $((j = i + 1))
@@ -116,9 +116,9 @@ function getOpt {
 }
 
 function getArrayOpt {
-    key="$1"
+    local key="$1"
     shift
-    array=($@)
+    local array=($@)
 
     for i in "${!array[@]}"; do
 
@@ -145,34 +145,34 @@ function getArrayOpt {
 
 
 function getInstalledMiners {
-    MINERS=$(find $minersDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
+    local MINERS=$(find $minersDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
     #MINERS=$(echo $(ls $minersDir))
     echo $MINERS
 }
 
 
 function getAvailableMiners {
-    MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
+    local MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
     #MINERS=$(jq -r ".miners | keys | join(\" \")" $RIG_CONFIG_FILE)
     echo $MINERS
 }
 
 
 function getInstalledAvailableMiners {
-    FILE_AV=$(mktemp)
-    FILE_IN=$(mktemp)
+    local FILE_AV=$(mktemp)
+    local FILE_IN=$(mktemp)
     echo $INSTALLED_MINERS |tr " " "\n" > $FILE_IN
     echo $CONFIGURED_MINERS |tr " " "\n" > $FILE_AV
-    MINERS=$(comm -12 $FILE_IN $FILE_AV | tr "\n" " ")
+    local MINERS=$(comm -12 $FILE_IN $FILE_AV | tr "\n" " ")
     rm -f $FILE_IN $FILE_AV
     echo $MINERS
 }
 
 
 function getMinerApiPort {
-    miner=$1
+    local miner=$1
 
-    API_PORT=$(eval echo `jq -r ".miners.${miner}.api.port" ${RIG_CONFIG_FILE} 2>/dev/null`)
+    local API_PORT=$(eval echo `jq -r ".miners.${miner}.api.port" ${RIG_CONFIG_FILE} 2>/dev/null`)
 
     if [ "$API_PORT" = "null" ]; then
         API_PORT=""
@@ -181,12 +181,13 @@ function getMinerApiPort {
     echo $API_PORT
 }
 
+
 function getInstallableAvailableMiners {
     #MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
 
     local current_dir=$commonBashDir
     local install_miner=${current_dir}/../../rig_manager/tools/install_miner.sh
-    MINERS=$(grep "function install_" $install_miner | cut -d_ -f2- | cut -d" " -f1 | tr "\n" " ")
+    local MINERS=$(grep "function install_" $install_miner | cut -d_ -f2- | cut -d" " -f1 | sort | tr "\n" " ")
 
     echo $MINERS
 }
@@ -202,26 +203,26 @@ function getInstallableAvailableMiners {
 
 
 function getInstalledFullnodes {
-    FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
+    local FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
     #FULLNODES=$(echo $(ls $fullnodesDir))
     echo $FULLNODES
 }
 
 
 function getAvailableFullnodes {
-    FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${NODE_CONFIG_FILE} 2>/dev/null`)
+    local FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${NODE_CONFIG_FILE} 2>/dev/null`)
     #FULLNODES=$(jq -r ".fullnodes | keys | join(\" \")" $NODE_CONFIG_FILE)
     echo $FULLNODES
 }
 
 function getInstalledAvailableFullnodes {
-    FILE_AV=$(mktemp)
-    FILE_IN=$(mktemp)
+    local FILE_AV=$(mktemp)
+    local FILE_IN=$(mktemp)
     echo $INSTALLED_FULLNODES |tr " " "\n" > $FILE_IN
     echo $CONFIGURED_FULLNODES |tr " " "\n" > $FILE_AV
-    FULLNODES=$(comm -12 $FILE_IN $FILE_AV | tr "\n" " ")
+    local FULLNODES=$(comm -12 $FILE_IN $FILE_AV | tr "\n" " ")
+    echo $FULLNODES
     rm -f $FILE_IN $FILE_AV
-    FULLNODES $FULLNODES
 }
 
 
@@ -230,7 +231,7 @@ function getInstallableAvailableFullnodes {
 
     local current_dir=$commonBashDir
     local install_fullnode=${current_dir}/../../node_manager/tools/install_fullnode.sh
-    FULLNODES=$(grep "function install_" $install_fullnode | cut -d_ -f2- | cut -d" " -f1 | tr "\n" " ")
+    local FULLNODES=$(grep "function install_" $install_fullnode | cut -d_ -f2- | cut -d" " -f1 | tr "\n" " ")
 
     echo $FULLNODES
 }

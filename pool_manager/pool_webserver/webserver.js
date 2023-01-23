@@ -75,8 +75,14 @@ function loadTemplate(tplFile, data = {}, currentUrl = '') {
     if (!fs_1.default.existsSync(tplPath)) {
         return null;
     }
-    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
-    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    let content = '';
+    try {
+        const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+        content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    }
+    catch (err) {
+        content = `Error: ${err.message}`;
+    }
     const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
     return pageContent;
 }

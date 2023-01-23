@@ -118,6 +118,9 @@ const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 let ws: WebSocket;
 let sendStatusTimeout: any = null;
 
+const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
+const installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
+const configuredMiners = (process.env.CONFIGURED_MINERS || '').split(' ');
 
 
 const wsServerHost = configRig.farmServer?.host || null;
@@ -149,6 +152,15 @@ let rigStatusTxt: string | null = null;
 console.log(`${now()} [${colors.blue('INFO')}] Starting Rig ${rigName}`);
 
 
+
+app.use(function (req: express.Request, res: express.Response, next: Function) {
+    // Log http request
+    console.log(`${now()} [${colors.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+
+    next();
+});
+
+
 app.use(express.urlencoded({ extended: true }));
 
 console.log(`${now()} [${colors.blue('INFO')}] Using static folder ${staticDir}`);
@@ -157,8 +169,6 @@ app.use(express.static(staticDir));
 
 
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
-    const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
-    const installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
     const activeProcesses: string = await getRigProcesses();
 
     const opts = {
@@ -219,18 +229,63 @@ app.get('/status.txt', async (req: express.Request, res: express.Response, next:
 
 
 app.get('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
-    // TODO
+    const minerName = req.query.miner as string || '';
+
+    const minerStatus = rigStatusJson?.services[minerName];
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner_install.html', opts, req.url);
+    res.send( pageContent );
     res.end();
 });
 
 
 app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
-    // TODO
+    const minerName = req.query.miner as string || '';
+
+    const minerStatus = rigStatusJson?.services[minerName];
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
+    res.send( pageContent );
     res.end();
 });
 
 
 app.get('/miners/miner', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+
+    const minerStatus = rigStatusJson?.services[minerName];
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+app.get('/miners/miner-status', async (req: express.Request, res: express.Response, next: Function) => {
     const miner = req.query.miner as string || '';
     const asJson = req.query.json === "1";
     const rawOutput = req.query.raw === "1";
@@ -253,7 +308,7 @@ app.get('/miners/miner', async (req: express.Request, res: express.Response, nex
         miner,
         minerStatus,
     };
-    const pageContent = loadTemplate('miner.html', opts, req.url);
+    const pageContent = loadTemplate('miner_status.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });

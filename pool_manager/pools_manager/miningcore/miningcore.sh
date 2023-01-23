@@ -41,11 +41,18 @@ function usage {
 
 ################################################################################
 
+
+if ! test -d ${poolsEngineDir}/${FRM_PACKAGE}; then
+    echo "Warning: ${FRM_PACKAGE} is not installed"
+    exit 1
+fi
+
+
 ACTION=$1
 
 if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "restart"; then
     # rebuild pool config
-    ./build_config.sh
+    ./build_miningcore_config.sh
 
     # rebuild API config
     ${poolAppDir}/pools_manager/patchs/miningcoreWebUI_api_config.sh -q

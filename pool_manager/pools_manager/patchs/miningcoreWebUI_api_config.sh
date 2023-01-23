@@ -8,6 +8,12 @@ source ../../pool_manager.sh
 package="miningcore"
 
 
+if ! test -d ${poolsEngineDir}/${FRM_PACKAGE}; then
+    echo "Warning: ${FRM_PACKAGE} is not installed"
+    #exit 1
+fi
+
+
 API_FILE="${poolsWebsitesDir}/miningcoreWebUI/js/miningcore.js"
 
 if ! test -f $API_FILE; then

@@ -29,9 +29,10 @@ ${activeProcesses}
 <ul>
     ${installablesFullnodes.map(nodeName => {
         if (! nodeName.trim()) return;
-        return '<li>' + nodeName + '</li>';
+        return '<li><a href="fullnodes/node?chain=' + nodeName + '">' + nodeName + '</a></li>';
     }).join('')}
 </ul>
+
 
 
 <br />

@@ -5,10 +5,14 @@ cd `dirname $0`
 source ../../pool_manager.sh
 set -e
 
-
 package="miningcore"
 
-MININGCORE_CONFIG_FILE=${poolConfDir}/engines/${package}/config.json
+
+if ! test -d ${poolsEngineDir}/${FRM_PACKAGE}; then
+    echo "Warning: ${FRM_PACKAGE} is not installed"
+    exit 1
+fi
+
 
 SMTP_HOST=""
 SMTP_PORT="587"
@@ -25,6 +29,7 @@ API_PORT="4000"
 
 echo "Generating miningcore config..."
 
+MININGCORE_CONFIG_FILE=${poolConfDir}/engines/${package}/config.json
 
 mkdir -p ${poolConfDir}/engines/${package}
 mkdir -p ${poolLogDir}/engines/${package}
