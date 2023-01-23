@@ -68,6 +68,7 @@ ${(() => {
 
     if (installStatus) {
         html += miner + ' has installation in progress...';
+        html += '&nbsp; <a class="btn btn-primary btn-sm" href="miner-install?miner=${miner}">show</a>';
 
     } else {
         html += miner + ' has no installation in progress';

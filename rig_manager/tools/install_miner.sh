@@ -535,6 +535,8 @@ function install_xmrig_sources_free {
     rm -rf ${minersDir}/${MINER}
     mkdir -p ${minersDir}/${MINER}
     cp -a xmrig ${minersDir}/${MINER}/xmrig-nofees
+
+    # symlink to xmrig
     if ! test -d ${minersDir}/xmrig; then
         cd ${minersDir}
         ln -s xmrig ${MINER}

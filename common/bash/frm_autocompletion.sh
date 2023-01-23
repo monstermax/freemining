@@ -9,6 +9,12 @@ fi
 _frm_completions_daemon="run debug start restart stop status ps log log-file pid pid-log pid-file"
 
 
+#COMP_WORDS: an array of all the words typed after the name of the program the compspec belongs to
+#COMP_CWORD: an index of the COMP_WORDS array pointing to the word the current cursor is at - in other words, the index of the word the cursor was when the tab key was pressed
+#COMP_LINE: the current command line
+
+
+
 function _frm_completions {
 
     if [ "${COMP_WORDS[1]}" = "rig" ]; then
@@ -56,6 +62,12 @@ function _frm_completions {
 
 
 function _rig_completions {
+    # import farm_manager to access to $FARM_CONFIG_FILE
+    source ${commonBashDir}/../../farm_manager/farm_manager.sh
+
+    # import rig_manager to access to $CONFIGURED_MINERS & $INSTALLED_MINERS & $INSTALLABLE_MINERS
+    source ${commonBashDir}/../../rig_manager/rig_manager.sh
+
     if [ "${COMP_WORDS[1]}" = "config" ]; then
         # FRM / RIG / CONFIG
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
@@ -68,6 +80,22 @@ function _rig_completions {
         # FRM / RIG / MINER
         COMP_WORDS=("${COMP_WORDS[@]:1}")
         _rig_miners_completions
+
+    elif [ "${COMP_WORDS[1]}" = "miner-install" ]; then
+        # FRM / MINER / MINER-INSTALL
+        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
+            return
+        fi
+        values="${INSTALLABLE_MINERS}"
+        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
+
+    elif [ "${COMP_WORDS[1]}" = "miner-uninstall" ]; then
+        # FRM / MINER / miner-UNINSTALL
+        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
+            return
+        fi
+        values="${INSTALLED_MINERS}"
+        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
     elif [ "${COMP_WORDS[1]}" = "agent" ]; then
         # FRM / RIG / AGENT
@@ -89,17 +117,6 @@ function _rig_completions {
 
 
 function _rig_miners_completions {
-    #COMP_WORDS: an array of all the words typed after the name of the program the compspec belongs to
-    #COMP_CWORD: an index of the COMP_WORDS array pointing to the word the current cursor is at - in other words, the index of the word the cursor was when the tab key was pressed
-    #COMP_LINE: the current command line
-
-    # import farm_manager to access to $FARM_CONFIG_FILE
-    source ${commonBashDir}/../../farm_manager/farm_manager.sh
-
-    # import rig_manager to access to $CONFIGURED_MINERS
-    source ${commonBashDir}/../../rig_manager/rig_manager.sh
-
-
     LAST_WORD=${COMP_WORDS[-1]}
     PREV_WORD=""
     #NB_WORDS=${#COMP_WORDS[@]}
@@ -110,7 +127,7 @@ function _rig_miners_completions {
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
-        values="${CONFIGURED_MINERS}"
+        values="${INSTALLED_MINERS}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
     elif [ "${COMP_WORDS[1]}" = "dir" ]; then
@@ -118,10 +135,10 @@ function _rig_miners_completions {
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
-        values="${CONFIGURED_MINERS}"
+        values="${INSTALLED_MINERS}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
-    elif [[ " $CONFIGURED_MINERS " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
+    elif [[ " $INSTALLED_MINERS " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
         # FRM / RIG / MINER / {MINER}
         if [ "${COMP_WORDS[2]}" = "run" -o "${COMP_WORDS[2]}" = "start" -o "${COMP_WORDS[2]}" = "restart" -o "${COMP_WORDS[2]}" = "debug" ]; then
             PREV_WORD=${COMP_WORDS[-2]}
@@ -195,7 +212,7 @@ function _rig_miners_completions {
 
     else
         # FRM / RIG / MINER / *
-        values="${CONFIGURED_MINERS} ps dir"
+        values="${INSTALLED_MINERS} ps dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 
@@ -231,7 +248,7 @@ function _farm_completions {
 
 
 function _node_completions {
-    # import node_manager to access to $CONFIGURED_FULLNODES
+    # import node_manager to access to $CONFIGURED_FULLNODES & $INSTALLABLE_FULLNODES & $INSTALLED_FULLNODES
     source ${commonBashDir}/../../node_manager/node_manager.sh
 
     if [ "${COMP_WORDS[1]}" = "config" ]; then
@@ -247,28 +264,28 @@ function _node_completions {
         COMP_WORDS=("${COMP_WORDS[@]:1}")
         _node_fullnodes_completions
 
+    elif [ "${COMP_WORDS[1]}" = "fullnode-install" ]; then
+        # FRM / NODE / FULLNODE-INSTALL
+        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
+            return
+        fi
+        values="${INSTALLABLE_FULLNODES}"
+        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
+
+    elif [ "${COMP_WORDS[1]}" = "fullnode-uninstall" ]; then
+        # FRM / NODE / FULLNODE-UNINSTALL
+        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
+            return
+        fi
+        values="${INSTALLED_FULLNODES}"
+        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
+
     elif [ "${COMP_WORDS[1]}" = "webserver" ]; then
         # FRM / NODE / WEBSERVER
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
         values="$_frm_completions_daemon"
-        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
-
-    elif [ "${COMP_WORDS[1]}" = "fullnode-install" ]; then
-        # FRM / NODE / WEBSERVER
-        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
-            return
-        fi
-        values="${CONFIGURED_FULLNODES}"
-        COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
-
-    elif [ "${COMP_WORDS[1]}" = "fullnode-uninstall" ]; then
-        # FRM / NODE / WEBSERVER
-        if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
-            return
-        fi
-        values="${INSTALLED_FULLNODES}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
     else
@@ -289,7 +306,7 @@ function _node_fullnodes_completions {
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
-        values="${CONFIGURED_FULLNODES}"
+        values="${INSTALLED_FULLNODES}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
     elif [ "${COMP_WORDS[1]}" = "dir" ]; then
@@ -297,10 +314,10 @@ function _node_fullnodes_completions {
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
         fi
-        values="${CONFIGURED_FULLNODES}"
+        values="${INSTALLED_FULLNODES}"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[2]}"))
 
-    elif [[ " $CONFIGURED_FULLNODES " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
+    elif [[ " $INSTALLED_FULLNODES " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
         # FRM / NODE / FULLNODE / {FULLNODE}
         if [ "${#COMP_WORDS[@]}" -gt "3" ]; then
             return
@@ -310,7 +327,7 @@ function _node_fullnodes_completions {
 
     else
         # FRM / NODE / FULLNODE / *
-        values="${CONFIGURED_FULLNODES} ps dir"
+        values="${INSTALLED_FULLNODES} ps dir"
         COMPREPLY=($(compgen -W '${values}' -- "${COMP_WORDS[1]}"))
     fi
 

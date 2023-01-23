@@ -3,17 +3,34 @@ Fullnode ${chain} - install
 
 <hr />
 
-${(() => {
-    let html = '';
+<form id="form-install" method="post">
+    <input type="hidden" id="action" name="action" value="" />
 
-    if (installStatus) {
-        html += 'Installation in progress...';
-        html += ' <a class="btn btn-danger btn-sm" href="?chain=${chain}&action=stop">Stop install</a>';
-        html += ' <a class="btn btn-primary btn-sm" href="?chain=${chain}&action=log">Show logs</a>';
+    ${(() => {
+        let html = '';
 
-    } else {
-        html += 'No running installation. <a class="btn btn-primary btn-sm" href="?chain=${chain}&action=start">Install</a>';
-    }
+        if (installStatus) {
+            html += 'Installation in progress...';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopInstall()" href="javascript:void(0)">Stop install</a>';
+            html += ' <a class="btn btn-primary btn-sm" href="?chain=${chain}&action=log">Show logs</a>';
 
-    return html;
-})()}
+        } else {
+            html += 'No running installation. <a class="btn btn-primary btn-sm" onclick="startInstall()" href="javascript:void(0)">Install</a>';
+        }
+
+        return html;
+    })()}
+</form>
+
+
+<script>
+function startInstall() {
+    document.getElementById('action').value = 'start';
+    document.getElementById('form-install').submit();
+}
+
+function stopInstall() {
+    document.getElementById('action').value = 'stop';
+    document.getElementById('form-install').submit();
+}
+</script>

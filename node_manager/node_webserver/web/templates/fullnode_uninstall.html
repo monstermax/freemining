@@ -2,3 +2,35 @@
 Fullnode ${chain} - uninstall
 
 <hr />
+
+<form id="form-uninstall" method="post">
+    <input type="hidden" id="action" name="action" value="" />
+
+    ${(() => {
+        let html = '';
+
+        if (uninstallStatus) {
+            html += 'Uninstallation in progress...';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopUninstall()" href="javascript:void(0)">Stop uninstall</a>';
+            html += ' <a class="btn btn-primary btn-sm" href="?chain=${chain}&action=log">Show logs</a>';
+
+        } else {
+            html += 'No running uninstallation. <a class="btn btn-primary btn-sm" onclick="startUninstall()" href="javascript:void(0)">Uninstall</a>';
+        }
+
+        return html;
+    })()}
+</form>
+
+
+<script>
+function startUninstall() {
+    document.getElementById('action').value = 'start';
+    document.getElementById('form-uninstall').submit();
+}
+
+function stopUninstall() {
+    document.getElementById('action').value = 'stop';
+    document.getElementById('form-uninstall').submit();
+}
+</script>

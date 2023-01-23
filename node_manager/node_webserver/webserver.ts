@@ -89,6 +89,36 @@ app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express
 
     const fullnodeStatus = await getFullnodeStatus(fullnodeName);
 
+    if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+
+    const installStatus = await getFullnodeInstallStatus(fullnodeName);
+
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+        installStatus,
+    };
+    const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+app.post('/fullnodes/fullnode-install', async (req: express.Request, res: express.Response, next: Function) => {
+    const fullnodeName = req.query.chain as string || '';
+    const action = req.body.action as string || '';
+
+    const fullnodeStatus = await getFullnodeStatus(fullnodeName);
+
     if (action === 'start') {
         if (fullnodeStatus) {
             res.send("Error: cannot re-intall a running fullnode");
@@ -114,15 +144,29 @@ app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express
         res.end();
         return;
 
-    } else if (action === 'log') {
-        // TODO: show install log
+    } else {
+        res.send(`Error: unknown action`);
+        res.end();
+        return;
+    }
+});
+
+
+app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+    const fullnodeName = req.query.chain as string || '';
+    const action = req.query.action as string || '';
+
+    const fullnodeStatus = await getFullnodeStatus(fullnodeName);
+
+    if (action === 'log') {
+        // TODO: show uninstall log
         res.send(`Error: log is not available`);
         res.end();
         return;
 
     }
 
-    const installStatus = await getFullnodeInstallStatus(fullnodeName);
+    const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
 
     const opts = {
         configNode,
@@ -131,17 +175,17 @@ app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
-        installStatus,
+        uninstallStatus,
     };
-    const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
+    const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });
 
 
-app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+app.post('/fullnodes/fullnode-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
     const fullnodeName = req.query.chain as string || '';
-    const action = req.query.action as string || '';
+    const action = req.body.action as string || '';
 
     const fullnodeStatus = await getFullnodeStatus(fullnodeName);
 
@@ -170,28 +214,11 @@ app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: expre
         res.end();
         return;
 
-    } else if (action === 'log') {
-        // TODO: show uninstall log
-        res.send(`Error: log is not available`);
+    } else {
+        res.send(`Error: unknown action`);
         res.end();
         return;
-
     }
-
-    const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
-
-    const opts = {
-        configNode,
-        chain: fullnodeName,
-        fullnodeStatus,
-        installablesFullnodes,
-        installedFullnodes,
-        configuredFullnodes,
-        uninstallStatus,
-    };
-    const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
-    res.send( pageContent );
-    res.end();
 });
 
 

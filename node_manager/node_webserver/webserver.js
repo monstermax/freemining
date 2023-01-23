@@ -58,6 +58,30 @@ app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(voi
     const fullnodeName = req.query.chain || '';
     const action = req.query.action || '';
     const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
+    if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+    const installStatus = yield getFullnodeInstallStatus(fullnodeName);
+    const opts = {
+        configNode,
+        chain: fullnodeName,
+        fullnodeStatus,
+        installablesFullnodes,
+        installedFullnodes,
+        configuredFullnodes,
+        installStatus,
+    };
+    const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
+app.post('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const fullnodeName = req.query.chain || '';
+    const action = req.body.action || '';
+    const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
     if (action === 'start') {
         if (fullnodeStatus) {
             res.send("Error: cannot re-intall a running fullnode");
@@ -80,13 +104,23 @@ app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(voi
         res.end();
         return;
     }
-    else if (action === 'log') {
-        // TODO: show install log
+    else {
+        res.send(`Error: unknown action`);
+        res.end();
+        return;
+    }
+}));
+app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const fullnodeName = req.query.chain || '';
+    const action = req.query.action || '';
+    const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
+    if (action === 'log') {
+        // TODO: show uninstall log
         res.send(`Error: log is not available`);
         res.end();
         return;
     }
-    const installStatus = yield getFullnodeInstallStatus(fullnodeName);
+    const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -94,15 +128,15 @@ app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(voi
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
-        installStatus,
+        uninstallStatus,
     };
-    const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
+    const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
     res.send(pageContent);
     res.end();
 }));
-app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+app.post('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const fullnodeName = req.query.chain || '';
-    const action = req.query.action || '';
+    const action = req.body.action || '';
     const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
     if (action === 'start') {
         if (fullnodeStatus) {
@@ -126,25 +160,11 @@ app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(v
         res.end();
         return;
     }
-    else if (action === 'log') {
-        // TODO: show uninstall log
-        res.send(`Error: log is not available`);
+    else {
+        res.send(`Error: unknown action`);
         res.end();
         return;
     }
-    const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
-    const opts = {
-        configNode,
-        chain: fullnodeName,
-        fullnodeStatus,
-        installablesFullnodes,
-        installedFullnodes,
-        configuredFullnodes,
-        uninstallStatus,
-    };
-    const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
-    res.send(pageContent);
-    res.end();
 }));
 app.get('/fullnodes/fullnode', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const fullnodeName = req.query.chain || '';

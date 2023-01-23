@@ -112,6 +112,30 @@ app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, v
     const minerName = req.query.miner || '';
     const action = req.query.action || '';
     const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+    const installStatus = yield getMinerInstallStatus(minerName);
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+        installStatus,
+    };
+    const pageContent = loadTemplate('miner_install.html', opts, req.url);
+    res.send(pageContent);
+    res.end();
+}));
+app.post('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const minerName = req.query.miner || '';
+    const action = req.body.action || '';
+    const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
     if (action === 'start') {
         if (minerStatus) {
             res.send("Error: cannot re-intall a running miner");
@@ -134,13 +158,23 @@ app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, v
         res.end();
         return;
     }
-    else if (action === 'log') {
-        // TODO: show install log
+    else {
+        res.send(`Error: unknown action`);
+        res.end();
+        return;
+    }
+}));
+app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const minerName = req.query.miner || '';
+    const action = req.query.action || '';
+    const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    if (action === 'log') {
+        // TODO: show uninstall log
         res.send(`Error: log is not available`);
         res.end();
         return;
     }
-    const installStatus = yield getMinerInstallStatus(minerName);
+    const uninstallStatus = yield getMinerUninstallStatus(minerName);
     const opts = {
         configRig,
         miner: minerName,
@@ -148,15 +182,15 @@ app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, v
         installablesMiners,
         installedMiners,
         configuredMiners,
-        installStatus,
+        uninstallStatus,
     };
-    const pageContent = loadTemplate('miner_install.html', opts, req.url);
+    const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
     res.send(pageContent);
     res.end();
 }));
-app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+app.post('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const minerName = req.query.miner || '';
-    const action = req.query.action || '';
+    const action = req.body.action || '';
     const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
     if (action === 'start') {
         if (minerStatus) {
@@ -180,25 +214,11 @@ app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0,
         res.end();
         return;
     }
-    else if (action === 'log') {
-        // TODO: show uninstall log
-        res.send(`Error: log is not available`);
+    else {
+        res.send(`Error: unknown action`);
         res.end();
         return;
     }
-    const uninstallStatus = yield getMinerUninstallStatus(minerName);
-    const opts = {
-        configRig,
-        miner: minerName,
-        minerStatus,
-        installablesMiners,
-        installedMiners,
-        configuredMiners,
-        uninstallStatus,
-    };
-    const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
-    res.send(pageContent);
-    res.end();
 }));
 app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const minerName = req.query.miner || '';

@@ -68,6 +68,7 @@ ${(() => {
 
     if (installStatus) {
         html += chain + ' has installation in progress...';
+        html += '&nbsp; <a class="btn btn-primary btn-sm" href="fullnode-install?chain=${chain}">show</a>';
 
     } else {
         html += chain + ' has no installation in progress';

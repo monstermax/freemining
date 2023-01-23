@@ -237,6 +237,36 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
 
     const minerStatus = rigStatusJson?.services[minerName];
 
+    if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+
+    const installStatus = await getMinerInstallStatus(minerName);
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+        installStatus,
+    };
+    const pageContent = loadTemplate('miner_install.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+app.post('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+    const action = req.body.action as string || '';
+
+    const minerStatus = rigStatusJson?.services[minerName];
+
     if (action === 'start') {
         if (minerStatus) {
             res.send("Error: cannot re-intall a running miner");
@@ -262,15 +292,29 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
         res.end();
         return;
 
-    } else if (action === 'log') {
-        // TODO: show install log
+    } else {
+        res.send(`Error: unknown action`);
+        res.end();
+        return;
+    }
+});
+
+
+app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+    const action = req.query.action as string || '';
+
+    const minerStatus = rigStatusJson?.services[minerName];
+
+    if (action === 'log') {
+        // TODO: show uninstall log
         res.send(`Error: log is not available`);
         res.end();
         return;
 
     }
 
-    const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
 
     const opts = {
         configRig,
@@ -279,17 +323,17 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
         installablesMiners,
         installedMiners,
         configuredMiners,
-        installStatus,
+        uninstallStatus,
     };
-    const pageContent = loadTemplate('miner_install.html', opts, req.url);
+    const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
     res.send( pageContent );
     res.end();
 });
 
 
-app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+app.post('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
-    const action = req.query.action as string || '';
+    const action = req.body.action as string || '';
 
     const minerStatus = rigStatusJson?.services[minerName];
 
@@ -318,28 +362,11 @@ app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Res
         res.end();
         return;
 
-    } else if (action === 'log') {
-        // TODO: show uninstall log
-        res.send(`Error: log is not available`);
+    } else {
+        res.send(`Error: unknown action`);
         res.end();
         return;
-
     }
-
-    const uninstallStatus = await getMinerUninstallStatus(minerName);
-
-    const opts = {
-        configRig,
-        miner: minerName,
-        minerStatus,
-        installablesMiners,
-        installedMiners,
-        configuredMiners,
-        uninstallStatus,
-    };
-    const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
-    res.send( pageContent );
-    res.end();
 });
 
 
