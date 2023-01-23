@@ -25,7 +25,7 @@ function usage {
 
     echo "Usage:"
     echo
-    echo "  $CMD {miner} [ --background ]"
+    echo "  $CMD {miner} [ --daemon ]"
     echo
     echo
 
@@ -304,8 +304,9 @@ function install_firominer_sources_amd {
     make -sj $(nproc)
 
     echo " - installing..."
-    mkdir -p ${minersDir}/firominer
-    #cp -a firominer ${minersDir}/firominer/firominer-amd
+    #rm -rf ${minersDir}/${MINER}
+    #mkdir -p ${minersDir}/${MINER}
+    #cp -a firominer ${minersDir}/${MINER}/firominer-amd
 
     echo
     #echo "Miner successfully installed into ${minersDir}/firominer"
@@ -347,11 +348,12 @@ function install_kawpowminer_nvidia {
     tar zxf kawpowminer-ubuntu20-cuda11-1.2.4.tar.gz
 
     echo " - installing..."
-    mkdir -p ${minersDir}/kawpowminer
-    cp -a linux-ubuntu20-cuda11-1.2.4/kawpowminer ${minersDir}/kawpowminer/kawpowminer-nvidia
+    rm -rf ${minersDir}/${MINER}
+    mkdir -p ${minersDir}/${MINER}
+    cp -a linux-ubuntu20-cuda11-1.2.4/kawpowminer ${minersDir}/${MINER}/kawpowminer-nvidia
 
     echo
-    echo "Miner successfully installed into ${minersDir}/kawpowminer"
+    echo "Miner successfully installed into ${minersDir}/${MINER}"
 }
 
 
@@ -367,11 +369,12 @@ function install_kawpowminer_amd {
     tar zxf kawpowminer-ubuntu20-opencl-1.2.4.tar.gz
 
     echo " - installing..."
-    mkdir -p ${minersDir}/kawpowminer
-    cp -a linux-ubuntu20-opencl-1.2.4/kawpowminer ${minersDir}/kawpowminer/kawpowminer-amd
+    rm -rf ${minersDir}/${MINER}
+    mkdir -p ${minersDir}/${MINER}
+    cp -a linux-ubuntu20-opencl-1.2.4/kawpowminer ${minersDir}/${MINER}/kawpowminer-amd
 
     echo
-    echo "Miner successfully installed into ${minersDir}/kawpowminer"
+    echo "Miner successfully installed into ${minersDir}/${MINER}"
 }
 
 
@@ -408,9 +411,9 @@ function install_autolykosv2_nvidia {
     unzip NV_Miner_Linux_CUDA11_4.2.0.zip -d NV_Miner
 
     echo " - installing..."
-    mkdir -p ${minersDir}/autolykosv2
-    rm -rf ${minersDir}/autolykosv2/nvidia
-    cp -a NV_Miner/NV_Miner_Linux_CUDA11_4.2.0 ${minersDir}/autolykosv2/nvidia
+    rm -rf ${minersDir}/${MINER}
+    mkdir -p ${minersDir}/${MINER}
+    cp -a NV_Miner/NV_Miner_Linux_CUDA11_4.2.0 ${minersDir}/${MINER}/autolykosv2-nvidia
 
     echo
     echo "Miner successfully installed into ${minersDir}/autolykosv2"
@@ -428,9 +431,9 @@ function install_autolykosv2_amd {
     unzip AMD_Miner_UBUNTU_2.1.zip -d AMD_Miner
 
     echo " - installing..."
-    mkdir -p ${minersDir}/autolykosv2
-    rm -rf ${minersDir}/autolykosv2/amd
-    cp -a AMD_Miner/AMD_Miner_UBUNTU_2.1 ${minersDir}/autolykosv2/amd
+    rm -rf ${minersDir}/${MINER}
+    mkdir -p ${minersDir}/${MINER}
+    cp -a AMD_Miner/AMD_Miner_UBUNTU_2.1 ${minersDir}/${MINER}/autolykosv2-amd
 
     echo
     echo "Miner successfully installed into ${minersDir}/autolykosv2"
@@ -529,15 +532,19 @@ function install_xmrig_sources_free {
     make -j$(nproc) >/dev/null 2>&1
 
     echo " - installing..."
-    rm -rf ${minersDir}/xmrig/xmrig-nofees
-    mkdir -p ${minersDir}/xmrig
-    cp -a xmrig ${minersDir}/xmrig/xmrig-nofees
+    rm -rf ${minersDir}/${MINER}
+    mkdir -p ${minersDir}/${MINER}
+    cp -a xmrig ${minersDir}/${MINER}/xmrig-nofees
+    if ! test -d ${minersDir}/xmrig; then
+        cd ${minersDir}
+        ln -s xmrig ${MINER}
+    fi
 
     echo " - testing..."
-    ${minersDir}/xmrig/xmrig-nofees --print-platforms
+    ${minersDir}/${MINER}/xmrig-nofees --print-platforms
 
     echo
-    echo "Miner successfully installed into ${minersDir}/xmrig"
+    echo "Miner successfully installed into ${minersDir}/${MINER}"
 }
 
 
