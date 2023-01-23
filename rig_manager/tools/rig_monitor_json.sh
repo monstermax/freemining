@@ -6,8 +6,6 @@ source ../rig_manager.sh
 set -e
 
 
-SERVICES=$(getAvailableMiners)
-
 
 JSON_MONITOR_DIR="../miners_monitor/json"
 
@@ -92,17 +90,19 @@ function readService {
 }
 
 
+INSTALLED_MINERS=$(getAvailableMiners)
+
 SERVICES_JSON=""
 
 DATA_DIR=$(mktemp -d)
 
-for service_name in $SERVICES; do
+for service_name in $INSTALLED_MINERS; do
     runService $service_name &
 done
 
 wait
 
-for service_name in $SERVICES; do
+for service_name in $INSTALLED_MINERS; do
     readService $service_name
 done
 

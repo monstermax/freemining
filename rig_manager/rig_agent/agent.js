@@ -34,6 +34,22 @@ const websocketPassword = 'xxx'; // password to access farm websocket server
 const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 let ws;
 let sendStatusTimeout = null;
+const wsServerHost = ((_e = configRig.farmServer) === null || _e === void 0 ? void 0 : _e.host) || null;
+const wsServerPort = ((_f = configRig.farmServer) === null || _f === void 0 ? void 0 : _f.port) || 4200;
+const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
+const serverNewConnDelay = 10000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
+const checkStatusInterval = 10000; // verifie le statut du rig toutes les x millisecondes
+const checkStatusIntervalIdle = 30000; // when no service running
+const sendStatusInterval = 10000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
+//const sendStatusIntervalIdle = 60_000; // when no service running
+let checkStatusTimeout = null;
+let connectionCount = 0;
+const toolsDir = `${__dirname}/../tools`;
+const cmdService = `${toolsDir}/run_miner.sh`;
+const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
+const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
+let rigStatusJson = null;
+let rigStatusTxt = null;
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Starting Rig ${rigName}`);
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
@@ -144,23 +160,6 @@ app.use(function (req, res, next) {
 server.listen(httpServerPort, httpServerHost, () => {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Webserver started on ${httpServerHost}:${httpServerPort}`);
 });
-// Init Websocket Cliennt
-const wsServerHost = ((_e = configRig.farmServer) === null || _e === void 0 ? void 0 : _e.host) || null;
-const wsServerPort = ((_f = configRig.farmServer) === null || _f === void 0 ? void 0 : _f.port) || 4200;
-const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
-const serverNewConnDelay = 10000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
-const checkStatusInterval = 10000; // verifie le statut du rig toutes les x millisecondes
-const checkStatusIntervalIdle = 30000; // when no service running
-const sendStatusInterval = 10000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
-const sendStatusIntervalIdle = 60000; // when no service running
-let checkStatusTimeout = null;
-let connectionCount = 0;
-const toolsDir = `${__dirname}/../tools`;
-const cmdService = `${toolsDir}/run_miner.sh`;
-const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
-const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
-let rigStatusJson = null;
-let rigStatusTxt = null;
 main();
 /* ############################ FUNCTIONS ################################### */
 function main() {
@@ -195,7 +194,7 @@ function loadTemplate(tplFile, data = {}, currentUrl = '') {
 function websocketConnect() {
     let newConnectionTimeout = null;
     const connectionId = connectionCount++;
-    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] connecting to websocket server... [conn ${connectionId}]`);
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [conn ${connectionId}]`);
     try {
         ws = new ws_1.default(`ws://${wsServerHost}:${wsServerPort}/`);
     }
@@ -464,7 +463,7 @@ function getMiners() {
 function getRigProcesses() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const cmd = rigManagerCmd;
-        const result = yield (0, utils_1.cmdExec)(cmd, 10000);
+        const result = yield (0, utils_1.cmdExec)(cmd, 2000);
         return result || '';
     });
 }

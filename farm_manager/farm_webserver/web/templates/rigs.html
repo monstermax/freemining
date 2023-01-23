@@ -31,23 +31,23 @@
 <tbody>
     ${Object.entries(rigs).map(entry => {
         const [rigName, rig] = entry;
-        //const dataAge = rig.rig.dataAge;
-        const dataAge = Date.now()/1000 - rig.rig.dateRig;
-        const isSuccess = (dataAge < 20) && (Object.keys(rig.services).length > 0);
-        const isError = (dataAge > 30);
+        const dataAge = rig.dataAge;
+        //const dataAge = Date.now()/1000 - rig.dataDate;
+        const isSuccess = (dataAge < 40) && (Object.keys(rig.services).length > 0);
+        const isError = (dataAge > 40);
         const isWarning = (! isSuccess && ! isError);
         const colorClass = isSuccess ? 'bg-success' : (isError ? 'bg-danger' : 'bg-warning');
 
         return `<tr class="bg-light" style="font-size:.9em; font-weight:bold;">
             <td rowspan="2" class="${colorClass} text-center" style="vertical-align:middle;">
-                <a class="text-light" href="./rig?rig=${rig.rig.name || rig.rig.hostname}">${rig.rig.name || rig.rig.hostname}</a>
+                <a class="text-light" href="./rig?rig=${rig.infos.name || rig.infos.hostname}">${rig.infos.name || rig.infos.hostname}</a>
             </td>
-            <td>${rig.rig.hostname}</td>
-            <td>${rig.rig.ip}</td>
-            <td>${rig.rig.os}</td>
-            <td class="text-end">${formatNumber(rig.rig.uptime, 'seconds')}</td>
-            <td class="text-end">${rig.rig.loadAvg}</td>
-            <td class="text-end">${formatNumber(rig.rig.memory.used)}/${formatNumber(rig.rig.memory.total)} MB</td>
+            <td>${rig.infos.hostname}</td>
+            <td>${rig.infos.ip}</td>
+            <td>${rig.infos.os}</td>
+            <td class="text-end">${formatNumber(rig.infos.uptime, 'seconds')}</td>
+            <td class="text-end">${rig.usage.loadAvg}</td>
+            <td class="text-end">${formatNumber(rig.usage.memory.used)}/${formatNumber(rig.usage.memory.total)} MB</td>
             <td class="text-end">${Object.keys(rig.services).length}</td>
             <td class="text-end"><span class="dataAge">${formatNumber(dataAge, 'seconds')}</span></td>
         </tr>

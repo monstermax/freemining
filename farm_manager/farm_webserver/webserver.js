@@ -45,29 +45,17 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
 }));
 app.get('/status.json', (req, res, next) => {
     res.header({ 'Content-Type': 'application/json' });
-    let rigsName;
-    for (rigsName in rigs) {
-        const rigStatus = rigs[rigsName];
-        rigStatus.dataAge = !rigStatus.dateFarm ? undefined : Math.round(Date.now() / 1000 - rigStatus.dateFarm);
-        //rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now()/1000 - rigStatus.rig.dateRig);
-    }
-    res.send(JSON.stringify(rigs));
+    const rigsStatuses = getLastRigsJsonStatus();
+    res.send(JSON.stringify(rigsStatuses));
     res.end();
 });
 app.get('/rigs/', (req, res, next) => {
+    const rigsStatuses = getLastRigsJsonStatus();
     const tplData = {
-        rigs,
+        rigs: rigsStatuses,
     };
     const tplHtml = fs_1.default.readFileSync(`${templatesDir}/rigs.html`).toString();
     const content = (0, utils_1.stringTemplate)(tplHtml, tplData);
-    const rigsTmp = {} = {};
-    let rigsName;
-    for (rigsName in rigs) {
-        const rigStatus = rigs[rigsName];
-        rigStatus.dataAge = !rigStatus.dateFarm ? undefined : Math.round(Date.now() / 1000 - rigStatus.dateFarm);
-        rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now() / 1000 - rigStatus.rig.dateRig);
-        rigsTmp[rigsName] = Object.assign({}, rigStatus);
-    }
     const opts = {
         meta: {
             title: '',
@@ -78,7 +66,7 @@ app.get('/rigs/', (req, res, next) => {
             content,
         },
         data: {
-            rigs: rigsTmp,
+            rigs: rigsStatuses,
         }
     };
     const layoutTemplate = fs_1.default.readFileSync(`${templatesDir}/layout_farm_webserver.html`).toString();
@@ -248,7 +236,7 @@ wss.on('connection', function connection(ws, req) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid config from ${clientIP}`);
                     return;
                 }
-                rigConfig.dateFarm = Math.round((new Date).getTime() / 1000);
+                rigConfig.farmDate = Math.round((new Date).getTime() / 1000);
                 rigsConfigs[rigName] = rigConfig;
             }
             catch (err) {
@@ -263,11 +251,11 @@ wss.on('connection', function connection(ws, req) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] received invalid status from ${clientIP}`);
                     return;
                 }
-                const rigName = status.rig.name || status.rig.hostname;
+                const rigName = status.infos.name || status.infos.hostname;
                 if (rigName != wsClients[rigName].rigName) {
                     var debugme = 1;
                 }
-                status.dateFarm = Math.round((new Date).getTime() / 1000);
+                status.farmDate = Math.round((new Date).getTime() / 1000);
                 rigs[rigName] = status;
                 // save to json file
                 //fs.writeFileSync('/tmp/farm_rig_' + rigName + '.json', JSON.stringify(status));
@@ -337,4 +325,21 @@ function getFarmProcesses() {
         const result = yield (0, utils_1.cmdExec)(cmd);
         return result || '';
     });
+}
+function getLastRigsJsonStatus() {
+    const rigsStatuses = {};
+    let rigName;
+    for (rigName in rigs) {
+        rigsStatuses[rigName] = getLastRigJsonStatus(rigName);
+    }
+    return rigsStatuses;
+}
+function getLastRigJsonStatus(rigName) {
+    const rigStatusJson = rigs[rigName];
+    if (!rigStatusJson) {
+        return null;
+    }
+    const _rigStatusJson = Object.assign({}, rigStatusJson);
+    _rigStatusJson.dataAge = !(rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.dataDate) ? undefined : Math.round(Date.now() / 1000 - rigStatusJson.dataDate);
+    return _rigStatusJson;
 }

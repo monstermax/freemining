@@ -11,10 +11,10 @@
     </h1>
 
     <div class="d-inline-block h3 ms-3">
-        ${rig.dataAge > 20 ? 
+        ${rig.dataAge > 40 ? 
             `<span class="badge bg-danger">Offline</span>`
             : (
-                Object.keys(rig.services).length == 0 ?
+                Object.keys(rig.services).length == 0 || rig.dataAge > 20 ?
                     `<span class="badge bg-warning">IDLE</span>`
                 :
                     `<span class="badge bg-success">UP</span>`

@@ -8,7 +8,7 @@ set -e
 TXT_MONITOR_DIR=../miners_monitor/txt
 
 
-echo "###################################### RIG ###########################################"
+#echo "###################################### RIG ###########################################"
 
 #LOCAL_IP=$(ip route get 4.2.2.1 2>/dev/null |grep dev |cut -d" " -f7)
 LOCAL_IP=$(hostname -I | cut -d' ' -f1)
@@ -66,23 +66,27 @@ ${SERVICE_TXT}
 }
 
 
-SERVICES=$(getInstalledMiners)
+#INSTALLED_MINERS=$(getInstalledMiners)
 
-SERVICES_TXT=""
 
-DATA_DIR=$(mktemp -d)
+if [ "$INSTALLED_MINERS" != "" ]; then
 
-for service_name in $SERVICES; do
-    runService $service_name &
-done
+    SERVICES_TXT=""
 
-wait
+    DATA_DIR=$(mktemp -d)
 
-for service_name in $SERVICES; do
-    readService $service_name
-done
+    for service_name in $INSTALLED_MINERS; do
+        runService $service_name &
+    done
 
-rm -rf $DATA_DIR
+    wait
 
-echo "$SERVICES_TXT"
+    for service_name in $INSTALLED_MINERS; do
+        readService $service_name
+    done
+
+    rm -rf $DATA_DIR
+
+    echo "$SERVICES_TXT"
+fi
 

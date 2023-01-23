@@ -209,8 +209,8 @@ function getInstalledFullnodes {
 
 
 function getAvailableFullnodes {
-    FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
-    #FULLNODES=$(jq -r ".fullnodes | keys | join(\" \")" $RIG_CONFIG_FILE)
+    FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${NODE_CONFIG_FILE} 2>/dev/null`)
+    #FULLNODES=$(jq -r ".fullnodes | keys | join(\" \")" $NODE_CONFIG_FILE)
     echo $FULLNODES
 }
 

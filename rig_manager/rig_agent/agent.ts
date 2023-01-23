@@ -70,8 +70,7 @@ type RigStatusJson = {
     services: { [key: string]: RigService },
     dataDate: number,
     dataAge?: number,
-    //dateFarm?: number,
-    //dataAge?: number,
+    //farmDate?: number,
 };
 
 
@@ -118,6 +117,34 @@ const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 
 let ws: WebSocket;
 let sendStatusTimeout: any = null;
+
+
+
+const wsServerHost = configRig.farmServer?.host || null;
+const wsServerPort = configRig.farmServer?.port || 4200;
+
+const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
+const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
+
+const checkStatusInterval = 10_000; // verifie le statut du rig toutes les x millisecondes
+const checkStatusIntervalIdle = 30_000; // when no service running
+
+const sendStatusInterval = 10_000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
+//const sendStatusIntervalIdle = 60_000; // when no service running
+
+let checkStatusTimeout: any = null;
+let connectionCount = 0;
+
+const toolsDir = `${__dirname}/../tools`;
+const cmdService = `${toolsDir}/run_miner.sh`;
+const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
+const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
+
+let rigStatusJson: RigStatusJson | null = null;
+let rigStatusTxt: string | null = null;
+
+
+
 
 console.log(`${now()} [${colors.blue('INFO')}] Starting Rig ${rigName}`);
 
@@ -268,31 +295,6 @@ server.listen(httpServerPort, httpServerHost, () => {
 
 
 
-// Init Websocket Cliennt
-const wsServerHost = configRig.farmServer?.host || null;
-const wsServerPort = configRig.farmServer?.port || 4200;
-
-const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
-const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
-
-const checkStatusInterval = 10_000; // verifie le statut du rig toutes les x millisecondes
-const checkStatusIntervalIdle = 30_000; // when no service running
-
-const sendStatusInterval = 10_000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
-const sendStatusIntervalIdle = 60_000; // when no service running
-
-let checkStatusTimeout: any = null;
-let connectionCount = 0;
-
-const toolsDir = `${__dirname}/../tools`;
-const cmdService = `${toolsDir}/run_miner.sh`;
-const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
-const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
-
-let rigStatusJson: RigStatusJson | null = null;
-let rigStatusTxt: string | null = null;
-
-
 
 main();
 
@@ -344,7 +346,7 @@ function websocketConnect() {
 
     const connectionId = connectionCount++;
 
-    console.log(`${now()} [${colors.blue('INFO')}] connecting to websocket server... [conn ${connectionId}]`);
+    console.log(`${now()} [${colors.blue('INFO')}] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [conn ${connectionId}]`);
 
     try {
         ws = new WebSocket(`ws://${wsServerHost}:${wsServerPort}/`);
@@ -699,7 +701,7 @@ function getMiners() {
 
 async function getRigProcesses(): Promise<string> {
     const cmd = rigManagerCmd;
-    const result = await cmdExec(cmd, 10_000);
+    const result = await cmdExec(cmd, 2_000);
     return result || '';
 }
 

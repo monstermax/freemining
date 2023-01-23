@@ -12,36 +12,66 @@ import { now, cmdExec, stringTemplate, applyHtmlLayout } from './common/utils';
 /* ############################## TYPES ##################################### */
 
 
-type Rig = {
+type RigInfo = {
+    name: string,
     hostname: string,
     ip: string,
     os: string,
     uptime: number,
+}
+
+type RigUsage = {
     loadAvg: number,
     memory: {
         used: number,
         total: number,
     },
-    devices: {
-        [key: string]: RigDevice,
-    },
-    dateRig?: number,
-    dataAge?: number,
-};
-
-type RigDevice = {
-    cpu: {
-        name: string,
-        threads: number,
-    },
-    gpu: RigDeviceGpu[],
-};
-
-type RigDeviceGpu = {
-    id: number,
-    name: string,
-    driver: string,
 }
+
+type RigDevices = {
+    devices: {
+        cpu: {
+            name: string,
+            threads: number,
+        },
+        gpu: [
+            {
+                id: number,
+                name: string,
+                driver: string,
+            }
+        ]
+    },
+}
+
+type RigService = {
+    worker: {
+        name: string,
+        miner: string,
+        pid: number,
+        algo: string,
+        hashRate: number,
+        uptime: number,
+        date: string,
+    }
+    pool: {
+        url: string,
+        account: string,
+    },
+    cpu: {[key:string]: any}[],
+    gpu: {[key:string]: any}[],
+}
+
+type RigStatusJson = {
+    infos: RigInfo,
+    usage: RigUsage,
+    devices: RigDevices,
+    services: { [key: string]: RigService },
+    dataDate: number,
+    dataAge?: number,
+    //farmDate?: number,
+};
+
 
 
 type wsClient = any;
@@ -84,7 +114,7 @@ const farmManagerCmd = `${__dirname}/../farm_manager.sh ps`;
 const websocketPassword = 'xxx'; // password required to connect to the websocket
 
 
-const rigs: {[key:string]: Rig} = {};
+const rigs: {[key:string]: RigStatusJson} = {};
 const rigsConfigs: {[key:string]: any} = {};
 
 const wsClients: {[key:string]: wsClient} = {};
@@ -113,41 +143,23 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 app.get('/status.json', (req: express.Request, res: express.Response, next: Function) => {
     res.header({'Content-Type': 'application/json'});
 
-    let rigsName: string;
-    for (rigsName in rigs) {
-        const rigStatus: any = rigs[rigsName];
-        rigStatus.dataAge = !rigStatus.dateFarm ? undefined : Math.round(Date.now()/1000 - rigStatus.dateFarm);
-        //rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now()/1000 - rigStatus.rig.dateRig);
-    }
+    const rigsStatuses = getLastRigsJsonStatus();
 
-
-    res.send( JSON.stringify(rigs) );
+    res.send( JSON.stringify(rigsStatuses) );
     res.end();
 });
 
 
 app.get('/rigs/', (req: express.Request, res: express.Response, next: Function) => {
 
+    const rigsStatuses = getLastRigsJsonStatus();
+
     const tplData = {
-        rigs,
+        rigs:rigsStatuses,
     };
 
     const tplHtml = fs.readFileSync(`${templatesDir}/rigs.html`).toString();
     const content = stringTemplate(tplHtml, tplData);
-
-    const rigsTmp: {[key:string]: Rig} = {} = {};
-
-    let rigsName: string;
-    for (rigsName in rigs) {
-        const rigStatus: any = rigs[rigsName];
-        rigStatus.dataAge = !rigStatus.dateFarm ? undefined : Math.round(Date.now()/1000 - rigStatus.dateFarm);
-        rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now()/1000 - rigStatus.rig.dateRig);
-
-        rigsTmp[rigsName] = {
-            ...rigStatus,
-        };
-    }
-
 
     const opts = {
         meta: {
@@ -159,7 +171,7 @@ app.get('/rigs/', (req: express.Request, res: express.Response, next: Function) 
             content,
         },
         data: {
-            rigs: rigsTmp,
+            rigs: rigsStatuses,
         }
     };
 
@@ -380,7 +392,7 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
                     return;
                 }
 
-                rigConfig.dateFarm = Math.round((new Date).getTime() / 1000);
+                rigConfig.farmDate = Math.round((new Date).getTime() / 1000);
                 rigsConfigs[rigName] = rigConfig;
 
             } catch(err: any) {
@@ -396,13 +408,13 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
                     return;
                 }
 
-                const rigName = status.rig.name || status.rig.hostname;
+                const rigName = status.infos.name || status.infos.hostname;
 
                 if (rigName != wsClients[rigName].rigName) {
                     var debugme = 1;
                 }
 
-                status.dateFarm = Math.round((new Date).getTime() / 1000);
+                status.farmDate = Math.round((new Date).getTime() / 1000);
                 rigs[rigName] = status;
 
                 // save to json file
@@ -505,3 +517,28 @@ async function getFarmProcesses(): Promise<string> {
     return result || '';
 }
 
+
+function getLastRigsJsonStatus(): {[key:string]: (RigStatusJson | null)} {
+    const rigsStatuses: {[key:string]: (RigStatusJson | null)} = {};
+    let rigName: string;
+
+    for (rigName in rigs) {
+        rigsStatuses[rigName] = getLastRigJsonStatus(rigName);
+    }
+    return rigsStatuses;
+}
+
+function getLastRigJsonStatus(rigName: string): RigStatusJson | null {
+    const rigStatusJson = rigs[rigName];
+
+    if (! rigStatusJson) {
+        return null;
+    }
+
+    const _rigStatusJson = {
+        ...rigStatusJson,
+    }
+    _rigStatusJson.dataAge = !rigStatusJson?.dataDate ? undefined : Math.round(Date.now()/1000 - rigStatusJson.dataDate);
+
+    return _rigStatusJson;
+}
