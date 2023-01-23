@@ -122,7 +122,7 @@ function _rig_miners_completions {
 
     elif [[ " $CONFIGURED_MINERS " =~ .*" ${COMP_WORDS[1]} ".* ]]; then
         # FRM / RIG / MINER / {MINER}
-        if [ "${COMP_WORDS[2]}" = "start" ]; then
+        if [ "${COMP_WORDS[2]}" = "run" -o "${COMP_WORDS[2]}" = "start" -o "${COMP_WORDS[2]}" = "restart" -o "${COMP_WORDS[2]}" = "debug" ]; then
             PREV_WORD=${COMP_WORDS[-2]}
             values=""
 

@@ -4,11 +4,27 @@ import colors from 'colors/safe';
 const { exec } = require('child_process');
 
 
-export async function cmdExec(cmd: string): Promise<string | null> {
+export async function cmdExec(cmd: string, timeout: number | null=null): Promise<string | null> {
     let ret: string | null = null;
 
     await new Promise((resolve, reject) => {
+        let timeouted: any = null;
+
+        if (timeout !== null) {
+            timeouted = setTimeout(() => {
+                // kill shell process
+                //killCmd = `pkill -f ${cmd.split(' ')[0]}`; // TODO: voir si on peut killer tous les fils shell (de agent.ts), si possible en matchant un pattern
+                //await cmdExec(killCmd);
+
+                reject();
+            }, timeout);
+        }
+
         exec(cmd, (error: any, stdout: string, stderr: string) => {
+            if (timeouted) {
+                clearTimeout(timeouted);
+            }
+
             if (error) {
                 //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
                 reject( error );

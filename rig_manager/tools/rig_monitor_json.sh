@@ -15,7 +15,7 @@ JSON_MONITOR_DIR="../miners_monitor/json"
 RIG_NAME=$rigName
 RIG_HOSTNAME=$(hostname)
 LOCAL_IP=$(hostname -I | cut -d' ' -f1)
-RIG_MOTHERBOARD=$(echo `cat /sys/devices/virtual/dmi/id/board_{name,vendor}`)
+RIG_MOTHERBOARD=$(cat /sys/devices/virtual/dmi/id/board_{name,vendor} | tr "\n" " ")
 
 OS_VERSION=$(grep PRETTY_NAME /etc/os-release |cut -d'"' -f2)
 UPTIME=$(cat /proc/uptime |cut -d" " -f1 |cut -d"." -f1)
@@ -111,31 +111,33 @@ rm -rf $DATA_DIR
 
 cat <<_EOF
 {
-    "rig": {
+    "infos": {
         "name": "${RIG_NAME}",
         "hostname": "${RIG_HOSTNAME}",
         "ip": "${LOCAL_IP}",
         "os": "${OS_VERSION}",
-        "uptime": "${UPTIME}",
-        "loadAvg": "${LOAD_AVG}",
+        "uptime": ${UPTIME}
+    },
+    "usage": {
+        "loadAvg": ${LOAD_AVG},
         "memory": {
-            "used": "${MEM_USED}",
-            "total": "${MEM_TOTAL}"
+            "used": ${MEM_USED},
+            "total": ${MEM_TOTAL}
+        }
+    },
+    "devices": {
+        "motherboard": "${RIG_MOTHERBOARD}",
+        "cpu": {
+            "name": "${CPU_NAME}",
+            "threads": ${CPU_COUNT}
         },
-        "devices": {
-            "motherboard": "${RIG_MOTHERBOARD}",
-            "cpu": {
-                "name": "${CPU_NAME}",
-                "threads": "${CPU_COUNT}"
-            },
-            "gpu": [
-                $VIDEO_CARDS_JSON
-            ]
-        },
-        "dateRig": ${DATE}
+        "gpu": [
+            $VIDEO_CARDS_JSON
+        ]
     },
     "services": {
         ${SERVICES_JSON}
-    }
+    },
+    "dataDate": ${DATE}
 }
 _EOF

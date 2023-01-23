@@ -20,6 +20,7 @@ if [ "$(command -v jq)" = "" ]; then
 fi
 
 
+
 ##### CONFIG #####
 
 FRM_MODULE="rig"
@@ -78,45 +79,15 @@ fi
 
 
 
-CONFIGURED_MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
-INSTALLED_MINERS=$(find $minersDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
-
-# TODO: do not hardcode this list
-INSTALLABLE_MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
+CONFIGURED_MINERS=$(getAvailableMiners)
+INSTALLED_MINERS=$(getInstalledMiners)
+INSTALLABLE_MINERS=$(getInstallableAvailableMiners)
 
 
 DAEMON_LOG_DIR=$rigLogDir
 DAEMON_PID_DIR=$rigPidDir
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
-##### FUNCTIONS #####
-
-
-function getMinerApiPort {
-    miner=$1
-
-    API_PORT=$(eval echo `jq -r ".miners.${miner}.api.port" ${RIG_CONFIG_FILE} 2>/dev/null`)
-
-    if [ "$API_PORT" = "null" ]; then
-        API_PORT=""
-    fi
-
-    echo $API_PORT
-}
-
-
-
-function getInstalledMiners {
-    MINERS=$(echo $(ls $minersDir))
-    echo $MINERS
-}
-
-
-function getAvailableMiners {
-    MINERS=$(jq -r ".miners | keys | join(\" \")" $RIG_CONFIG_FILE)
-    echo $MINERS
-    # TODO: filtrer/conserver uniquement les miners installés (si inclus dans getInstalledMiners)
-}
 
 
 

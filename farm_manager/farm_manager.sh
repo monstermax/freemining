@@ -74,9 +74,6 @@ if test "$FARM_SERVER_PORT" = "" || test "$FARM_SERVER_PORT" = "null"; then
     FARM_SERVER_PORT=4200
 fi
 
-##### FUNCTIONS #####
-
-
 
 
 ##### MAIN #####

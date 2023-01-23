@@ -49,7 +49,7 @@
             <td class="text-end">${rig.rig.loadAvg}</td>
             <td class="text-end">${formatNumber(rig.rig.memory.used)}/${formatNumber(rig.rig.memory.total)} MB</td>
             <td class="text-end">${Object.keys(rig.services).length}</td>
-            <td class="text-end"><span class="dataAge">${Math.round(dataAge)}</span> sec. ago</td>
+            <td class="text-end"><span class="dataAge">${formatNumber(dataAge, 'seconds')}</span></td>
         </tr>
         <tr class="bg-light">
             <td colspan="8" class="">

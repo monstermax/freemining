@@ -17,51 +17,47 @@
     </div>
 
     <small class="d-inline-block ms-3">
-        Data age: <span id="dataAge">${Math.round(Date.now()/1000 - rig.rig.dateRig)}</span> sec. ago
+        Freshness: <span id="dataAge">${Math.round(Date.now()/1000 - rig.dataDate)}</span> sec. ago
     </small>
 
 </div>
 
-<br />
 <br />
 
 <h2>System informations</h2>
 
 <div class="alert alert-secondary">
     <div class="row">
-        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> ${rig.rig.hostname}</div>
-        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> ${rig.rig.ip}</div>
-        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> ${rig.rig.os}</div>
-        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> ${rig.rig.loadAvg}</div>
-        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> ${formatNumber(rig.rig.uptime, 'seconds')} sec.</div>
-        <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> ${formatNumber(rig.rig.memory.used)} / ${formatNumber(rig.rig.memory.total)} MB</div>
+        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> ${rig.infos.hostname}</div>
+        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> ${rig.infos.ip}</div>
+        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> ${rig.infos.os}</div>
+        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> ${rig.usage.loadAvg}</div>
+        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> ${formatNumber(rig.infos.uptime, 'seconds')} sec.</div>
+        <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> ${formatNumber(rig.usage.memory.used)} / ${formatNumber(rig.usage.memory.total)} MB</div>
     </div>
 </div>
 
-<br />
 <br />
 
 <h2>Hardware devices</h2>
 
 <div class="alert alert-secondary">
-    <div class="row">
+    <div class="row mb-1">
         <div class="col-12">
             <b>CPU</b>
         </div>
         <div class="col-12">
             <div class="border border-dark rounded bg-light m-1 p-1">
-                ${rig.rig.devices.cpu.threads} X ${rig.rig.devices.cpu.name}
+                ${rig.devices.cpu.threads} X ${rig.devices.cpu.name}
             </div>
         </div>
     </div>
-
-    <br />
 
     <div class="row">
         <div class="col-12">
             <b>GPU</b>
         </div>
-        ${rig.rig.devices.gpu.map(gpu => {
+        ${rig.devices.gpu.map(gpu => {
             return `
                 <div class="col-12 col-lg-6">
                     <div class="border border-primary rounded bg-light m-1 p-1">
@@ -73,8 +69,6 @@
     </div>
 </div>
 
-
-<br />
 <br />
 
 
@@ -356,7 +350,7 @@ function testStart() {
     alertify.confirm("DEBUG/TEST - xmrig", "Do you want to start <b>xmrig</b> with the default parameters ?",
         function(){
             const poolUrl = 'xmrpool.eu:5555';
-            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rig.rig.name}';
+            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+${rig.infos.name}';
             startService('xmrig', 'rx/0', poolUrl, poolAccount, '')
         },
         function(){
@@ -373,7 +367,7 @@ function startService(serviceName, algo, poolUrl, poolAccount, optionalParams=''
 
     const url = '/api/rigs/rig/service/start';
     const data = {
-        rig: '${rig.rig.name}',
+        rig: '${rig.infos.name}',
         service: serviceName,
         algo: algo,
         poolUrl,
@@ -406,7 +400,7 @@ function stopService(serviceName) {
 
             const url = '/api/rigs/rig/service/stop';
             const data = {
-                rig: '${rig.rig.name}',
+                rig: '${rig.infos.name}',
                 service: serviceName,
             };
             jQuery.post(url, data).then(() => {

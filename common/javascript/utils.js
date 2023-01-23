@@ -5,11 +5,23 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const { exec } = require('child_process');
-function cmdExec(cmd) {
+function cmdExec(cmd, timeout = null) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let ret = null;
         yield new Promise((resolve, reject) => {
+            let timeouted = null;
+            if (timeout !== null) {
+                timeouted = setTimeout(() => {
+                    // kill shell process
+                    //killCmd = `pkill -f ${cmd.split(' ')[0]}`; // TODO: voir si on peut killer tous les fils shell (de agent.ts), si possible en matchant un pattern
+                    //await cmdExec(killCmd);
+                    reject();
+                }, timeout);
+            }
             exec(cmd, (error, stdout, stderr) => {
+                if (timeouted) {
+                    clearTimeout(timeouted);
+                }
                 if (error) {
                     //console.error(`${now()} [${colors.red('ERROR')}] Error while running exec command : ${error.message.trim()}`);
                     reject(error);

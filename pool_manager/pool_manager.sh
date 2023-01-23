@@ -81,9 +81,6 @@ DAEMON_LOG_DIR=$poolLogDir
 DAEMON_PID_DIR=$poolPidDir
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
 
-##### FUNCTIONS #####
-
-
 
 
 ##### MAIN #####

@@ -13,17 +13,23 @@ import { now, cmdExec, stringTemplate, applyHtmlLayout } from './common/utils';
 /* ############################## TYPES ##################################### */
 
 
-type Rig = {
+type RigInfo = {
     name: string,
     hostname: string,
     ip: string,
     os: string,
     uptime: number,
+}
+
+type RigUsage = {
     loadAvg: number,
     memory: {
         used: number,
         total: number,
     },
+}
+
+type RigDevices = {
     devices: {
         cpu: {
             name: string,
@@ -37,11 +43,9 @@ type Rig = {
             }
         ]
     },
-    dateRig?: number,
-    dataAge?: number,
 }
 
-type Service = {
+type RigService = {
     worker: {
         name: string,
         miner: string,
@@ -59,11 +63,15 @@ type Service = {
     gpu: {[key:string]: any}[],
 }
 
-type RigStatus = {
-    rig: Rig,
-    services: { [key: string]: Service },
-    dateFarm?: number,
+type RigStatusJson = {
+    infos: RigInfo,
+    usage: RigUsage,
+    devices: RigDevices,
+    services: { [key: string]: RigService },
+    dataDate: number,
     dataAge?: number,
+    //dateFarm?: number,
+    //dataAge?: number,
 };
 
 
@@ -108,7 +116,8 @@ const websocketPassword = 'xxx'; // password to access farm websocket server
 
 const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 
-
+let ws: WebSocket;
+let sendStatusTimeout: any = null;
 
 console.log(`${now()} [${colors.blue('INFO')}] Starting Rig ${rigName}`);
 
@@ -121,7 +130,7 @@ app.use(express.static(staticDir));
 
 
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
-    if (! rigStatus) {
+    if (! rigStatusJson) {
         res.send(`Rig not initialized`);
         res.end();
         return;
@@ -134,7 +143,7 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 
     const opts = {
         rigName,
-        rig: rigStatus,
+        rig: getLastRigJsonStatus(),
         miners: getMiners(),
         rigs:[],
         activeProcesses,
@@ -148,7 +157,7 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 
 
 app.get('/status', async (req: express.Request, res: express.Response, next: Function) => {
-    if (! rigStatus) {
+    if (! rigStatusJson) {
         res.send(`Rig not initialized`);
         res.end();
         return;
@@ -158,7 +167,7 @@ app.get('/status', async (req: express.Request, res: express.Response, next: Fun
 
     const opts = {
         rigName,
-        rig: rigStatus,
+        rig: getLastRigJsonStatus(),
         miners: getMiners(),
         rigs:[],
         presets,
@@ -173,7 +182,17 @@ app.get('/status', async (req: express.Request, res: express.Response, next: Fun
 app.get('/status.json', (req: express.Request, res: express.Response, next: Function) => {
     res.header({'Content-Type': 'application/json'});
 
-    res.send( JSON.stringify(rigStatus) );
+    res.send( JSON.stringify(getLastRigJsonStatus()) );
+    res.end();
+});
+
+
+app.get('/status.txt', async (req: express.Request, res: express.Response, next: Function) => {
+    res.header({'Content-Type': 'text/plain'});
+
+    rigStatusTxt = await getRigTxtStatus();
+
+    res.send( getLastRigTxtStatus() );
     res.end();
 });
 
@@ -244,7 +263,7 @@ app.use(function (req: express.Request, res: express.Response, next: Function) {
 });
 
 server.listen(httpServerPort, httpServerHost, () => {
-    console.log(`${now()} [${colors.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
+    console.log(`${now()} [${colors.blue('INFO')}] Webserver started on ${httpServerHost}:${httpServerPort}`);
 });
 
 
@@ -255,8 +274,12 @@ const wsServerPort = configRig.farmServer?.port || 4200;
 
 const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
+
 const checkStatusInterval = 10_000; // verifie le statut du rig toutes les x millisecondes
+const checkStatusIntervalIdle = 30_000; // when no service running
+
 const sendStatusInterval = 10_000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
+const sendStatusIntervalIdle = 60_000; // when no service running
 
 let checkStatusTimeout: any = null;
 let connectionCount = 0;
@@ -264,8 +287,10 @@ let connectionCount = 0;
 const toolsDir = `${__dirname}/../tools`;
 const cmdService = `${toolsDir}/run_miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
+const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
 
-let rigStatus: RigStatus | null = null;
+let rigStatusJson: RigStatusJson | null = null;
+let rigStatusTxt: string | null = null;
 
 
 
@@ -277,7 +302,7 @@ main();
 
 
 async function main() {
-    await checkStatus();
+    await checkStatus(false);
 
     if (wsServerHost) {
         // connect to websocket server
@@ -292,30 +317,35 @@ async function main() {
 
 
 
-function loadTemplate(tplFile: string, data: any={}, currentUrl:string='') {
+function loadTemplate(tplFile: string, data: any={}, currentUrl:string=''): string {
     const tplPath = `${templatesDir}/${tplFile}`;
 
     if (! fs.existsSync(tplPath)) {
-        return null;
+        return '';
     }
-    const layoutTemplate = fs.readFileSync(tplPath).toString();
-    let content = stringTemplate(layoutTemplate, data) || '';
 
-    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl);
+    let content = '';
+    try {
+        const layoutTemplate = fs.readFileSync(tplPath).toString();
+        content = stringTemplate(layoutTemplate, data) || '';
+
+    } catch (err: any) {
+        content = `Error: ${err.message}`;
+    }
+
+    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl) || '';
     return pageContent;
 }
 
 
 
 function websocketConnect() {
-    let sendStatusTimeout: any = null;
     let newConnectionTimeout: any = null;
 
     const connectionId = connectionCount++;
 
     console.log(`${now()} [${colors.blue('INFO')}] connecting to websocket server... [conn ${connectionId}]`);
 
-    let ws: WebSocket;
     try {
         ws = new WebSocket(`ws://${wsServerHost}:${wsServerPort}/`);
 
@@ -335,9 +365,6 @@ function websocketConnect() {
 
 
     ws.on('open', async function open() {
-        // Prepare connection heartbeat
-        heartbeat.call(this);
-
         // Send auth
         ws.send(`auth ${rigName} ${websocketPassword}`);
 
@@ -345,20 +372,22 @@ function websocketConnect() {
         console.log(`${now()} [${colors.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`)
         ws.send( `rigConfig ${JSON.stringify(configRig)}`);
 
+        if (! rigStatusJson) {
+            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatusJson to server (open) [conn ${connectionId}]`)
+            ws.close();
+            return;
+        }
 
         // Send rig status
-        if (rigStatus) {
-            console.log(`${now()} [${colors.blue('INFO')}] sending rigStatus to server (open) [conn ${connectionId}]`)
-            ws.send( `rigStatus ${JSON.stringify(rigStatus)}`);
-
-        } else {
-            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatus to server (open) [conn ${connectionId}]`)
-        }
+        sendStatus(`(open)`);
 
         // send rig status every 10 seconds
-        if (sendStatusTimeout === null) {
-            sendStatusTimeout = setTimeout(hello, sendStatusInterval);
-        }
+        //if (sendStatusTimeout === null) {
+        //    sendStatusTimeout = setTimeout(sendStatusSafe, sendStatusInterval, ws);
+        //}
+
+        // Prepare connection heartbeat
+        heartbeat.call(this);
     });
 
 
@@ -456,34 +485,6 @@ function websocketConnect() {
 
     }
 
-
-    async function hello() {
-        sendStatusTimeout = null;
-
-        if (rigStatus) {
-            if (ws.readyState === WebSocket.OPEN) {
-                console.log(`${now()} [${colors.blue('INFO')}] sending rigStatus to server (hello) [conn ${connectionId}]`);
-                ws.send( `rigStatus ${JSON.stringify(rigStatus)}`);
-
-                var debugSentData = JSON.stringify(rigStatus);
-                var debugme = 1;
-
-            } else {
-                console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatus to server (hello. ws closed) [conn ${connectionId}]`);
-                ws.close();
-                return;
-            }
-
-        } else {
-            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatus to server (hello. no status available) [conn ${connectionId}]`)
-            ws.close();
-            return;
-        }
-
-        sendStatusTimeout = setTimeout(hello, 10_000);
-    }
-
-
     return ws;
 }
 
@@ -494,15 +495,16 @@ async function startRigService(minerName: string, params: any) {
     const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    const ret = await cmdExec(cmd);
+    const ret = await cmdExec(cmd, 10_000);
 
     if (ret) {
         console.log(`${now()} [DEBUG] command result: ${ret}`);
 
     } else {
         console.log(`${now()} [DEBUG] command result: ERROR`);
-
     }
+
+    await checkStatus();
 
     return !!ret;
 }
@@ -514,15 +516,16 @@ async function stopRigService(minerName: string) {
     const cmd = `${cmdService} ${minerName} stop`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    const ret = await cmdExec(cmd);
+    const ret = await cmdExec(cmd, 10_000);
 
     if (ret) {
         console.log(`${now()} [DEBUG] command result: ${ret}`);
 
     } else {
         console.log(`${now()} [DEBUG] command result: ERROR`);
-
     }
+
+    await checkStatus();
 
     return !!ret;
 }
@@ -535,7 +538,7 @@ async function getRigServiceStatus(minerName: string, option:string=''): Promise
     const cmd = `${cmdService} ${minerName} status${option}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    let ret: string = (await cmdExec(cmd)) || '';
+    let ret: string = (await cmdExec(cmd, 5_000)) || '';
 
     if (ret) {
         ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
@@ -546,24 +549,79 @@ async function getRigServiceStatus(minerName: string, option:string=''): Promise
 
 
 
-async function getRigStatus(): Promise<RigStatus | null> {
+function getLastRigTxtStatus(): string | null {
+    if (! rigStatusTxt) {
+        return null;
+    }
+    let _rigStatusTxt = rigStatusTxt;
+
+    if (_rigStatusTxt) {
+        _rigStatusTxt = _rigStatusTxt.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
+    }
+
+    return _rigStatusTxt;
+}
+
+
+async function getRigTxtStatus(): Promise<string | null> {
+    const cmd = cmdRigMonitorTxt;
+
+    // poll services status...
+    console.log(`${now()} [${colors.blue('INFO')}] polling TXT rig status...`);
+    const statusTxt = await cmdExec(cmd, 5_000);
+
+    if (statusTxt) {
+        console.log(`${now()} [${colors.blue('INFO')}]  => rig TXT status OK`)
+
+    } else {
+        console.error(`${now()} [${colors.red('ERROR')}]  => rig TXT status KO. cannot read rig status (no response from shell)`);
+    }
+
+    return statusTxt;
+}
+
+
+
+
+
+function getLastRigJsonStatus(): RigStatusJson | null {
+    if (! rigStatusJson) {
+        return null;
+    }
+    const _rigStatusJson = {
+        ...rigStatusJson,
+    }
+    _rigStatusJson.dataAge = !rigStatusJson?.dataDate ? undefined : Math.round(Date.now()/1000 - rigStatusJson.dataDate);
+
+    return _rigStatusJson;
+}
+
+
+async function getRigJsonStatus(): Promise<RigStatusJson | null> {
     const cmd = cmdRigMonitorJson;
 
-    const statusJson = await cmdExec(cmd);
+    // poll services status...
+    console.log(`${now()} [${colors.blue('INFO')}] polling JSON rig status...`);
+    const statusJson = await cmdExec(cmd, 5_000);
 
     if (statusJson) {
         try {
-            console.log(`${now()} [${colors.blue('INFO')}] checking rig status`)
-            const _rigStatus = JSON.parse(statusJson);
-            return _rigStatus;
+            const _rigStatusJson = JSON.parse(statusJson);
+
+            // status is OK
+            console.log(`${now()} [${colors.blue('INFO')}]  => rig JSON status OK`)
+
+            return _rigStatusJson;
 
         } catch (err: any) {
-            console.error(`${now()} [${colors.red('ERROR')}] cannot read rig status (invalid shell response)`);
+            // status ERROR: empty or malformed JSON
+            console.error(`${now()} [${colors.red('ERROR')}]  => rig JSON status KO. cannot read rig status (invalid shell response)`);
             console.debug(statusJson);
         }
 
     } else {
-        console.log(`${now()} [${colors.red('WAWRNING')}] cannot read rig status (no response from shell)`);
+        // status ERROR: shell command error
+        console.log(`${now()} [${colors.red('WARNING')}]  => rig JSON status KO. cannot read rig status (no response from shell)`);
     }
 
     return null;
@@ -571,13 +629,58 @@ async function getRigStatus(): Promise<RigStatus | null> {
 
 
 
-async function checkStatus() {
-    console.log(`${now()} [${colors.blue('INFO')}] refreshing rigStatus`)
-    checkStatusTimeout = null;
-    rigStatus = await getRigStatus();
+async function checkStatus(sendStatusToFarm: boolean=true) {
+    if (checkStatusTimeout) {
+        clearTimeout(checkStatusTimeout);
+        checkStatusTimeout = null;
+    }
 
-    // poll services every x seconds
-    checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
+    // retrieve current rig status
+    rigStatusJson = await getRigJsonStatus();
+
+    if (sendStatusToFarm) {
+        sendStatusSafe();
+    }
+
+    // re-check status in {delay} seconds...
+    const delay = (!rigStatusJson || Object.keys(rigStatusJson.services).length == 0) ? checkStatusIntervalIdle : checkStatusInterval;
+    checkStatusTimeout = setTimeout(checkStatus, delay);
+}
+
+
+
+function sendStatusSafe(): void {
+    //if (sendStatusTimeout) {
+    //    clearTimeout(sendStatusTimeout);
+    //    sendStatusTimeout = null;
+    //}
+
+    if (rigStatusJson) {
+        if (ws.readyState === WebSocket.OPEN) {
+            sendStatus(`(sendStatusSafe)`);
+
+            //var debugSentData = JSON.stringify(rigStatusJson);
+            //var debugme = 1;
+
+        } else {
+            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatusJson to server (sendStatusSafe. ws closed)`);
+            ws.close();
+            return;
+        }
+
+    } else {
+        console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigStatusJson to server (sendStatusSafe. no status available)`)
+        ws.close();
+        return;
+    }
+
+    //sendStatusTimeout = setTimeout(sendStatusSafe, sendStatusInterval);
+}
+
+
+function sendStatus(debugInfos:string=''): void {
+    console.log(`${now()} [${colors.blue('INFO')}] sending rigStatusJson to server ${debugInfos}`);
+    ws.send( `rigStatus ${JSON.stringify(getLastRigJsonStatus())}`);
 }
 
 
@@ -596,7 +699,7 @@ function getMiners() {
 
 async function getRigProcesses(): Promise<string> {
     const cmd = rigManagerCmd;
-    const result = await cmdExec(cmd);
+    const result = await cmdExec(cmd, 10_000);
     return result || '';
 }
 

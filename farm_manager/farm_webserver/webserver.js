@@ -49,7 +49,7 @@ app.get('/status.json', (req, res, next) => {
     for (rigsName in rigs) {
         const rigStatus = rigs[rigsName];
         rigStatus.dataAge = !rigStatus.dateFarm ? undefined : Math.round(Date.now() / 1000 - rigStatus.dateFarm);
-        rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now() / 1000 - rigStatus.rig.dateRig);
+        //rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now()/1000 - rigStatus.rig.dateRig);
     }
     res.send(JSON.stringify(rigs));
     res.end();

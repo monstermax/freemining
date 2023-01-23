@@ -32,12 +32,14 @@ const layoutPath = `${templatesDir}/layout_rig_agent.html`;
 const rigName = configRig.rigName || os_1.default.hostname();
 const websocketPassword = 'xxx'; // password to access farm websocket server
 const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
+let ws;
+let sendStatusTimeout = null;
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Starting Rig ${rigName}`);
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
 app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    if (!rigStatus) {
+    if (!rigStatusJson) {
         res.send(`Rig not initialized`);
         res.end();
         return;
@@ -47,7 +49,7 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
     const installablesMiners = (process.env.INSTALLED_MINERS || '').split(' ');
     const opts = {
         rigName,
-        rig: rigStatus,
+        rig: getLastRigJsonStatus(),
         miners: getMiners(),
         rigs: [],
         activeProcesses,
@@ -59,7 +61,7 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
     res.end();
 }));
 app.get('/status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    if (!rigStatus) {
+    if (!rigStatusJson) {
         res.send(`Rig not initialized`);
         res.end();
         return;
@@ -67,7 +69,7 @@ app.get('/status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     const presets = configRig.pools || {};
     const opts = {
         rigName,
-        rig: rigStatus,
+        rig: getLastRigJsonStatus(),
         miners: getMiners(),
         rigs: [],
         presets,
@@ -78,9 +80,15 @@ app.get('/status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0,
 }));
 app.get('/status.json', (req, res, next) => {
     res.header({ 'Content-Type': 'application/json' });
-    res.send(JSON.stringify(rigStatus));
+    res.send(JSON.stringify(getLastRigJsonStatus()));
     res.end();
 });
+app.get('/status.txt', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    res.header({ 'Content-Type': 'text/plain' });
+    rigStatusTxt = yield getRigTxtStatus();
+    res.send(getLastRigTxtStatus());
+    res.end();
+}));
 app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const miner = req.query.miner || '';
     const asJson = req.query.json === "1";
@@ -134,7 +142,7 @@ app.use(function (req, res, next) {
     next();
 });
 server.listen(httpServerPort, httpServerHost, () => {
-    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Server started on ${httpServerHost}:${httpServerPort}`);
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Webserver started on ${httpServerHost}:${httpServerPort}`);
 });
 // Init Websocket Cliennt
 const wsServerHost = ((_e = configRig.farmServer) === null || _e === void 0 ? void 0 : _e.host) || null;
@@ -142,18 +150,22 @@ const wsServerPort = ((_f = configRig.farmServer) === null || _f === void 0 ? vo
 const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
 const checkStatusInterval = 10000; // verifie le statut du rig toutes les x millisecondes
+const checkStatusIntervalIdle = 30000; // when no service running
 const sendStatusInterval = 10000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
+const sendStatusIntervalIdle = 60000; // when no service running
 let checkStatusTimeout = null;
 let connectionCount = 0;
 const toolsDir = `${__dirname}/../tools`;
 const cmdService = `${toolsDir}/run_miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
-let rigStatus = null;
+const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
+let rigStatusJson = null;
+let rigStatusTxt = null;
 main();
 /* ############################ FUNCTIONS ################################### */
 function main() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        yield checkStatus();
+        yield checkStatus(false);
         if (wsServerHost) {
             // connect to websocket server
             websocketConnect();
@@ -167,19 +179,23 @@ function main() {
 function loadTemplate(tplFile, data = {}, currentUrl = '') {
     const tplPath = `${templatesDir}/${tplFile}`;
     if (!fs_1.default.existsSync(tplPath)) {
-        return null;
+        return '';
     }
-    const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
-    let content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
-    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl);
+    let content = '';
+    try {
+        const layoutTemplate = fs_1.default.readFileSync(tplPath).toString();
+        content = (0, utils_1.stringTemplate)(layoutTemplate, data) || '';
+    }
+    catch (err) {
+        content = `Error: ${err.message}`;
+    }
+    const pageContent = (0, utils_1.applyHtmlLayout)(content, data, layoutPath, currentUrl) || '';
     return pageContent;
 }
 function websocketConnect() {
-    let sendStatusTimeout = null;
     let newConnectionTimeout = null;
     const connectionId = connectionCount++;
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] connecting to websocket server... [conn ${connectionId}]`);
-    let ws;
     try {
         ws = new ws_1.default(`ws://${wsServerHost}:${wsServerPort}/`);
     }
@@ -196,25 +212,24 @@ function websocketConnect() {
     });
     ws.on('open', function open() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // Prepare connection heartbeat
-            heartbeat.call(this);
             // Send auth
             ws.send(`auth ${rigName} ${websocketPassword}`);
             // Send rig config
             console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`);
             ws.send(`rigConfig ${JSON.stringify(configRig)}`);
+            if (!rigStatusJson) {
+                console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] cannot send rigStatusJson to server (open) [conn ${connectionId}]`);
+                ws.close();
+                return;
+            }
             // Send rig status
-            if (rigStatus) {
-                console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigStatus to server (open) [conn ${connectionId}]`);
-                ws.send(`rigStatus ${JSON.stringify(rigStatus)}`);
-            }
-            else {
-                console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] cannot send rigStatus to server (open) [conn ${connectionId}]`);
-            }
+            sendStatus(`(open)`);
             // send rig status every 10 seconds
-            if (sendStatusTimeout === null) {
-                sendStatusTimeout = setTimeout(hello, sendStatusInterval);
-            }
+            //if (sendStatusTimeout === null) {
+            //    sendStatusTimeout = setTimeout(sendStatusSafe, sendStatusInterval, ws);
+            //}
+            // Prepare connection heartbeat
+            heartbeat.call(this);
         });
     });
     // Handle connections heartbeat
@@ -286,30 +301,6 @@ function websocketConnect() {
             }
         }, serverConnTimeout + 1000);
     }
-    function hello() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            sendStatusTimeout = null;
-            if (rigStatus) {
-                if (ws.readyState === ws_1.default.OPEN) {
-                    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigStatus to server (hello) [conn ${connectionId}]`);
-                    ws.send(`rigStatus ${JSON.stringify(rigStatus)}`);
-                    var debugSentData = JSON.stringify(rigStatus);
-                    var debugme = 1;
-                }
-                else {
-                    console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] cannot send rigStatus to server (hello. ws closed) [conn ${connectionId}]`);
-                    ws.close();
-                    return;
-                }
-            }
-            else {
-                console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] cannot send rigStatus to server (hello. no status available) [conn ${connectionId}]`);
-                ws.close();
-                return;
-            }
-            sendStatusTimeout = setTimeout(hello, 10000);
-        });
-    }
     return ws;
 }
 function startRigService(minerName, params) {
@@ -317,13 +308,14 @@ function startRigService(minerName, params) {
         // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
-        const ret = yield (0, utils_1.cmdExec)(cmd);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
         if (ret) {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
         }
         else {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
         }
+        yield checkStatus();
         return !!ret;
     });
 }
@@ -332,13 +324,14 @@ function stopRigService(minerName) {
         // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} ${minerName} stop`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
-        const ret = yield (0, utils_1.cmdExec)(cmd);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
         if (ret) {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
         }
         else {
             console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
         }
+        yield checkStatus();
         return !!ret;
     });
 }
@@ -347,42 +340,115 @@ function getRigServiceStatus(minerName, option = '') {
         // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} ${minerName} status${option}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
-        let ret = (yield (0, utils_1.cmdExec)(cmd)) || '';
+        let ret = (yield (0, utils_1.cmdExec)(cmd, 5000)) || '';
         if (ret) {
             ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
         }
         return ret || '';
     });
 }
-function getRigStatus() {
+function getLastRigTxtStatus() {
+    if (!rigStatusTxt) {
+        return null;
+    }
+    let _rigStatusTxt = rigStatusTxt;
+    if (_rigStatusTxt) {
+        _rigStatusTxt = _rigStatusTxt.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
+    }
+    return _rigStatusTxt;
+}
+function getRigTxtStatus() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = cmdRigMonitorTxt;
+        // poll services status...
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] polling TXT rig status...`);
+        const statusTxt = yield (0, utils_1.cmdExec)(cmd, 5000);
+        if (statusTxt) {
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}]  => rig TXT status OK`);
+        }
+        else {
+            console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}]  => rig TXT status KO. cannot read rig status (no response from shell)`);
+        }
+        return statusTxt;
+    });
+}
+function getLastRigJsonStatus() {
+    if (!rigStatusJson) {
+        return null;
+    }
+    const _rigStatusJson = Object.assign({}, rigStatusJson);
+    _rigStatusJson.dataAge = !(rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.dataDate) ? undefined : Math.round(Date.now() / 1000 - rigStatusJson.dataDate);
+    return _rigStatusJson;
+}
+function getRigJsonStatus() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const cmd = cmdRigMonitorJson;
-        const statusJson = yield (0, utils_1.cmdExec)(cmd);
+        // poll services status...
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] polling JSON rig status...`);
+        const statusJson = yield (0, utils_1.cmdExec)(cmd, 5000);
         if (statusJson) {
             try {
-                console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] checking rig status`);
-                const _rigStatus = JSON.parse(statusJson);
-                return _rigStatus;
+                const _rigStatusJson = JSON.parse(statusJson);
+                // status is OK
+                console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}]  => rig JSON status OK`);
+                return _rigStatusJson;
             }
             catch (err) {
-                console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] cannot read rig status (invalid shell response)`);
+                // status ERROR: empty or malformed JSON
+                console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}]  => rig JSON status KO. cannot read rig status (invalid shell response)`);
                 console.debug(statusJson);
             }
         }
         else {
-            console.log(`${(0, utils_1.now)()} [${safe_1.default.red('WAWRNING')}] cannot read rig status (no response from shell)`);
+            // status ERROR: shell command error
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.red('WARNING')}]  => rig JSON status KO. cannot read rig status (no response from shell)`);
         }
         return null;
     });
 }
-function checkStatus() {
+function checkStatus(sendStatusToFarm = true) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] refreshing rigStatus`);
-        checkStatusTimeout = null;
-        rigStatus = yield getRigStatus();
-        // poll services every x seconds
-        checkStatusTimeout = setTimeout(checkStatus, checkStatusInterval);
+        if (checkStatusTimeout) {
+            clearTimeout(checkStatusTimeout);
+            checkStatusTimeout = null;
+        }
+        // retrieve current rig status
+        rigStatusJson = yield getRigJsonStatus();
+        if (sendStatusToFarm) {
+            sendStatusSafe();
+        }
+        // re-check status in {delay} seconds...
+        const delay = (!rigStatusJson || Object.keys(rigStatusJson.services).length == 0) ? checkStatusIntervalIdle : checkStatusInterval;
+        checkStatusTimeout = setTimeout(checkStatus, delay);
     });
+}
+function sendStatusSafe() {
+    //if (sendStatusTimeout) {
+    //    clearTimeout(sendStatusTimeout);
+    //    sendStatusTimeout = null;
+    //}
+    if (rigStatusJson) {
+        if (ws.readyState === ws_1.default.OPEN) {
+            sendStatus(`(sendStatusSafe)`);
+            //var debugSentData = JSON.stringify(rigStatusJson);
+            //var debugme = 1;
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] cannot send rigStatusJson to server (sendStatusSafe. ws closed)`);
+            ws.close();
+            return;
+        }
+    }
+    else {
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] cannot send rigStatusJson to server (sendStatusSafe. no status available)`);
+        ws.close();
+        return;
+    }
+    //sendStatusTimeout = setTimeout(sendStatusSafe, sendStatusInterval);
+}
+function sendStatus(debugInfos = '') {
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] sending rigStatusJson to server ${debugInfos}`);
+    ws.send(`rigStatus ${JSON.stringify(getLastRigJsonStatus())}`);
 }
 function getMiners() {
     const miners = [
@@ -398,7 +464,7 @@ function getMiners() {
 function getRigProcesses() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const cmd = rigManagerCmd;
-        const result = yield (0, utils_1.cmdExec)(cmd);
+        const result = yield (0, utils_1.cmdExec)(cmd, 10000);
         return result || '';
     });
 }

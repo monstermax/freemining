@@ -10,9 +10,10 @@ TXT_MONITOR_DIR=../miners_monitor/txt
 
 echo "###################################### RIG ###########################################"
 
-LOCAL_IP=$(ip route get 4.2.2.1 |grep dev |cut -d" " -f7)
+#LOCAL_IP=$(ip route get 4.2.2.1 2>/dev/null |grep dev |cut -d" " -f7)
+LOCAL_IP=$(hostname -I | cut -d' ' -f1)
 OS_VERSION=$(grep PRETTY_NAME /etc/os-release |cut -d'"' -f2)
-RIG_MOTHERBOARD=$(cat /sys/devices/virtual/dmi/id/board_{name,vendor})
+RIG_MOTHERBOARD=$(cat /sys/devices/virtual/dmi/id/board_{name,vendor} | tr "\n" " ")
 UPTIME=$(cat /proc/uptime |cut -d" " -f1 |cut -d"." -f1)
 LOAD_AVG=$(cat /proc/loadavg |cut -d" " -f1)
 MEM=$(free --mega -t |tail -n1 |tr -s ' ')
@@ -30,33 +31,58 @@ echo "rig.memory: ${MEM_USED}/${MEM_TOTAL} MB"
 echo "rig.date: ${DATE}"
 
 
-echo "###################################### NBMiner #######################################"
 
-# NBMiner
-${TXT_MONITOR_DIR}/nbminer.sh || true
+function runService {
+    service_name=$1
 
-echo "###################################### lolMiner ######################################"
+    service_cmd="${TXT_MONITOR_DIR}/${service_name}.sh"
+    if [ -x $service_cmd ]; then
+        exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt
 
-# lolMiner
-${TXT_MONITOR_DIR}/lolminer.sh || true
+    else
+        #echo "Warning: service $service_cmd not found"
+        rm -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt
+    fi
+}
 
-echo "###################################### XMRig #########################################"
 
-# XMRig
-${TXT_MONITOR_DIR}/xmrig.sh || true
+function readService {
+    service_name=$1
 
-echo "###################################### GMiner ########################################"
+    if ! test -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt; then
+        return
+    fi
 
-# GMiner
-${TXT_MONITOR_DIR}/gminer.sh || true
+    SERVICE_TXT=$(cat ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt)
 
-echo "###################################### T-Rex ########################################"
+    if [ "$SERVICE_TXT" != "" ]; then
+        SERVICES_TXT="${SERVICES_TXT}
+==== ${service_name} ====
+${SERVICE_TXT}
+"
 
-# T-Rex
-${TXT_MONITOR_DIR}/trex.sh || true
+    fi
 
-echo "###################################### TeamRedMiner #################################"
+}
 
-# TeamRedMiner
-${TXT_MONITOR_DIR}/teamredminer.sh || true
+
+SERVICES=$(getInstalledMiners)
+
+SERVICES_TXT=""
+
+DATA_DIR=$(mktemp -d)
+
+for service_name in $SERVICES; do
+    runService $service_name &
+done
+
+wait
+
+for service_name in $SERVICES; do
+    readService $service_name
+done
+
+rm -rf $DATA_DIR
+
+echo "$SERVICES_TXT"
 

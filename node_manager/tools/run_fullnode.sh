@@ -212,6 +212,11 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=9766 -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 $@"
             ;;
 
+        nervos)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/ckb run -C ${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_ARGS="$@"
+            ;;
+
         radiant)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
             CMD_ARGS="-daemon -rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 -rpcbind=0.0.0.0 -rpcport=7332 $@"

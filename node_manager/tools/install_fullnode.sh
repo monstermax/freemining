@@ -899,6 +899,40 @@ function install_neoxa {
 }
 
 
+function install_nervos {
+    cd ${TMP_DIR}
+
+    chain="nervos"
+    VERSION="0.107.0-rc1"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    DL_URL="https://github.com/nervosnetwork/ckb/releases/download/v${VERSION}/ckb_v${VERSION}_x86_64-unknown-linux-gnu.tar.gz"
+    DL_FILE=$(basename $DL_URL)
+
+    UNZIP_DIR="ckb_v${VERSION}_x86_64-unknown-linux-gnu"
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    tar zxf ${DL_FILE}
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    echo " - Initializing"
+    ${fullnodesDir}/${chain}/ckb init -C ${nodeConfDir}/fullnodes/${chain} >>${INSTALL_LOG}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
+
+
 function install_radiant {
     cd ${TMP_DIR}
 
@@ -1209,6 +1243,9 @@ elif [ "$fullnode" = "monero" ]; then
 
 elif [ "$fullnode" = "neoxa" ]; then
     install_neoxa
+
+elif [ "$fullnode" = "nervos" ]; then
+    install_nervos
 
 elif [ "$fullnode" = "radiant" ]; then
     install_radiant

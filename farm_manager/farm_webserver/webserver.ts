@@ -117,7 +117,7 @@ app.get('/status.json', (req: express.Request, res: express.Response, next: Func
     for (rigsName in rigs) {
         const rigStatus: any = rigs[rigsName];
         rigStatus.dataAge = !rigStatus.dateFarm ? undefined : Math.round(Date.now()/1000 - rigStatus.dateFarm);
-        rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now()/1000 - rigStatus.rig.dateRig);
+        //rigStatus.rig.dataAge = !rigStatus.rig.dateRig ? undefined : Math.round(Date.now()/1000 - rigStatus.rig.dateRig);
     }
 
 

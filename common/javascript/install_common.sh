@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ../common.sh
+source ./common.sh
 
 
 # install basic tools

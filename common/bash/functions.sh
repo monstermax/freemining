@@ -1,5 +1,7 @@
 #!/bin/bash
 
+commonBashDir=$(realpath `dirname $BASH_SOURCE`)
+
 
 function getCmdPath {
     command -v $1
@@ -134,4 +136,106 @@ function getArrayOpt {
 #    # use like this (to remove -ts from script arguments) :
 #    # x=$@ ; set -- $(removeOpt "$x" "-ts")
 #}
+
+
+
+
+######################## RIG ########################
+
+
+
+function getInstalledMiners {
+    MINERS=$(find $minersDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
+    #MINERS=$(echo $(ls $minersDir))
+    echo $MINERS
+}
+
+
+function getAvailableMiners {
+    MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
+    #MINERS=$(jq -r ".miners | keys | join(\" \")" $RIG_CONFIG_FILE)
+    echo $MINERS
+}
+
+
+function getInstalledAvailableMiners {
+    FILE_AV=$(mktemp)
+    FILE_IN=$(mktemp)
+    echo $INSTALLED_MINERS |tr " " "\n" > $FILE_IN
+    echo $CONFIGURED_MINERS |tr " " "\n" > $FILE_AV
+    MINERS=$(comm -12 $FILE_IN $FILE_AV | tr "\n" " ")
+    rm -f $FILE_IN $FILE_AV
+    echo $MINERS
+}
+
+
+function getMinerApiPort {
+    miner=$1
+
+    API_PORT=$(eval echo `jq -r ".miners.${miner}.api.port" ${RIG_CONFIG_FILE} 2>/dev/null`)
+
+    if [ "$API_PORT" = "null" ]; then
+        API_PORT=""
+    fi
+
+    echo $API_PORT
+}
+
+function getInstallableAvailableMiners {
+    #MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
+
+    local current_dir=$commonBashDir
+    local install_miner=${current_dir}/../../rig_manager/tools/install_miner.sh
+    MINERS=$(grep "function install_" $install_miner | cut -d_ -f2- | cut -d" " -f1 | tr "\n" " ")
+
+    echo $MINERS
+}
+
+
+
+
+######################## FARM ########################
+
+
+
+######################## NODE ########################
+
+
+function getInstalledFullnodes {
+    FULLNODES=$(find $fullnodesDir -mindepth 1 -maxdepth 1 -type d 2>/dev/null | xargs -I '{}' basename {} | sort | tr "\n" " ")
+    #FULLNODES=$(echo $(ls $fullnodesDir))
+    echo $FULLNODES
+}
+
+
+function getAvailableFullnodes {
+    FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
+    #FULLNODES=$(jq -r ".fullnodes | keys | join(\" \")" $RIG_CONFIG_FILE)
+    echo $FULLNODES
+}
+
+function getInstalledAvailableFullnodes {
+    FILE_AV=$(mktemp)
+    FILE_IN=$(mktemp)
+    echo $INSTALLED_FULLNODES |tr " " "\n" > $FILE_IN
+    echo $CONFIGURED_FULLNODES |tr " " "\n" > $FILE_AV
+    FULLNODES=$(comm -12 $FILE_IN $FILE_AV | tr "\n" " ")
+    rm -f $FILE_IN $FILE_AV
+    FULLNODES $FULLNODES
+}
+
+
+function getInstallableAvailableFullnodes {
+    #FULLNODES="bitcoincash bitcoinsv callisto dogecoin ergo ethereum ethereum_classic firo flux kadena kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin siacoin zcash"
+
+    local current_dir=$commonBashDir
+    local install_fullnode=${current_dir}/../../node_manager/tools/install_fullnode.sh
+    FULLNODES=$(grep "function install_" $install_fullnode | cut -d_ -f2- | cut -d" " -f1 | tr "\n" " ")
+
+    echo $FULLNODES
+}
+
+
+######################## POOL ########################
+
 

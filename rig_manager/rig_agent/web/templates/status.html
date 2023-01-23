@@ -11,10 +11,14 @@
     </h1>
 
     <div class="d-inline-block h3 ms-3">
-        ${rig.dataAge > 10 ? 
+        ${rig.dataAge > 20 ? 
             `<span class="badge bg-danger">Offline</span>`
-            : 
-            `<span class="badge bg-success">UP</span>`
+            : (
+                Object.keys(rig.services).length == 0 ?
+                    `<span class="badge bg-warning">IDLE</span>`
+                :
+                    `<span class="badge bg-success">UP</span>`
+            )
         }
     </div>
     <div class="d-inline-block h3 ms-3">
@@ -22,51 +26,47 @@
     </div>
 
     <small class="d-inline-block ms-3">
-        Data age: <span id="dataAge">${Math.round(Date.now()/1000 - rig.rig.dateRig)}</span> sec. ago
+        Freshness: <span id="dataAge">${formatNumber(rig.dataAge, 'seconds')}</span> ago
     </small>
 
 </div>
 
-<br />
 <br />
 
 <h2>System informations</h2>
 
 <div class="alert alert-secondary">
     <div class="row">
-        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> ${rig.rig.hostname}</div>
-        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> ${rig.rig.ip}</div>
-        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> ${rig.rig.os}</div>
-        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> ${rig.rig.loadAvg}</div>
-        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> ${formatNumber(rig.rig.uptime, 'seconds')}</div>
-        <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> ${formatNumber(rig.rig.memory.used)} / ${formatNumber(rig.rig.memory.total)} MB</div>
+        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> ${rig.infos.hostname}</div>
+        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> ${rig.infos.ip}</div>
+        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> ${rig.infos.os}</div>
+        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> ${rig.usage.loadAvg}</div>
+        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> ${formatNumber(rig.infos.uptime, 'seconds')}</div>
+        <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> ${formatNumber(rig.usage.memory.used)} / ${formatNumber(rig.usage.memory.total)} MB</div>
     </div>
 </div>
 
-<br />
 <br />
 
 <h2>Hardware devices</h2>
 
 <div class="alert alert-secondary">
-    <div class="row">
+    <div class="row mb-1">
         <div class="col-12">
             <b>CPU</b>
         </div>
         <div class="col-12">
             <div class="border border-dark rounded bg-light m-1 p-1">
-                ${rig.rig.devices.cpu.threads} X ${rig.rig.devices.cpu.name}
+                ${rig.devices.cpu.threads} X ${rig.devices.cpu.name}
             </div>
         </div>
     </div>
-
-    <br />
 
     <div class="row">
         <div class="col-12">
             <b>GPU</b>
         </div>
-        ${rig.rig.devices.gpu.map(gpu => {
+        ${rig.devices.gpu.map(gpu => {
             return `
                 <div class="col-12 col-lg-6">
                     <div class="border border-primary rounded bg-light m-1 p-1">
@@ -78,8 +78,6 @@
     </div>
 </div>
 
-
-<br />
 <br />
 
 
