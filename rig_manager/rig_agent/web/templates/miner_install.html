@@ -1,0 +1,21 @@
+ 
+Miner ${miner} - install
+
+<hr />
+
+${(() => {
+    let html = '';
+
+    if (installStatus) {
+        html += 'Installation in progress...';
+        html += ' <a class="btn btn-danger btn-sm" href="?miner=${miner}&action=stop">Stop install</a>';
+        html += ' <a class="btn btn-primary btn-sm" href="?miner=${miner}&action=log">Show logs</a>';
+
+    } else {
+        html += 'No running installation. <a class="btn btn-primary btn-sm" href="?miner=${miner}&action=start">Install</a>';
+    }
+
+    return html;
+})()}
+
+

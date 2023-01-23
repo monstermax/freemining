@@ -25,6 +25,15 @@ const nodeManagerCmd = `${__dirname}/../node_manager.sh ps`;
 const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
 const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
 const configuredFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+const toolsDir = `${__dirname}/../tools`;
+const cmdFullnode = `${toolsDir}/fullnode.sh`;
+const cmdInstallFullnode = `${toolsDir}/install_fullnode.sh`;
+const cmdUninstallFullnode = `${toolsDir}/uninstall_fullnode.sh`; // not available
+app.use(function (req, res, next) {
+    // Log http request
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+    next();
+});
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
@@ -47,7 +56,37 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
 }));
 app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const fullnodeName = req.query.chain || '';
-    const fullnodeStatus = null; // TODO
+    const action = req.query.action || '';
+    const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
+    if (action === 'start') {
+        if (fullnodeStatus) {
+            res.send("Error: cannot re-intall a running fullnode");
+            res.end();
+            return;
+        }
+        const ok = yield startFullnodeInstall(fullnodeName);
+        if (ok) {
+            res.send(`OK: install started`);
+        }
+        else {
+            res.send(`ERROR: cannot start install`);
+        }
+        res.end();
+        return;
+    }
+    else if (action === 'stop') {
+        // TODO: stop install
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+    }
+    else if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+    const installStatus = yield getFullnodeInstallStatus(fullnodeName);
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -55,6 +94,7 @@ app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(voi
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
+        installStatus,
     };
     const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
     res.send(pageContent);
@@ -62,7 +102,37 @@ app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(voi
 }));
 app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const fullnodeName = req.query.chain || '';
-    const fullnodeStatus = null; // TODO
+    const action = req.query.action || '';
+    const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
+    if (action === 'start') {
+        if (fullnodeStatus) {
+            res.send("Error: cannot uninstall a running fullnode");
+            res.end();
+            return;
+        }
+        const ok = yield startFullnodeUninstall(fullnodeName);
+        if (ok) {
+            res.send(`OK: uninstall started`);
+        }
+        else {
+            res.send(`ERROR: cannot start uninstall`);
+        }
+        res.end();
+        return;
+    }
+    else if (action === 'stop') {
+        // TODO: stop uninstall
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+    }
+    else if (action === 'log') {
+        // TODO: show uninstall log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+    const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -70,6 +140,7 @@ app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(v
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
     res.send(pageContent);
@@ -77,7 +148,9 @@ app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(v
 }));
 app.get('/fullnodes/fullnode', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const fullnodeName = req.query.chain || '';
-    const fullnodeStatus = null; // TODO
+    const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
+    const installStatus = yield getFullnodeInstallStatus(fullnodeName);
+    const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -85,6 +158,8 @@ app.get('/fullnodes/fullnode', (req, res, next) => tslib_1.__awaiter(void 0, voi
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
+        installStatus,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('fullnode.html', opts, req.url);
     res.send(pageContent);
@@ -94,7 +169,7 @@ app.get('/fullnodes/fullnode-status', (req, res, next) => tslib_1.__awaiter(void
     const fullnodeName = req.query.chain || '';
     const asJson = req.query.json === "1";
     const rawOutput = req.query.raw === "1";
-    const fullnodeStatus = null; // TODO
+    const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
     if (rawOutput) {
         if (asJson) {
             res.header({ "Content-Type": "application/json" });
@@ -112,21 +187,6 @@ app.get('/fullnodes/fullnode-status', (req, res, next) => tslib_1.__awaiter(void
         fullnodeStatus,
     };
     const pageContent = loadTemplate('fullnode_status.html', opts, req.url);
-    res.send(pageContent);
-    res.end();
-}));
-app.get('/fullnodes/node', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    const fullnodeName = req.query.chain;
-    const fullnodeStatus = null; // TODO
-    const opts = {
-        configNode,
-        chain: fullnodeName,
-        fullnodeStatus,
-        installablesFullnodes,
-        installedFullnodes,
-        configuredFullnodes,
-    };
-    const pageContent = loadTemplate('fullnode.html', opts, req.url);
     res.send(pageContent);
     res.end();
 }));
@@ -160,5 +220,106 @@ function getNodeProcesses() {
         const cmd = nodeManagerCmd;
         const result = yield (0, utils_1.cmdExec)(cmd);
         return result || '';
+    });
+}
+function getFullnodeStatus(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdFullnode} ${fullnodeName} status`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function startFullnodeInstall(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon start`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function stopFullnodeInstall(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon stop`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function getFullnodeInstallStatus(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon status`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function startFullnodeUninstall(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdUninstallFullnode} ${fullnodeName} --daemon start`;
+        return false;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function stopFullnodeUninstall(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdUninstallFullnode} ${fullnodeName} --daemon stop`;
+        return false;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function getFullnodeUninstallStatus(fullnodeName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon status`;
+        return false;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
     });
 }

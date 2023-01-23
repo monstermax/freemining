@@ -51,6 +51,8 @@ const toolsDir = `${__dirname}/../tools`;
 const cmdService = `${toolsDir}/run_miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
+const cmdInstallMiner = `${toolsDir}/install_miner.sh`;
+const cmdUninstallMiner = `${toolsDir}/uninstall_miner.sh`; // not available
 let rigStatusJson = null;
 let rigStatusTxt = null;
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Starting Rig ${rigName}`);
@@ -108,7 +110,37 @@ app.get('/status.txt', (req, res, next) => tslib_1.__awaiter(void 0, void 0, voi
 }));
 app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const minerName = req.query.miner || '';
+    const action = req.query.action || '';
     const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    if (action === 'start') {
+        if (minerStatus) {
+            res.send("Error: cannot re-intall a running miner");
+            res.end();
+            return;
+        }
+        const ok = yield startMinerInstall(minerName);
+        if (ok) {
+            res.send(`OK: install started`);
+        }
+        else {
+            res.send(`ERROR: cannot start install`);
+        }
+        res.end();
+        return;
+    }
+    else if (action === 'stop') {
+        // TODO: stop install
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+    }
+    else if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+    const installStatus = yield getMinerInstallStatus(minerName);
     const opts = {
         configRig,
         miner: minerName,
@@ -116,6 +148,7 @@ app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, v
         installablesMiners,
         installedMiners,
         configuredMiners,
+        installStatus,
     };
     const pageContent = loadTemplate('miner_install.html', opts, req.url);
     res.send(pageContent);
@@ -123,7 +156,37 @@ app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, v
 }));
 app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const minerName = req.query.miner || '';
+    const action = req.query.action || '';
     const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    if (action === 'start') {
+        if (minerStatus) {
+            res.send("Error: cannot uninstall a running miner");
+            res.end();
+            return;
+        }
+        const ok = yield startMinerUninstall(minerName);
+        if (ok) {
+            res.send(`OK: uninstall started`);
+        }
+        else {
+            res.send(`ERROR: cannot start uninstall`);
+        }
+        res.end();
+        return;
+    }
+    else if (action === 'stop') {
+        // TODO: stop uninstall
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+    }
+    else if (action === 'log') {
+        // TODO: show uninstall log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+    }
+    const uninstallStatus = yield getMinerUninstallStatus(minerName);
     const opts = {
         configRig,
         miner: minerName,
@@ -131,6 +194,7 @@ app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0,
         installablesMiners,
         installedMiners,
         configuredMiners,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
     res.send(pageContent);
@@ -139,6 +203,8 @@ app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0,
 app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const minerName = req.query.miner || '';
     const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
+    const installStatus = yield getMinerInstallStatus(minerName);
+    const uninstallStatus = yield getMinerUninstallStatus(minerName);
     const opts = {
         configRig,
         miner: minerName,
@@ -146,6 +212,8 @@ app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, v
         installablesMiners,
         installedMiners,
         configuredMiners,
+        installStatus,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('miner.html', opts, req.url);
     res.send(pageContent);
@@ -359,7 +427,6 @@ function websocketConnect() {
 }
 function startRigService(minerName, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
@@ -375,7 +442,6 @@ function startRigService(minerName, params) {
 }
 function stopRigService(minerName) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} ${minerName} stop`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
@@ -391,7 +457,6 @@ function stopRigService(minerName) {
 }
 function getRigServiceStatus(minerName, option = '') {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        // TODO: prevoir une version full nodejs (et compatible windows)
         const cmd = `${cmdService} ${minerName} status${option}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         let ret = (yield (0, utils_1.cmdExec)(cmd, 5000)) || '';
@@ -520,5 +585,92 @@ function getRigProcesses() {
         const cmd = rigManagerCmd;
         const result = yield (0, utils_1.cmdExec)(cmd, 2000);
         return result || '';
+    });
+}
+function startMinerInstall(minerName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallMiner} ${minerName} --daemon start`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function stopMinerInstall(minerName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallMiner} ${minerName} --daemon stop`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function getMinerInstallStatus(minerName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdInstallMiner} ${minerName} --daemon status`;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function startMinerUninstall(minerName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdUninstallMiner} ${minerName} --daemon start`;
+        return false;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function stopMinerUninstall(minerName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdUninstallMiner} ${minerName} --daemon stop`;
+        return false;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
+    });
+}
+function getMinerUninstallStatus(minerName) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const cmd = `${cmdUninstallMiner} ${minerName} --daemon status`;
+        return false;
+        console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
+        const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
+        if (ret) {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ${ret}`);
+        }
+        else {
+            console.log(`${(0, utils_1.now)()} [DEBUG] command result: ERROR`);
+        }
+        return !!ret;
     });
 }

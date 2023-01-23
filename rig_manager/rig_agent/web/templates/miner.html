@@ -1,0 +1,105 @@
+ 
+Miner ${miner}
+
+<hr />
+
+
+<br />
+
+
+<h3>Status</h3>
+${(() => {
+    let html = '';
+
+    if (configuredMiners.includes(miner)) {
+        html += miner + ' is configured';
+
+    } else {
+        html += miner + ' is not configured';
+    }
+
+    return html;
+})()}
+<br />
+${(() => {
+    let html = '';
+
+    if (minerStatus) {
+        html += miner + ' is running';
+        html += '&nbsp; <a class="btn btn-secondary btn-sm" href="miner-status?miner=${miner}">status</a>';
+        html += '&nbsp; <a class="btn btn-warning btn-sm" href="/status">stop</a>';
+
+    } else {
+        html += miner + ' is not running';
+        if (installedMiners.includes(miner)) {
+            html += '&nbsp; <a class="btn btn-success btn-sm" href="/status">start</a>';
+        }
+    }
+
+    return html;
+})()}
+
+<br />
+<br />
+
+<h3>Install</h3>
+${(() => {
+    let html = '';
+    let installTxt = 'install';
+
+    if (installedMiners.includes(miner)) {
+        html += miner + ' is installed';
+        installTxt = 're-install';
+
+    } else {
+        html += miner + ' is not installed';
+    }
+    html += '<br />';
+
+    if (installablesMiners.includes(miner) && ! installStatus) {
+        html += miner + ' is installable';
+        html += '&nbsp; <a class="btn btn-primary btn-sm" href="miner-install?miner=${miner}">' + installTxt + '</a>';
+
+    } else {
+        html += miner + ' is not installable';
+        //html += '<a>uninstall</a>';
+    }
+    html += '<br />';
+
+    if (installStatus) {
+        html += miner + ' has installation in progress...';
+
+    } else {
+        html += miner + ' has no installation in progress';
+    }
+
+    return html;
+})()}
+
+<br />
+<br />
+
+
+<h3>Uninstall</h3>
+${(() => {
+    let html = '';
+
+    if (installedMiners.includes(miner)) {
+        html += miner + ' is installed';
+        html += '&nbsp; <a class="btn btn-danger btn-sm" href="miner-uninstall?miner=${miner}">uninstall</a>';
+
+    } else {
+        html += miner + ' is not installed';
+        //html += '<a>uninstall</a>';
+    }
+    html += '<br />';
+
+    if (uninstallStatus) {
+        html += miner + ' has uninstallation in progress';
+
+    } else {
+        html += miner + ' has no uninstallation in progress';
+    }
+
+    return html;
+})()}

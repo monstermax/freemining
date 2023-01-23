@@ -130,12 +130,12 @@ function getArrayOpt {
     done
 }
 
-#function removeOpt {
-#    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
-#
-#    # use like this (to remove -ts from script arguments) :
-#    # x=$@ ; set -- $(removeOpt "$x" "-ts")
-#}
+function removeOpt {
+    echo $(echo $(echo " $1 " | sed -e "s# $2 # #"))
+
+    # use like this (to remove -ts from script arguments) :
+    # x=$@ ; set -- $(removeOpt "$x" "-ts")
+}
 
 
 

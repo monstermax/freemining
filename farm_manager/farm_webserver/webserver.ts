@@ -119,6 +119,16 @@ const rigsConfigs: {[key:string]: any} = {};
 
 const wsClients: {[key:string]: wsClient} = {};
 
+
+
+app.use(function (req: express.Request, res: express.Response, next: Function) {
+    // Log http request
+    console.log(`${now()} [${colors.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+
+    next();
+});
+
+
 app.use(express.urlencoded({ extended: true }));
 
 console.log(`${now()} [${colors.blue('INFO')}] Using static folder ${staticDir}`);

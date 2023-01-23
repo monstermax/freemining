@@ -26,6 +26,11 @@ staticDir = (0, utils_1.stringTemplate)(staticDir, ctx, false, true, true) || ''
 engineWebsiteDir = (0, utils_1.stringTemplate)(engineWebsiteDir, ctx, false, true, true) || '';
 const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
 const poolManagerCmd = `${__dirname}/../pool_manager.sh ps`;
+app.use(function (req, res, next) {
+    // Log http request
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+    next();
+});
 app.use(express_1.default.urlencoded({ extended: true }));
 if (staticDir) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);

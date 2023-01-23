@@ -24,17 +24,17 @@ ${(() => {
 ${(() => {
     let html = '';
 
-    //if (fullnodeStatus) {
-    //    html += chain + ' is running';
-    //    html += '&nbsp; <a class="btn btn-secondary btn-sm" href="fullnode-status?chain=${chain}">status</a>';
-    //    html += '&nbsp; <a class="btn btn-warning btn-sm" href="/status">stop</a>';
-    //
-    //} else {
-    //    html += chain + ' is not running';
-    //    if (installedFullnodes.includes(chain)) {
-    //        html += '&nbsp; <a class="btn btn-success btn-sm" href="/status">start</a>';
-    //    }
-    //}
+    if (fullnodeStatus) {
+        html += chain + ' is running';
+        //html += '&nbsp; <a class="btn btn-secondary btn-sm" href="fullnode-status?chain=${chain}">status</a>';
+        //html += '&nbsp; <a class="btn btn-warning btn-sm" href="/status">stop</a>';
+
+    } else {
+        html += chain + ' is not running';
+        if (installedFullnodes.includes(chain)) {
+            //html += '&nbsp; <a class="btn btn-success btn-sm" href="/status">start</a>';
+        }
+    }
 
     return html;
 })()}
@@ -64,6 +64,14 @@ ${(() => {
         html += chain + ' is not installable';
         //html += '<a>uninstall</a>';
     }
+    html += '<br />';
+
+    if (installStatus) {
+        html += chain + ' has installation in progress...';
+
+    } else {
+        html += chain + ' has no installation in progress';
+    }
 
     return html;
 })()}
@@ -83,6 +91,14 @@ ${(() => {
     } else {
         html += chain + ' is not installed';
         //html += '<a>uninstall</a>';
+    }
+    html += '<br />';
+
+    if (uninstallStatus) {
+        html += chain + ' has uninstallation in progress';
+
+    } else {
+        html += chain + ' has no uninstallation in progress';
     }
 
     return html;

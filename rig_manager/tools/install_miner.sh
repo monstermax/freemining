@@ -9,6 +9,9 @@ set -e
 # ./install_miner.sh ps
 
 
+miner=$1
+shift || true
+
 FRM_PACKAGE="miner_install"
 
 
@@ -22,7 +25,7 @@ function usage {
 
     echo "Usage:"
     echo
-    echo "  $CMD <miner>"
+    echo "  $CMD {miner} [ --background ]"
     echo
     echo
 
@@ -593,8 +596,6 @@ function showMinersList {
 ################################################################################
 
 
-miner=$1
-
 if [ "$miner" = "" ]; then
     usage
     exit 0
@@ -619,75 +620,69 @@ if ! test -d ${minersDir}; then
 fi
 
 
+
 if [ "$miner" = "lolminer" ]; then
-    install_lolminer
-
+    true
 elif [ "$miner" = "gminer" ]; then
-    install_gminer
-
+    true
 elif [ "$miner" = "trex" ]; then
-    install_trex
-
+    true
 elif [ "$miner" = "nbminer" ]; then
-    install_nbminer
-
+    true
 elif [ "$miner" = "teamredminer" ]; then
-    install_teamredminer
-
+    true
 elif [ "$miner" = "bzminer" ]; then
-    install_bzminer
-
+    true
 elif [ "$miner" = "claymore" ]; then
-    install_claymore
-
+    true
 elif [ "$miner" = "nanominer" ]; then
-    install_nanominer
-
+    true
 elif [ "$miner" = "miniz" ]; then
-    install_miniz
-
+    true
 elif [ "$miner" = "firominer" ]; then
-    install_firominer
-
+    true
 elif [ "$miner" = "firominer_sources_amd" ]; then
-    install_firominer_sources_amd
-
+    true
 elif [ "$miner" = "wildrig" ]; then
-    install_wildrig
-
+    true
 elif [ "$miner" = "kawpowminer_nvidia" ]; then
-    install_kawpowminer_nvidia
-
+    true
 elif [ "$miner" = "kawpowminer_amd" ]; then
-    install_kawpowminer_amd
-
+    true
 elif [ "$miner" = "bminer" ]; then
-    install_bminer
-
+    true
 elif [ "$miner" = "autolykosv2_nvidia" ]; then
-    install_autolykosv2_nvidia
-
+    true
 elif [ "$miner" = "autolykosv2_amd" ]; then
-    install_autolykosv2_amd
-
+    true
 elif [ "$miner" = "ethminer" ]; then
-    install_ethminer
-
+    true
 elif [ "$miner" = "srbminer" ]; then
-    install_srbminer
-
+    true
 elif [ "$miner" = "xmrig" ]; then
-    install_xmrig
-
+    true
 elif [ "$miner" = "xmrig_sources_free" ]; then
-    install_xmrig_sources_free
-
+    true
 elif [ "$miner" = "xmrig_nvidia_cuda_support" ]; then
-    install_xmrig_nvidia_cuda_support
-
+    true
 else
     usage
     exit 1
+fi
+
+
+if hasOpt --daemon; then
+    # run in daemon mode
+    x=$@ ; set -- $(removeOpt "$x" "--daemon")
+
+    DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${miner}"
+    DAEMON_CMD="$0 ${miner}"
+    DAEMON_CMD="python3 ../../common/bash/exec_name.py $DAEMON_NAME $DAEMON_CMD" # wrap to change the shell process name
+    daemon_manager $@
+
+else
+    # normal run
+    install_${miner}
 fi
 
 

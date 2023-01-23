@@ -40,8 +40,18 @@ const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' 
 const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
 const configuredFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
 
+const toolsDir = `${__dirname}/../tools`;
+const cmdFullnode = `${toolsDir}/fullnode.sh`;
+const cmdInstallFullnode = `${toolsDir}/install_fullnode.sh`;
+const cmdUninstallFullnode = `${toolsDir}/uninstall_fullnode.sh`; // not available
 
 
+app.use(function (req: express.Request, res: express.Response, next: Function) {
+    // Log http request
+    console.log(`${now()} [${colors.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+
+    next();
+});
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -75,8 +85,44 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 
 app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express.Response, next: Function) => {
     const fullnodeName = req.query.chain as string || '';
+    const action = req.query.action as string || '';
 
-    const fullnodeStatus = null; // TODO
+    const fullnodeStatus = await getFullnodeStatus(fullnodeName);
+
+    if (action === 'start') {
+        if (fullnodeStatus) {
+            res.send("Error: cannot re-intall a running fullnode");
+            res.end();
+            return;
+        }
+
+        const ok = await startFullnodeInstall(fullnodeName);
+
+        if (ok) {
+            res.send(`OK: install started`);
+
+        } else {
+            res.send(`ERROR: cannot start install`);
+        }
+
+        res.end();
+        return;
+
+    } else if (action === 'stop') {
+        // TODO: stop install
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+
+    } else if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+
+    }
+
+    const installStatus = await getFullnodeInstallStatus(fullnodeName);
 
     const opts = {
         configNode,
@@ -85,6 +131,7 @@ app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
+        installStatus,
     };
     const pageContent = loadTemplate('fullnode_install.html', opts, req.url);
     res.send( pageContent );
@@ -94,8 +141,44 @@ app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express
 
 app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
     const fullnodeName = req.query.chain as string || '';
+    const action = req.query.action as string || '';
 
-    const fullnodeStatus = null; // TODO
+    const fullnodeStatus = await getFullnodeStatus(fullnodeName);
+
+    if (action === 'start') {
+        if (fullnodeStatus) {
+            res.send("Error: cannot uninstall a running fullnode");
+            res.end();
+            return;
+        }
+
+        const ok = await startFullnodeUninstall(fullnodeName);
+
+        if (ok) {
+            res.send(`OK: uninstall started`);
+
+        } else {
+            res.send(`ERROR: cannot start uninstall`);
+        }
+
+        res.end();
+        return;
+
+    } else if (action === 'stop') {
+        // TODO: stop uninstall
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+
+    } else if (action === 'log') {
+        // TODO: show uninstall log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+
+    }
+
+    const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
 
     const opts = {
         configNode,
@@ -104,6 +187,7 @@ app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: expre
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('fullnode_uninstall.html', opts, req.url);
     res.send( pageContent );
@@ -114,7 +198,10 @@ app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: expre
 app.get('/fullnodes/fullnode', async (req: express.Request, res: express.Response, next: Function) => {
     const fullnodeName = req.query.chain as string || '';
 
-    const fullnodeStatus = null; // TODO
+    const fullnodeStatus = await getFullnodeStatus(fullnodeName);
+
+    const installStatus = await getFullnodeInstallStatus(fullnodeName);
+    const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
 
     const opts = {
         configNode,
@@ -123,6 +210,8 @@ app.get('/fullnodes/fullnode', async (req: express.Request, res: express.Respons
         installablesFullnodes,
         installedFullnodes,
         configuredFullnodes,
+        installStatus,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('fullnode.html', opts, req.url);
     res.send( pageContent );
@@ -135,7 +224,7 @@ app.get('/fullnodes/fullnode-status', async (req: express.Request, res: express.
     const asJson = req.query.json === "1";
     const rawOutput = req.query.raw === "1";
 
-    const fullnodeStatus = null; // TODO
+    const fullnodeStatus = await getFullnodeStatus(fullnodeName);
 
     if (rawOutput) {
         if (asJson) {
@@ -160,24 +249,6 @@ app.get('/fullnodes/fullnode-status', async (req: express.Request, res: express.
 
 
 
-
-app.get('/fullnodes/node', async (req: express.Request, res: express.Response, next: Function) => {
-    const fullnodeName = req.query.chain;
-
-    const fullnodeStatus = null; // TODO
-
-    const opts = {
-        configNode,
-        chain: fullnodeName,
-        fullnodeStatus,
-        installablesFullnodes,
-        installedFullnodes,
-        configuredFullnodes,
-    };
-    const pageContent = loadTemplate('fullnode.html', opts, req.url);
-    res.send( pageContent );
-    res.end();
-});
 
 
 
@@ -223,3 +294,130 @@ async function getNodeProcesses(): Promise<string> {
     return result || '';
 }
 
+
+
+async function getFullnodeStatus(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdFullnode} ${fullnodeName} status`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+
+async function startFullnodeInstall(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon start`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function stopFullnodeInstall(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon stop`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function getFullnodeInstallStatus(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon status`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function startFullnodeUninstall(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdUninstallFullnode} ${fullnodeName} --daemon start`;
+
+    return false;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function stopFullnodeUninstall(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdUninstallFullnode} ${fullnodeName} --daemon stop`;
+
+    return false;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+
+async function getFullnodeUninstallStatus(fullnodeName: string): Promise<boolean> {
+    const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon status`;
+
+    return false;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}

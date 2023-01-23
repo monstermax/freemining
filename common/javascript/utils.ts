@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import colors from 'colors/safe';
-const { exec } = require('child_process');
+import { exec } from 'child_process';
 
 
 export async function cmdExec(cmd: string, timeout: number | null=null): Promise<string | null> {

@@ -4,7 +4,7 @@ exports.applyHtmlLayout = exports.now = exports.formatNumber = exports.stringTem
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
-const { exec } = require('child_process');
+const child_process_1 = require("child_process");
 function cmdExec(cmd, timeout = null) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let ret = null;
@@ -18,7 +18,7 @@ function cmdExec(cmd, timeout = null) {
                     reject();
                 }, timeout);
             }
-            exec(cmd, (error, stdout, stderr) => {
+            (0, child_process_1.exec)(cmd, (error, stdout, stderr) => {
                 if (timeouted) {
                     clearTimeout(timeouted);
                 }

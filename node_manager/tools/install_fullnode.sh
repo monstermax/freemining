@@ -9,7 +9,11 @@ set -e
 # ./install_fullnode.sh ps
 
 
+fullnode=$1
+shift || true
+
 FRM_PACKAGE="fullnode_install"
+
 
 
 function usage {
@@ -22,7 +26,7 @@ function usage {
 
     echo "Usage:"
     echo
-    echo "  $CMD <fullnode>"
+    echo "  $CMD {fullnode} [ --daemon ]"
     echo
     echo
 
@@ -1173,8 +1177,6 @@ function showFullnodesList {
 ################################################################################
 
 
-fullnode=$1
-
 if test "$fullnode" = ""; then
     usage
     exit 0
@@ -1199,72 +1201,68 @@ if ! test -d ${fullnodesDir}; then
 fi
 
 
+
+
 if [ "$fullnode" = "bitcoincash" ]; then
-    install_bitcoincash
-
-elif [ "$fullnode" = "bitcoinsv" ]; then
-    install_bitcoinsv
-
+    true
+elif [ "$fulln bitcoinsv" ]; then
+    true
 elif [ "$fullnode" = "callisto" ]; then
-    install_callisto
-
+    true
 elif [ "$fullnode" = "dogecoin" ]; then
-    install_dogecoin
-
+    true
 elif [ "$fullnode" = "ergo" ]; then
-    install_ergo
-
+    true
 elif [ "$fullnode" = "ethereum" ]; then
-    install_ethereum
-
+    true
 elif [ "$fullnode" = "ethereum_classic" ]; then
-    install_ethereum_classic
-
+    true
 elif [ "$fullnode" = "firo" ]; then
-    install_firo
-
+    true
 elif [ "$fullnode" = "flux" ]; then
-    install_flux
-
+    true
 elif [ "$fullnode" = "kadena" ]; then
-    install_kadena
-
+    true
 elif [ "$fullnode" = "kaspa" ]; then
-    install_kaspa
-
+    true
 elif [ "$fullnode" = "komodo" ]; then
-    install_komodo
-
+    true
 elif [ "$fullnode" = "meowcoin" ]; then
-    install_meowcoin
-
+    true
 elif [ "$fullnode" = "monero" ]; then
-    install_monero
-
+    true
 elif [ "$fullnode" = "neoxa" ]; then
-    install_neoxa
-
+    true
 elif [ "$fullnode" = "nervos" ]; then
-    install_nervos
-
+    true
 elif [ "$fullnode" = "radiant" ]; then
-    install_radiant
-
+    true
 elif [ "$fullnode" = "raptoreum" ]; then
-    install_raptoreum
-
+    true
 elif [ "$fullnode" = "ravencoin" ]; then
-    install_ravencoin
-
+    true
 elif [ "$fullnode" = "siacoin" ]; then
-    install_siacoin
-
+    true
 elif [ "$fullnode" = "zcash" ]; then
-    install_zcash
-
+    true
 else
     usage
     exit 1
+fi
+
+
+if hasOpt --daemon; then
+    # run in daemon mode
+    x=$@ ; set -- $(removeOpt "$x" "--daemon")
+
+    DAEMON_NAME="freemining.${FRM_MODULE}.${FRM_PACKAGE}.${fullnode}"
+    DAEMON_CMD="$0 ${fullnode}"
+    DAEMON_CMD="python3 ../../common/bash/exec_name.py $DAEMON_NAME $DAEMON_CMD" # wrap to change the shell process name
+    daemon_manager $@
+
+else
+    # normal run
+    install_${fullnode}
 fi
 
 

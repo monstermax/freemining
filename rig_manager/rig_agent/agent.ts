@@ -143,6 +143,9 @@ const cmdService = `${toolsDir}/run_miner.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
 
+const cmdInstallMiner = `${toolsDir}/install_miner.sh`;
+const cmdUninstallMiner = `${toolsDir}/uninstall_miner.sh`; // not available
+
 let rigStatusJson: RigStatusJson | null = null;
 let rigStatusTxt: string | null = null;
 
@@ -230,8 +233,44 @@ app.get('/status.txt', async (req: express.Request, res: express.Response, next:
 
 app.get('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
+    const action = req.query.action as string || '';
 
     const minerStatus = rigStatusJson?.services[minerName];
+
+    if (action === 'start') {
+        if (minerStatus) {
+            res.send("Error: cannot re-intall a running miner");
+            res.end();
+            return;
+        }
+
+        const ok = await startMinerInstall(minerName);
+
+        if (ok) {
+            res.send(`OK: install started`);
+
+        } else {
+            res.send(`ERROR: cannot start install`);
+        }
+
+        res.end();
+        return;
+
+    } else if (action === 'stop') {
+        // TODO: stop install
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+
+    } else if (action === 'log') {
+        // TODO: show install log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+
+    }
+
+    const installStatus = await getMinerInstallStatus(minerName);
 
     const opts = {
         configRig,
@@ -240,6 +279,7 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
         installablesMiners,
         installedMiners,
         configuredMiners,
+        installStatus,
     };
     const pageContent = loadTemplate('miner_install.html', opts, req.url);
     res.send( pageContent );
@@ -249,8 +289,44 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
 
 app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
+    const action = req.query.action as string || '';
 
     const minerStatus = rigStatusJson?.services[minerName];
+
+    if (action === 'start') {
+        if (minerStatus) {
+            res.send("Error: cannot uninstall a running miner");
+            res.end();
+            return;
+        }
+
+        const ok = await startMinerUninstall(minerName);
+
+        if (ok) {
+            res.send(`OK: uninstall started`);
+
+        } else {
+            res.send(`ERROR: cannot start uninstall`);
+        }
+
+        res.end();
+        return;
+
+    } else if (action === 'stop') {
+        // TODO: stop uninstall
+        res.send(`Error: stop is not available`);
+        res.end();
+        return;
+
+    } else if (action === 'log') {
+        // TODO: show uninstall log
+        res.send(`Error: log is not available`);
+        res.end();
+        return;
+
+    }
+
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
 
     const opts = {
         configRig,
@@ -259,6 +335,7 @@ app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Res
         installablesMiners,
         installedMiners,
         configuredMiners,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
     res.send( pageContent );
@@ -271,6 +348,9 @@ app.get('/miners/miner', async (req: express.Request, res: express.Response, nex
 
     const minerStatus = rigStatusJson?.services[minerName];
 
+    const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
+
     const opts = {
         configRig,
         miner: minerName,
@@ -278,6 +358,8 @@ app.get('/miners/miner', async (req: express.Request, res: express.Response, nex
         installablesMiners,
         installedMiners,
         configuredMiners,
+        installStatus,
+        uninstallStatus,
     };
     const pageContent = loadTemplate('miner.html', opts, req.url);
     res.send( pageContent );
@@ -564,8 +646,6 @@ function websocketConnect() {
 
 
 async function startRigService(minerName: string, params: any) {
-    // TODO: prevoir une version full nodejs (et compatible windows)
-
     const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
@@ -585,8 +665,6 @@ async function startRigService(minerName: string, params: any) {
 
 
 async function stopRigService(minerName: string) {
-    // TODO: prevoir une version full nodejs (et compatible windows)
-
     const cmd = `${cmdService} ${minerName} stop`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
@@ -607,8 +685,6 @@ async function stopRigService(minerName: string) {
 
 
 async function getRigServiceStatus(minerName: string, option:string=''): Promise<string> {
-    // TODO: prevoir une version full nodejs (et compatible windows)
-
     const cmd = `${cmdService} ${minerName} status${option}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
@@ -777,4 +853,114 @@ async function getRigProcesses(): Promise<string> {
     return result || '';
 }
 
+
+
+
+async function startMinerInstall(minerName: string): Promise<boolean> {
+    const cmd = `${cmdInstallMiner} ${minerName} --daemon start`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function stopMinerInstall(minerName: string): Promise<boolean> {
+    const cmd = `${cmdInstallMiner} ${minerName} --daemon stop`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function getMinerInstallStatus(minerName: string): Promise<boolean> {
+    const cmd = `${cmdInstallMiner} ${minerName} --daemon status`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+
+async function startMinerUninstall(minerName: string): Promise<boolean> {
+    const cmd = `${cmdUninstallMiner} ${minerName} --daemon start`;
+
+    return false;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function stopMinerUninstall(minerName: string): Promise<boolean> {
+    const cmd = `${cmdUninstallMiner} ${minerName} --daemon stop`;
+
+    return false;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
+
+
+async function getMinerUninstallStatus(minerName: string): Promise<boolean> {
+    const cmd = `${cmdUninstallMiner} ${minerName} --daemon status`;
+
+    return false;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return !!ret;
+}
 

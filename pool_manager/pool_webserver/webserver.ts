@@ -42,6 +42,14 @@ const layoutPath = `${templatesDir}/layout_pool_webserver.html`;
 const poolManagerCmd = `${__dirname}/../pool_manager.sh ps`;
 
 
+app.use(function (req: express.Request, res: express.Response, next: Function) {
+    // Log http request
+    console.log(`${now()} [${colors.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+
+    next();
+});
+
+
 app.use(express.urlencoded({ extended: true }));
 
 

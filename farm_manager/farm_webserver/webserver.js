@@ -30,6 +30,11 @@ const websocketPassword = 'xxx'; // password required to connect to the websocke
 const rigs = {};
 const rigsConfigs = {};
 const wsClients = {};
+app.use(function (req, res, next) {
+    // Log http request
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
+    next();
+});
 app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
