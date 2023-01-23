@@ -350,7 +350,7 @@ function install_kawpowminer_nvidia {
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
     mkdir -p ${minersDir}/${MINER}
-    cp -a linux-ubuntu20-cuda11-1.2.4/kawpowminer ${minersDir}/${MINER}/kawpowminer-nvidia
+    cp -a linux-ubuntu20-cuda11-1.2.4 ${minersDir}/${MINER}
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -371,7 +371,7 @@ function install_kawpowminer_amd {
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
     mkdir -p ${minersDir}/${MINER}
-    cp -a linux-ubuntu20-opencl-1.2.4/kawpowminer ${minersDir}/${MINER}/kawpowminer-amd
+    cp -a linux-ubuntu20-opencl-1.2.4 ${minersDir}/${MINER}
 
     echo
     echo "Miner successfully installed into ${minersDir}/${MINER}"
@@ -413,7 +413,7 @@ function install_autolykosv2_nvidia {
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
     mkdir -p ${minersDir}/${MINER}
-    cp -a NV_Miner/NV_Miner_Linux_CUDA11_4.2.0 ${minersDir}/${MINER}/autolykosv2-nvidia
+    cp -a NV_Miner/NV_Miner_Linux_CUDA11_4.2.0 ${minersDir}/${MINER}
 
     echo
     echo "Miner successfully installed into ${minersDir}/autolykosv2"
@@ -433,7 +433,7 @@ function install_autolykosv2_amd {
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
     mkdir -p ${minersDir}/${MINER}
-    cp -a AMD_Miner/AMD_Miner_UBUNTU_2.1 ${minersDir}/${MINER}/autolykosv2-amd
+    cp -a AMD_Miner/AMD_Miner_UBUNTU_2.1 ${minersDir}/${MINER}
 
     echo
     echo "Miner successfully installed into ${minersDir}/autolykosv2"
@@ -510,7 +510,7 @@ function install_xmrig {
 
 function install_xmrig_sources_free {
     cd ${TMP_DIR}
-    MINER="xmrig"
+    MINER="xmrig_sources_free"
 
     echo "Installing ${MINER} (sources/nofees)..."
 
@@ -550,7 +550,7 @@ function install_xmrig_sources_free {
 
 function install_xmrig_nvidia_cuda_support {
     cd ${TMP_DIR}
-    MINER="xmrig"
+    MINER="xmrig_nvidia_cuda_support"
 
     echo "Installing ${MINER} (cuda support)..."
 
@@ -565,8 +565,13 @@ function install_xmrig_nvidia_cuda_support {
 
     echo " - installing..."
     rm -rf ${minersDir}/xmrig/libxmrig-cuda.so
-    mkdir -p ${minersDir}/xmrig
-    cp -a libxmrig-cuda.so ${minersDir}/xmrig/
+
+    if test -d ${minersDir}/xmrig; then
+        cp -a libxmrig-cuda.so ${minersDir}/xmrig/
+    fi
+    if test -d ${minersDir}/xmrig_sources_free; then
+        cp -a libxmrig-cuda.so ${minersDir}/xmrig_sources_free/
+    fi
 
     echo
     echo "Cuda support for XMRig successfully installed into ${minersDir}/xmrig"
