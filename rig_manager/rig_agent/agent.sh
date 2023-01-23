@@ -44,6 +44,7 @@ function usage {
 
 export CONFIGURED_MINERS
 export INSTALLED_MINERS
+export INSTALLABLE_MINERS
 
 
 DAEMON_CMD="${NODE} ./agent.js"

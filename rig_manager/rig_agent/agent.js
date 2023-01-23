@@ -55,14 +55,9 @@ app.use(express_1.default.urlencoded({ extended: true }));
 console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express_1.default.static(staticDir));
 app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    if (!rigStatusJson) {
-        res.send(`Rig not initialized`);
-        res.end();
-        return;
-    }
+    const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
+    const installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
     const activeProcesses = yield getRigProcesses();
-    const installedMiners = (process.env.CONFIGURED_MINERS || '').split(' ');
-    const installablesMiners = (process.env.INSTALLED_MINERS || '').split(' ');
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
@@ -103,6 +98,14 @@ app.get('/status.txt', (req, res, next) => tslib_1.__awaiter(void 0, void 0, voi
     res.header({ 'Content-Type': 'text/plain' });
     rigStatusTxt = yield getRigTxtStatus();
     res.send(getLastRigTxtStatus());
+    res.end();
+}));
+app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    // TODO
+    res.end();
+}));
+app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    // TODO
     res.end();
 }));
 app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
@@ -223,6 +226,7 @@ function websocketConnect() {
             }
             // Send rig status
             sendStatus(`(open)`);
+            // TODO: envoyer la liste des miners installés ( process.env.INSTALLED_MINERS )
             // send rig status every 10 seconds
             //if (sendStatusTimeout === null) {
             //    sendStatusTimeout = setTimeout(sendStatusSafe, sendStatusInterval, ws);
@@ -242,7 +246,15 @@ function websocketConnect() {
             const message = data.toString();
             console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] received: ${message} [conn ${connectionId}]`);
             const args = message.split(' ');
-            if (args[0] === 'service') {
+            if (args[0] === 'miner-install') {
+                // TODO
+            }
+            else if (args[0] === 'miner-uninstall') {
+                // TODO
+                //} else if (args[0] === 'get-installed-miners') {
+                //    // TODO
+            }
+            else if (args[0] === 'service') {
                 if (args[1] === 'start') {
                     args.shift();
                     args.shift();

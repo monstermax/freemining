@@ -44,6 +44,7 @@ function usage {
 
 export CONFIGURED_FULLNODES
 export INSTALLED_FULLNODES
+export INSTALLABLE_FULLNODES
 
 
 DAEMON_CMD="${NODE} ./webserver.js"

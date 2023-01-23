@@ -49,7 +49,7 @@ if (staticDir) {
 
 
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
-    const installablesFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+    const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
     const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
     const activeProcesses: string = await getNodeProcesses();
 
@@ -63,6 +63,20 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
     res.send( pageContent );
     res.end();
 });
+
+
+
+app.get('/fullnodes/node-install', async (req: express.Request, res: express.Response, next: Function) => {
+    // TODO
+    res.end();
+});
+
+
+app.get('/fullnodes/node-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+    // TODO
+    res.end();
+});
+
 
 
 app.get('/fullnodes/node', async (req: express.Request, res: express.Response, next: Function) => {

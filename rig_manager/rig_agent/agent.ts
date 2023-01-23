@@ -157,16 +157,9 @@ app.use(express.static(staticDir));
 
 
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
-    if (! rigStatusJson) {
-        res.send(`Rig not initialized`);
-        res.end();
-        return;
-    }
-
+    const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
+    const installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
     const activeProcesses: string = await getRigProcesses();
-
-    const installedMiners = (process.env.CONFIGURED_MINERS || '').split(' ');
-    const installablesMiners = (process.env.INSTALLED_MINERS || '').split(' ');
 
     const opts = {
         rigName,
@@ -220,6 +213,19 @@ app.get('/status.txt', async (req: express.Request, res: express.Response, next:
     rigStatusTxt = await getRigTxtStatus();
 
     res.send( getLastRigTxtStatus() );
+    res.end();
+});
+
+
+
+app.get('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
+    // TODO
+    res.end();
+});
+
+
+app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
+    // TODO
     res.end();
 });
 
@@ -383,6 +389,8 @@ function websocketConnect() {
         // Send rig status
         sendStatus(`(open)`);
 
+        // TODO: envoyer la liste des miners installés ( process.env.INSTALLED_MINERS )
+
         // send rig status every 10 seconds
         //if (sendStatusTimeout === null) {
         //    sendStatusTimeout = setTimeout(sendStatusSafe, sendStatusInterval, ws);
@@ -407,7 +415,16 @@ function websocketConnect() {
 
         const args = message.split(' ');
 
-        if (args[0] === 'service') {
+        if (args[0] === 'miner-install') {
+            // TODO
+
+        } else if (args[0] === 'miner-uninstall') {
+            // TODO
+
+        //} else if (args[0] === 'get-installed-miners') {
+        //    // TODO
+
+        } else if (args[0] === 'service') {
 
             if (args[1] === 'start') {
                 args.shift();

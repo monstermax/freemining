@@ -66,13 +66,12 @@ ${SERVICE_TXT}
 }
 
 
-#INSTALLED_MINERS=$(getInstalledMiners)
+
+#INSTALLED_MINERS=$(getInstalledMiners) # already loaded in rig_manager.sh
 
 
 if [ "$INSTALLED_MINERS" != "" ]; then
-
     SERVICES_TXT=""
-
     DATA_DIR=$(mktemp -d)
 
     for service_name in $INSTALLED_MINERS; do

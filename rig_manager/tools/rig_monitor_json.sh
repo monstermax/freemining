@@ -66,12 +66,22 @@ function runService {
     service_name=$1
 
     service_cmd="${JSON_MONITOR_DIR}/${service_name}.sh"
-    exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
+    if [ -x $service_cmd ]; then
+        exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
+
+    else
+        #echo "Warning: service $service_cmd not found"
+        rm -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
+    fi
 }
 
 
 function readService {
     service_name=$1
+
+    if ! test -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.json; then
+        return
+    fi
 
     SERVICE_JSON=$(cat ${DATA_DIR}/rig_monitor_${service_name}.tmp.json)
 
@@ -90,23 +100,26 @@ function readService {
 }
 
 
-INSTALLED_MINERS=$(getAvailableMiners)
+#INSTALLED_MINERS=$(getAvailableMiners) # already loaded in rig_manager.sh
+
 
 SERVICES_JSON=""
+if [ "$INSTALLED_MINERS" != "" ]; then
+    DATA_DIR=$(mktemp -d)
 
-DATA_DIR=$(mktemp -d)
+    for service_name in $INSTALLED_MINERS; do
+        runService $service_name &
+    done
 
-for service_name in $INSTALLED_MINERS; do
-    runService $service_name &
-done
+    wait
 
-wait
+    for service_name in $INSTALLED_MINERS; do
+        readService $service_name
+    done
 
-for service_name in $INSTALLED_MINERS; do
-    readService $service_name
-done
+    rm -rf $DATA_DIR
+fi
 
-rm -rf $DATA_DIR
 
 
 cat <<_EOF

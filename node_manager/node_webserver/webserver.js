@@ -29,7 +29,7 @@ if (staticDir) {
     app.use(express_1.default.static(staticDir));
 }
 app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    const installablesFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+    const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
     const installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
     const activeProcesses = yield getNodeProcesses();
     const opts = {
@@ -40,6 +40,14 @@ app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, funct
     };
     const pageContent = loadTemplate('index.html', opts, req.url);
     res.send(pageContent);
+    res.end();
+}));
+app.get('/fullnodes/node-install', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    // TODO
+    res.end();
+}));
+app.get('/fullnodes/node-uninstall', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    // TODO
     res.end();
 }));
 app.get('/fullnodes/node', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {

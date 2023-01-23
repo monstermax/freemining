@@ -22,16 +22,15 @@ ${activeProcesses}
     ${installedMiners.map(minerName => {
         if (! minerName.trim()) return;
 
-        if (minerName in rig.services) {
+        //if (minerName in rig.services) {
+        //    // service is running
             return '<li><a href="miners/miner?miner=' + minerName + '">' + minerName + '</a></li>';
-        } else {
-            return '<li>' + minerName + '</li>';
-        }
+        //} else {
+        //    return '<li>' + minerName + '</li>';
+        //}
     }).join('')}
 </ul>
 
-
-<br />
 <br />
 
 <h2 class="h4">Installable miners</h2>
