@@ -1,0 +1,66 @@
+ 
+Miner ${miner} - run
+
+<hr />
+
+<form id="form-run" method="post">
+    <input type="hidden" id="action" name="action" value="" />
+
+    <input type="hidden" id="miner" name="miner" value="${miner}" />
+    <input type="hidden" id="algo" name="algo" value="" />
+    <input type="hidden" id="algo" name="pool_url" value="" />
+    <input type="hidden" id="algo" name="pool_account" value="" />
+    <input type="hidden" id="algo" name="optional_params" value="" />
+
+    ${(() => {
+        let html = '';
+
+        if (minerStatus) {
+            html += 'Miner is running...';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopMiner()" href="javascript:void(0)">Stop Miner</a>';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-primary btn-sm" href="?miner=${miner}&action=log">Show logs</a>';
+
+        } else {
+            html += 'No running instance.';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-primary btn-sm" onclick="startMiner()" href="javascript:void(0)">Start</a>';
+        }
+
+        return html;
+    })()}
+</form>
+
+
+<script>
+const minerName = '${miner}';
+
+function startMiner() {
+    //document.getElementById('action').value = 'start';
+    //document.getElementById('form-run').submit();
+
+    const algo = '';
+    const poolUrl = '';
+    const poolAccount = '';
+    const optionalParams = '';
+
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    startMinerAjax(minerName, algo, poolUrl, poolAccount, optionalParams, onStart, onSuccess, onFail);
+}
+
+function stopMiner() {
+    //document.getElementById('action').value = 'stop';
+    //document.getElementById('form-run').submit();
+
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    stopMinerAjax(minerName, onStart, onSuccess, onFail);
+}
+</script>
+

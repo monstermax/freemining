@@ -1,0 +1,43 @@
+ 
+Fullnode ${chain} - run
+
+<hr />
+
+<form id="form-run" method="post">
+    <input type="hidden" id="action" name="action" value="" />
+
+    ${(() => {
+        let html = '';
+
+        if (fullnodeStatus) {
+            html += 'Fullnode is running...';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopFullnode()" href="javascript:void(0)">Stop Fullnode</a>';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-primary btn-sm" href="?chain=${chain}&action=log">Show logs</a>';
+
+        } else {
+            html += 'No running instance.';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-primary btn-sm" onclick="startFullnode()" href="javascript:void(0)">Start</a>';
+        }
+
+        return html;
+    })()}
+</form>
+
+
+<script>
+function startFullnode() {
+    document.getElementById('action').value = 'start';
+    document.getElementById('form-run').submit();
+}
+
+function stopFullnode() {
+    document.getElementById('action').value = 'stop';
+    document.getElementById('form-run').submit();
+}
+</script>
+
