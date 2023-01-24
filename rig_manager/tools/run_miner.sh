@@ -283,7 +283,7 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
     if [ "$CMD_EXEC" != "" ]; then
         CMD="$CMD_EXEC $CMD_ARGS"
 
-        daemonStart $DAEMON_NAME "$CMD" $DAEMON_OPTS
+        daemonStart "$DAEMON_NAME" "$CMD" "$DAEMON_OPTS" $@
         exit $?
     fi
 
@@ -292,46 +292,46 @@ fi
 
 # STOP
 if test "$ACTION" = "stop"; then
-    daemonStop $DAEMON_NAME $DAEMON_OPTS
+    daemonStop "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
 
 # STATUS
 if test "$ACTION" = "status"; then
-    daemonStatus $DAEMON_NAME $DAEMON_OPTS
+    daemonStatus "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
 
 # LOG
 if test "$ACTION" = "log"; then
-    daemonLog $DAEMON_NAME $DAEMON_OPTS
+    daemonLog "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
 
 # PID-LOG
 if test "$ACTION" = "pid-log"; then
-    daemonPidLog $DAEMON_NAME $DAEMON_OPTS
+    daemonPidLog "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
 # LOG-FILE
 if test "$ACTION" = "log-file"; then
-    daemonLogFile $DAEMON_NAME $DAEMON_OPTS
+    daemonLogFile "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
 # PID-FILE
 if test "$ACTION" = "pid-file"; then
-    daemonPidFile $DAEMON_NAME $DAEMON_OPTS
+    daemonPidFile "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
 # PID
 if test "$ACTION" = "pid"; then
-    daemonPid $DAEMON_NAME $DAEMON_OPTS
+    daemonPid "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 
@@ -347,7 +347,7 @@ if test "$MINER" = "ps" || test "$ACTION" = "ps"; then
         exit $?
     fi
 
-    daemonPidPs $DAEMON_NAME $DAEMON_OPTS
+    daemonPidPs "$DAEMON_NAME" "$DAEMON_OPTS" $@
     exit $?
 fi
 

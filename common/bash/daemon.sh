@@ -161,7 +161,7 @@ function daemonLog {
         return 1
     fi
 
-    tail -f $LOG_FILE $@
+    tail $LOG_FILE $@
 }
 
 
@@ -182,7 +182,7 @@ function daemonPidLog {
         return 1
     fi
 
-    tail -f /proc/$PID/fd/1
+    tail /proc/$PID/fd/1
 }
 
 

@@ -12,7 +12,7 @@ body.dark {
     background-color: #1c1c1e;
     color: hsl(0, 3%, 71%);
 }
-body.dark a:not(.navbar-brand, .nav-link) {
+body.dark a:not(.navbar-brand, .nav-link, .btn) {
     color: rgb(77, 132, 183);
 }
 body.dark img {

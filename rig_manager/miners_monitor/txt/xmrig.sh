@@ -26,6 +26,7 @@ fi
 
 echo -e "miner.active: \033[0;32mtrue\033[0m"
 
+echo "------------"
 
 POOL_USER=$(echo $CONFIG_JSON |jq -r ".pools[0].user")
 
@@ -74,6 +75,7 @@ if test -f $PID_FILE; then
     echo "worker.pid: ${PID}"
 fi
 
+echo "------------"
 
 POOL_URL=$(echo $SUMMARY_JSON |jq -r ".connection.pool")
 echo "pool.url: ${POOL_URL}"

@@ -11,28 +11,22 @@ Miner ${miner}
 ${(() => {
     let html = '';
 
-    if (configuredMiners.includes(miner)) {
-        html += miner + ' is configured';
-
-    } else {
-        html += miner + ' is not configured';
-    }
-
-    return html;
-})()}
-<br />
-${(() => {
-    let html = '';
-
     if (minerStatus) {
-        html += miner + ' is running';
-        html += '&nbsp; <a class="btn btn-secondary btn-sm" href="miner-status?miner=${miner}">status</a>';
-        html += '&nbsp; <a class="btn btn-warning btn-sm" href="/status">stop</a>';
+        html += miner + ' is <span class="badge bg-success">running</span>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp; <a class="btn btn-warning btn-sm" href="miner-run?miner=${miner}">stop</a>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp; <a class="btn btn-secondary btn-sm" href="miner-run?miner=${miner}&action=log">view log</a>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp; <a class="btn btn-secondary btn-sm" href="miner-status?miner=${miner}">detailed status</a>';
 
     } else {
-        html += miner + ' is not running';
+        html += miner + ' is <span class="badge bg-danger">not running</span>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+
         if (installedMiners.includes(miner)) {
-            html += '&nbsp; <a class="btn btn-success btn-sm" href="/status">start</a>';
+            html += ' <a class="btn btn-success btn-sm" href="miner-run?miner=${miner}">start</a>';
         }
     }
 
@@ -46,32 +40,34 @@ ${(() => {
 ${(() => {
     let html = '';
     let installTxt = 'install';
+    let installClass = 'primary';
 
     if (installedMiners.includes(miner)) {
-        html += miner + ' is installed';
+        html += miner + ' is <span class="badge bg-success">installed</span>';
         installTxt = 're-install';
+        installClass = 'warning';
 
     } else {
-        html += miner + ' is not installed';
+        html += miner + ' is <span class="badge bg-danger">not installed</span>';
     }
     html += '<br />';
 
     if (installablesMiners.includes(miner) && ! installStatus) {
-        html += miner + ' is installable';
-        html += '&nbsp; <a class="btn btn-primary btn-sm" href="miner-install?miner=${miner}">' + installTxt + '</a>';
+        html += miner + ' is <span class="badge bg-success">installable</span>';
+        html += '&nbsp; <a class="btn btn-' + installClass + ' btn-sm" href="miner-install?miner=${miner}">' + installTxt + '</a>';
 
     } else {
-        html += miner + ' is not installable';
+        html += miner + ' is <span class="badge bg-danger">not installable</span>';
         //html += '<a>uninstall</a>';
     }
     html += '<br />';
 
     if (installStatus) {
-        html += miner + ' has installation in progress...';
+        html += miner + ' has <span class="badge bg-warning">installation in progress...</span>';
         html += '&nbsp; <a class="btn btn-primary btn-sm" href="miner-install?miner=${miner}">show</a>';
 
     } else {
-        html += miner + ' has no installation in progress';
+        html += miner + ' has <span class="badge bg-success">no installation in progress</span>';
     }
 
     return html;
@@ -86,21 +82,40 @@ ${(() => {
     let html = '';
 
     if (installedMiners.includes(miner)) {
-        html += miner + ' is installed';
+        html += miner + ' is <span class="badge bg-success">installed</span>';
         html += '&nbsp; <a class="btn btn-danger btn-sm" href="miner-uninstall?miner=${miner}">uninstall</a>';
 
     } else {
-        html += miner + ' is not installed';
+        html += miner + ' is <span class="badge bg-danger">not installed</span>';
         //html += '<a>uninstall</a>';
     }
     html += '<br />';
 
     if (uninstallStatus) {
-        html += miner + ' has uninstallation in progress';
+        html += miner + ' has <span class="badge bg-warning">uninstallation in progress</span>';
 
     } else {
-        html += miner + ' has no uninstallation in progress';
+        html += miner + ' has <span class="badge bg-success">no uninstallation in progress</span>';
     }
 
     return html;
 })()}
+
+
+<br />
+<br />
+
+<h3>Freemining support</h3>
+${(() => {
+    let html = '';
+
+    if (configuredMiners.includes(miner)) {
+        html += miner + ' is <span class="badge bg-success">supported</span> on Freemining rig manager';
+
+    } else {
+        html += miner + ' is <span class="badge bg-danger">not supported</span> on Freemining rig manager';
+    }
+
+    return html;
+})()}
+

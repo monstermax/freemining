@@ -156,28 +156,30 @@ console.log(`${now()} [${colors.blue('INFO')}] Starting Rig ${rigName}`);
 
 
 
+// LOG HTTP REQUEST
 app.use(function (req: express.Request, res: express.Response, next: Function) {
-    // Log http request
     console.log(`${now()} [${colors.blue('INFO')}] ${req.method.toLocaleUpperCase()} ${req.url}`);
 
     next();
 });
 
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); // parse POST body
 
+
+// STATIC DIR
 console.log(`${now()} [${colors.blue('INFO')}] Using static folder ${staticDir}`);
 app.use(express.static(staticDir));
 
 
-
+// HOMEPAGE
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
     const activeProcesses: string = await getRigProcesses();
 
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getMiners(),
+        miners: getAllMiners(),
         rigs:[],
         activeProcesses,
         installedMiners,
@@ -189,6 +191,7 @@ app.get('/', async (req: express.Request, res: express.Response, next: Function)
 });
 
 
+// RIG STATUS
 app.get('/status', async (req: express.Request, res: express.Response, next: Function) => {
     if (! rigStatusJson) {
         res.send(`Rig not initialized`);
@@ -201,7 +204,8 @@ app.get('/status', async (req: express.Request, res: express.Response, next: Fun
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getMiners(),
+        miners: getAllMiners(),
+        runnableMiners: getRunnableMiners(),
         rigs:[],
         presets,
     };
@@ -209,7 +213,6 @@ app.get('/status', async (req: express.Request, res: express.Response, next: Fun
     res.send( pageContent );
     res.end();
 });
-
 
 
 app.get('/status.json', (req: express.Request, res: express.Response, next: Function) => {
@@ -230,21 +233,19 @@ app.get('/status.txt', async (req: express.Request, res: express.Response, next:
 });
 
 
-
-app.get('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
+// GET MINER
+app.get('/miners/miner', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
-    const action = req.query.action as string || '';
 
-    const minerStatus = rigStatusJson?.services[minerName];
-
-    if (action === 'log') {
-        // TODO: show install log
-        res.send(`Error: log is not available`);
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
         res.end();
         return;
     }
 
+    const minerStatus = rigStatusJson?.services[minerName];
     const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
 
     const opts = {
         configRig,
@@ -254,6 +255,208 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
         installedMiners,
         configuredMiners,
         installStatus,
+        uninstallStatus,
+    };
+    const pageContent = loadTemplate('miner.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+// GET MINER-STATUS
+app.get('/miners/miner-status', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+    const asJson = req.query.json === "1";
+    const rawOutput = req.query.raw === "1";
+
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
+    const minerStatus = await getMinerStatus(minerName, asJson ? '-json' : '-txt');
+
+    if (rawOutput) {
+        if (asJson) {
+            res.header( {"Content-Type": "application/json"} );
+        } else {
+            res.header( {"Content-Type": "text/plain"} );
+        }
+        res.send( minerStatus );
+        res.end();
+        return;
+    }
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+    };
+    const pageContent = loadTemplate('miner_status.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+// GET MINER-RUN
+app.get('/miners/miner-run', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+    const action = req.query.action as string || '';
+
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
+    const minerStatus = await getMinerStatus(minerName);
+
+    if (action === 'log') {
+        const logs = await getMinerLogs(minerName);
+
+        res.header({'Content-Type': 'text/plain'});
+        res.send(logs);
+        res.end();
+        return;
+    }
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
+    };
+    const pageContent = loadTemplate('miner_run.html', opts, req.url);
+    res.send( pageContent );
+    res.end();
+});
+
+
+// POST MINER-RUN
+app.post('/miners/miner-run', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+    const action = req.body.action as string || '';
+
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
+    const minerStatus = await getMinerStatus(minerName);
+    const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
+
+    if (action === 'start') {
+        if (minerStatus) {
+            res.send("Error: cannot start a running miner");
+            res.end();
+            return;
+        }
+        if (installStatus) {
+            res.send("Error: cannot start a miner while an install is running");
+            res.end();
+            return;
+        }
+        if (uninstallStatus) {
+            res.send("Error: cannot start a miner while an uninstall is running");
+            res.end();
+            return;
+        }
+
+        const algo = req.body.algo || '';
+        const service = req.body.service || '';
+        const poolUrl = req.body.poolUrl || '';
+        const poolAccount = req.body.poolAccount || '';
+        const optionalParams = req.body.optionalParams || '';
+
+        const params = {
+            //coin: '',
+            algo,
+            service,
+            poolUrl,
+            poolAccount,
+            optionalParams,
+        };
+        //const paramsJson = JSON.stringify(params);
+
+        const ok = await startMiner(minerName, params);
+
+        if (ok) {
+            res.send(`OK: miner started`);
+
+        } else {
+            res.send(`ERROR: cannot start miner`);
+        }
+
+        res.end();
+        return;
+
+    } else if (action === 'stop') {
+        if (! minerStatus) {
+            res.send("Error: cannot stop a non-running miner");
+            res.end();
+            return;
+        }
+
+        const ok = await stopMiner(minerName);
+
+        if (ok) {
+            res.send(`OK: miner stopped`);
+
+        } else {
+            res.send(`ERROR: cannot stop miner`);
+        }
+
+        res.end();
+        return;
+
+    } else {
+        res.send(`Error: unknown action`);
+        res.end();
+        return;
+    }
+
+});
+
+
+// GET MINER-INSTALL
+app.get('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
+    const minerName = req.query.miner as string || '';
+    const action = req.query.action as string || '';
+
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
+    const minerStatus = rigStatusJson?.services[minerName];
+
+    if (action === 'log') {
+        const logs = await getMinerInstallLogs(minerName);
+
+        res.header({'Content-Type': 'text/plain'});
+        res.send(logs);
+        res.end();
+        return;
+    }
+
+    const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
+
+    const opts = {
+        configRig,
+        miner: minerName,
+        minerStatus,
+        installStatus,
+        uninstallStatus,
+        installablesMiners,
+        installedMiners,
+        configuredMiners,
     };
     const pageContent = loadTemplate('miner_install.html', opts, req.url);
     res.send( pageContent );
@@ -261,15 +464,34 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
 });
 
 
+// POST MINER-INSTALL
 app.post('/miners/miner-install', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
     const action = req.body.action as string || '';
 
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
     const minerStatus = rigStatusJson?.services[minerName];
+    const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
 
     if (action === 'start') {
         if (minerStatus) {
             res.send("Error: cannot re-intall a running miner");
+            res.end();
+            return;
+        }
+        if (installStatus) {
+            res.send("Error: cannot install a miner while another install is running");
+            res.end();
+            return;
+        }
+        if (uninstallStatus) {
+            res.send("Error: cannot install a miner while an uninstall is running");
             res.end();
             return;
         }
@@ -300,30 +522,40 @@ app.post('/miners/miner-install', async (req: express.Request, res: express.Resp
 });
 
 
+// GET MINER-UNINSTALL
 app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
     const action = req.query.action as string || '';
 
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
     const minerStatus = rigStatusJson?.services[minerName];
 
     if (action === 'log') {
-        // TODO: show uninstall log
-        res.send(`Error: log is not available`);
+        const logs = await getMinerUninstallLogs(minerName);
+
+        res.header({'Content-Type': 'text/plain'});
+        res.send(logs);
         res.end();
         return;
-
     }
 
+    const installStatus = await getMinerInstallStatus(minerName);
     const uninstallStatus = await getMinerUninstallStatus(minerName);
 
     const opts = {
         configRig,
         miner: minerName,
         minerStatus,
+        installStatus,
+        uninstallStatus,
         installablesMiners,
         installedMiners,
         configuredMiners,
-        uninstallStatus,
     };
     const pageContent = loadTemplate('miner_uninstall.html', opts, req.url);
     res.send( pageContent );
@@ -331,15 +563,35 @@ app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Res
 });
 
 
+
+// POST MINER-UNINSTALL
 app.post('/miners/miner-uninstall', async (req: express.Request, res: express.Response, next: Function) => {
     const minerName = req.query.miner as string || '';
     const action = req.body.action as string || '';
 
+    if (! minerName) {
+        res.send(`Error: missing {miner} parameter`);
+        res.end();
+        return;
+    }
+
     const minerStatus = rigStatusJson?.services[minerName];
+    const installStatus = await getMinerInstallStatus(minerName);
+    const uninstallStatus = await getMinerUninstallStatus(minerName);
 
     if (action === 'start') {
         if (minerStatus) {
             res.send("Error: cannot uninstall a running miner");
+            res.end();
+            return;
+        }
+        if (installStatus) {
+            res.send("Error: cannot uninstall a miner while an install is running");
+            res.end();
+            return;
+        }
+        if (uninstallStatus) {
+            res.send("Error: cannot uninstall a miner while another uninstall is running");
             res.end();
             return;
         }
@@ -357,8 +609,21 @@ app.post('/miners/miner-uninstall', async (req: express.Request, res: express.Re
         return;
 
     } else if (action === 'stop') {
-        // TODO: stop uninstall
-        res.send(`Error: stop is not available`);
+        if (! minerStatus) {
+            res.send("Error: cannot stop a non-running uninstall");
+            res.end();
+            return;
+        }
+
+        const ok = await stopMinerUninstall(minerName);
+
+        if (ok) {
+            res.send(`OK: install stopped`);
+
+        } else {
+            res.send(`ERROR: cannot stop install`);
+        }
+
         res.end();
         return;
 
@@ -370,95 +635,15 @@ app.post('/miners/miner-uninstall', async (req: express.Request, res: express.Re
 });
 
 
-app.get('/miners/miner', async (req: express.Request, res: express.Response, next: Function) => {
-    const minerName = req.query.miner as string || '';
-
-    const minerStatus = rigStatusJson?.services[minerName];
-
-    const installStatus = await getMinerInstallStatus(minerName);
-    const uninstallStatus = await getMinerUninstallStatus(minerName);
-
-    const opts = {
-        configRig,
-        miner: minerName,
-        minerStatus,
-        installablesMiners,
-        installedMiners,
-        configuredMiners,
-        installStatus,
-        uninstallStatus,
-    };
-    const pageContent = loadTemplate('miner.html', opts, req.url);
-    res.send( pageContent );
-    res.end();
-});
-
-
-app.get('/miners/miner-status', async (req: express.Request, res: express.Response, next: Function) => {
-    const miner = req.query.miner as string || '';
-    const asJson = req.query.json === "1";
-    const rawOutput = req.query.raw === "1";
-
-    const minerStatus = await getRigServiceStatus(miner, asJson ? '-json' : '-txt');
-
-    if (rawOutput) {
-        if (asJson) {
-            res.header( {"Content-Type": "application/json"} );
-        } else {
-            res.header( {"Content-Type": "text/plain"} );
-        }
-        res.send( minerStatus );
-        res.end();
-        return;
-    }
-
-    const opts = {
-        configRig,
-        miner,
-        minerStatus,
-    };
-    const pageContent = loadTemplate('miner_status.html', opts, req.url);
-    res.send( pageContent );
-    res.end();
-});
-
-
-app.post('/api/rig/service/start', async (req: express.Request, res: express.Response, next: Function) => {
-    const minerName = req.body.service;
-
-    const algo = req.body.algo || '';
-    const service = req.body.service || '';
-    const poolUrl = req.body.poolUrl || '';
-    const poolAccount = req.body.poolAccount || '';
-    const optionalParams = req.body.optionalParams || '';
-
-    const params = {
-        //coin: '',
-        algo,
-        service,
-        poolUrl,
-        poolAccount,
-        optionalParams,
-    };
-    //const paramsJson = JSON.stringify(params);
-
-    const ok = await startRigService(minerName, params);
-});
-
-
-app.post('/api/rig/service/stop', async (req: express.Request, res: express.Response, next: Function) => {
-    const minerName = req.body.service;
-    const ok = await stopRigService(minerName);
-});
-
-
+// ERROR 404
 app.use(function (req: express.Request, res: express.Response, next: Function) {
-    // Error 404
     console.log(`${now()} [${colors.yellow('WARNING')}] Error 404: ${req.method.toLocaleUpperCase()} ${req.url}`);
 
     next();
 });
 
+
+// LISTEN
 server.listen(httpServerPort, httpServerHost, () => {
     console.log(`${now()} [${colors.blue('INFO')}] Webserver started on ${httpServerHost}:${httpServerPort}`);
 });
@@ -489,28 +674,7 @@ async function main() {
 
 
 
-function loadTemplate(tplFile: string, data: any={}, currentUrl:string=''): string {
-    const tplPath = `${templatesDir}/${tplFile}`;
-
-    if (! fs.existsSync(tplPath)) {
-        return '';
-    }
-
-    let content = '';
-    try {
-        const layoutTemplate = fs.readFileSync(tplPath).toString();
-        content = stringTemplate(layoutTemplate, data) || '';
-
-    } catch (err: any) {
-        content = `Error: ${err.message}`;
-    }
-
-    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl) || '';
-    return pageContent;
-}
-
-
-
+// WEBSOCKET
 function websocketConnect() {
     let newConnectionTimeout: any = null;
 
@@ -607,7 +771,7 @@ function websocketConnect() {
                         return;
                     }
 
-                    const ok = await startRigService(minerName, params);
+                    const ok = await startMiner(minerName, params);
                     var debugme = 1;
 
                 }
@@ -620,7 +784,7 @@ function websocketConnect() {
                 const minerName = args.shift();
 
                 if (minerName) {
-                    const ok = stopRigService(minerName);
+                    const ok = await stopMiner(minerName);
                     var debugme = 1;
 
                 }
@@ -672,7 +836,9 @@ function websocketConnect() {
 }
 
 
-async function startRigService(minerName: string, params: any) {
+
+// MINER RUN
+async function startMiner(minerName: string, params: any) {
     const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
@@ -691,7 +857,7 @@ async function startRigService(minerName: string, params: any) {
 }
 
 
-async function stopRigService(minerName: string) {
+async function stopMiner(minerName: string) {
     const cmd = `${cmdService} ${minerName} stop`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
@@ -710,8 +876,7 @@ async function stopRigService(minerName: string) {
 }
 
 
-
-async function getRigServiceStatus(minerName: string, option:string=''): Promise<string> {
+async function getMinerStatus(minerName: string, option:string=''): Promise<string> {
     const cmd = `${cmdService} ${minerName} status${option}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
@@ -725,6 +890,26 @@ async function getRigServiceStatus(minerName: string, option:string=''): Promise
 }
 
 
+async function getMinerLogs(minerName: string): Promise<string> {
+    const cmd = `${cmdService} ${minerName} log -- -n 50`;
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return ret || '';
+}
+
+
+
+
+// RIG STATUS
 
 function getLastRigTxtStatus(): string | null {
     if (! rigStatusTxt) {
@@ -756,9 +941,6 @@ async function getRigTxtStatus(): Promise<string | null> {
 
     return statusTxt;
 }
-
-
-
 
 
 function getLastRigJsonStatus(): RigStatusJson | null {
@@ -805,7 +987,6 @@ async function getRigJsonStatus(): Promise<RigStatusJson | null> {
 }
 
 
-
 async function checkStatus(sendStatusToFarm: boolean=true) {
     if (checkStatusTimeout) {
         clearTimeout(checkStatusTimeout);
@@ -823,7 +1004,6 @@ async function checkStatus(sendStatusToFarm: boolean=true) {
     const delay = (!rigStatusJson || Object.keys(rigStatusJson.services).length == 0) ? checkStatusIntervalIdle : checkStatusInterval;
     checkStatusTimeout = setTimeout(checkStatus, delay);
 }
-
 
 
 function sendStatusSafe(): void {
@@ -861,28 +1041,8 @@ function sendStatus(debugInfos:string=''): void {
 }
 
 
-function getMiners() {
-    const miners = [
-        'gminer',
-        'lolminer',
-        'nbminer',
-        'teamredminer',
-        'trex',
-        'xmrig',
-    ];
-    return miners;
-}
 
-
-async function getRigProcesses(): Promise<string> {
-    const cmd = rigManagerCmd;
-    const result = await cmdExec(cmd, 2_000);
-    return result || '';
-}
-
-
-
-
+// MINER INSTALL
 async function startMinerInstall(minerName: string): Promise<boolean> {
     const cmd = `${cmdInstallMiner} ${minerName} --daemon start`;
 
@@ -934,11 +1094,28 @@ async function getMinerInstallStatus(minerName: string): Promise<boolean> {
 }
 
 
+async function getMinerInstallLogs(minerName: string): Promise<string> {
+    const cmd = `${cmdInstallMiner} ${minerName} log -n 50`;
 
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return ret || '';
+}
+
+
+// MINER UNINSTALL
 async function startMinerUninstall(minerName: string): Promise<boolean> {
     const cmd = `${cmdUninstallMiner} ${minerName} --daemon start`;
 
-    return false;
+    return false; // uninstall_miner not supported (uninstall_miner.sh do not exist)
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd, 10_000);
@@ -957,7 +1134,7 @@ async function startMinerUninstall(minerName: string): Promise<boolean> {
 async function stopMinerUninstall(minerName: string): Promise<boolean> {
     const cmd = `${cmdUninstallMiner} ${minerName} --daemon stop`;
 
-    return false;
+    return false; // uninstall_miner not supported (uninstall_miner.sh do not exist)
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd, 10_000);
@@ -976,7 +1153,7 @@ async function stopMinerUninstall(minerName: string): Promise<boolean> {
 async function getMinerUninstallStatus(minerName: string): Promise<boolean> {
     const cmd = `${cmdUninstallMiner} ${minerName} --daemon status`;
 
-    return false;
+    return false; // uninstall_miner not supported (uninstall_miner.sh do not exist)
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd, 10_000);
@@ -990,4 +1167,66 @@ async function getMinerUninstallStatus(minerName: string): Promise<boolean> {
 
     return !!ret;
 }
+
+
+async function getMinerUninstallLogs(minerName: string): Promise<string> {
+    const cmd = `${cmdUninstallMiner} ${minerName} log -n 50`;
+
+    return ''; // uninstall_miner not supported (uninstall_miner.sh do not exist)
+
+    console.log(`${now()} [DEBUG] executing command: ${cmd}`);
+    const ret = await cmdExec(cmd, 10_000);
+
+    if (ret) {
+        console.log(`${now()} [DEBUG] command result: ${ret}`);
+
+    } else {
+        console.log(`${now()} [DEBUG] command result: ERROR`);
+    }
+
+    return ret || '';
+}
+
+
+
+// MISC
+
+function getAllMiners() {
+    const miners = installablesMiners;
+    return miners;
+}
+
+function getRunnableMiners() {
+    const miners = installedMiners.filter(miner => configuredMiners.includes(miner));
+    return miners;
+}
+
+
+async function getRigProcesses(): Promise<string> {
+    const cmd = rigManagerCmd;
+    const result = await cmdExec(cmd, 2_000);
+    return result || '';
+}
+
+
+function loadTemplate(tplFile: string, data: any={}, currentUrl:string=''): string {
+    const tplPath = `${templatesDir}/${tplFile}`;
+
+    if (! fs.existsSync(tplPath)) {
+        return '';
+    }
+
+    let content = '';
+    try {
+        const layoutTemplate = fs.readFileSync(tplPath).toString();
+        content = stringTemplate(layoutTemplate, data) || '';
+
+    } catch (err: any) {
+        content = `Error: ${err.message}`;
+    }
+
+    const pageContent = applyHtmlLayout(content, data, layoutPath, currentUrl) || '';
+    return pageContent;
+}
+
 
