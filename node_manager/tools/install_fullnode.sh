@@ -59,6 +59,42 @@ installNodejsPackages
 
 
 
+function install_bitcoin {
+    cd ${TMP_DIR}
+
+    chain="bitcoin"
+    #VERSION="22.0"
+    #VERSION="23.1"
+    VERSION="24.0.1"
+    DL_URL="https://bitcoin.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz"
+    DL_FILE=$(basename $DL_URL)
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    tar zxvf $DL_FILE
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    cd bitcoin-${VERSION}
+    ln -s bin/bitcoind
+    ln -s bin/bitcoin-cli
+    ln -s bin/bitcoin-qt
+    ln -s bin/bitcoin-tx
+    cd ..
+
+    rm -rf ${fullnodesDir}/${chain}
+    mv bitcoin-${VERSION} ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
 function install_bitcoincash {
     cd ${TMP_DIR}
 
@@ -76,7 +112,7 @@ function install_bitcoincash {
     wget -q $DL_URL
 
     echo " - Unzipping"
-    tar zxvf bitcoin-cash-node-${VERSION}-x86_64-linux-gnu.tar.gz
+    tar zxvf $DL_FILE
 
     echo " - Install into ${fullnodesDir}/${chain}"
     cd bitcoin-cash-node-${VERSION}
@@ -1201,9 +1237,11 @@ if ! test -d ${fullnodesDir}; then
 fi
 
 
+# TODO: rendre cette liste dynamique (en utilisant $INSTALLABLE_FULLNODES)
 
-
-if [ "$fullnode" = "bitcoincash" ]; then
+if [ "$fullnode" = "bitcoin" ]; then
+    true
+elif [ "$fulln bitcoincash" ]; then
     true
 elif [ "$fulln bitcoinsv" ]; then
     true

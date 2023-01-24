@@ -634,6 +634,7 @@ if ! test -d ${minersDir}; then
 fi
 
 
+# TODO: rendre cette liste dynamique (en utilisant $INSTALLABLE_MINERS)
 
 if [ "$miner" = "lolminer" ]; then
     true
