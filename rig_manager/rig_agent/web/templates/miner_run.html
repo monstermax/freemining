@@ -27,7 +27,7 @@ Miner ${miner} - run
             html += 'No running instance.';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
-            html += ' <a class="btn btn-primary btn-sm" onclick="startMinerModal(\'${miner}\')" href="javascript:void(0)">Start</a>';
+            html += ' <a class="btn btn-primary btn-sm" onclick="startMiner()" href="javascript:void(0)">Start</a>';
         }
 
         return html;
@@ -38,10 +38,18 @@ Miner ${miner} - run
 <script>
 const minerName = '${miner}';
 
+function startMiner() {
+    const onStart = window.onStartMinerModalStart = null;
+    const onSuccess = window.onStartMinerModalSuccess = () => window.location.reload();
+    const onFail = window.onStartMinerModalFail = null;
+    startMinerModal(minerName, onStart, onSuccess, onFail);
+}
+
 function stopMiner() {
     const onStart = null;
-    const onSuccess = null;
+    const onSuccess = () => window.location.reload();
     const onFail = null;
+
     stopMinerAjax(minerName, onStart, onSuccess, onFail);
 }
 </script>

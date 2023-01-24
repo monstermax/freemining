@@ -6,7 +6,6 @@ source ../../rig_manager.sh
 
 MINER="gminer"
 
-#echo "miner.name: $MINER"
 
 API_PORT=$(getMinerApiPort $MINER)
 
@@ -16,14 +15,12 @@ SUMMARY_URL=${API_URL}/stat
 SUMMARY_JSON=$(wget -qO- $SUMMARY_URL)
 
 if [ "$SUMMARY_JSON" = "" ]; then
-    #echo -e "miner.active: \033[0;31mfalse\033[0m"
     exit 1
 fi
 
-#echo -e "miner.active: \033[0;32mtrue\033[0m"
 
 
-PID_FILE="${PIDS_DIR}/${MINER}.pid"
+PID_FILE="${rigPidDir}/miners/freemining.rig.miner.${MINER}.pid"
 PID=""
 if test -f $PID_FILE; then
     PID=$(cat $PID_FILE)
@@ -48,13 +45,6 @@ DATE=$(date "+%F %T")
 
 ALGO=$(echo $SUMMARY_JSON |jq -r ".algorithm")
 
-#echo "worker.name: ${WORKER_NAME}"
-#echo "worker.uptime: ${UPTIME}"
-#echo "worker.date: ${DATE}"
-
-#echo "pool.url: ${POOL_URL}"
-#echo "pool.account: ${USER_ADDR}"
-
 
 CPUS=""
 GPUS=""
@@ -63,13 +53,10 @@ GPUS=""
 
 DEVICES_COUNT=$(echo $SUMMARY_JSON |jq ".devices | length")
 
-#echo "------------"
-
 for i in `seq 1 $DEVICES_COUNT`; do
     let WORKER_ID=$((i-1))
 
     if [ "$WORKER_ID" -gt 0 ]; then
-        #echo "------"
         true
     fi
 
@@ -85,14 +72,6 @@ for i in `seq 1 $DEVICES_COUNT`; do
     GPU_TEMPERATURE=$(echo $SUMMARY_JSON |jq -r ".devices[${WORKER_ID}].temperature")
     GPU_POWER_USAGE=$(echo $SUMMARY_JSON |jq -r ".devices[${WORKER_ID}].power_usage")
 
-    #echo "gpu.${WORKER_ID}.id: ${GPU_ID}"
-    #echo "gpu.${WORKER_ID}.name: ${GPU_NAME}"
-    #echo "gpu.${WORKER_ID}.temperature: ${GPU_TEMPERATURE}°"
-    #echo "gpu.${WORKER_ID}.fanSpeed: ${GPU_FAN_SPEED}%"
-    #echo "gpu.${WORKER_ID}.hashRate: ${GPU_HASHRATE_ROUND} ${GPU_SPEED_UNIT}"
-    ##echo "gpu.${WORKER_ID}.powerUsage: ${GPU_POWER_USAGE} ${GPU_POWER_USAGE_UNIT}"
-
-
     if [ "$GPUS" != "" ]; then
         GPUS="${GPUS},"
     fi
@@ -102,9 +81,9 @@ for i in `seq 1 $DEVICES_COUNT`; do
 {
             "id": "${GPU_ID}",
             "name": "${GPU_NAME}",
-            "temperature": "${GPU_TEMPERATURE}",
-            "fanSpeed": "${GPU_FAN_SPEED}",
-            "hashRate": "${GPU_HASHRATE}"
+            "temperature": ${GPU_TEMPERATURE},
+            "fanSpeed": ${GPU_FAN_SPEED},
+            "hashRate": ${GPU_HASHRATE}
         }
 _EOF
     )
@@ -120,10 +99,10 @@ cat <<_EOF
     "worker": {
         "name": "${WORKER_NAME}",
         "miner": "${MINER}",
-        "pid": "${PID}",
+        "pid": ${PID},
         "algo": "${ALGO}",
-        "hashRate": "${WORKER_HASHRATE}",
-        "uptime": "${UPTIME}",
+        "hashRate": ${WORKER_HASHRATE},
+        "uptime": ${UPTIME},
         "date": "${DATE}"
     },
     "pool": {

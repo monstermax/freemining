@@ -30,14 +30,23 @@ Fullnode ${chain} - run
 
 
 <script>
+const fullnodeName = '${chain}';
+
 function startFullnode() {
-    document.getElementById('action').value = 'start';
-    document.getElementById('form-run').submit();
+    const optionalParams = '';
+
+    const onStart = null;
+    const onSuccess = () => window.location.reload();
+    const onFail = null;
+    startFullnodeAjax(fullnodeName, optionalParams, onStart, onSuccess, onFail);
 }
 
 function stopFullnode() {
-    document.getElementById('action').value = 'stop';
-    document.getElementById('form-run').submit();
+    const onStart = null;
+    const onSuccess = () => window.location.reload();
+    const onFail = null;
+    stopFullnodeAjax(fullnodeName, onStart, onSuccess, onFail);
 }
+
 </script>
 

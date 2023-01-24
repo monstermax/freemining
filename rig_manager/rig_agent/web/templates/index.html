@@ -16,6 +16,17 @@ ${activeProcesses}
 <br />
 <br />
 
+<h2 class="h4">Running miners</h2>
+<ul>
+    ${Object.entries(rig.services).map(entry => {
+        const [minerName, service] = entry;
+        if (! minerName.trim()) return;
+        return '<li><a href="miners/miner?miner=' + minerName + '">' + minerName + '</a></li>';
+    }).join('')}
+</ul>
+
+<br />
+
 
 <h2 class="h4">Installed miners</h2>
 <ul>
