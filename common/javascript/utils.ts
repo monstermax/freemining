@@ -16,7 +16,7 @@ export async function cmdExec(cmd: string, timeout: number | null=null): Promise
                 //killCmd = `pkill -f ${cmd.split(' ')[0]}`; // TODO: voir si on peut killer tous les fils shell (de agent.ts), si possible en matchant un pattern
                 //await cmdExec(killCmd);
 
-                reject();
+                reject( { message: `command timeouted (${Math.round(10 * timeout/1000) / 10}) sec.` } );
             }, timeout);
         }
 

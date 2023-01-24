@@ -129,7 +129,7 @@ ${Object.entries(rig.services).map(entry => {
                 <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.worker.uptime, 'seconds')} sec.</div>
                 <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.worker.hashRate)}/sec.</div>
                 <div class="col-12 col-lg-1">
-                    <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMinerAjax('${minerName}')" />
+                    <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('${minerName}')" />
                 </div>
             </div>
 
@@ -156,235 +156,21 @@ ${Object.entries(rig.services).map(entry => {
 
 <input type="button" value="Start new service..." class="btn btn-warning" onclick="startMinerModal()" />
 
-<!--
-<br />
-<br />
-
-<input type="button" value="Start xmrig" class="btn btn-warning" onclick="testStart()" />
--->
-
-
-<div id="modals">
-
-    <!-- Start service Modal -->
-    <div class="modal modal-lg fade" id="startMinerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="startMinerLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="startMinerForm" onchange="checkForm()">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="startMinerLabel">Starting a service</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="action" id="action" value="" />
-
-                        <!--
-                        <div class="mb-3">
-                            <label for="newService_coin" class="form-label">Coin</label>
-                            <select id="newService_coin" name="coin" class="form-select" aria-describedby="newService_coin_Help">
-                                <option></option>
-                            </select>
-                            <div id="newService_coin_Help" class="form-text">optional. used to suggest algos. not yet implemented. do nothing</div>
-                        </div>
-                        -->
-
-                        <div class="mb-3">
-                            <label for="newService_preset" class="form-label">Load config</label>
-                            <select id="newService_preset" name="preset" class="form-select" aria-describedby="newService_preset_Help" onchange="loadConfig(this.value)">
-                                <option value=""></option>
-
-                                ${Object.entries(presets).map((entry, idx) => {
-                                    const [poolName, poolConfigs] = entry;
-
-                                    let poolHtml = '';
-
-                                    if (idx > 0) {
-                                        poolHtml += '<option value=""></option>';
-                                    }
-
-                                    poolHtml += '<optgroup label="+ ' + poolName + '">';
-
-                                    poolHtml += Object.entries(poolConfigs).map(entry2 => {
-                                        const [coinName, preset] = entry2;
-                                        let coinHtml = '<option value="' + poolName + '.' + coinName + '"> * ' + coinName + '&gt; ' + preset.name + '</option>';
-                                        return coinHtml;
-                                    }).join('');
-
-                                    poolHtml += '</optgroup>';
-
-                                    return poolHtml;
-                                }).join('')}
-                            </select>
-                            <div id="newService_preset_Help" class="form-text"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="newService_miner" class="form-label">Miner<sup>*</sup></label>
-                            <select id="newService_miner" name="miner" class="form-select required" aria-describedby="newService_miner_Help">
-                                <option></option>
-
-                                ${runnableMiners.map(miner => {
-                                    if (miner in rig.services) {
-                                        return '<option value="' + miner + '" disabled>' + miner + '</option>';
-
-                                    } else {
-                                        return '<option value="' + miner + '">' + miner + '</option>';
-                                    }
-                                }).join('')}
-                            </select>
-                            <div id="newService_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="newService_algo" class="form-label">Algo<sup>*</sup></label>
-                            <input type="text" class="form-control required" id="newService_algo" name="algo" aria-describedby="newService_algo_Help">
-                            <div id="newService_algo_Help" class="form-text"> &gt; Algorithm of the coin to mine</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="newService_pool_url" class="form-label">Pool url<sup>*</sup></label>
-                            <input type="text" class="form-control required" id="newService_pool_url" name="pool_url" aria-describedby="newService_pool_url_Help">
-                            <div id="newService_pool_url_Help" class="form-text"> &gt; HOST:PORT only (no tcp/stratum/ssl)</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="newService_pool_account" class="form-label">Pool account<sup>*</sup></label>
-                            <input type="text" class="form-control required" id="newService_pool_account" name="pool_account" aria-describedby="newService_pool_account_Help">
-                            <div id="newService_pool_account_Help" class="form-text"> &gt; your mining address + worker name<br />Example: myPoolMiningAddress.myWorkerName</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="newService_optional_params" class="form-label">Miner optional parameters</label>
-                            <input type="text" class="form-control" id="newService_optional_params" name="optional_params" aria-describedby="newService_optional_params_Help">
-                            <div id="newService_optional_params_Help" class="form-text"> &gt; optional miner arguments<br />Example: -d 0,1,2 -log</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer d-flex">
-                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary ms-auto" onclick="submitForm()">Start !</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
 
 <script>
-const rigName = '${rigName}';
 
-let hasSubmited = false;
-function checkForm() {
-    // check form errors
-    const allFields = Array.from(document.getElementsByClassName('required'));
-    const requiredFields = Array.from(document.getElementsByClassName('required'));
-
-    allFields.forEach(field => {
-        if (! hasSubmited) return;
-        field.style.borderColor = '';
-    });
-
-    const errorFields = requiredFields.filter(field => ! field.value);
-    if (errorFields.length) {
-        errorFields.forEach(field => {
-            if (! hasSubmited) return;
-            field.style.borderColor = '#f1aeb5';
-        });
-        return false;
-    }
-    return true;
+window.onStartMinerModalSuccess = () => {
+    window.location.reload();
 }
 
-function submitForm() {
-    hasSubmited = true;
-    if (! checkForm()) return;
-
-    // submit form
-    //document.getElementById('action').value = 'start';
-    //document.getElementById('startMinerForm').submit();
-
-    const minerName = jQuery('#newService_miner').val();
-    const algo = jQuery('#newService_algo').val();
-    const poolUrl = jQuery('#newService_pool_url').val();
-    const poolAccount = jQuery('#newService_pool_account').val();
-    const optionalParams = jQuery('#newService_optional_params').val();
-
+function stopMiner(minerName) {
     const onStart = null;
-    const onSuccess = (minerName, response) => {
-        resetForm();
-        startMinerModalObj.hide();
+    const onSuccess = () => {
+        jQuery('#rig-service-' + minerName).remove();
+        jQuery('#startMinerModal').remove();
     };
-    const onFail = (minerName, reason) => {};
-    startMinerAjax(minerName, algo, poolUrl, poolAccount, optionalParams, onStart, onSuccess, onFail);
-}
-
-function resetForm() {
-    jQuery('#newService_preset').val('');
-    jQuery('#newService_miner').val('');
-    jQuery('#newService_algo').val('');
-    jQuery('#newService_pool_url').val('');
-    jQuery('#newService_pool_account').val('');
-    jQuery('#newService_optional_params').val('');
+    const onFail = () => {
+    };
+    stopMinerAjax(minerName, onStart, onSuccess, onFail);
 }
 </script>
-
-<script>
-let startMinerModalObj = null;
-function startMinerModal() {
-    const options = {};
-    const modal = document.getElementById('startMinerModal');
-    startMinerModalObj = new bootstrap.Modal(modal, options);
-    startMinerModalObj.show();
-}
-
-function testStart() {
-    alertify.confirm("DEBUG/TEST - xmrig", "Do you want to start <b>xmrig</b> with the default parameters ?",
-        function(){
-            const poolUrl = 'xmrpool.eu:5555';
-            const poolAccount = '46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+' + rigName;
-
-            const onStart = null, onSuccess = null, onFail = null;
-            startMinerAjax('xmrig', 'rx/0', poolUrl, poolAccount, '', onStart, onSuccess, onFail)
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
-}
-
-function loadConfig(selectedPreset) {
-    //const $presetsSelect = jQuery('#newService_preset');
-    const parts = selectedPreset.split('.');
-
-    if (parts.length != 2) {
-        jQuery('#newService_miner').val('');
-        jQuery('#newService_algo').val('');
-        jQuery('#newService_pool_url').val('');
-        jQuery('#newService_pool_account').val('');
-        jQuery('#newService_optional_params').val('');
-        return;
-    }
-    const [part1, part2] = parts;
-
-    const config = presets[part1][part2];
-
-    jQuery('#newService_miner').val(config.miner);
-    jQuery('#newService_algo').val(config.algo);
-    jQuery('#newService_pool_url').val(config.poolUrl);
-    jQuery('#newService_pool_account').val(config.poolAccount);
-    jQuery('#newService_optional_params').val(config.args);
-}
-
-const presets = ${JSON.stringify(presets)};
-
-
-//setInterval(() => {
-//    const age = jQuery('#dataAge').text();
-//    jQuery('#dataAge').text(age*1 + 1);
-//}, 1000);
-
-</script>
-

@@ -81,7 +81,7 @@ fi
 if [ "$0" = "$BASH_SOURCE" ]; then
 
     function usage {
-        CMD=$(basename $BASH_SOURCE)
+        local CMD=$(basename $BASH_SOURCE)
 
         echo "=============="
         echo "| FreeMining | ==> [${FRM_MODULE^^}]"

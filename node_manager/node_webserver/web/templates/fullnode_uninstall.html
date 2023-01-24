@@ -6,14 +6,29 @@ Fullnode ${chain} - uninstall
 <form id="form-uninstall" method="post">
     <input type="hidden" id="action" name="action" value="" />
 
+    Fullnode is
+
     ${(() => {
         let html = '';
 
         if (fullnodeStatus) {
-            html += 'Fullnode is <span class="badge bg-warning">running</span>...';
+            html += '<span class="badge bg-warning">running</span>...';
 
         } else {
-            html += 'Fullnode is <span class="badge bg-success">not running</span>';
+            html += '<span class="badge bg-success">not running</span>';
+        }
+
+        return html;
+    })()}
+
+    ${(() => {
+        let html = '';
+
+        if (installedFullnodes.includes(chain)) {
+            html += '<span class="badge bg-success">installed</span>';
+
+        } else {
+            html += '<span class="badge bg-danger">not installed</span>';
         }
 
         return html;
@@ -45,7 +60,7 @@ Fullnode ${chain} - uninstall
             html += 'Uninstallation in progress...';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
-            html += ' <a class="btn btn-danger btn-sm" onclick="stopUninstall()" href="javascript:void(0)">Stop uninstall</a>';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopFullnodeUninstall()" href="javascript:void(0)">Stop uninstall</a>';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
             html += ' <a class="btn btn-primary btn-sm" href="?chain=${chain}&action=log">Show logs</a>';
 
@@ -54,7 +69,7 @@ Fullnode ${chain} - uninstall
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
 
             if (! fullnodeStatus && ! installStatus && installedFullnodes.includes(chain)) {
-                html += ' <a class="btn btn-danger btn-sm disabled" onclick="startUninstall()" href="javascript:void(0)" disabled>Uninstall</a>';
+                html += ' <a class="btn btn-danger btn-sm" onclick="startFullnodeUninstall()" href="javascript:void(0)">Uninstall</a>';
             }
         }
 
@@ -64,31 +79,19 @@ Fullnode ${chain} - uninstall
 
 
 <script>
-function startUninstall() {
-    alertify.confirm("<b>Fullnode uninstallation - confirmation</b>", "Do you want to uninstall the fullnode '<b>${chain}</b>' ?",
-        function(){
-            alertify.success('Starting ${chain} uninstallation...');
+const fullnodeName = '${chain}';
 
-            document.getElementById('action').value = 'start';
-            document.getElementById('form-install').submit();
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
+function startFullnodeUninstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    startFullnodeUninstallAjax(fullnodeName, onStart, onSuccess, onFail);
 }
 
-function stopUninstall() {
-    alertify.confirm("<b>Fullnode uninstallation stopping - confirmation</b>", "Do you want to stop the uninstallation of the fullnode '<b>${chain}</b>' ?",
-        function(){
-            alertify.success('Stopping ${chain} uninstallation...');
-
-            document.getElementById('action').value = 'stop';
-            document.getElementById('form-install').submit();
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
+function stopFullnodeUninstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    stopFullnodeUninstallAjax(fullnodeName, onStart, onSuccess, onFail);
 }
 </script>

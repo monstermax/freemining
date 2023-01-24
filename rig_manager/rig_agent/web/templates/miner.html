@@ -25,7 +25,7 @@ ${(() => {
         html += miner + ' is <span class="badge bg-danger">not running</span>';
         html += '&nbsp;&nbsp;&nbsp;&nbsp;';
 
-        if (installedMiners.includes(miner)) {
+        if (installedMiners.includes(miner) && configuredMiners.includes(miner)) {
             html += ' <a class="btn btn-success btn-sm" href="miner-run?miner=${miner}">start</a>';
         }
     }

@@ -20,7 +20,7 @@ ${(() => {
 
     } else {
         html += chain + ' is <span class="badge bg-danger">not running</span>';
-        if (installedFullnodes.includes(chain)) {
+        if (installedFullnodes.includes(chain) && configuredFullnodes.includes(chain)) {
             html += '&nbsp; <a class="btn btn-success btn-sm" href="fullnode-run?chain=${chain}">start</a>';
         }
     }

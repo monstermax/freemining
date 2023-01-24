@@ -29,7 +29,7 @@ function isRoot {
 
 
 function installBasicTools {
-    INSTALLS=""
+    local INSTALLS=""
     if [ "`getCmdPath curl`" = "" ]; then
         INSTALLS="$INSTALLS curl"
     fi

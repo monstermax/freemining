@@ -190,6 +190,8 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
 
     CMD_EXEC=""
 
+    # TODO: remplacer/modifier le case par des appels de fonctions 'run_{miner}' (comme pour les installs)
+
     case "$MINER" in
         nbminer)
             API_PORT=$(getMinerApiPort ${MINER})

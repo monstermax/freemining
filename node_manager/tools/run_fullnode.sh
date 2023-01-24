@@ -139,7 +139,14 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
     CMD_EXEC=""
     CMD_ARGS=""
 
+    # TODO: remplacer/modifier le case par des appels de fonctions 'run_{fullnode}' (comme pour les installs)
+
     case "$FULLNODE" in
+
+        bitcoin)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
+            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
+            ;;
 
         bitcoincash)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/bitcoind -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"

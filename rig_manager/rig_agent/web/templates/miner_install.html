@@ -6,19 +6,48 @@ Miner ${miner} - install
 <form id="form-install" method="post">
     <input type="hidden" id="action" name="action" value="" />
 
+    Miner is
+
     ${(() => {
         let html = '';
 
         if (minerStatus) {
-            html += 'Miner is <span class="badge bg-warning">running</span>...';
+            html += '<span class="badge bg-warning">running</span>...';
 
         } else {
-            html += 'Miner is <span class="badge bg-success">not running</span>';
+            html += '<span class="badge bg-success">not running</span>';
         }
 
         return html;
     })()}
 
+    ${(() => {
+        let html = '';
+
+        if (installablesMiners.includes(miner)) {
+            html += '<span class="badge bg-success">installable</span>';
+
+        } else {
+            html += '<span class="badge bg-danger">not installable</span>';
+        }
+
+        return html;
+    })()}
+
+    ${(() => {
+        let html = '';
+
+        if (installedMiners.includes(miner)) {
+            html += '<span class="badge bg-warning">installed</span>';
+
+        } else {
+            html += '<span class="badge bg-success">not installed</span>';
+        }
+
+        return html;
+    })()}
+
+    <br />
     <br />
 
     ${(() => {
@@ -28,19 +57,19 @@ Miner ${miner} - install
             html += 'Installation in progress...';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
-            html += ' <a class="btn btn-danger btn-sm" onclick="stopInstall()" href="javascript:void(0)">Stop install</a>';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopMinerInstall()" href="javascript:void(0)">Stop install</a>';
             html += ' <a class="btn btn-primary btn-sm" href="?miner=${miner}&action=log">Show logs</a>';
 
         } else {
             html += 'No running installation.';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
 
-            if (! minerStatus && ! uninstallStatus) {
+            if (! minerStatus && ! uninstallStatus && installablesMiners.includes(miner)) {
                 if (installedMiners.includes(miner)) {
-                    html += ' <a class="btn btn-warning btn-sm" onclick="startInstall()" href="javascript:void(0)">Re-install</a>';
+                    html += ' <a class="btn btn-warning btn-sm" onclick="startMinerInstall()" href="javascript:void(0)">Re-install</a>';
 
                 } else {
-                    html += ' <a class="btn btn-primary btn-sm" onclick="startInstall()" href="javascript:void(0)">Install</a>';
+                    html += ' <a class="btn btn-primary btn-sm" onclick="startMinerInstall()" href="javascript:void(0)">Install</a>';
                 }
             }
         }
@@ -68,32 +97,21 @@ Miner ${miner} - install
 
 
 <script>
-function startInstall() {
-    alertify.confirm("<b>Miner installation - confirmation</b>", "Do you want to install the miner '<b>${miner}</b>' ?",
-        function(){
-            alertify.success('Starting ${miner} installation...');
+const minerName = '${miner}';
 
-            document.getElementById('action').value = 'start';
-            document.getElementById('form-install').submit();
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
+function startMinerInstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    startMinerInstallAjax(minerName, onStart, onSuccess, onFail);
 }
 
-function stopInstall() {
-    alertify.confirm("<b>Miner installation stopping - confirmation</b>", "Do you want to stop the installation of the miner '<b>${miner}</b>' ?",
-        function(){
-            alertify.success('Stopping ${miner} installation...');
 
-            document.getElementById('action').value = 'stop';
-            document.getElementById('form-install').submit();
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
+function stopMinerInstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    stopMinerInstallAjax(minerName, onStart, onSuccess, onFail);
 }
 </script>
 

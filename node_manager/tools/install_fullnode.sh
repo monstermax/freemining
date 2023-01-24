@@ -205,6 +205,34 @@ function install_callisto {
 
 
 
+function install_cardano {
+    cd ${TMP_DIR}
+
+    chain="cardano"
+    VERSION="1.35.4"
+    DL_URL="https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${VERSION}-linux.tar.gz"
+    DL_FILE=$(basename $DL_URL)
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    mkdir -p $UNZIP_DIR
+    tar zxvf $DL_FILE -C $UNZIP_DIR
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
 function install_dogecoin {
     cd ${TMP_DIR}
 
@@ -222,7 +250,7 @@ function install_dogecoin {
     wget -q $DL_URL
 
     echo " - Unzipping"
-    tar zxvf dogecoin-${VERSION}-x86_64-linux-gnu.tar.gz
+    tar zxvf $DL_FILE
 
     echo " - Install into ${fullnodesDir}/${chain}"
     cd dogecoin-${VERSION}
@@ -1246,6 +1274,8 @@ elif [ "$fulln bitcoincash" ]; then
 elif [ "$fulln bitcoinsv" ]; then
     true
 elif [ "$fullnode" = "callisto" ]; then
+    true
+elif [ "$fullnode" = "cardano" ]; then
     true
 elif [ "$fullnode" = "dogecoin" ]; then
     true

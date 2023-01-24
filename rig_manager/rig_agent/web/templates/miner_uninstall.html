@@ -6,14 +6,29 @@ Miner ${miner} - uninstall
 <form id="form-uninstall" method="post">
     <input type="hidden" id="action" name="action" value="" />
 
+    Miner is 
+
     ${(() => {
         let html = '';
 
         if (minerStatus) {
-            html += 'Miner is <span class="badge bg-warning">running</span>...';
+            html += '<span class="badge bg-warning">running</span>...';
 
         } else {
-            html += 'Miner is <span class="badge bg-success">not running</span>';
+            html += '<span class="badge bg-success">not running</span>';
+        }
+
+        return html;
+    })()}
+
+    ${(() => {
+        let html = '';
+
+        if (installedMiners.includes(miner)) {
+            html += '<span class="badge bg-success">installed</span>';
+
+        } else {
+            html += '<span class="badge bg-danger">not installed</span>';
         }
 
         return html;
@@ -45,7 +60,7 @@ Miner ${miner} - uninstall
             html += 'Uninstallation in progress...';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
-            html += ' <a class="btn btn-danger btn-sm" onclick="stopUninstall()" href="javascript:void(0)">Stop uninstall</a>';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopMinerUninstall()" href="javascript:void(0)">Stop uninstall</a>';
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
             html += ' <a class="btn btn-primary btn-sm" href="?miner=${miner}&action=log">Show logs</a>';
 
@@ -54,7 +69,7 @@ Miner ${miner} - uninstall
             html += '&nbsp;&nbsp;&nbsp;&nbsp;';
 
             if (! minerStatus && ! installStatus && installedMiners.includes(miner)) {
-                html += ' <a class="btn btn-danger btn-sm disabled" onclick="startUninstall()" href="javascript:void(0)" disabled>Uninstall</a>';
+                html += ' <a class="btn btn-danger btn-sm" onclick="startMinerUninstall()" href="javascript:void(0)">Uninstall</a>';
             }
         }
 
@@ -64,31 +79,19 @@ Miner ${miner} - uninstall
 
 
 <script>
-function startUninstall() {
-    alertify.confirm("<b>Miner uninstallation - confirmation</b>", "Do you want to uninstall the miner '<b>${miner}</b>' ?",
-        function(){
-            alertify.success('Starting miner ${miner} uninstallation...');
+const minerName = '${miner}';
 
-            document.getElementById('action').value = 'start';
-            document.getElementById('form-uninstall').submit();
-
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
+function startMinerUninstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    startMinerUninstallAjax(minerName, onStart, onSuccess, onFail);
 }
 
-function stopUninstall() {
-    alertify.confirm("<b>Miner uninstallation stopping - confirmation</b>", "Do you want to stop the uninstallation of the miner '<b>${miner}</b>' ?",
-        function(){
-            alertify.success('Stopping miner ${miner} uninstallation...');
-            document.getElementById('action').value = 'stop';
-            document.getElementById('form-uninstall').submit();
-        },
-        function(){
-            //alertify.error('Cancel');
-        }
-    );
+function stopMinerUninstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    stopMinerUninstallAjax(minerName, onStart, onSuccess, onFail);
 }
 </script>
