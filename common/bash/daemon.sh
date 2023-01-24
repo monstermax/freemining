@@ -241,15 +241,13 @@ function do_start {
         local DAEMON_NAME="freemining.anonymous"
     fi
 
-    CMD="$DAEMON_CMD $@"
-
     DAEMON_CHDIR=$PWD
 
     if test "$ACTION" = "debug"; then
         DAEMON_DRY=1
     fi
 
-    daemonStart "$DAEMON_NAME" "$CMD" "$DAEMON_OPTS"
+    daemonStart "$DAEMON_NAME" "$DAEMON_CMD $@" "$DAEMON_OPTS"
 }
 
 function do_stop {

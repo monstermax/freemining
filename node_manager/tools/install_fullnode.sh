@@ -58,6 +58,10 @@ installNodejsPackages
 ################################################################################
 
 
+# TODO: stellar, near, eos, tezos
+# TODO: avalanche, bnbchain, polygon, fantom, cronos, optimism, arbitrum
+
+
 
 function install_bitcoin {
     cd ${TMP_DIR}
@@ -232,6 +236,35 @@ function install_cardano {
     echo
     echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
+
+
+function install_cosmos {
+    cd ${TMP_DIR}
+
+    chain="cosmos"
+    VERSION="9.0.0-rc1"
+    DL_URL="https://github.com/cosmos/gaia/releases/download/v${VERSION}/gaiad-v${VERSION}-linux-amd64"
+    DL_FILE=$(basename $DL_URL)
+    #UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+    chmod +x $DL_FILE
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    mv $DL_FILE ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
+
 
 function install_dogecoin {
     cd ${TMP_DIR}
@@ -1153,7 +1186,6 @@ function install_ravencoin {
 
 
 function install_siacoin {
-
     cd ${TMP_DIR}
 
     chain="siacoin"
@@ -1180,6 +1212,65 @@ function install_siacoin {
     echo
     echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
 }
+
+
+function install_solana {
+    cd ${TMP_DIR}
+
+    chain="solana"
+    VERSION="1.9.12"
+    DL_URL="https://release.solana.com/v${VERSION}/install"
+    DL_FILE=$(basename $DL_URL)
+    UNZIP_DIR="${chain}-unzipped"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Installing ${chain}..."
+    chmod +x $DL_FILE
+    ./$DL_FILE -d ${TMP_DIR}/${UNZIP_DIR}
+    #./${TMP_DIR}/${UNZIP_DIR}/bin/solana config set --url https://api.testnet.solana.com
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+
+}
+
+
+function install_tron {
+    cd ${TMP_DIR}
+
+    chain="tron"
+    VERSION="4.7.0.1"
+    INSTALL_LOG="${nodeLogDir}/fullnodes/${chain}_install.log"
+    >${INSTALL_LOG}
+
+    DL_URL="https://github/com/tronprotocol/java-tron/releases/download/GreatVoyage-v${VERSION}/FullNode.jar"
+    DL_FILE=$(basename $DL_URL)
+    #UNZIP_DIR="${chain}-unzipped"
+
+    echo "Installing ${chain} ${VERSION}..."
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a ./FullNode.jar ${fullnodesDir}/${chain}/
+
+    echo
+    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+}
+
 
 function install_zcash {
     cd ${TMP_DIR}
@@ -1311,12 +1402,17 @@ elif [ "$fullnode" = "ravencoin" ]; then
     true
 elif [ "$fullnode" = "siacoin" ]; then
     true
+elif [ "$fullnode" = "solana" ]; then
+    true
+elif [ "$fullnode" = "tron" ]; then
+    true
 elif [ "$fullnode" = "zcash" ]; then
     true
 else
     usage
     exit 1
 fi
+
 
 
 if hasOpt --daemon; then

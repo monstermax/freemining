@@ -27,37 +27,44 @@ function startFullnodeAjax(fullnodeName, optionalParams='', onStart, onSuccess, 
         return;
     }
 
-    const url = '/fullnodes/fullnode-run?chain=' + fullnodeName;
-    const data = {
-        action: 'start',
-        chain: fullnodeName,
-        optionalParams: optionalParams || '',
-    };
+    alertify.confirm("<b>Fullnode start - confirmation</b>", "Do you want to start the fullnode '<b>" + fullnodeName + "</b>' ?",
+        function(){
+            const url = '/fullnodes/fullnode-run?chain=' + fullnodeName;
+            const data = {
+                action: 'start',
+                chain: fullnodeName,
+                optionalParams: optionalParams || '',
+            };
 
-    if (typeof onStart === 'function') {
-        onStart(fullnodeName);
-    }
-
-    jQuery.post(url, data).then((response) => {
-        if (response.startsWith('OK:')) {
-            if (typeof onSuccess === 'function') {
-                onSuccess(fullnodeName, response);
+            if (typeof onStart === 'function') {
+                onStart(fullnodeName);
             }
-            alertify.success('Fullnode ' + fullnodeName + ' started');
 
-        } else {
-            if (typeof onFail === 'function') {
-                onFail(fullnodeName, { message: response });
-            }
-            alertify.error('Fullnode ' + fullnodeName + ' cannot be started. ' + response);
-        }
+            jQuery.post(url, data).then((response) => {
+                if (response.startsWith('OK:')) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(fullnodeName, response);
+                    }
+                    alertify.success('Fullnode ' + fullnodeName + ' started');
 
-    }, (err) => {
-        if (typeof onFail === 'function') {
-            onFail(fullnodeName, err);
+                } else {
+                    if (typeof onFail === 'function') {
+                        onFail(fullnodeName, { message: response });
+                    }
+                    alertify.error('Fullnode ' + fullnodeName + ' cannot be started. ' + response);
+                }
+
+            }, (err) => {
+                if (typeof onFail === 'function') {
+                    onFail(fullnodeName, err);
+                }
+                alertify.error('Fullnode ' + fullnodeName + ' cannot be started. ' + err.message);
+            });
+        },
+        function(){
+            //alertify.error('Cancel');
         }
-        alertify.error('Fullnode ' + fullnodeName + ' cannot be started. ' + err.message);
-    });
+    );
 }
 
 

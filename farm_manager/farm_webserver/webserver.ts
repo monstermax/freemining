@@ -493,6 +493,7 @@ const interval = setInterval(function pings() {
 
 
 function getMiners() {
+    // TODO: recuperer depuis une variable d'env
     const miners = [
         'gminer',
         'lolminer',

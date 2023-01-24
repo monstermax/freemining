@@ -283,10 +283,11 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
 
 
     if [ "$CMD_EXEC" != "" ]; then
-        CMD="$CMD_EXEC $CMD_ARGS"
-
-        daemonStart "$DAEMON_NAME" "$CMD" "$DAEMON_OPTS" $@
+        daemonStart "$DAEMON_NAME" "$CMD_EXEC $CMD_ARGS" "$DAEMON_OPTS" # $@
         exit $?
+
+    else
+        exit 1
     fi
 
 fi

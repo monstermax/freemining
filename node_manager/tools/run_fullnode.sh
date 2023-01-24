@@ -164,6 +164,12 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
             CMD_ARGS="--port 30303 --http.addr 0.0.0.0 --http.port 8545 --ws.addr 0.0.0.0 --ws.port 8546 $@"
             ;;
 
+        cosmos)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/gaiad"
+            CMD_ARGS="$@"
+            # TODO
+            ;;
+
         dogecoin)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
             CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=22555 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=22556 $@"
@@ -242,6 +248,16 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
         siacoin)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/siad --sia-directory ${nodeConfDir}/fullnodes/${FULLNODE}"
             CMD_ARGS="--rpc-addr 127.0.0.1:9981 $@"
+            ;;
+
+        solana)
+            CMD_EXEC="${fullnodesDir}/${FULLNODE}/bin/solana-validator"
+            CMD_ARGS="--ful-rpc-apî --rpc-bind-address 127.0.0.1 --rpc-port 9981 $@"
+            ;;
+
+        tron)
+            CMD_EXEC="java -Xmx24g -XX:+UseConcMarkSweepGC -jar ${fullnodesDir}/${FULLNODE}/Fullnode.jar -c ${nodeConfDir}/fullnodes/${FULLNODE}/main_net_config.conf"
+            CMD_ARGS="$@"
             ;;
 
         zcash)
