@@ -265,6 +265,18 @@ _EOF
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     MINER=$(echo ${FILENAME%.*})
-    miner_run $MINER $@
+
+    if test "$1" = "--install-miner"; then
+        miner_alias=$MINER
+
+        if hasOpt --alias; then
+            miner_alias=$(getOpt --alias)
+        fi
+
+        miner_install $miner_alias $@
+
+    else
+        miner_run $MINER $@
+    fi
 fi
 

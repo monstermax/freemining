@@ -712,10 +712,10 @@ else
     if test -f ../miners_support/${miner}.sh; then
         source ../miners_support/${miner}.sh
 
-        miner_alias=$(getOpt --alias)
-        if test "$miner_alias" = ""; then
-            miner_alias=$miner
-            shift 2 || true
+        miner_alias=$miner
+
+        if hasOpt --alias; then
+            miner_alias=$(getOpt --alias)
         fi
 
         miner_install "${miner_alias}"

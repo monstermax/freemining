@@ -42,3 +42,25 @@ function miner_install {
 }
 
 
+
+############################################
+
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+    FILENAME=$(basename $0)
+    MINER=$(echo ${FILENAME%.*})
+
+    if test "$1" = "--install-miner"; then
+        miner_alias=$MINER
+
+        if hasOpt --alias; then
+            miner_alias=$(getOpt --alias)
+        fi
+
+        miner_install $miner_alias $@
+
+    else
+        true
+    fi
+fi
+

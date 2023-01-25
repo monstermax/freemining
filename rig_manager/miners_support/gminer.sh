@@ -12,7 +12,7 @@ function miner_install {
     local VERSION="3.24"
     local VERSION_BIS="3_24"
     local TMP_DIR=$(mktemp -d)
-    miner_before_install "$VERSION" $TMP_DIR
+    miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
     local DL_URL="https://github.com/develsoftware/GMinerRelease/releases/download/${VERSION}/gminer_${VERSION_BIS}_linux64.tar.xz"
     local DL_FILE=$(basename $DL_URL)
@@ -264,6 +264,18 @@ _EOF
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     MINER=$(echo ${FILENAME%.*})
-    miner_run $MINER $@
+
+    if test "$1" = "--install-miner"; then
+        miner_alias=$MINER
+
+        if hasOpt --alias; then
+            miner_alias=$(getOpt --alias)
+        fi
+
+        miner_install $miner_alias $@
+
+    else
+        miner_run $MINER $@
+    fi
 fi
 

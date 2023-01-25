@@ -196,7 +196,19 @@ function fullnode_status_json {
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     FULLNODE=$(echo ${FILENAME%.*})
-    fullnode_run $FULLNODE $@
+
+    if test "$1" = "--install-fullnode"; then
+        fullnode_alias=$FULLNODE
+
+        if hasOpt --alias; then
+            fullnode_alias=$(getOpt --alias)
+        fi
+
+        fullnode_install $fullnode_alias $@
+
+    else
+        fullnode_run $FULLNODE $@
+    fi
 fi
 
 

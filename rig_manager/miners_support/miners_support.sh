@@ -40,6 +40,7 @@ function miner_before_install {
     cd ${TMP_DIR}
 
     echo "Installing ${MINER} ${VERSION}..."
+    echo "Target: ${minersDir}/${MINER}"
 }
 
 
@@ -64,7 +65,11 @@ function miner_run {
     local MINER=$1
     local MINER_CMD=$(miner_get_run_cmd "$MINER")
 
-    if test -x $MINER_CMD; then
+    if ! test -d ${minersDir}/${MINER}; then
+        echo "Error: Miner $MINER is not installed"
+        exit 1
+
+    elif test -x $MINER_CMD; then
         exec $MINER_CMD $@
 
     else

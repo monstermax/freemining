@@ -1426,7 +1426,23 @@ if hasOpt --daemon; then
 
 else
     # normal run
-    install_${fullnode}
+    #install_${fullnode}
+
+    if test -f ../fullnodes_support/${fullnode}.sh; then
+        source ../fullnodes_support/${fullnode}.sh
+
+        fullnode_alias=$fullnode
+
+        if hasOpt --alias; then
+            fullnode_alias=$(getOpt --alias)
+        fi
+
+        fullnode_install "${fullnode_alias}"
+        exit $?
+    fi
+
+    usage
+    exit 1
 fi
 
 

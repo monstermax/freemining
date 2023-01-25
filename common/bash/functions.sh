@@ -158,6 +158,9 @@ function getInstalledMiners {
 function getAvailableMiners {
     local MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
     # TODO: a revoir => lister les fichiers du dossier miners_support
+    # grep "function miner_get_run_cmd" ${commonBashDir}/../../rig_manager/miners_support/* -l | xargs -I {} basename {} | cut -d. -f1
+    # OR
+    # grep "function miner_status_json" ${commonBashDir}/../../rig_manager/miners_support/* -l | xargs -I {} basename {} | cut -d. -f1
     echo $MINERS
 }
 
@@ -174,10 +177,10 @@ function getInstalledAvailableMiners {
 
 
 function getInstallableAvailableMiners {
-    # TODO: a revoir => lister les fichiers (contenant un certain pattern) du dossier miners_support ?
     local install_miner=${commonBashDir}/../../rig_manager/tools/install_miner.sh
     local MINERS=$(grep "function install_" $install_miner | cut -d_ -f2- | cut -d" " -f1 | sort | tr "\n" " ")
-
+    # TODO: a revoir => lister les fichiers (contenant un certain pattern) du dossier miners_support ?
+    # grep "function miner_install" ${commonBashDir}/../../rig_manager/miners_support/* -l | xargs -I {} basename {} | cut -d. -f1
     echo $MINERS
 }
 
