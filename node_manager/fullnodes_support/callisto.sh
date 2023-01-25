@@ -9,7 +9,26 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="1.3.1"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github.com/EthereumCommonwealth/go-callisto/releases/download/${VERSION}/geth-linux-amd64"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+    chmod 775 ${DL_FILE}
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    mv ${DL_FILE} ${fullnodesDir}/${chain}/
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

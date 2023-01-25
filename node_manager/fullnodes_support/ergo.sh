@@ -9,7 +9,97 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="5.0.5"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github.com/ergoplatform/ergo/releases/download/v${VERSION}/ergo-${VERSION}.jar"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    if [ "`getCmdPath java`" = "" ]; then
+        echo " - Installing dependencies packages: Java-JDK"
+        rootRequired
+        sudo apt-get install -qq default-jdk -y
+    fi
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Preparing"
+    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
+    mkdir -p $CONF_DIR
+
+    poolName=$(jq '.poolName' $POOL_CONFIG_FILE)
+    apiKeyHash=$(jq '.fullnodes.ergo.apiKeyHash' $POOL_CONFIG_FILE)
+
+    CONF_DIR_REAL=$(realpath $CONF_DIR)
+
+    cat << _EOF > ${CONF_DIR}/ergo.conf
+
+ergo {
+    directory = ${CONF_DIR}
+
+    node {
+        mining = true
+    }
+
+    chain {
+        reemission {
+            checkReemissionRules = true
+        }
+    }
+
+}
+
+scorex {
+    restApi {
+        #bindAddress = "0.0.0.0:9053"
+        apiKeyHash = "${apiKeyHash}"
+    }
+
+    network {
+        #nodeName = "ergo-yo"
+        #bindAddress = "0.0.0.0:9020"
+    }
+}
+
+
+_EOF
+
+    cat << _EOF > start.sh
+#!/bin/bash
+
+java -jar -Xmx4G ${fullnodesDir}/${chain}/${DL_FILE} --mainnet -c ${CONF_DIR_REAL}/ergo.conf
+
+_EOF
+
+    cat << _EOF > stop.sh
+#!/bin/bash
+
+pkill -f jar.*ergo-.*\.jar
+
+_EOF
+
+    cat << _EOF > status.sh
+#!/bin/bash
+
+pgrep -f -a jar.*ergo-.*\.jar
+
+_EOF
+
+    chmod +x *.sh
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a *.jar *.sh ${fullnodesDir}/${chain}/
+    cd ${fullnodesDir}/${chain}
+    ln -s ${DL_FILE} ergo.jar
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

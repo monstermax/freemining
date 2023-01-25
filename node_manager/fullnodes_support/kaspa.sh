@@ -9,7 +9,27 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="0.12.11"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github.com/kaspanet/kaspad/releases/download/v${VERSION}/kaspad-v${VERSION}-linux.zip"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    unzip -q $DL_FILE -d $UNZIP_DIR
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR/bin ${fullnodesDir}/${chain}
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

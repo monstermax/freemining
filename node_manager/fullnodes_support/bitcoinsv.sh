@@ -9,7 +9,47 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="sources"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github.com/bitcoin-sv/bitcoin-sv"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+
+    echo " - Installing dependencies packages: build tools"
+    rootRequired
+
+    sudo apt-get install -qq -y build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
+    sudo apt-get install -qq -y libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
+    sudo apt-get install -qq -y libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev
+    sudo apt-get install -qq -y libgoogle-perftools-dev libzmq3-dev
+
+    echo " - Downloading ${chain}"
+    git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+    cd bitcoin-sv
+
+    echo " - Compiling 1/3"
+    ./autogen.sh >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+
+    echo " - Compiling 2/3"
+    mkdir build
+    cd build
+    ../configure >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+
+    echo " - Compiling 2/3 (about 1 hour remaining...)"
+    make >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+    # 1 hour compilation...
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a ./src/{bitcoind,bitcoin-cli,bitcoin-miner,bitcoin-tx} ${fullnodesDir}/${chain}/
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

@@ -9,7 +9,27 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="5.3.2"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://z.cash/downloads/zcash-${VERSION}-linux64-debian-buster.tar.gz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    tar zxf $DL_FILE
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    cp -a ./zcash-${VERSION}/bin ${fullnodesDir}/${chain}
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

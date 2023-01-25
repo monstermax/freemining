@@ -9,7 +9,25 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="4.7.0.1"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github/com/tronprotocol/java-tron/releases/download/GreatVoyage-v${VERSION}/FullNode.jar"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a ./FullNode.jar ${fullnodesDir}/${chain}/
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

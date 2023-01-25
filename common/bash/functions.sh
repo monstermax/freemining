@@ -157,7 +157,7 @@ function getInstalledMiners {
 
 function getAvailableMiners {
     local MINERS=$(eval echo `jq -r ".miners | keys | join(\" \")" ${RIG_CONFIG_FILE} 2>/dev/null`)
-    #MINERS=$(jq -r ".miners | keys | join(\" \")" $RIG_CONFIG_FILE)
+    # TODO: a revoir => lister les fichiers du dossier miners_support
     echo $MINERS
 }
 
@@ -173,6 +173,15 @@ function getInstalledAvailableMiners {
 }
 
 
+function getInstallableAvailableMiners {
+    # TODO: a revoir => lister les fichiers (contenant un certain pattern) du dossier miners_support ?
+    local install_miner=${commonBashDir}/../../rig_manager/tools/install_miner.sh
+    local MINERS=$(grep "function install_" $install_miner | cut -d_ -f2- | cut -d" " -f1 | sort | tr "\n" " ")
+
+    echo $MINERS
+}
+
+
 function getMinerApiPort {
     local miner=$1
 
@@ -183,17 +192,6 @@ function getMinerApiPort {
     fi
 
     echo $API_PORT
-}
-
-
-function getInstallableAvailableMiners {
-    #MINERS="autolykosv2_amd autolykosv2_nvidia bminer bzminer claymore ethminer firominer firominer_sources_amd gminer kawpowminer_amd kawpowminer_nvidia lolminer miniz nanominer nbminer srbminer teamredminer trex wildrig xmrig xmrig_sources_free xmrig_nvidia_cuda_support"
-
-    local current_dir=$commonBashDir
-    local install_miner=${current_dir}/../../rig_manager/tools/install_miner.sh
-    local MINERS=$(grep "function install_" $install_miner | cut -d_ -f2- | cut -d" " -f1 | sort | tr "\n" " ")
-
-    echo $MINERS
 }
 
 
@@ -215,7 +213,7 @@ function getInstalledFullnodes {
 
 function getAvailableFullnodes {
     local FULLNODES=$(eval echo `jq -r ".fullnodes | keys | join(\" \")" ${NODE_CONFIG_FILE} 2>/dev/null`)
-    #FULLNODES=$(jq -r ".fullnodes | keys | join(\" \")" $NODE_CONFIG_FILE)
+    # TODO: a revoir => lister les fichiers du dossier fullnodes_support
     echo $FULLNODES
 }
 
@@ -231,10 +229,8 @@ function getInstalledAvailableFullnodes {
 
 
 function getInstallableAvailableFullnodes {
-    #FULLNODES="bitcoincash bitcoinsv callisto dogecoin ergo ethereum ethereum_classic firo flux kadena kaspa komodo meowcoin monero neoxa radiant raptoreum ravencoin siacoin zcash"
-
-    local current_dir=$commonBashDir
-    local install_fullnode=${current_dir}/../../node_manager/tools/install_fullnode.sh
+    # TODO: a revoir => lister les fichiers (contenant un certain pattern) du dossier fullnodes_support ?
+    local install_fullnode=${commonBashDir}/../../node_manager/tools/install_fullnode.sh
     local FULLNODES=$(grep "function install_" $install_fullnode | cut -d_ -f2- | cut -d" " -f1 | tr "\n" " ")
 
     echo $FULLNODES

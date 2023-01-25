@@ -9,7 +9,39 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="1.0.3"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-CLI-x86_64-linux-gnu.tar.gz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    local DL_URL_QT="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-Qt-x86_64-linux-gnu.tar.gz"
+    local DL_FILE_QT=$(basename $DL_URL_QT)
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    mkdir $UNZIP_DIR
+    tar zxf ${DL_FILE} -C $UNZIP_DIR
+
+    if [ "1" = "0" ]; then
+        echo " - Downloading Qt fullnode"
+        wget -q $DL_URL_QT
+
+        echo " - Unzipping Qt fullnode"
+        unzip -q ${DL_FILE_QT} -d $UNZIP_DIR
+    fi
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

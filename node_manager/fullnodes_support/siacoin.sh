@@ -9,7 +9,27 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="1.5.9"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://sia.tech/releases/siad/Sia-v${VERSION}-linux-amd64.zip"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    unzip -q $DL_FILE
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    cp -a ./Sia-v${VERSION}-linux-amd64 ${fullnodesDir}/${chain}
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

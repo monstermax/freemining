@@ -9,7 +9,57 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="sources"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://github.com/KomodoPlatform/komodo"
+    #local DL_FILE=$(basename $DL_URL)
+    #local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Installing dependencies packages: build tools"
+    rootRequired
+    sudo apt-get update -qq
+    sudo apt-get upgrade -qq -y
+    sudo apt-get install -qq -y build-essential pkg-config libc6-dev m4 g++-multilib autoconf libtool ncurses-dev unzip git zlib1g-dev wget curl bsdmainutils automake cmake clang ntp ntpdate nano >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+
+
+    echo " - Downloading ${chain}"
+    git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
+    cd komodo
+
+    echo " - Fetching params"
+    ./zcutil/fetch-params.sh >>${INSTALL_LOG}
+
+    echo " - Compiling ${chain}"
+    ./zcutil/build.sh -j$(nproc) >>${INSTALL_LOG}
+
+    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
+    mkdir -p $CONF_DIR
+
+    cat << _EOF > ${CONF_DIR}/komodo.conf
+rpcuser=user
+rpcpassword=pass
+txindex=1
+bind=127.0.0.1
+rpcbind=127.0.0.1
+addnode=78.47.196.146
+addnode=5.9.102.210
+addnode=178.63.69.164
+addnode=88.198.65.74
+addnode=5.9.122.241
+addnode=144.76.94.38
+addnode=148.251.44.16
+_EOF
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mkdir -p ${fullnodesDir}/${chain}
+    cp -a src/{komodod,komodo-cli,komodo-tx} ${fullnodesDir}/${chain}/
+
+    #fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 

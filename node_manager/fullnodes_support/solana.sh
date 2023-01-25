@@ -9,7 +9,29 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+    local VERSION="1.9.12"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$VERSION" $TMP_DIR
 
+    local DL_URL="https://release.solana.com/v${VERSION}/install"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${chain}"
+    wget -q $DL_URL
+
+    echo " - Installing ${chain}..."
+    chmod +x $DL_FILE
+    ./$DL_FILE -d ${TMP_DIR}/${UNZIP_DIR}
+    #./${TMP_DIR}/${UNZIP_DIR}/bin/solana config set --url https://api.testnet.solana.com
+
+    echo " - Install into ${fullnodesDir}/${chain}"
+    rm -rf ${fullnodesDir}/${chain}
+    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+
+    fullnode_after_install "$VERSION" $TMP_DIR
 }
 
 
