@@ -22,14 +22,6 @@ function daemonStart {
     local DAEMON_CMD=$2
     local DAEMON_BG=$3
 
-    #echo "=== daemonStart ==="
-    #echo "@ = $@"
-    #echo "DAEMON_NAME = $DAEMON_NAME"
-    #echo "DAEMON_CMD = $DAEMON_CMD"
-    #echo "DAEMON_BG = $DAEMON_BG"
-    #echo "=== /daemonStart ==="
-    #echo
-
     local DAEMON_CMD_WITHOUT_ARGS=$(echo $DAEMON_CMD | cut -d" " -f1)
     local DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
 
