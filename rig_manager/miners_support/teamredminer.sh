@@ -13,10 +13,10 @@ function miner_install {
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    DL_URL="https://github.com/todxx/teamredminer/releases/download/v${VERSION}/teamredminer-v${VERSION}-linux.tgz"
-    DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${MINER}-unzipped"
-    INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
+    local DL_URL="https://github.com/todxx/teamredminer/releases/download/v${VERSION}/teamredminer-v${VERSION}-linux.tgz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${MINER}-unzipped"
+    local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
     >${INSTALL_LOG}
 
     echo " - downloading..."
@@ -36,19 +36,24 @@ function miner_install {
 }
 
 
-
+ 
 function miner_get_run_cmd {
+    local MINER=$1
+    shift || true
+
+    local CMD_EXEC=${minersDir}/${MINER}/teamredminer
+    echo $CMD_EXEC
+}
+
+
+function miner_get_run_args {
     local MINER=$1
     local ALGO=$2
     local POOL_URL=$3
     local POOL_ACCOUNT=$4
     shift 4 || true
 
-    mkdir -p ${rigLogDir}/miners
-    mkdir -p ${rigPidDir}/miners
-
     local API_PORT=$(getMinerApiPort ${MINER})
-    local CMD_EXEC="${minersDir}/${MINER}/teamredminer"
 
     local CMD_ARGS="-a ${ALGO} \
         -o stratum+tcp://${POOL_URL} \
@@ -57,7 +62,7 @@ function miner_get_run_cmd {
         --api_listen=0.0.0.0:${API_PORT} \
         $@"
 
-    echo $CMD_EXEC $CMD_ARGS
+    echo $CMD_ARGS
 }
 
 
@@ -258,11 +263,6 @@ _EOF
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     MINER=$(echo ${FILENAME%.*})
-    MINER_CMD=${minersDir}/${MINER}/${MINER}
-
-    if test -x $MINER_CMD; then
-        exec $MINER_CMD $@
-    fi
-
+    miner_run $MINER $@
 fi
 

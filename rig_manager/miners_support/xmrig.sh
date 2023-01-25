@@ -461,11 +461,6 @@ _EOF
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     MINER=$(echo ${FILENAME%.*})
-    MINER_CMD=$(miner_get_run_cmd ${MINER})
-
-    if test -x $MINER_CMD; then
-        exec $MINER_CMD $@
-    fi
-
+    miner_run $MINER $@
 fi
 

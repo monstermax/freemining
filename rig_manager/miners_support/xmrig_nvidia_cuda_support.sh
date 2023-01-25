@@ -13,10 +13,10 @@ function miner_install {
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    DL_URL="https://github.com/xmrig/xmrig-cuda.git"
-    #DL_FILE=$(basename $DL_URL)
-    #UNZIP_DIR="${MINER}-unzipped"
-    INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
+    local DL_URL="https://github.com/xmrig/xmrig-cuda.git"
+    #local DL_FILE=$(basename $DL_URL)
+    #local UNZIP_DIR="${MINER}-unzipped"
+    local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
     >${INSTALL_LOG}
 
     echo " - downloading..."

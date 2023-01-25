@@ -16,7 +16,18 @@ function miner_before_install {
     local TMP_DIR=$3
 
     if [ "$MINER" = "" ]; then
-        echo "Error: missing MINER_INSTALL"
+        echo "Error: missing MINER"
+        exit 1
+    fi
+
+    if [ "$VERSION" = "" ]; then
+        #echo "Error: missing VERSION"
+        #exit 1
+        true
+    fi
+
+    if [ "$TMP_DIR" = "" ]; then
+        echo "Error: missing TMP_DIR"
         exit 1
     fi
 
@@ -43,8 +54,23 @@ function miner_after_install {
 }
 
 
+function miner_get_run_cmd {
+    local MINER=$1
+    # extends ME
+}
+
+
 function miner_run {
-    local cmd=$(miner_get_run_cmd)
-    $cmd
+    local MINER=$1
+    local MINER_CMD=$(miner_get_run_cmd "$MINER")
+
+    if test -x $MINER_CMD; then
+        exec $MINER_CMD $@
+
+    else
+        echo "Error: invalid command $MINER_CMD"
+        exit 1
+    fi
+
 }
 

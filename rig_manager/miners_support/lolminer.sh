@@ -14,10 +14,10 @@ function miner_install {
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    DL_URL="https://github.com/Lolliedieb/lolMiner-releases/releases/download/${VERSION}/lolMiner_v${VERSION}_Lin64.tar.gz"
-    DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${MINER}-unzipped"
-    INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
+    local DL_URL="https://github.com/Lolliedieb/lolMiner-releases/releases/download/${VERSION}/lolMiner_v${VERSION}_Lin64.tar.gz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${MINER}-unzipped"
+    local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
     >${INSTALL_LOG}
 
     echo " - downloading..."
@@ -53,9 +53,6 @@ function miner_get_run_args {
     local POOL_URL=$3
     local POOL_ACCOUNT=$4
     shift 4 || true
-
-    mkdir -p ${rigLogDir}/miners
-    mkdir -p ${rigPidDir}/miners
 
     local API_PORT=$(getMinerApiPort ${MINER})
 
@@ -260,11 +257,6 @@ _EOF
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     MINER=$(echo ${FILENAME%.*})
-    MINER_CMD=${minersDir}/${MINER}/lolMiner
-
-    if test -x $MINER_CMD; then
-        exec $MINER_CMD $@
-    fi
-
+    miner_run $MINER $@
 fi
 

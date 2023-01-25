@@ -13,10 +13,10 @@ function miner_install {
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$VERSION" $TMP_DIR
 
-    DL_URL="https://github.com/bzminer/bzminer/releases/download/v${VERSION}/bzminer_v${VERSION}_linux.tar.gz"
-    DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${MINER}-unzipped"
-    INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
+    local DL_URL="https://github.com/bzminer/bzminer/releases/download/v${VERSION}/bzminer_v${VERSION}_linux.tar.gz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${MINER}-unzipped"
+    local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
     >${INSTALL_LOG}
 
     echo " - downloading..."
@@ -79,11 +79,6 @@ function miner_status_json {
 if [ "$0" = "$BASH_SOURCE" ]; then
     FILENAME=$(basename $0)
     MINER=$(echo ${FILENAME%.*})
-    MINER_CMD=$(miner_get_run_cmd ${MINER})
-
-    if test -x $MINER_CMD; then
-        exec $MINER_CMD $@
-    fi
-
+    miner_run $MINER $@
 fi
 
