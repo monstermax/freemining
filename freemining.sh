@@ -214,6 +214,7 @@ $0 \$@
         cd node_manager/node_webserver; tsc; cd ../..
 
     elif [ "$ACTION" = "update" ]; then
+        git reset --hard
         git pull
         $BASH_SOURCE modules-install
 

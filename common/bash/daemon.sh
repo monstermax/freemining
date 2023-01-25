@@ -71,7 +71,7 @@ function daemonStart {
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME debug"
         RC=0
 
-    elif [ "$DAEMON_BG" = "bg" -o "$DAEMON_BG" = "background" -o "$DAEMON_BG" = "daemon" ]; then
+    elif [ "$DAEMON_BG" != "bg" -a "$DAEMON_BG" != "background" -a "$DAEMON_BG" != "daemon" ]; then
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME terminated"
 
     elif [ "$RC" = "0" ]; then
