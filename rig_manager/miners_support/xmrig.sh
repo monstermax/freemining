@@ -13,10 +13,10 @@ function miner_install {
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    DL_URL="https://github.com/xmrig/xmrig/releases/download/v${VERSION}/xmrig-${VERSION}-linux-x64.tar.gz"
-    DL_FILE=$(basename $DL_URL)
-    UNZIP_DIR="${MINER}-unzipped"
-    INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
+    local DL_URL="https://github.com/xmrig/xmrig/releases/download/v${VERSION}/xmrig-${VERSION}-linux-x64.tar.gz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${MINER}-unzipped"
+    local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
     >${INSTALL_LOG}
 
     echo " - downloading..."
@@ -57,21 +57,21 @@ function miner_get_run_args {
     local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
 
     local CMD_ARGS="
-        -a ${ALGO} \
-        --url=${POOL_URL} \
-        --user=${POOL_ACCOUNT} \
-        --http-enabled \ \
-        --http-host 127.0.0.1
-        --http-port ${API_PORT} \
-        --http-access-token=yomining \
-        --http-no-restricted \
-        -k \
-        --donate-level 0 \
-        --cpu-max-threads-hint 75 \
-        --cpu-priority 3 \
-        --randomx-no-rdmsr \
-        --log-file=${LOG_FILE} \
-        --no-color \
+        -a ${ALGO}
+        --url=${POOL_URL}
+        --user=${POOL_ACCOUNT}
+        --http-enabled
+        --http-host 127.0.0
+        --http-port ${API_PORT}
+        --http-access-token=yomining
+        --http-no-restricted
+        -k
+        --donate-level 0
+        --cpu-max-threads-hint 75
+        --cpu-priority 3
+        --randomx-no-rdmsr
+        --log-file=${LOG_FILE}
+        --no-color
         "
 
     echo $CMD_ARGS

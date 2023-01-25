@@ -9,37 +9,9 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
-    #local VERSION="22.0"
-    #local VERSION="23.1"
-    local VERSION="24.0.1"
-    local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
 
-    local DL_URL="https://bitcoin.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz"
-    local DL_FILE=$(basename $DL_URL)
-    local UNZIP_DIR="${FULLNODE}-unzipped"
-    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
-    >${INSTALL_LOG}
-
-    echo " - Downloading ${FULLNODE}"
-    wget -q $DL_URL
-
-    echo " - Unzipping"
-    tar zxf $DL_FILE
-
-    echo " - Install into ${fullnodesDir}/${FULLNODE}"
-    cd bitcoin-${VERSION}
-    ln -s bin/bitcoind
-    ln -s bin/bitcoin-cli
-    ln -s bin/bitcoin-qt
-    ln -s bin/bitcoin-tx
-    cd ..
-
-    rm -rf ${fullnodesDir}/${FULLNODE}
-    mv bitcoin-${VERSION} ${fullnodesDir}/${FULLNODE}
-
-    fullnode_after_install "$VERSION" $TMP_DIR
 }
+
 
 
 function fullnode_get_run_cmd {

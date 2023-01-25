@@ -58,12 +58,12 @@ function miner_get_run_args {
     local API_PORT=$(getMinerApiPort ${MINER})
 
     local CMD_ARGS="
-        --algo ${ALGO} \
-        --server ${POOL_HOST} \
-        --port ${POOL_PORT} \
-        --user ${POOL_ACCOUNT} \
-        --pass x \
-        --api ${API_PORT} \
+        --algo ${ALGO}
+        --server ${POOL_HOST}
+        --port ${POOL_PORT}
+        --user ${POOL_ACCOUNT}
+        --pass x
+        --api ${API_PORT}
         "
 
     echo $CMD_ARGS

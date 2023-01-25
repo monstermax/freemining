@@ -9,6 +9,7 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+
 }
 
 
@@ -17,7 +18,7 @@ function fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
-    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/dogecoind
+    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/chainweb-node
     echo $CMD_EXEC
 }
 
@@ -26,16 +27,8 @@ function fullnode_get_run_args {
     local FULLNODE=$1
 
     local CMD_ARGS="
-        -datadir=${nodeConfDir}/fullnodes/${FULLNODE}
-        -server
-        -port=22556
-        -rpcbind=0.0.0.0
-        -rpcport=22555
-        -rpcuser=user
-        -rpcpassword=pass
-        -rpcallowip=127.0.0.1
-        -rpcallowip=${IP_CRYPTO}
-        -printtoconsole
+        --database-directory ${nodeConfDir}/fullnodes/${FULLNODE}
+        --config-file ${nodeConfDir}/fullnodes/${FULLNODE}/kadena.conf
         "
     echo $CMD_ARGS
 }

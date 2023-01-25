@@ -252,7 +252,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
 
         solana)
             CMD_EXEC="${fullnodesDir}/${FULLNODE}/bin/solana-validator"
-            CMD_ARGS="--ful-rpc-apî --rpc-bind-address 127.0.0.1 --rpc-port 9981 $@"
+            CMD_ARGS="--ful-rpc-api --rpc-bind-address 127.0.0.1 --rpc-port 9981 $@"
             ;;
 
         tron)

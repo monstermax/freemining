@@ -9,6 +9,7 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+
 }
 
 
@@ -17,7 +18,7 @@ function fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
-    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/dogecoind
+    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/firod
     echo $CMD_EXEC
 }
 
@@ -28,11 +29,11 @@ function fullnode_get_run_args {
     local CMD_ARGS="
         -datadir=${nodeConfDir}/fullnodes/${FULLNODE}
         -server
-        -port=22556
-        -rpcbind=0.0.0.0
-        -rpcport=22555
+        -port=8168
         -rpcuser=user
         -rpcpassword=pass
+        -rpcbind=0.0.0.0
+        -rpcport=8888
         -rpcallowip=127.0.0.1
         -rpcallowip=${IP_CRYPTO}
         -printtoconsole
