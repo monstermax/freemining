@@ -336,7 +336,17 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
     CMD_ARGS=$(miner_get_run_args "${MINER}" "${ALGO}" "${POOL_URL}" "${POOL_ACCOUNT}")
 
     if [ "$CMD_EXEC" != "" ]; then
-        daemonStart "$DAEMON_NAME" "$CMD_EXEC $CMD_ARGS $@" "$DAEMON_OPTS"
+        DAEMON_CMD="$CMD_EXEC $CMD_ARGS $@"
+
+        #echo "=== run_miner ==="
+        #echo "@ = $@"
+        #echo "DAEMON_NAME = $DAEMON_NAME"
+        #echo "DAEMON_CMD = $DAEMON_CMD"
+        #echo "DAEMON_BG = $DAEMON_OPTS"
+        #echo "=== /run_miner ==="
+        #echo
+
+        daemonStart "$DAEMON_NAME" "$DAEMON_CMD" "$DAEMON_OPTS"
         exit $?
 
     else

@@ -631,7 +631,7 @@ function websocketConnect() {
 // MINER RUN
 function startMiner(minerName, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
+        const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams}`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
         if (ret) {
@@ -672,7 +672,7 @@ function getMinerStatus(minerName, option = '') {
 }
 function getMinerLogs(minerName) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const cmd = `${cmdService} ${minerName} log -- -n 50`;
+        const cmd = `${cmdService} ${minerName} log -n 50`;
         console.log(`${(0, utils_1.now)()} [DEBUG] executing command: ${cmd}`);
         const ret = yield (0, utils_1.cmdExec)(cmd, 10000);
         if (ret) {

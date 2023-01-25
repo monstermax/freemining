@@ -22,11 +22,19 @@ function daemonStart {
     local DAEMON_CMD=$2
     local DAEMON_BG=$3
 
+    #echo "=== daemonStart ==="
+    #echo "@ = $@"
+    #echo "DAEMON_NAME = $DAEMON_NAME"
+    #echo "DAEMON_CMD = $DAEMON_CMD"
+    #echo "DAEMON_BG = $DAEMON_BG"
+    #echo "=== /daemonStart ==="
+    #echo
+
     local DAEMON_CMD_WITHOUT_ARGS=$(echo $DAEMON_CMD | cut -d" " -f1)
     local DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
 
+
     local DAEMON_OUTPUT=""
-    echo "DEBUG DAEMON_PID_DIR=$DAEMON_PID_DIR"
 
     local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
     local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
@@ -71,7 +79,7 @@ function daemonStart {
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME debug"
         RC=0
 
-    elif [ "$DAEMON_BG" = "" ]; then
+    elif [ "$DAEMON_BG" = "bg" -o "$DAEMON_BG" = "background" -o "$DAEMON_BG" = "daemon" ]; then
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME terminated"
 
     elif [ "$RC" = "0" ]; then

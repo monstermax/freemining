@@ -56,12 +56,13 @@ function miner_get_run_args {
 
     local API_PORT=$(getMinerApiPort ${MINER})
 
-    local CMD_ARGS="-a ${ALGO} \
-        -o stratum+tcp://${POOL_URL} \
-        -u ${POOL_ACCOUNT} \
-        -p x \
-        --api-bind-http 127.0.0.1:${API_PORT} \
-        $@"
+    local CMD_ARGS="
+        -a ${ALGO}
+        -o stratum+tcp://${POOL_URL}
+        -u ${POOL_ACCOUNT}
+        -p x
+        --api-bind-http 127.0.0.1:${API_PORT}
+        "
 
     echo $CMD_ARGS
 }
@@ -201,11 +202,12 @@ function miner_status_json {
         local GPU_VENDOR=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].vendor")
         local GPU_NAME=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].name")
 
-        local GPU_HASHRATE=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].hashrate")
+        local GPU_HASHRATE=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].hashrate | select(. != \"\") // null | select(. != null) // 0")
         local GPU_HASHRATE_ROUND=$(echo "scale=2; $GPU_HASHRATE / 1024 / 1024" |bc )
 
-        local GPU_FAN_SPEED=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].fan_speed")
-        local GPU_TEMPERATURE=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].temperature")
+        local GPU_FAN_SPEED=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].fan_speed | select(. != \"\") // null | select(. != null) // 0")
+        local GPU_TEMPERATURE=$(echo $SUMMARY_JSON |jq -r ".gpus[${WORKER_ID}].temperature | select(. != \"\") // null | select(. != null) // 0")
+
 
         if [ "$GPUS" != "" ]; then
             GPUS="${GPUS},"

@@ -120,7 +120,7 @@ function miner_get_run_args {
         --url=${POOL_URL}
         --user=${POOL_ACCOUNT}
         --http-enabled
-        --http-host 127.0.0
+        --http-host 127.0.0.1
         --http-port ${API_PORT}
         --http-access-token=yomining
         --http-no-restricted
@@ -344,10 +344,7 @@ function miner_status_json {
 
     #local LOADAVG=$(echo $SUMMARY_JSON |jq ".xxxxx")
 
-    local ALGO=$(echo $SUMMARY_JSON |jq -r ".algo")
-    if [ "$ALGO" = "null" ]; then
-        ALGO=""
-    fi
+    local ALGO=$(echo $SUMMARY_JSON |jq -r ".algo | select(. != null)")
 
     local POOL_URL=$(echo $SUMMARY_JSON |jq -r ".connection.pool")
     local USER_ADDR=$(echo $POOL_USER | tr "+" "." | cut -d"." -f1)
