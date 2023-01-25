@@ -11,7 +11,7 @@ function fullnode_install {
     local FULLNODE=$1
     local VERSION="5.3.2"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://z.cash/downloads/zcash-${VERSION}-linux64-debian-buster.tar.gz"
     local DL_FILE=$(basename $DL_URL)
@@ -29,7 +29,7 @@ function fullnode_install {
     rm -rf ${fullnodesDir}/${chain}
     cp -a ./zcash-${VERSION}/bin ${fullnodesDir}/${chain}
 
-    fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

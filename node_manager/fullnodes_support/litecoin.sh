@@ -9,23 +9,25 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
-    local VERSION="4.7.0.1"
+    local VERSION="0.21.2.1"
     local TMP_DIR=$(mktemp -d)
     fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
-    local DL_URL="https://github/com/tronprotocol/java-tron/releases/download/GreatVoyage-v${VERSION}/FullNode.jar"
+    local DL_URL="https://github.com/litecoin-project/litecoin/releases/download/v${VERSION}/litecoin-${VERSION}-x86_64-linux-gnu.tar.gz"
     local DL_FILE=$(basename $DL_URL)
     local UNZIP_DIR="${FULLNODE}-unzipped"
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    cp -a ./FullNode.jar ${fullnodesDir}/${chain}/
+    echo " - Unzipping"
+    tar zxf $DL_FILE
+
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv litecoin-${VERSION}/bin ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -36,7 +38,7 @@ function fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
-    local CMD_EXEC=/usr/bin/java
+    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/${FULLNODE}d
     echo $CMD_EXEC
 }
 
@@ -44,12 +46,7 @@ function fullnode_get_run_cmd {
 function fullnode_get_run_args {
     local FULLNODE=$1
 
-    local CMD_ARGS="
-        -Xmx24g
-        -XX:+UseConcMarkSweepGC
-        -jar ${fullnodesDir}/${FULLNODE}/Fullnode.jar
-        -c ${nodeConfDir}/fullnodes/${FULLNODE}/main_net_config.conf
-        "
+    local CMD_ARGS=""
     echo $CMD_ARGS
 }
 

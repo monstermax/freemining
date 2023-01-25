@@ -11,7 +11,7 @@ function fullnode_install {
     local FULLNODE=$1
     local VERSION="0.14.12.0"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://github.com/firoorg/firo/releases/download/v${VERSION}/firo-${VERSION}-linux64.tar.gz"
     local DL_FILE=$(basename $DL_URL)
@@ -29,7 +29,7 @@ function fullnode_install {
     rm -rf ${fullnodesDir}/${chain}
     mv firo-*/bin ${fullnodesDir}/${chain}
 
-    fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

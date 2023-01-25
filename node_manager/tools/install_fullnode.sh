@@ -58,7 +58,7 @@ installNodejsPackages
 ################################################################################
 
 
-# TODO: stellar, near, eos, tezos
+# TODO: litecoin, stellar, near, eos, tezos
 # TODO: avalanche, bnbchain, polygon, fantom, cronos, optimism, arbitrum
 
 

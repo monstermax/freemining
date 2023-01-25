@@ -11,7 +11,7 @@ function fullnode_install {
     local FULLNODE=$1
     local VERSION="0.107.0-rc1"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://github.com/nervosnetwork/ckb/releases/download/v${VERSION}/ckb_v${VERSION}_x86_64-unknown-linux-gnu.tar.gz"
     local DL_FILE=$(basename $DL_URL)
@@ -34,7 +34,7 @@ function fullnode_install {
     echo " - Initializing"
     ${fullnodesDir}/${chain}/ckb init -C ${nodeConfDir}/fullnodes/${chain} >>${INSTALL_LOG}
 
-    fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

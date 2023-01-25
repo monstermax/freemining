@@ -11,7 +11,7 @@ function fullnode_install {
     local FULLNODE=$1
     local VERSION="4.3.2.1"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://github.com/RavenProject/Ravencoin/releases/download/v${VERSION}/raven-${VERSION}-x86_64-linux-gnu.zip"
     local DL_FILE=$(basename $DL_URL)
@@ -35,7 +35,7 @@ function fullnode_install {
 
     rm -rf ${UNZIP_DIR}
 
-    fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

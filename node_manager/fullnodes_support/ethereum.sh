@@ -11,7 +11,7 @@ function fullnode_install {
     local FULLNODE=$1
     local VERSION="1.10.26-e5eb32ac"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${VERSION}.tar.gz"
     local DL_FILE=$(basename $DL_URL)
@@ -29,7 +29,7 @@ function fullnode_install {
     rm -rf ${fullnodesDir}/${chain}
     mv geth-linux-amd64-${VERSION} ${fullnodesDir}/${chain}
 
-    fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

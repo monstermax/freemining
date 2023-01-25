@@ -13,7 +13,7 @@ function fullnode_install {
     #local VERSION="23.1"
     local VERSION="24.0.1"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://bitcoin.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz"
     local DL_FILE=$(basename $DL_URL)
@@ -38,7 +38,7 @@ function fullnode_install {
     rm -rf ${fullnodesDir}/${FULLNODE}
     mv bitcoin-${VERSION} ${fullnodesDir}/${FULLNODE}
 
-    fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

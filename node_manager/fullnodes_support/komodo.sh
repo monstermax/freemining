@@ -11,7 +11,7 @@ function fullnode_install {
     local FULLNODE=$1
     local VERSION="sources"
     local TMP_DIR=$(mktemp -d)
-    fullnode_before_install "$VERSION" $TMP_DIR
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://github.com/KomodoPlatform/komodo"
     #local DL_FILE=$(basename $DL_URL)
@@ -59,7 +59,7 @@ _EOF
     mkdir -p ${fullnodesDir}/${chain}
     cp -a src/{komodod,komodo-cli,komodo-tx} ${fullnodesDir}/${chain}/
 
-    #fullnode_after_install "$VERSION" $TMP_DIR
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
 
 

@@ -136,148 +136,34 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
     mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}
 
 
-    CMD_EXEC=""
-    CMD_ARGS=""
-
-    # TODO: remplacer/modifier le case par des appels de fonctions 'run_{fullnode}' (comme pour les installs)
-
-    case "$FULLNODE" in
-
-        bitcoin)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
-            ;;
-
-        bitcoincash)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/bitcoind -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
-            ;;
-
-        bitcoinsv)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/bitcoind -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8333 $@"
-            # TODO
-            ;;
-
-        callisto)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/geth-linux-amd64 --datadir ${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="--port 30303 --http.addr 0.0.0.0 --http.port 8545 --ws.addr 0.0.0.0 --ws.port 8546 $@"
-            ;;
-
-        cosmos)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/gaiad"
-            CMD_ARGS="$@"
-            # TODO
-            ;;
-
-        dogecoin)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
-            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=22555 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=22556 $@"
-            ;;
-
-        ergo)
-            CMD_EXEC="java -jar -Xmx4G ${fullnodesDir}/${FULLNODE}/ergo.jar --mainnet -c ${nodeConfDir}/fullnodes/${FULLNODE}/${FULLNODE}.conf"
-            CMD_ARGS="$@"
-            ;;
-
-        ethereum_classic)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/geth --datadir ${nodeConfDir}/fullnodes/${FULLNODE} --classic"
-            CMD_ARGS="--port 30303 --http.addr 0.0.0.0 --http.port 8545 --ws.addr 0.0.0.0 --ws.port 8546 $@"
-            ;;
-
-        firo)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
-            CMD_ARGS="-server -rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8888 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=8168 $@"
-            ;;
-
-        flux)
-            CMD_EXEC="zelcashd -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcport=16124 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=16125 $@"
-            ;;
-
-        kadena)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/chainweb-node --database-directory ${nodeConfDir}/fullnodes/${FULLNODE} --config-file ${nodeConfDir}/fullnodes/${FULLNODE}/kadena.conf"
-            CMD_ARGS="$@"
-            ;;
-
-        kaspa)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d --appdir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="--utxoindex --rpclisten=16110 $@"
-            ;;
-
-        komodo)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=8332 -rpcallowip=127.0.0.1 -rpcallowip=${IP_CRYPTO} -port=7770 -exportdir=/tmp $@"
-            ;;
-
-        meowcoin)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcport=9766 $@"
-            ;;
-
-        monero)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d --data-dir ${nodeConfDir}/fullnodes/${FULLNODE} --non-interactive"
-            CMD_ARGS="--daemon-address 127.0.0.1:18081 --disable-rpc-login --config-file ${nodeConfDir}/fullnodes/${FULLNODE}/monerod-wallet-rpc.conf --password-file ${nodeConfDir}/fullnodes/${FULLNODE}/monero_wallet/yomining.secret $@"
-            ;;
-
-        neoxa)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcbind=0.0.0.0 -rpcport=9766 -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 $@"
-            ;;
-
-        nervos)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/ckb run -C ${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="$@"
-            ;;
-
-        radiant)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-daemon -rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 -rpcbind=0.0.0.0 -rpcport=7332 $@"
-            ;;
-
-        raptoreum)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE} -printtoconsole"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcallowip=51.255.67.45 -rpcbind=0.0.0.0 -rpcport=10225 $@"
-            ;;
-
-        ravencoin)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcbind=127.0.0.1 -rpcport=8766 -rpcallowip=127.0.0.1 -maxconnections=100 $@"
-            ;;
-
-        siacoin)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/siad --sia-directory ${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="--rpc-addr 127.0.0.1:9981 $@"
-            ;;
-
-        solana)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/bin/solana-validator"
-            CMD_ARGS="--ful-rpc-api --rpc-bind-address 127.0.0.1 --rpc-port 9981 $@"
-            ;;
-
-        tron)
-            CMD_EXEC="java -Xmx24g -XX:+UseConcMarkSweepGC -jar ${fullnodesDir}/${FULLNODE}/Fullnode.jar -c ${nodeConfDir}/fullnodes/${FULLNODE}/main_net_config.conf"
-            CMD_ARGS="$@"
-            ;;
-
-        zcash)
-            CMD_EXEC="${fullnodesDir}/${FULLNODE}/${FULLNODE}d -datadir=${nodeConfDir}/fullnodes/${FULLNODE}"
-            CMD_ARGS="-rpcuser=user -rpcpassword=pass -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcport=8232 $@"
-            ;;
-
-        *)
-            echo "Error: unknown fullnode ${FULLNODE}"
-            exit 1
-            ;;
-    esac
-
-
-    if [ "$CMD_EXEC" != "" ]; then
-        daemonStart "$DAEMON_NAME" "$CMD_EXEC $CMD_ARGS" "$DAEMON_OPTS" $@
-        exit $?
+    FULLNODE_LOADED="0"
+    if [ "$FULLNODE" != "" -a "$FULLNODE" != "ps" -a "$FULLNODE" != "dir" ]; then
+        if test -f ../fullnodes_support/${FULLNODE}.sh; then
+            source ../fullnodes_support/${FULLNODE}.sh
+            FULLNODE_LOADED="1"
+        fi
     fi
 
-    exit 1
+
+    if test "$FULLNODE_LOADED" != "1"; then
+        echo "Error: ${FULLNODE} is not a valid fullnode"
+        exit 1
+    fi
+
+
+    CMD_EXEC=$(fullnode_get_run_cmd "${FULLNODE}")
+    CMD_ARGS=$(fullnode_get_run_args "${FULLNODE}" "${ALGO}" "${POOL_URL}" "${POOL_ACCOUNT}")
+
+    if [ "$CMD_EXEC" != "" ]; then
+        DAEMON_CMD="$CMD_EXEC $CMD_ARGS $@"
+
+        daemonStart "$DAEMON_NAME" "$DAEMON_CMD" "$DAEMON_OPTS"
+        exit $?
+
+    else
+        echo "Error: ${FULLNODE} is not supported"
+        exit 1
+    fi
 fi
 
 
