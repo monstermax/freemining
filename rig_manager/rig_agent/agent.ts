@@ -885,7 +885,7 @@ function websocketConnect() {
 
 // MINER RUN
 async function startMiner(minerName: string, params: any) {
-    const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams ? ("-- " + params.optionalParams) : ""}`;
+    const cmd = `${cmdService} ${minerName} start -algo "${params.algo}" -url "${params.poolUrl}" -user "${params.poolAccount}" ${params.optionalParams}`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd, 10_000);
@@ -937,7 +937,7 @@ async function getMinerStatus(minerName: string, option:string=''): Promise<stri
 
 
 async function getMinerLogs(minerName: string): Promise<string> {
-    const cmd = `${cmdService} ${minerName} log -- -n 50`;
+    const cmd = `${cmdService} ${minerName} log -n 50`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
     const ret = await cmdExec(cmd, 10_000);

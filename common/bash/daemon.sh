@@ -8,6 +8,9 @@ DAEMON_CHDIR=""
 DAEMONER_CMD="/sbin/start-stop-daemon"
 
 
+# TODO: remplacer DAEMON_LOG_DIR par DAEMON_LOG_FILE
+# TODO: remplacer DAEMON_PID_DIR par DAEMON_PID_FILE
+
 
 #### DAEMONS 1/3 ####
 
@@ -23,6 +26,7 @@ function daemonStart {
     local DAEMON_FULLNAME="[${DAEMON_NAME}] ${DAEMON_CMD_WITHOUT_ARGS}"
 
     local DAEMON_OUTPUT=""
+    echo "DEBUG DAEMON_PID_DIR=$DAEMON_PID_DIR"
 
     local LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
     local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
@@ -64,11 +68,13 @@ function daemonStart {
     set -e
 
     if [ "$DAEMON_DRY" = "1" ]; then
-        RC=-1
-        echo
-    fi
+        echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME debug"
+        RC=0
 
-    if [ "$RC" = "0" ]; then
+    elif [ "$DAEMON_BG" = "" ]; then
+        echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME terminated"
+
+    elif [ "$RC" = "0" ]; then
         echo -e "${COLOR_GREEN}[INFO]${NO_COLOR} Daemon $DAEMON_NAME started"
 
     elif [ "$RC" = "1" ]; then
@@ -90,7 +96,7 @@ function daemonStatus {
 
     local DAEMON_NAME=$1
     local PID_FILE=${DAEMON_PID_DIR}/${DAEMON_NAME}.pid
-    local DAEMONER_ARGS="--pidfile $PID_FILE --remove-pidfile"
+    local DAEMONER_ARGS="--pidfile $PID_FILE"
     #DAEMONER_ARGS="$DAEMONER_ARGS --quiet"
 
     set +e
@@ -289,7 +295,7 @@ function do_ps {
 
 
 function daemon_manager {
-    ACTION=$1
+    local ACTION=$1
 
     # STOP
     if test "$ACTION" = "stop" || test "$ACTION" = "restart"; then

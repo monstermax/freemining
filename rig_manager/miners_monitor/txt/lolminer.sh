@@ -11,7 +11,7 @@ API_PORT=$(getMinerApiPort $MINER)
 API_URL=http://localhost:${API_PORT}
 
 SUMMARY_URL=${API_URL}/
-SUMMARY_JSON=$(wget -qO- $SUMMARY_URL)
+SUMMARY_JSON=$(wget --tries=1 --timeout=1 --connect-timeout=1 --read-timeout=1 -qO- $SUMMARY_URL)
 
 if [ "$SUMMARY_JSON" = "" ]; then
     echo -e "miner.active: \033[0;31mfalse\033[0m"

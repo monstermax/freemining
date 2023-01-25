@@ -33,31 +33,31 @@ echo "rig.date: ${DATE}"
 
 
 function runService {
-    service_name=$1
+    local miner=$1
 
-    service_cmd="${TXT_MONITOR_DIR}/${service_name}.sh"
+    service_cmd="${TXT_MONITOR_DIR}/${miner}.sh"
     if [ -x $service_cmd ]; then
-        exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt
+        exec $service_cmd > ${DATA_DIR}/rig_monitor_${miner}.tmp.txt
 
     else
         #echo "Warning: service $service_cmd not found"
-        rm -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt
+        rm -f ${DATA_DIR}/rig_monitor_${miner}.tmp.txt
     fi
 }
 
 
 function readService {
-    service_name=$1
+    local miner=$1
 
-    if ! test -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt; then
+    if ! test -f ${DATA_DIR}/rig_monitor_${miner}.tmp.txt; then
         return
     fi
 
-    SERVICE_TXT=$(cat ${DATA_DIR}/rig_monitor_${service_name}.tmp.txt)
+    SERVICE_TXT=$(cat ${DATA_DIR}/rig_monitor_${miner}.tmp.txt)
 
     if [ "$SERVICE_TXT" != "" ]; then
         SERVICES_TXT="${SERVICES_TXT}
-==== ${service_name} ====
+==== ${miner} ====
 ${SERVICE_TXT}
 "
 

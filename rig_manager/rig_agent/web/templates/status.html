@@ -113,7 +113,7 @@ ${Object.entries(rig.services).map(entry => {
                     <div class="col-5"><b>Name</b> <br /> ${gpu.name}</div>
                     <div class="col-1"><b>Temperature</b> <br /> ${gpu.temperature}°</div>
                     <div class="col-1"><b>Fan speed</b> <br /> ${gpu.fanSpeed}%</div>
-                    <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(gpu.hashRate)}/sec.</div>
+                    <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(gpu.hashRate, 'size')}H/sec.</div>
                 </div>
             </div>
             `;
@@ -126,8 +126,8 @@ ${Object.entries(rig.services).map(entry => {
                 <div class="col-12 col-lg-2 text-truncate"><div class="alert alert-dark h4 text-center">${minerName}</div></div>
                 <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.worker.algo}</div>
                 <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.worker.name}</div>
-                <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.worker.uptime, 'seconds')} sec.</div>
-                <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.worker.hashRate)}/sec.</div>
+                <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.worker.uptime, 'seconds')}</div>
+                <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.worker.hashRate, 'size')}H/sec.</div>
                 <div class="col-12 col-lg-1">
                     <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('${minerName}')" />
                 </div>

@@ -50,6 +50,10 @@ function installBasicTools {
         INSTALLS="$INSTALLS vim"
     fi
 
+    if [ "`getCmdPath 7z`" = "" ]; then
+        INSTALLS="$INSTALLS p7zip-full"
+    fi
+
     if [ "`getCmdPath /sbin/ifconfig`" = "" ]; then
         INSTALLS="$INSTALLS net-tools"
     fi
