@@ -223,7 +223,25 @@ $0 \$@
         git pull
 
     elif [ "$ACTION" = "push" ]; then
+        modified_files=$(git status -s |wc -l)
+        if [ "$modified_files" != "0" ] ; then
+            echo "Warning: ${modified_files} file(s) not committed"
+            exit 1
+        fi
         git push
+
+    elif [ "$ACTION" = "commit" ]; then
+        modified_files=$(git status -s |wc -l)
+        if [ "$modified_files" = "0" ] ; then
+            echo "Warning: no file to commit"
+            exit 1
+        fi
+        message=$@
+        if [ "$message" = "" ]; then
+            echo "Error: missing commit message"
+            exit 1
+        fi
+        git commit -am "${message}"
 
     elif [ "$ACTION" = "ps" ]; then
         #ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.") |grep -e '\[free[m]ining.*\]' --color -B1
