@@ -37,7 +37,7 @@ function fullnode_install {
     local DL_URL="https://github.com/kadena-io/chainweb-node/releases/download/${VERSION}/chainweb-${VERSION_LONG}.tar.gz"
     local DL_FILE=$(basename $DL_URL)
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -45,14 +45,14 @@ function fullnode_install {
     tar zxf $DL_FILE -C $UNZIP_DIR
 
     echo " - Preparing"
-    mkdir -p ${nodeConfDir}/fullnodes/${chain}
+    mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}
 
     # create default config
-    $UNZIP_DIR/chainweb-node --database-directory ${nodeConfDir}/fullnodes/${chain} --print-config > ${nodeConfDir}/fullnodes/${chain}/kadena.conf
+    $UNZIP_DIR/FULLNODEweb-node --database-directory ${nodeConfDir}/fullnodes/${FULLNODE} --print-config > ${nodeConfDir}/fullnodes/${FULLNODE}/kadena.conf
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv $UNZIP_DIR ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

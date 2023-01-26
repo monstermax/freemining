@@ -28,7 +28,7 @@ function fullnode_install {
     sudo apt-get install -qq -y libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev
     sudo apt-get install -qq -y libgoogle-perftools-dev libzmq3-dev
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     cd bitcoin-sv
 
@@ -44,10 +44,10 @@ function fullnode_install {
     make >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     # 1 hour compilation...
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    cp -a ./src/{bitcoind,bitcoin-cli,bitcoin-miner,bitcoin-tx} ${fullnodesDir}/${chain}/
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    cp -a ./src/{bitcoind,bitcoin-cli,bitcoin-miner,bitcoin-tx} ${fullnodesDir}/${FULLNODE}/
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

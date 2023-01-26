@@ -28,24 +28,24 @@ function fullnode_install {
     echo " - Downloading sources"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
-    echo " - Compiling ${chain} (1/2)"
+    echo " - Compiling ${FULLNODE} (1/2)"
     mkdir radiant-node/build && cd radiant-node/build
     cmake -GNinja .. -DBUILD_RADIANT_QT=OFF >>${INSTALL_LOG}
     # OR cmake -GNinja ..
 
-    echo " - Compiling ${chain} (2/2)"
+    echo " - Compiling ${FULLNODE} (2/2)"
     ninja >>${INSTALL_LOG}
 
     echo " - Install tmp"
     rm -rf dist
     DESTDIR="dist" ninja install
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    cp -a ./dist/usr/local/* ${fullnodesDir}/${chain}/
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    cp -a ./dist/usr/local/* ${fullnodesDir}/${FULLNODE}/
 
-    cd ${fullnodesDir}/${chain}
+    cd ${fullnodesDir}/${FULLNODE}
     ln -s bin/radiantd
     ln -s bin/radiant-cli
     ln -s bin/radiant-wallet

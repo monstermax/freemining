@@ -68,11 +68,11 @@ app.use(express_1.default.static(staticDir));
 // HOMEPAGE
 app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const activeProcesses = yield getRigProcesses();
-    const installedMiners = getInstalledMiners();
+    const installedMiners = yield getInstalledMiners();
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getAllMiners(),
+        miners: getInstallablesMiners(),
         rigs: [],
         activeProcesses,
         installedMiners,
@@ -93,8 +93,8 @@ app.get('/status', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getAllMiners(),
-        runnableMiners: getRunnableMiners(),
+        miners: getInstallablesMiners(),
+        runnableMiners: yield getRunnableMiners(),
         presets,
     };
     const pageContent = loadTemplate('status.html', opts, req.url);
@@ -112,8 +112,8 @@ app.get('/miners/miner-run-modal', (req, res, next) => tslib_1.__awaiter(void 0,
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getAllMiners(),
-        runnableMiners: getRunnableMiners(),
+        miners: getInstallablesMiners(),
+        runnableMiners: yield getRunnableMiners(),
         presets,
         miner: minerName,
     };
@@ -143,7 +143,7 @@ app.get('/miners/miner', (req, res, next) => tslib_1.__awaiter(void 0, void 0, v
     const minerStatus = rigStatusJson === null || rigStatusJson === void 0 ? void 0 : rigStatusJson.services[minerName];
     const installStatus = yield getMinerInstallStatus(minerName);
     const uninstallStatus = yield getMinerUninstallStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = yield getInstalledMiners();
     const opts = {
         configRig,
         miner: minerName,
@@ -199,7 +199,7 @@ app.get('/miners/miner-run', (req, res, next) => tslib_1.__awaiter(void 0, void 
         return;
     }
     const minerStatus = yield getMinerStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = yield getInstalledMiners();
     if (action === 'log') {
         const logs = yield getMinerLogs(minerName);
         res.header({ 'Content-Type': 'text/plain' });
@@ -312,7 +312,7 @@ app.get('/miners/miner-install', (req, res, next) => tslib_1.__awaiter(void 0, v
     }
     const installStatus = yield getMinerInstallStatus(minerName);
     const uninstallStatus = yield getMinerUninstallStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = yield getInstalledMiners();
     const opts = {
         configRig,
         miner: minerName,
@@ -407,7 +407,7 @@ app.get('/miners/miner-uninstall', (req, res, next) => tslib_1.__awaiter(void 0,
     }
     const installStatus = yield getMinerInstallStatus(minerName);
     const uninstallStatus = yield getMinerUninstallStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = yield getInstalledMiners();
     const opts = {
         configRig,
         miner: minerName,
@@ -879,14 +879,16 @@ function getMinerUninstallLogs(minerName) {
     });
 }
 // MISC
-function getAllMiners() {
+function getInstallablesMiners() {
     const miners = installablesMiners;
     return miners;
 }
 function getRunnableMiners() {
-    const installedMiners = getInstalledMiners();
-    const miners = installedMiners.filter(miner => configuredMiners.includes(miner));
-    return miners;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const installedMiners = yield getInstalledMiners();
+        const miners = installedMiners.filter(miner => configuredMiners.includes(miner));
+        return miners;
+    });
 }
 function getRigProcesses() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -914,9 +916,13 @@ function loadTemplate(tplFile, data = {}, currentUrl = '', withLayout = true) {
     return content;
 }
 function getInstalledMiners() {
-    // TODO: prevoir de rafraichir la liste en live (cf en cas d'install/desinstall de miners)
-    if (installedMiners === null) {
-        installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
-    }
-    return installedMiners;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        //if (installedMiners === null) {
+        //    installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
+        //}
+        const cmd = `bash -c "source /home/karma/dev/perso/freemining/node_manager/node_manager.sh; echo \\$INSTALLED_FULLNODES"`;
+        const installedMinersList = yield (0, utils_1.cmdExec)(cmd);
+        installedMiners = (installedMinersList || '').split(' ');
+        return installedMiners;
+    });
 }

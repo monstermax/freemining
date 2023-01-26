@@ -44,7 +44,7 @@ if (staticDir) {
 // HOMEPAGE
 app.get('/', (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = yield getInstalledFullnodes();
     const activeProcesses = yield getNodeProcesses();
     const opts = {
         configNode,
@@ -67,7 +67,7 @@ app.get('/fullnodes/fullnode', (req, res, next) => tslib_1.__awaiter(void 0, voi
     const fullnodeStatus = yield getFullnodeStatus(fullnodeName);
     const installStatus = yield getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = yield getInstalledFullnodes();
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -132,7 +132,7 @@ app.get('/fullnodes/fullnode-run', (req, res, next) => tslib_1.__awaiter(void 0,
     }
     const installStatus = yield getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = yield getInstalledFullnodes();
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -226,7 +226,7 @@ app.get('/fullnodes/fullnode-install', (req, res, next) => tslib_1.__awaiter(voi
     }
     const installStatus = yield getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = yield getInstalledFullnodes();
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -321,7 +321,7 @@ app.get('/fullnodes/fullnode-uninstall', (req, res, next) => tslib_1.__awaiter(v
     }
     const installStatus = yield getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = yield getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = yield getInstalledFullnodes();
     const opts = {
         configNode,
         chain: fullnodeName,
@@ -579,9 +579,13 @@ function getNodeProcesses() {
     });
 }
 function getInstalledFullnodes() {
-    // TODO: prevoir de rafraichir la liste en live (cf en cas d'install/desinstall de fullnodes)
-    if (installedFullnodes === null) {
-        installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
-    }
-    return installedFullnodes;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        //if (installedFullnodes === null) {
+        //    installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+        //}
+        const cmd = `bash -c "source /home/karma/dev/perso/freemining/node_manager/node_manager.sh; echo \\$INSTALLED_FULLNODES"`;
+        const installedFullnodesList = yield (0, utils_1.cmdExec)(cmd);
+        installedFullnodes = (installedFullnodesList || '').split(' ');
+        return installedFullnodes;
+    });
 }

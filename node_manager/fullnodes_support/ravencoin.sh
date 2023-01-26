@@ -19,7 +19,7 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -29,9 +29,9 @@ function fullnode_install {
     echo " - Unzipping second archive"
     tar zxf raven-${VERSION}-x86_64-linux-gnu.tar.gz
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    cp -a ./raven-${VERSION}/bin ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    cp -a ./raven-${VERSION}/bin ${fullnodesDir}/${FULLNODE}
 
     rm -rf ${UNZIP_DIR}
 

@@ -19,15 +19,15 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     unzip -q $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    cp -a ./Sia-v${VERSION}-linux-amd64 ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    cp -a ./Sia-v${VERSION}-linux-amd64 ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

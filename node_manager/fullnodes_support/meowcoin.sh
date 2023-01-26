@@ -22,7 +22,7 @@ function fullnode_install {
     local DL_URL_QT="https://github.com/JustAResearcher/Meowcoin/releases/download/V${VERSION}/MEOW-${VERSION}-Qt-x86_64-linux-gnu.tar.gz"
     local DL_FILE_QT=$(basename $DL_URL_QT)
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -37,9 +37,9 @@ function fullnode_install {
         unzip -q ${DL_FILE_QT} -d $UNZIP_DIR
     fi
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv $UNZIP_DIR ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

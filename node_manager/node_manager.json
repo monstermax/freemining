@@ -9,10 +9,22 @@
     "fullnodesDir": "${nodeDataDir}/fullnodes",
 
 	"fullnodes": {
+		"bitcoin": {
+
+		},
 		"bitcoincash": {
 
 		},
+		"bitcoinsv": {
+
+		},
 		"callisto": {
+
+		},
+		"cardano": {
+
+		},
+		"cosmos": {
 
 		},
 		"dogecoin": {
@@ -25,16 +37,25 @@
 		"ethereum_classic": {
 
 		},
+		"ethereum": {
+
+		},
 		"firo": {
 
 		},
 		"flux": {
 
 		},
+		"kadena": {
+
+		},
 		"kaspa": {
 
 		},
 		"komodo": {
+
+		},
+		"litecoin": {
 
 		},
 		"meowcoin": {
@@ -53,6 +74,15 @@
 
 		},
 		"ravencoin": {
+
+		},
+		"siacoin": {
+
+		},
+		"solanna": {
+
+		},
+		"tron": {
 
 		},
 		"zcash": {

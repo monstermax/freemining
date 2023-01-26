@@ -67,7 +67,7 @@ if (staticDir) {
 // HOMEPAGE
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
     const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = await getInstalledFullnodes();
     const activeProcesses: string = await getNodeProcesses();
 
     const opts = {
@@ -96,7 +96,7 @@ app.get('/fullnodes/fullnode', async (req: express.Request, res: express.Respons
     const fullnodeStatus = await getFullnodeStatus(fullnodeName);
     const installStatus = await getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = await getInstalledFullnodes();
 
     const opts = {
         configNode,
@@ -174,7 +174,7 @@ app.get('/fullnodes/fullnode-run', async (req: express.Request, res: express.Res
 
     const installStatus = await getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = await getInstalledFullnodes();
 
     const opts = {
         configNode,
@@ -288,7 +288,7 @@ app.get('/fullnodes/fullnode-install', async (req: express.Request, res: express
 
     const installStatus = await getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = await getInstalledFullnodes();
 
     const opts = {
         configNode,
@@ -403,7 +403,7 @@ app.get('/fullnodes/fullnode-uninstall', async (req: express.Request, res: expre
 
     const installStatus = await getFullnodeInstallStatus(fullnodeName);
     const uninstallStatus = await getFullnodeUninstallStatus(fullnodeName);
-    const installedFullnodes = getInstalledFullnodes();
+    const installedFullnodes = await getInstalledFullnodes();
 
     const opts = {
         configNode,
@@ -718,11 +718,15 @@ async function getNodeProcesses(): Promise<string> {
 }
 
 
-function getInstalledFullnodes(): string[] {
-    // TODO: prevoir de rafraichir la liste en live (cf en cas d'install/desinstall de fullnodes)
-    if (installedFullnodes === null) {
-        installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
-    }
+async function getInstalledFullnodes(): Promise<string[]> {
+    //if (installedFullnodes === null) {
+    //    installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+    //}
+
+    const cmd = `bash -c "source /home/karma/dev/perso/freemining/node_manager/node_manager.sh; echo \\$INSTALLED_FULLNODES"`;
+    const installedFullnodesList = await cmdExec(cmd);
+    installedFullnodes = (installedFullnodesList || '').split(' ');
+
     return installedFullnodes;
 }
 

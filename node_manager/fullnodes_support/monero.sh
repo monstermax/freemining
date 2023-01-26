@@ -19,7 +19,7 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q --content-disposition $DL_URL
     local DL_FILE=$(basename monero-linux-x64-v*.tar.bz2)
 
@@ -28,7 +28,7 @@ function fullnode_install {
     local UNZIP_DIR=$(basename monero-x86_64-linux-gnu-v*)
 
     echo " - Preparing"
-    local CONF_DIR=${nodeConfDir}/fullnodes/${chain}
+    local CONF_DIR=${nodeConfDir}/fullnodes/${FULLNODE}
     mkdir -p $CONF_DIR
 
     local CONF_DIR_REAL=$(realpath $CONF_DIR)
@@ -91,7 +91,7 @@ _EOF
     mkdir -p touch ${CONF_DIR}/local_wallet
     echo secret > ${CONF_DIR}/local_wallet/freemining.secret
 
-    local NODE_DIR_REAL=$(realpath ${fullnodesDir}/${chain})
+    local NODE_DIR_REAL=$(realpath ${fullnodesDir}/${FULLNODE})
 
     cat << _EOF > start.sh
 #!/bin/bash
@@ -140,10 +140,10 @@ _EOF
 
     chmod +x *.sh
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    cp -a *.sh ${UNZIP_DIR}/monero* ${fullnodesDir}/${chain}/
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    cp -a *.sh ${UNZIP_DIR}/monero* ${fullnodesDir}/${FULLNODE}/
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -164,12 +164,16 @@ function fullnode_get_run_args {
 
     local CMD_ARGS="
         --data-dir ${nodeConfDir}/fullnodes/${FULLNODE}
-        --daemon-address 127.0.0.1:18081
-        --disable-rpc-login
-        --config-file ${nodeConfDir}/fullnodes/${FULLNODE}/monerod-wallet-rpc.conf
-        --password-file ${nodeConfDir}/fullnodes/${FULLNODE}/monero_wallet/yomining.secret
+        --rpc-bind-ip 127.0.0.1
+        --rpc-bind-port 18081
+        --rpc-login user:pass
         --non-interactive
         "
+
+# TODO: essayer de connecter la pool sans ces 2 options (aka sans le daemon wallet). sinon les ré-activer
+#        --config-file ${nodeConfDir}/fullnodes/${FULLNODE}/monerod-wallet-rpc.conf
+#        --password-file ${nodeConfDir}/fullnodes/${FULLNODE}/monero_wallet/yomining.secret
+
     echo $CMD_ARGS
 }
 

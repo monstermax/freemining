@@ -62,6 +62,15 @@ function usage {
 ################################################################################
 
 
+FULLNODE_LOADED="0"
+if [ "$FULLNODE" != "" -a "$FULLNODE" != "ps" -a "$FULLNODE" != "dir" ]; then
+    if test -f ../fullnodes_support/${FULLNODE}.sh; then
+        source ../fullnodes_support/${FULLNODE}.sh
+        FULLNODE_LOADED="1"
+    fi
+fi
+
+
 DAEMON_LOG_DIR=$nodeLogDir/fullnodes
 DAEMON_PID_DIR=$nodePidDir/fullnodes
 mkdir -p $DAEMON_LOG_DIR $DAEMON_PID_DIR
@@ -132,17 +141,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
         exit 1
     fi
 
-
     mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}
-
-
-    FULLNODE_LOADED="0"
-    if [ "$FULLNODE" != "" -a "$FULLNODE" != "ps" -a "$FULLNODE" != "dir" ]; then
-        if test -f ../fullnodes_support/${FULLNODE}.sh; then
-            source ../fullnodes_support/${FULLNODE}.sh
-            FULLNODE_LOADED="1"
-        fi
-    fi
 
 
     if test "$FULLNODE_LOADED" != "1"; then

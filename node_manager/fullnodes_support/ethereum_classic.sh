@@ -19,16 +19,16 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     unzip -q $DL_FILE -d $UNZIP_DIR
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    mv $UNZIP_DIR/* ${fullnodesDir}/${chain}/
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    mv $UNZIP_DIR/* ${fullnodesDir}/${FULLNODE}/
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

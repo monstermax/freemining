@@ -25,11 +25,11 @@ function fullnode_install {
         sudo apt-get install -qq default-jdk -y
     fi
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Preparing"
-    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
+    CONF_DIR=${nodeConfDir}/fullnodes/${FULLNODE}
     mkdir -p $CONF_DIR
 
     poolName=$(jq '.poolName' $POOL_CONFIG_FILE)
@@ -72,7 +72,7 @@ _EOF
     cat << _EOF > start.sh
 #!/bin/bash
 
-java -jar -Xmx4G ${fullnodesDir}/${chain}/${DL_FILE} --mainnet -c ${CONF_DIR_REAL}/ergo.conf
+java -jar -Xmx4G ${fullnodesDir}/${FULLNODE}/${DL_FILE} --mainnet -c ${CONF_DIR_REAL}/ergo.conf
 
 _EOF
 
@@ -92,11 +92,11 @@ _EOF
 
     chmod +x *.sh
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    cp -a *.jar *.sh ${fullnodesDir}/${chain}/
-    cd ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    cp -a *.jar *.sh ${fullnodesDir}/${FULLNODE}/
+    cd ${fullnodesDir}/${FULLNODE}
     ln -s ${DL_FILE} ergo.jar
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR

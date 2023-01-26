@@ -20,13 +20,13 @@ function fullnode_install {
     >${INSTALL_LOG}
 
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
-    tar zxvf $DL_FILE
+    tar zxf $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${chain}"
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
     cd bitcoin-cash-node-${VERSION}
     ln -s bin/bitcoind
     ln -s bin/bitcoin-cli
@@ -34,8 +34,8 @@ function fullnode_install {
     ln -s bin/bitcoin-tx
     cd ..
 
-    rm -rf ${fullnodesDir}/${chain}
-    mv bitcoin-cash-node-${VERSION} ${fullnodesDir}/${chain}
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv bitcoin-cash-node-${VERSION} ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

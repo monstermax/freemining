@@ -22,7 +22,7 @@ function fullnode_install {
     local DL_URL_QT="https://github.com/NeoxaChain/Neoxa/releases/download/v${VERSION}/neoxa-qt-linux64.zip"
     local DL_FILE_QT=$(basename $DL_URL_QT)
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
@@ -36,9 +36,9 @@ function fullnode_install {
         unzip -q ${DL_FILE_QT} -d $UNZIP_DIR
     fi
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv $UNZIP_DIR ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

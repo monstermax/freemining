@@ -46,8 +46,8 @@ function miner_before_install {
 
 function miner_after_install {
     local MINER=$1
-    local VERSION=$1
-    local TMP_DIR=$2
+    local VERSION=$2
+    local TMP_DIR=$3
 
     rm -rf $TMP_DIR
     echo

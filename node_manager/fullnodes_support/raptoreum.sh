@@ -9,7 +9,7 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
-    local VERSION="1.13.17.02"
+    local VERSION="1.3.17.02"
     local TMP_DIR=$(mktemp -d)
     fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
@@ -36,24 +36,22 @@ function fullnode_install {
     if [ "$VERSION_LONG" != "" ]; then
         DL_URL="https://github.com/Raptor3um/raptoreum/releases/download/${VERSION}/raptoreum-${VERSION_LONG}.tar.gz"
         DL_FILE=$(basename $DL_URL)
-        UNZIP_DIR="${chain}-unzipped"
+        UNZIP_DIR="${FULLNODE}-unzipped"
 
-        echo "Installing ${chain} ${VERSION} ${VERSION_LONG}..."
-
-        echo " - Downloading ${chain}"
+        echo " - Downloading ${FULLNODE}"
         wget -q $DL_URL
 
         echo " - Unzipping"
         mkdir $UNZIP_DIR
         tar zxf $DL_FILE -C $UNZIP_DIR
 
-        echo " - Install into ${fullnodesDir}/${chain}"
-        rm -rf ${fullnodesDir}/${chain}
-        mv $UNZIP_DIR ${fullnodesDir}/${chain}
+        echo " - Install into ${fullnodesDir}/${FULLNODE}"
+        rm -rf ${fullnodesDir}/${FULLNODE}
+        mv $UNZIP_DIR ${fullnodesDir}/${FULLNODE}
 
     else
         # install from sources
-        echo "Installing ${chain} sources..."
+        echo "Installing ${FULLNODE} sources..."
 
         echo " - Installing dependencies packages: build tools"
         rootRequired

@@ -26,17 +26,17 @@ function fullnode_install {
     sudo apt-get install -qq -y build-essential pkg-config libc6-dev m4 g++-multilib autoconf libtool ncurses-dev unzip git zlib1g-dev wget curl bsdmainutils automake cmake clang ntp ntpdate nano >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     git clone $DL_URL >>${INSTALL_LOG} 2>>${INSTALL_LOG}
     cd komodo
 
     echo " - Fetching params"
     ./zcutil/fetch-params.sh >>${INSTALL_LOG}
 
-    echo " - Compiling ${chain}"
+    echo " - Compiling ${FULLNODE}"
     ./zcutil/build.sh -j$(nproc) >>${INSTALL_LOG}
 
-    CONF_DIR=${nodeConfDir}/fullnodes/${chain}
+    CONF_DIR=${nodeConfDir}/fullnodes/${FULLNODE}
     mkdir -p $CONF_DIR
 
     cat << _EOF > ${CONF_DIR}/komodo.conf
@@ -54,10 +54,10 @@ addnode=144.76.94.38
 addnode=148.251.44.16
 _EOF
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    cp -a src/{komodod,komodo-cli,komodo-tx} ${fullnodesDir}/${chain}/
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    cp -a src/{komodod,komodo-cli,komodo-tx} ${fullnodesDir}/${FULLNODE}/
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

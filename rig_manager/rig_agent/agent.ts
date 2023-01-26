@@ -176,12 +176,12 @@ app.use(express.static(staticDir));
 app.get('/', async (req: express.Request, res: express.Response, next: Function) => {
     const activeProcesses: string = await getRigProcesses();
 
-    const installedMiners = getInstalledMiners();
+    const installedMiners = await getInstalledMiners();
 
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getAllMiners(),
+        miners: getInstallablesMiners(),
         rigs:[],
         activeProcesses,
         installedMiners,
@@ -206,8 +206,8 @@ app.get('/status', async (req: express.Request, res: express.Response, next: Fun
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getAllMiners(),
-        runnableMiners: getRunnableMiners(),
+        miners: getInstallablesMiners(),
+        runnableMiners: await getRunnableMiners(),
         presets,
     };
     const pageContent = loadTemplate('status.html', opts, req.url);
@@ -230,8 +230,8 @@ app.get('/miners/miner-run-modal', async (req: express.Request, res: express.Res
     const opts = {
         rigName,
         rig: getLastRigJsonStatus(),
-        miners: getAllMiners(),
-        runnableMiners: getRunnableMiners(),
+        miners: getInstallablesMiners(),
+        runnableMiners: await getRunnableMiners(),
         presets,
         miner: minerName,
     };
@@ -271,7 +271,7 @@ app.get('/miners/miner', async (req: express.Request, res: express.Response, nex
     const minerStatus = rigStatusJson?.services[minerName];
     const installStatus = await getMinerInstallStatus(minerName);
     const uninstallStatus = await getMinerUninstallStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = await getInstalledMiners();
 
     const opts = {
         configRig,
@@ -337,7 +337,7 @@ app.get('/miners/miner-run', async (req: express.Request, res: express.Response,
     }
 
     const minerStatus = await getMinerStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = await getInstalledMiners();
 
     if (action === 'log') {
         const logs = await getMinerLogs(minerName);
@@ -474,7 +474,7 @@ app.get('/miners/miner-install', async (req: express.Request, res: express.Respo
 
     const installStatus = await getMinerInstallStatus(minerName);
     const uninstallStatus = await getMinerUninstallStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = await getInstalledMiners();
 
     const opts = {
         configRig,
@@ -589,7 +589,7 @@ app.get('/miners/miner-uninstall', async (req: express.Request, res: express.Res
 
     const installStatus = await getMinerInstallStatus(minerName);
     const uninstallStatus = await getMinerUninstallStatus(minerName);
-    const installedMiners = getInstalledMiners();
+    const installedMiners = await getInstalledMiners();
 
     const opts = {
         configRig,
@@ -1196,13 +1196,13 @@ async function getMinerUninstallLogs(minerName: string): Promise<string> {
 
 // MISC
 
-function getAllMiners() {
+function getInstallablesMiners() {
     const miners = installablesMiners;
     return miners;
 }
 
-function getRunnableMiners() {
-    const installedMiners = getInstalledMiners();
+async function getRunnableMiners() {
+    const installedMiners = await getInstalledMiners();
     const miners = installedMiners.filter(miner => configuredMiners.includes(miner));
     return miners;
 }
@@ -1240,11 +1240,15 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='', withL
 }
 
 
-function getInstalledMiners(): string[] {
-    // TODO: prevoir de rafraichir la liste en live (cf en cas d'install/desinstall de miners)
-    if (installedMiners === null) {
-        installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
-    }
+async function getInstalledMiners(): Promise<string[]> {
+    //if (installedMiners === null) {
+    //    installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
+    //}
+
+    const cmd = `bash -c "source /home/karma/dev/perso/freemining/node_manager/node_manager.sh; echo \\$INSTALLED_FULLNODES"`;
+    const installedMinersList = await cmdExec(cmd);
+    installedMiners = (installedMinersList || '').split(' ');
+
     return installedMiners;
 }
 

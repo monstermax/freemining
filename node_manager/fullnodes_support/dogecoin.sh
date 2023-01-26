@@ -19,13 +19,13 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
-    tar zxvf $DL_FILE
+    tar zxf $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${chain}"
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
     cd dogecoin-${VERSION}
     ln -s bin/dogecoind
     ln -s bin/dogecoin-cli
@@ -33,8 +33,8 @@ function fullnode_install {
     ln -s bin/dogecoin-tx
     cd ..
 
-    rm -rf ${fullnodesDir}/${chain}
-    mv dogecoin-${VERSION} ${fullnodesDir}/${chain}
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv dogecoin-${VERSION} ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

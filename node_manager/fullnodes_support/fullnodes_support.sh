@@ -45,8 +45,8 @@ function fullnode_before_install {
 
 function fullnode_after_install {
     local FULLNODE=$1
-    local VERSION=$1
-    local TMP_DIR=$2
+    local VERSION=$2
+    local TMP_DIR=$3
 
     rm -rf $TMP_DIR
     echo

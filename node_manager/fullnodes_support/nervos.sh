@@ -21,18 +21,18 @@ function fullnode_install {
 
     local UNZIP_DIR="ckb_v${VERSION}_x86_64-unknown-linux-gnu"
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     tar zxf ${DL_FILE}
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mv $UNZIP_DIR ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv $UNZIP_DIR ${fullnodesDir}/${FULLNODE}
 
     echo " - Initializing"
-    ${fullnodesDir}/${chain}/ckb init -C ${nodeConfDir}/fullnodes/${chain} >>${INSTALL_LOG}
+    ${fullnodesDir}/${FULLNODE}/ckb init -C ${nodeConfDir}/fullnodes/${FULLNODE} >>${INSTALL_LOG}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -43,7 +43,7 @@ function fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
-    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/ckd
+    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/ckb
     echo $CMD_EXEC
 }
 

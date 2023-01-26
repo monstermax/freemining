@@ -80,49 +80,6 @@ ALGO=""
 POOL_URL=""
 POOL_ACCOUNT=""
 
-#while [ : ]; do
-#
-#    case "$1" in
-#        -conf)
-#            CONF_NAME="$2"
-#            shift 2 || echo "Error: missing argument"
-#            ;;
-#
-#        -algo)
-#            ALGO="$2"
-#            shift 2 || echo "Error: missing argument"
-#            ;;
-#
-#        -url)
-#            POOL_URL="$2"
-#            shift 2 || echo "Error: missing argument"
-#            ;;
-#
-#        -user)
-#            POOL_ACCOUNT="$2"
-#            shift 2 || echo "Error: missing argument"
-#            ;;
-#
-#        "")
-#            #echo "end of args"
-#            break
-#            ;;
-#
-#        --)
-#            #echo "breaking"
-#            shift
-#            break
-#            ;;
-#
-#        *)
-#            #echo "Warning: invalid argument $1"
-#            #exit 1
-#            shift
-#            ;;
-#    esac
-#done
-
-
 
 if hasOpt -conf; then
     CONF_NAME=$(getOpt -conf)
@@ -229,108 +186,10 @@ if test "$ACTION" = "start" || test "$ACTION" = "run" || test "$ACTION" = "debug
     POOL_HOST=$(echo "$POOL_URL" |cut -d":" -f1)
     POOL_PORT=$(echo "$POOL_URL" |cut -d":" -f2)
 
-    CMD_EXEC=""
-    CMD_ARGS=""
-
-#    # TODO: remplacer/modifier le case par des appels de fonctions 'run_{miner}' (comme pour les installs)
-#
-#    case "$MINER" in
-#        nbminer)
-#            API_PORT=$(getMinerApiPort ${MINER})
-#            CMD_EXEC="${minersDir}/${MINER}/nbminer"
-#
-#            CMD_ARGS="-a ${ALGO} \
-#                -o stratum+tcp://${POOL_URL} \
-#                -u ${POOL_ACCOUNT} \
-#                --api 127.0.0.1:${API_PORT} \
-#                $@"
-#            ;;
-#
-#        lolminer)
-#            API_PORT=$(getMinerApiPort ${MINER})
-#            CMD_EXEC="${minersDir}/${MINER}/lolMiner"
-#
-#            CMD_ARGS="--algo ${ALGO} \
-#                --pool ${POOL_URL} \
-#                --user ${POOL_ACCOUNT} \
-#                --apihost 127.0.0.1 --apiport ${API_PORT} \
-#                $@"
-#            ;;
-#
-#        xmrig)
-#            API_PORT=$(getMinerApiPort ${MINER})
-#            CMD_EXEC="${minersDir}/${MINER}/xmrig-nofees"
-#
-#            if [ "$ALGO" = "" ]; then
-#                ALGO="rx/0"
-#            fi
-#
-#            LOG_FILE=${DAEMON_LOG_DIR}/${DAEMON_NAME}.daemon.log
-#
-#            CMD_ARGS="--url=${POOL_URL} \
-#                --user=${POOL_ACCOUNT} \
-#                -a ${ALGO} \
-#                -k \
-#                --donate-level 0 \
-#                --http-enabled --http-host 127.0.0.1 --http-port ${API_PORT} --http-access-token=yomining --http-no-restricted \
-#                --cpu-max-threads-hint 75 --cpu-priority 3 \
-#                --randomx-no-rdmsr \
-#                --log-file=${LOG_FILE} --no-color \
-#                $@"
-#            ;;
-#
-#        teamredminer)
-#            API_PORT=$(getMinerApiPort ${MINER})
-#            CMD_EXEC="${minersDir}/${MINER}/teamredminer"
-#
-#            CMD_ARGS="-a ${ALGO} \
-#                -o stratum+tcp://${POOL_URL} \
-#                -u ${POOL_ACCOUNT} \
-#                -p x \
-#                --api_listen=0.0.0.0:${API_PORT} \
-#                $@"
-#            ;;
-#
-#        trex)
-#            API_PORT=$(getMinerApiPort ${MINER})
-#            CMD_EXEC="${minersDir}/${MINER}/t-rex"
-#
-#            CMD_ARGS="-a ${ALGO} \
-#                -o stratum+tcp://${POOL_URL} \
-#                -u ${POOL_ACCOUNT} \
-#                -p x \
-#                --api-bind-http 127.0.0.1:${API_PORT} \
-#                $@"
-#            ;;
-#
-#        gminer)
-#            API_PORT=$(getMinerApiPort ${MINER})
-#            CMD_EXEC="${minersDir}/${MINER}/miner"
-#
-#            CMD_ARGS="--user ${POOL_ACCOUNT} \
-#                --server ${POOL_HOST} --port ${POOL_PORT} --pass x \
-#                --algo ${ALGO} \
-#                --api ${API_PORT} \
-#                $@"
-#            ;;
-#
-#        "")
-#            ;;
-#
-#        *)
-#            echo "Error: unknown miner ${MINER}"
-#            exit 1
-#            ;;
-#    esac
-
-
     if test "$MINER_LOADED" != "1"; then
         echo "Error: ${MINER} is not a valid miner"
         exit 1
     fi
-
-    #CMD_EXEC="$(miner_get_run_cmd "${MINER}" "${ALGO}" "${POOL_URL}" "${POOL_ACCOUNT}")"
-    #CMD_ARGS=""
 
     CMD_EXEC=$(miner_get_run_cmd "${MINER}")
     CMD_ARGS=$(miner_get_run_args "${MINER}" "${ALGO}" "${POOL_URL}" "${POOL_ACCOUNT}")

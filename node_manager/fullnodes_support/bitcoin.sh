@@ -6,23 +6,31 @@ source ./fullnodes_support.sh
 set -e
 
 
+# bitcoin.org download links: https://bitcoin.org/en/download
+
 
 function fullnode_install {
     local FULLNODE=$1
-    #local VERSION="22.0"
-    #local VERSION="23.1"
-    local VERSION="24.0.1"
+    local VERSION="22.0" # bitcoin.org
     local TMP_DIR=$(mktemp -d)
     fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
     local DL_URL="https://bitcoin.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz"
+
+    if [ "1" = "1" ]; then
+        # Use bitcoincore.org downloads (and not bitcoin.org)
+        #local VERSION="23.1" # bitcoincore.org
+        local VERSION="24.0.1" # bitcoincore.org
+        local DL_URL="https://bitcoincore.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz"
+    fi
+
     local DL_FILE=$(basename $DL_URL)
     local UNZIP_DIR="${FULLNODE}-unzipped"
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
     echo " - Downloading ${FULLNODE}"
-    wget -q $DL_URL
+    wget  $DL_URL
 
     echo " - Unzipping"
     tar zxf $DL_FILE

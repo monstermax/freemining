@@ -47,10 +47,10 @@ function fullnode_install {
     #sudo apt-get install -qq -y g++-multilib autoconf libtool ncurses-dev unzip git python
     #sudo apt-get install -qq -y python-zmq zlib1g-dev wget curl bsdmainutils automake
 
-    mkdir -p ${nodeConfDir}/fullnodes/${chain}/zelcash
-    touch ${nodeConfDir}/fullnodes/${chain}/zelcash/zelcash.conf
+    mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}/zelcash
+    touch ${nodeConfDir}/fullnodes/${FULLNODE}/zelcash/zelcash.conf
 
-    cat << EOF > ${nodeConfDir}/fullnodes/${chain}/zelcash/zelcash.conf
+    cat << EOF > ${nodeConfDir}/fullnodes/${FULLNODE}/zelcash/zelcash.conf
 rpcuser=user
 rpcpassword=pass
 rpcallowip=127.0.0.1
@@ -76,7 +76,7 @@ EOF
 
     # Bootstrap
     #wget https://www.dropbox.com/s/kyqe8ji3g1yetfx/zel-bootstrap.zip
-    #unzip zel-bootstrap.zip -d ${nodeConfDir}/fullnodes/${chain}/zelcash
+    #unzip zel-bootstrap.zip -d ${nodeConfDir}/fullnodes/${FULLNODE}/zelcash
     #rm zel-bootstrap.zip
 
     if [ "`getCmdPath mongod`" = "" ]; then
@@ -101,7 +101,7 @@ EOF
 
 
     # Installing zelcashd
-    echo " - Installing ${chain}/zelcashd"
+    echo " - Installing ${FULLNODE}/zelcashd"
     rootRequired
 
     #echo 'deb https://apt.zel.cash/ all main' | sudo tee /etc/apt/sources.list.d/zelcash.list >/dev/null
@@ -117,14 +117,14 @@ EOF
     zelcash-fetch-params.sh >/dev/null
 
 
-    echo " - Downloading ${chain}/zelflux"
+    echo " - Downloading ${FULLNODE}/zelflux"
     git clone https://github.com/zelcash/zelflux.git >>${INSTALL_LOG} 2>>${INSTALL_LOG}
 
 
-    mkdir -p ${nodeConfDir}/fullnodes/${chain}/zelflux/config
-    touch ${nodeConfDir}/fullnodes/${chain}/zelflux/config/userconfig.js
+    mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}/zelflux/config
+    touch ${nodeConfDir}/fullnodes/${FULLNODE}/zelflux/config/userconfig.js
 
-    cat << EOF > ${nodeConfDir}/fullnodes/${chain}/zelflux/config/userconfig.js
+    cat << EOF > ${nodeConfDir}/fullnodes/${FULLNODE}/zelflux/config/userconfig.js
 module.exports = {
     initial: {
         ipaddress: '${ipAddress}',
@@ -136,13 +136,13 @@ module.exports = {
 EOF
 
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mkdir -p ${fullnodesDir}/${chain}
-    mv zelflux ${fullnodesDir}/${chain}/
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mkdir -p ${fullnodesDir}/${FULLNODE}
+    mv zelflux ${fullnodesDir}/${FULLNODE}/
 
     echo
-    echo "Fullnode successfully installed into ${fullnodesDir}/${chain}"
+    echo "Fullnode successfully installed into ${fullnodesDir}/${FULLNODE}"
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }

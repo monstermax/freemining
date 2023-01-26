@@ -19,15 +19,15 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
-    echo " - Downloading ${chain}"
+    echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
 
     echo " - Unzipping"
     tar zxf $DL_FILE
 
-    echo " - Install into ${fullnodesDir}/${chain}"
-    rm -rf ${fullnodesDir}/${chain}
-    mv geth-linux-amd64-${VERSION} ${fullnodesDir}/${chain}
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv geth-linux-amd64-${VERSION} ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -46,7 +46,14 @@ function fullnode_get_run_cmd {
 function fullnode_get_run_args {
     local FULLNODE=$1
 
-    local CMD_ARGS=""
+    local CMD_ARGS="
+        --datadir ${nodeConfDir}/fullnodes/${FULLNODE}
+        --port 30303
+        --http.addr 0.0.0.0
+        --http.port 8545
+        --ws.addr 0.0.0.0
+        --ws.port 8546
+    "
     echo $CMD_ARGS
 }
 
