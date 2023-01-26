@@ -12,7 +12,7 @@ source ./xmrig.sh
 # DEPRECATED
 
 
-function miner_install {
+function DEPRECATED_miner_install {
     local MINER=$1
     local VERSION=""
     local TMP_DIR=$(mktemp -d)

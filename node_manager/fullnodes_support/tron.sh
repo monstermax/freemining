@@ -21,11 +21,14 @@ function fullnode_install {
 
     echo " - Downloading ${FULLNODE}"
     wget -q $DL_URL
+    wget https://github.com/tronprotocol/tron-deployment/raw/master/main_net_config.conf
 
     echo " - Install into ${fullnodesDir}/${FULLNODE}"
     rm -rf ${fullnodesDir}/${FULLNODE}
     mkdir -p ${fullnodesDir}/${FULLNODE}
     cp -a ./FullNode.jar ${fullnodesDir}/${FULLNODE}/
+    mkdir -p ${nodeConfDir}/fullnodes/${FULLNODE}
+    cp -a ./main_net_config.conf ${nodeConfDir}/fullnodes/${FULLNODE}/
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -46,8 +49,8 @@ function fullnode_get_run_args {
 
     local CMD_ARGS="
         -Xmx24g
-        -XX:+UseConcMarkSweepGC
-        -jar ${fullnodesDir}/${FULLNODE}/Fullnode.jar
+        -jar ${fullnodesDir}/${FULLNODE}/FullNode.jar
+        --output-directory ${nodeConfDir}/fullnodes/${FULLNODE}
         -c ${nodeConfDir}/fullnodes/${FULLNODE}/main_net_config.conf
         "
     echo $CMD_ARGS
