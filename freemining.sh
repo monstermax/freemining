@@ -218,6 +218,9 @@ $0 \$@
         git pull
         $BASH_SOURCE modules-install
 
+    elif [ "$ACTION" = "status" ]; then
+        git status -s
+
     elif [ "$ACTION" = "pull" ]; then
         git reset --hard
         git pull
