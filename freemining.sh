@@ -236,6 +236,7 @@ $0 \$@
             echo "Warning: no file to commit"
             exit 1
         fi
+        echo "$modified_files files waiting for commit..."
         message=$@
         if [ "$message" = "" ]; then
             echo "Error: missing commit message"
