@@ -9,12 +9,13 @@ set -e
 
 function miner_install {
     local MINER=$1
-    local VERSION="2.1"
+    local VERSION="1.82"
+    local VERSION_BIS="1_82"
 
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    local DL_URL="https://github.com/mhssamadani/Autolykos2_AMD_Miner/releases/download/${VERSION}/AMD_Miner_UBUNTU_${VERSION}.zip"
+    local DL_URL="https://github.com/sp-hash/TeamBlackMiner/releases/download/v${VERSION}/TeamBlackMiner_${VERSION_BIS}_Ubuntu_18_04_Cuda_11_6.tar.xz"
     local DL_FILE=$(basename $DL_URL)
     local UNZIP_DIR="${MINER}-unzipped"
     local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
@@ -24,40 +25,57 @@ function miner_install {
     wget -q $DL_URL
 
     echo " - unziping..."
-    unzip $DL_FILE -d $UNZIP_DIR
+    tar -Jxf $DL_FILE
+    UNZIP_DIR=TeamBlackMiner_${VERSION_BIS}_Ubuntu_18_04_Cuda_11_6
 
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
-    mkdir -p ${minersDir}/${MINER}
-    cp -a ${UNZIP_DIR}/AMD_Miner_UBUNTU_${VERSION} ${minersDir}/${MINER}
+    mv $UNZIP_DIR ${minersDir}/${MINER}
 
-    #echo " - testing..."
+    echo " - testing..."
+    ${minersDir}/${MINER}/TBMiner --list-devices
 
     miner_after_install "$MINER" "$VERSION" $TMP_DIR
-
 }
 
 
 
-function TODO_miner_get_run_cmd {
+function miner_get_run_cmd {
     local MINER=$1
     shift || true
 
-    local CMD_EXEC=${minersDir}/${MINER}/${MINER}
+    local CMD_EXEC=${minersDir}/${MINER}/TBMiner
     echo $CMD_EXEC
 }
 
 
-function TODO_miner_get_run_args {
+
+function miner_get_run_args {
     local MINER=$1
     local ALGO=$2
     local POOL_URL=$3
     local POOL_ACCOUNT=$4
     shift 4 || true
 
+    local POOL_HOST=$(echo "$POOL_URL" |cut -d":" -f1)
+    local POOL_PORT=$(echo "$POOL_URL" |cut -d":" -f2)
+
+    local POOL_ADDR=$(echo "$POOL_ACCOUNT" |cut -d"." -f1)
+    local WORKER_NAME=$(echo "$POOL_ACCOUNT" |cut -d"." -f2)
+
     local API_PORT=$(getMinerApiPort ${MINER})
 
-    local CMD_ARGS=""
+    local CMD_ARGS="
+        --algo ${ALGO}
+        --hostname ${POOL_HOST}
+        --port ${POOL_PORT}
+        --wallet ${POOL_ADDR}
+        --worker-name ${WORKER_NAME}
+        --server-passwd x
+        --api
+        --api-ip 127.0.0.1
+        --api-port ${API_PORT}
+    "
 
     echo $CMD_ARGS
 }

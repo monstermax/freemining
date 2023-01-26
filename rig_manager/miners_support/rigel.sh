@@ -9,12 +9,11 @@ set -e
 
 function miner_install {
     local MINER=$1
-    local VERSION="2.1"
-
+    local VERSION="1.3.0"
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    local DL_URL="https://github.com/mhssamadani/Autolykos2_AMD_Miner/releases/download/${VERSION}/AMD_Miner_UBUNTU_${VERSION}.zip"
+    local DL_URL="https://github.com/rigelminer/rigel/releases/download/${VERSION}/rigel-${VERSION}-linux.tar.gz"
     local DL_FILE=$(basename $DL_URL)
     local UNZIP_DIR="${MINER}-unzipped"
     local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
@@ -24,31 +23,29 @@ function miner_install {
     wget -q $DL_URL
 
     echo " - unziping..."
-    unzip $DL_FILE -d $UNZIP_DIR
+    tar zxf $DL_FILE
 
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
-    mkdir -p ${minersDir}/${MINER}
-    cp -a ${UNZIP_DIR}/AMD_Miner_UBUNTU_${VERSION} ${minersDir}/${MINER}
+    cp -a rigel-${VERSION}-linux ${minersDir}/${MINER}
 
-    #echo " - testing..."
+    echo " - testing..."
+    ${minersDir}/${MINER}/rigel --list-devices
 
     miner_after_install "$MINER" "$VERSION" $TMP_DIR
-
 }
 
 
-
-function TODO_miner_get_run_cmd {
+function miner_get_run_cmd {
     local MINER=$1
     shift || true
 
-    local CMD_EXEC=${minersDir}/${MINER}/${MINER}
+    local CMD_EXEC=${minersDir}/${MINER}/rigel
     echo $CMD_EXEC
 }
 
 
-function TODO_miner_get_run_args {
+function miner_get_run_args {
     local MINER=$1
     local ALGO=$2
     local POOL_URL=$3
@@ -57,11 +54,16 @@ function TODO_miner_get_run_args {
 
     local API_PORT=$(getMinerApiPort ${MINER})
 
-    local CMD_ARGS=""
+    local CMD_ARGS="
+        -a ${ALGO}
+        -o stratum+tcp://${POOL_URL}
+        -u ${POOL_ACCOUNT}
+        -p x
+        --api-bind=127.0.0.1:${API_PORT}
+        "
 
     echo $CMD_ARGS
 }
-
 
 
 function TODO_miner_status_txt {
@@ -72,6 +74,7 @@ function TODO_miner_status_txt {
 function TODO_miner_status_json {
     local MINER=$1
 }
+
 
 
 
@@ -95,4 +98,3 @@ if [ "$0" = "$BASH_SOURCE" ]; then
         miner_run $MINER $@
     fi
 fi
-

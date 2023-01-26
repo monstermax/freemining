@@ -10,6 +10,15 @@ mkdir -p ${rigLogDir}/miners
 mkdir -p ${rigPidDir}/miners
 
 
+function miner_install {
+    local MINER=$1
+    # extends ME
+
+    echo "Error: Miner ${MINER} has no installation script" >&2
+    return 1
+}
+
+
 function miner_before_install {
     local MINER=$1
     local VERSION=$2
@@ -55,9 +64,22 @@ function miner_after_install {
 }
 
 
+
 function miner_get_run_cmd {
     local MINER=$1
     # extends ME
+
+    echo "Error: Miner ${MINER} has no get_run_cmd script" >&2
+    return 1
+}
+
+
+function miner_get_run_args {
+    local MINER=$1
+    # extends ME
+
+    echo "Error: Miner ${MINER} has no get_run_args script" >&2
+    return 1
 }
 
 
@@ -77,5 +99,23 @@ function miner_run {
         exit 1
     fi
 
+}
+
+
+function miner_status_txt {
+    local MINER=$1
+    # extends ME
+
+    #echo "Error: Miner ${MINER} has no status-txt script" >&2
+    #return 1
+}
+
+
+function miner_status_json {
+    local MINER=$1
+    # extends ME
+
+    #echo "Error: Miner ${MINER} has no status-json script" >&2
+    #return 1
 }
 

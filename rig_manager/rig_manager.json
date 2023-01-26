@@ -41,9 +41,9 @@
 
 	},
 	"miners": {
-		"nbminer": {
+		"gminer": {
 			"api": {
-				"port": 42001
+				"port": 42006
 			}
 		},
 		"lolminer": {
@@ -51,9 +51,14 @@
 				"port": 42002
 			}
 		},
-		"xmrig": {
+		"nbminer": {
 			"api": {
-				"port": 42003
+				"port": 42001
+			}
+		},
+		"rigel": {
+			"api": {
+				"port": 42007
 			}
 		},
 		"teamredminer": {
@@ -66,9 +71,9 @@
 				"port": 42005
 			}
 		},
-		"gminer": {
+		"xmrig": {
 			"api": {
-				"port": 42006
+				"port": 42003
 			}
 		}
 	}

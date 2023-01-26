@@ -68,9 +68,16 @@ function usage {
 
 MINER_LOADED="0"
 if [ "$MINER" != "" -a "$MINER" != "ps" -a "$MINER" != "dir" ]; then
-    if test -f ../miners_support/${MINER}.sh; then
+    if test -x ../miners_support/${MINER}.sh; then
         source ../miners_support/${MINER}.sh
         MINER_LOADED="1"
+
+    else
+        MINER_FROM_ALIAS=$(jq -r ".miners[\"${MINER}\"].miner | select(. != null) // \"\"" $RIG_CONFIG_FILE 2>/dev/null)
+        if test -x ../miners_support/${MINER_FROM_ALIAS}.sh; then
+            source ../miners_support/${MINER_FROM_ALIAS}.sh
+            MINER_LOADED="1"
+        fi
     fi
 fi
 

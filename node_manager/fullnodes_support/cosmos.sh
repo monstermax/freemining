@@ -26,7 +26,7 @@ function fullnode_install {
     echo " - Install into ${fullnodesDir}/${FULLNODE}"
     rm -rf ${fullnodesDir}/${FULLNODE}
     mkdir -p ${fullnodesDir}/${FULLNODE}
-    mv $DL_FILE ${fullnodesDir}/${FULLNODE}/
+    mv $DL_FILE ${fullnodesDir}/${FULLNODE}/gaiad
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -45,19 +45,24 @@ function fullnode_get_run_cmd {
 function fullnode_get_run_args {
     local FULLNODE=$1
 
-    local CMD_ARGS=""
+    local CMD_ARGS="
+        --home ${nodeConfDir}/fullnodes/${FULLNODE}
+        --p2p.laddr tcp://0.0.0.0:26656
+        --rpc.laddr tcp://127.0.0.1:26657
+        --rpc.unsafe
+        "
     echo $CMD_ARGS
 }
 
 
 
-function fullnode_status_txt {
+function TODO_fullnode_status_txt {
     local FULLNODE=$1
     # not available
 }
 
 
-function fullnode_status_json {
+function TODO_fullnode_status_json {
     local FULLNODE=$1
     # not available
 }

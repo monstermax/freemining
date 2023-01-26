@@ -36,11 +36,12 @@ const layoutPath = `${templatesDir}/layout_node_webserver.html`;
 
 const nodeManagerCmd = `${__dirname}/../node_manager.sh ps`;
 
-const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').split(' ');
-let installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
-const configuredFullnodes = (process.env.CONFIGURED_FULLNODES || '').split(' ');
+const installablesFullnodes = (process.env.INSTALLABLE_FULLNODES || '').trim().split(' ');
+let installedFullnodes = (process.env.INSTALLED_FULLNODES || '').trim().split(' ');
+const configuredFullnodes = (process.env.CONFIGURED_FULLNODES || '').trim().split(' ');
 
 const toolsDir = `${__dirname}/../tools`;
+const cmdNode = `${toolsDir}/../node_manager.sh`;
 const cmdFullnode = `${toolsDir}/run_fullnode.sh`;
 const cmdInstallFullnode = `${toolsDir}/install_fullnode.sh`;
 const cmdUninstallFullnode = `${toolsDir}/uninstall_fullnode.sh`;
@@ -569,10 +570,11 @@ async function getFullnodeLogs(fullnodeName: string): Promise<string> {
     const cmd = `${cmdFullnode} ${fullnodeName} log -n 50`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    const ret = await cmdExec(cmd, 10_000);
+    let ret = await cmdExec(cmd, 10_000);
 
     if (ret) {
-        console.log(`${now()} [DEBUG] command result: ${ret}`);
+        //console.log(`${now()} [DEBUG] command result: ${ret}`);
+        ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
 
     } else {
         console.log(`${now()} [DEBUG] command result: ERROR`);
@@ -639,10 +641,11 @@ async function getFullnodeInstallLogs(fullnodeName: string): Promise<string> {
     const cmd = `${cmdInstallFullnode} ${fullnodeName} --daemon log -n 50`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    const ret = await cmdExec(cmd, 10_000);
+    let ret = await cmdExec(cmd, 10_000);
 
     if (ret) {
-        console.log(`${now()} [DEBUG] command result: ${ret}`);
+        //console.log(`${now()} [DEBUG] command result: ${ret}`);
+        ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
 
     } else {
         console.log(`${now()} [DEBUG] command result: ERROR`);
@@ -720,12 +723,12 @@ async function getNodeProcesses(): Promise<string> {
 
 async function getInstalledFullnodes(): Promise<string[]> {
     //if (installedFullnodes === null) {
-    //    installedFullnodes = (process.env.INSTALLED_FULLNODES || '').split(' ');
+    //    installedFullnodes = (process.env.INSTALLED_FULLNODES || '').trim().split(' ');
     //}
 
-    const cmd = `bash -c "source /home/karma/dev/perso/freemining/node_manager/node_manager.sh; echo \\$INSTALLED_FULLNODES"`;
+    const cmd = `bash -c "source ${cmdNode}; echo \\$INSTALLED_FULLNODES"`;
     const installedFullnodesList = await cmdExec(cmd);
-    installedFullnodes = (installedFullnodesList || '').split(' ');
+    installedFullnodes = (installedFullnodesList || '').trim().split(' ');
 
     return installedFullnodes;
 }

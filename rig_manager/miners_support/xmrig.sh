@@ -6,12 +6,24 @@ source ./miners_support.sh
 set -e
 
 
+# Install release
+#frm rig miner-install xmrig
+
+# Install from sources
+#frm rig miner-install xmrig --from-sources
+
+# Install from sources + remove minimum donate level
+#frm rig miner-install xmrig --from-sources --nofees
+#frm rig miner-install xmrig --from-sources --nofees --alias xmrig-free
+
+
 
 function miner_install {
     local MINER=$1
 
     if hasOpt --from-sources; then
         miner_install_from_sources $@
+        return
     fi
 
     local VERSION="6.18.1"
@@ -31,10 +43,12 @@ function miner_install {
     tar zxf $DL_FILE
 
     echo " - installing..."
-    rm -rf ${minersDir}/${MINER}/${MINER}
+    #rm -rf ${minersDir}/${MINER}/${MINER}
     mkdir -p ${minersDir}/${MINER}
     cp -a xmrig-${VERSION}/config.json ${minersDir}/${MINER}
     cp -a xmrig-${VERSION}/xmrig ${minersDir}/${MINER}/xmrig-release
+
+    # add versioning symlink
     cd ${minersDir}/${MINER}
     ln -fs xmrig-release xmrig
 
@@ -47,9 +61,8 @@ function miner_install {
 
 function miner_install_from_sources {
     local MINER=$1
-    local OPTIONS=$2 # nofees
 
-    local VERSION=""
+    local VERSION="sources"
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
@@ -59,7 +72,7 @@ function miner_install_from_sources {
     local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
     >${INSTALL_LOG}
 
-    echo " -installing dev tools"
+    echo "- installing dev tools"
     rootRequired
     sudo apt-get update -qq --allow-releaseinfo-change
     sudo apt-get install -qq -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev automake libtool autoconf
@@ -73,7 +86,7 @@ function miner_install_from_sources {
     mkdir xmrig/build
     cd xmrig/scripts
 
-    if [ "$OPTIONS" = "nofees" ]; then
+    if hasOpt --nofees; then
         sed -i "s/ = 1;/ = 0;/" ../src/donate.h
     fi
 
@@ -155,7 +168,7 @@ function miner_status_txt {
 
     if [ "$SUMMARY_JSON" = "" ]; then
         echo -e "miner.active: \033[0;31mfalse\033[0m"
-        exit 1
+        return 1 2>/dev/null || exit 1
     fi
 
     echo -e "miner.active: \033[0;32mtrue\033[0m"
@@ -199,7 +212,7 @@ function miner_status_txt {
     echo "worker.algo: ${ALGO}"
 
 
-    local PID_FILE=/tmp/xmrig.pid
+    local PID_FILE=${rigPidDir}/miners/freemining.rig.miner.${MINER}.pid
     local PID=""
     if test -f $PID_FILE; then
         PID=$(cat $PID_FILE)
@@ -314,14 +327,14 @@ function miner_status_json {
     local SUMMARY_JSON=$(wget --tries=1 --timeout=1 --connect-timeout=1 --read-timeout=1 --header="Authorization: Bearer ${BEARER}" -qO- $SUMMARY_URL)
 
     if [ "$SUMMARY_JSON" = "" ]; then
-        exit 1
+        return 1 2>/dev/null || exit 1
     fi
 
     local CONFIG_URL=${API_URL}/2/config
     local CONFIG_JSON=$(wget --tries=1 --timeout=1 --connect-timeout=1 --read-timeout=1 --header="Authorization: Bearer ${BEARER}" -qO- $CONFIG_URL)
 
     local PID_FILE="${rigPidDir}/miners/freemining.rig.miner.${MINER}.pid"
-    local PID=""
+    local PID="0"
     if test -f $PID_FILE; then
         PID=$(cat $PID_FILE)
     fi

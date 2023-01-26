@@ -9,12 +9,12 @@ set -e
 
 function miner_install {
     local MINER=$1
-    local VERSION="2.1"
+    local VERSION="0.5.0"
 
     local TMP_DIR=$(mktemp -d)
     miner_before_install "$MINER" "$VERSION" $TMP_DIR
 
-    local DL_URL="https://github.com/mhssamadani/Autolykos2_AMD_Miner/releases/download/${VERSION}/AMD_Miner_UBUNTU_${VERSION}.zip"
+    local DL_URL="https://github.com/fancyIX/ccminer/releases/download/${VERSION}/ccminer-linux-amd64"
     local DL_FILE=$(basename $DL_URL)
     local UNZIP_DIR="${MINER}-unzipped"
     local INSTALL_LOG="${rigLogDir}/miners/${MINER}_install.log"
@@ -22,19 +22,17 @@ function miner_install {
 
     echo " - downloading..."
     wget -q $DL_URL
-
-    echo " - unziping..."
-    unzip $DL_FILE -d $UNZIP_DIR
+    chmod +x $DL_FILE
 
     echo " - installing..."
     rm -rf ${minersDir}/${MINER}
     mkdir -p ${minersDir}/${MINER}
-    cp -a ${UNZIP_DIR}/AMD_Miner_UBUNTU_${VERSION} ${minersDir}/${MINER}
+    cp -a $DL_FILE ${minersDir}/${MINER}/ccminer
 
-    #echo " - testing..."
+    echo " - testing..."
+    ${minersDir}/${MINER}/ccminer --ndevs
 
     miner_after_install "$MINER" "$VERSION" $TMP_DIR
-
 }
 
 

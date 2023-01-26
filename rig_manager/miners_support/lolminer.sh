@@ -81,7 +81,7 @@ function miner_status_txt {
 
     if [ "$SUMMARY_JSON" = "" ]; then
         echo -e "miner.active: \033[0;31mfalse\033[0m"
-        exit 1
+        return 1 2>/dev/null || exit 1
     fi
 
     echo -e "miner.active: \033[0;32mtrue\033[0m"
@@ -154,7 +154,7 @@ function miner_status_json {
     local SUMMARY_JSON=$(wget --tries=1 --timeout=1 --connect-timeout=1 --read-timeout=1 -qO- $SUMMARY_URL)
 
     if [ "$SUMMARY_JSON" = "" ]; then
-        exit 1
+        return 1 2>/dev/null || exit 1
     fi
 
 

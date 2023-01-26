@@ -42,7 +42,7 @@ function miner_get_run_cmd {
     local MINER=$1
     shift || true
 
-    local CMD_EXEC=${minersDir}/${MINER}/${MINER}
+    local CMD_EXEC=${minersDir}/${MINER}/miniZ
     echo $CMD_EXEC
 }
 
@@ -56,20 +56,25 @@ function miner_get_run_args {
 
     local API_PORT=$(getMinerApiPort ${MINER})
 
-    local CMD_ARGS=""
+    local CMD_ARGS="
+        --url=${POOL_ACCOUNT}@${POOL_HOST}
+        -p x
+        --smart-pers
+        --telemetry=${API_PORT}
+        "
 
     echo $CMD_ARGS
 }
 
 
 
-function miner_status_txt {
+function TODO_miner_status_txt {
     local MINER=$1
 }
 
 
 
-function miner_status_json {
+function TODO_miner_status_json {
     local MINER=$1
 }
 

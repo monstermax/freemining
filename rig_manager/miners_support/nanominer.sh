@@ -38,7 +38,7 @@ function miner_install {
 
 
 
-function miner_get_run_cmd {
+function TODO_miner_get_run_cmd {
     local MINER=$1
     shift || true
 
@@ -47,7 +47,7 @@ function miner_get_run_cmd {
 }
 
 
-function miner_get_run_args {
+function TODO_miner_get_run_args {
     local MINER=$1
     local ALGO=$2
     local POOL_URL=$3
@@ -63,13 +63,13 @@ function miner_get_run_args {
 
 
 
-function miner_status_txt {
+function TODO_miner_status_txt {
     local MINER=$1
 }
 
 
 
-function miner_status_json {
+function TODO_miner_status_json {
     local MINER=$1
 }
 

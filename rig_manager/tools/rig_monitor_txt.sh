@@ -33,31 +33,39 @@ echo "rig.date: ${DATE}"
 
 
 function runService {
-    local miner=$1
+    local MINER=$1
 
-    service_cmd="${TXT_MONITOR_DIR}/${miner}.sh"
-    if [ -x $service_cmd ]; then
-        exec $service_cmd > ${DATA_DIR}/rig_monitor_${miner}.tmp.txt
+    if [ -x ../miners_support/${MINER}.sh ]; then
+        source ../miners_support/${MINER}.sh
 
     else
-        #echo "Warning: service $service_cmd not found"
-        rm -f ${DATA_DIR}/rig_monitor_${miner}.tmp.txt
+        MINER_FROM_ALIAS=$(jq -r ".miners[\"${MINER}\"].miner | select(. != null) // \"\"" $RIG_CONFIG_FILE 2>/dev/null)
+
+        if test -x ../miners_support/${MINER_FROM_ALIAS}.sh; then
+            source ../miners_support/${MINER_FROM_ALIAS}.sh
+
+        else
+            rm -f ${DATA_DIR}/rig_monitor_${MINER}.tmp.txt
+            return
+        fi
     fi
+
+    miner_status_txt $MINER >${DATA_DIR}/rig_monitor_${MINER}.tmp.txt 2>/dev/null || true
 }
 
 
 function readService {
-    local miner=$1
+    local MINER=$1
 
-    if ! test -f ${DATA_DIR}/rig_monitor_${miner}.tmp.txt; then
+    if ! test -f ${DATA_DIR}/rig_monitor_${MINER}.tmp.txt; then
         return
     fi
 
-    SERVICE_TXT=$(cat ${DATA_DIR}/rig_monitor_${miner}.tmp.txt)
+    local SERVICE_TXT=$(cat ${DATA_DIR}/rig_monitor_${MINER}.tmp.txt)
 
     if [ "$SERVICE_TXT" != "" ]; then
         SERVICES_TXT="${SERVICES_TXT}
-==== ${miner} ====
+==== ${MINER} ====
 ${SERVICE_TXT}
 "
 
@@ -74,18 +82,17 @@ if [ "$INSTALLED_MINERS" != "" ]; then
     SERVICES_TXT=""
     DATA_DIR=$(mktemp -d)
 
-    for service_name in $INSTALLED_MINERS; do
-        runService $service_name &
+    for MINER in $INSTALLED_MINERS; do
+        runService $MINER &
     done
 
     wait
 
-    for service_name in $INSTALLED_MINERS; do
-        readService $service_name
+    for MINER in $INSTALLED_MINERS; do
+        readService $MINER
     done
 
     rm -rf $DATA_DIR
 
     echo "$SERVICES_TXT"
 fi
-

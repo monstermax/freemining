@@ -218,6 +218,13 @@ $0 \$@
         git pull
         $BASH_SOURCE modules-install
 
+    elif [ "$ACTION" = "pull" ]; then
+        git reset --hard
+        git pull
+
+    elif [ "$ACTION" = "push" ]; then
+        git push
+
     elif [ "$ACTION" = "ps" ]; then
         #ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.") |grep -e '\[free[m]ining.*\]' --color -B1
 

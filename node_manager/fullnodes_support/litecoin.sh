@@ -34,7 +34,7 @@ function fullnode_install {
 
 
 
-function fullnode_get_run_cmd {
+function TODO_fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
@@ -43,7 +43,7 @@ function fullnode_get_run_cmd {
 }
 
 
-function fullnode_get_run_args {
+function TODO_fullnode_get_run_args {
     local FULLNODE=$1
 
     local CMD_ARGS=""
@@ -52,13 +52,13 @@ function fullnode_get_run_args {
 
 
 
-function fullnode_status_txt {
+function TODO_fullnode_status_txt {
     local FULLNODE=$1
     # not available
 }
 
 
-function fullnode_status_json {
+function TODO_fullnode_status_json {
     local FULLNODE=$1
     # not available
 }

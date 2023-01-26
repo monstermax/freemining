@@ -118,9 +118,9 @@ const rigManagerCmd = `${__dirname}/../rig_manager.sh ps`;
 let ws: WebSocket;
 let sendStatusTimeout: any = null;
 
-const installablesMiners = (process.env.INSTALLABLE_MINERS || '').split(' ');
-let installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
-const configuredMiners = (process.env.CONFIGURED_MINERS || '').split(' ');
+const installablesMiners = (process.env.INSTALLABLE_MINERS || '').trim().split(' ');
+let installedMiners = (process.env.INSTALLED_MINERS || '').trim().split(' ');
+const configuredMiners = (process.env.CONFIGURED_MINERS || '').trim().split(' ');
 
 
 const wsServerHost = configRig.farmServer?.host || null;
@@ -140,6 +140,7 @@ let connectionCount = 0;
 
 const toolsDir = `${__dirname}/../tools`;
 const cmdService = `${toolsDir}/run_miner.sh`;
+const cmdRig = `${toolsDir}/../rig_manager.sh`;
 const cmdRigMonitorJson = `${toolsDir}/rig_monitor_json.sh`;
 const cmdRigMonitorTxt = `${toolsDir}/rig_monitor_txt.sh`;
 
@@ -526,8 +527,6 @@ app.post('/miners/miner-install', async (req: express.Request, res: express.Resp
 
         const ok = await startMinerInstall(minerName);
 
-        // TODO: voir pour raffraichir la liste installedMiners (mettre à null pour provoquer un rechargement au prochain getInstalledMiners)
-
         if (ok) {
             res.send(`OK: install started`);
 
@@ -642,8 +641,6 @@ app.post('/miners/miner-uninstall', async (req: express.Request, res: express.Re
 
         const ok = await startMinerUninstall(minerName);
 
-        // TODO: voir pour raffraichir la liste installedMiners (mettre à null pour provoquer un rechargement au prochain getInstalledMiners)
-
         if (ok) {
             res.send(`OK: uninstall started`);
 
@@ -689,13 +686,6 @@ app.use(function (req: express.Request, res: express.Response, next: Function) {
 });
 
 
-// LISTEN
-server.listen(httpServerPort, httpServerHost, () => {
-    console.log(`${now()} [${colors.blue('INFO')}] Webserver started on ${httpServerHost}:${httpServerPort}`);
-});
-
-
-
 
 main();
 
@@ -705,16 +695,18 @@ main();
 
 
 async function main() {
+    if (httpServerHost) {
+        // run local webserver
+        server.listen(httpServerPort, httpServerHost, () => {
+            console.log(`${now()} [${colors.blue('INFO')}] Webserver started on ${httpServerHost}:${httpServerPort}`);
+        });
+    }
+
     await checkStatus(false);
 
     if (wsServerHost) {
         // connect to websocket server
         websocketConnect();
-    }
-
-    if (false) {
-        // run local webserver
-        // TODO
     }
 }
 
@@ -940,10 +932,11 @@ async function getMinerLogs(minerName: string): Promise<string> {
     const cmd = `${cmdService} ${minerName} log -n 50`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    const ret = await cmdExec(cmd, 10_000);
+    let ret = await cmdExec(cmd, 10_000);
 
     if (ret) {
-        console.log(`${now()} [DEBUG] command result: ${ret}`);
+        //console.log(`${now()} [DEBUG] command result: ${ret}`);
+        ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
 
     } else {
         console.log(`${now()} [DEBUG] command result: ERROR`);
@@ -1144,10 +1137,11 @@ async function getMinerInstallLogs(minerName: string): Promise<string> {
     const cmd = `${cmdInstallMiner} ${minerName} --daemon log -n 50`;
 
     console.log(`${now()} [DEBUG] executing command: ${cmd}`);
-    const ret = await cmdExec(cmd, 10_000);
+    let ret = await cmdExec(cmd, 10_000);
 
     if (ret) {
-        console.log(`${now()} [DEBUG] command result: ${ret}`);
+        //console.log(`${now()} [DEBUG] command result: ${ret}`);
+        ret = ret.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
 
     } else {
         console.log(`${now()} [DEBUG] command result: ERROR`);
@@ -1242,12 +1236,12 @@ function loadTemplate(tplFile: string, data: any={}, currentUrl:string='', withL
 
 async function getInstalledMiners(): Promise<string[]> {
     //if (installedMiners === null) {
-    //    installedMiners = (process.env.INSTALLED_MINERS || '').split(' ');
+    //    installedMiners = (process.env.INSTALLED_MINERS || '').trim().split(' ');
     //}
 
-    const cmd = `bash -c "source /home/karma/dev/perso/freemining/node_manager/node_manager.sh; echo \\$INSTALLED_FULLNODES"`;
+    const cmd = `bash -c "source ${cmdRig}; echo \\$INSTALLED_MINERS"`;
     const installedMinersList = await cmdExec(cmd);
-    installedMiners = (installedMinersList || '').split(' ');
+    installedMiners = (installedMinersList || '').trim().split(' ');
 
     return installedMiners;
 }

@@ -61,7 +61,7 @@ function miner_get_run_args {
         -u ${POOL_ACCOUNT}
         -p x
         --api_listen=0.0.0.0:${API_PORT}
-        $@"
+        "
 
     echo $CMD_ARGS
 }
@@ -80,7 +80,7 @@ function miner_status_txt {
 
     if [ "$SUMMARY_JSON" = "" ]; then
         echo -e "miner.active: \033[0;31mfalse\033[0m"
-        exit 1
+        return 1 2>/dev/null || exit 1
     fi
 
     echo -e "miner.active: \033[0;32mtrue\033[0m"
@@ -107,7 +107,7 @@ function miner_status_txt {
     echo "worker.hashRate: ${HASHRATE_ROUND} MH/s"
 
 
-    local PID_FILE=/tmp/teamredminer.pid
+    local PID_FILE=${rigPidDir}/miners/freemining.rig.miner.${MINER}.pid
     local PID=""
     if test -f $PID_FILE; then
         PID=$(cat $PID_FILE)
@@ -158,7 +158,7 @@ function miner_status_json {
     local SUMMARY_JSON=$(echo -n summary | nc -w 1 127.0.0.1 ${API_PORT} 2>/dev/null |sed 's/,/\n/g')
 
     if [ "$SUMMARY_JSON" = "" ]; then
-        exit 1
+        return 1 2>/dev/null || exit 1
     fi
 
 

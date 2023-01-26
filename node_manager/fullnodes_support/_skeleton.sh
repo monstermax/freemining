@@ -9,23 +9,25 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
-    local VERSION="4.7.0.1"
+    local VERSION="EDIT_ME"
     local TMP_DIR=$(mktemp -d)
     fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
 
-    local DL_URL="https://github.com/tronprotocol/java-tron/releases/download/GreatVoyage-v${VERSION}/FullNode.jar"
+    local DL_URL="EDIT_ME"
     local DL_FILE=$(basename $DL_URL)
     local UNZIP_DIR="${FULLNODE}-unzipped"
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
     echo " - Downloading ${FULLNODE}"
-    wget -q $DL_URL
+    #wget -q $DL_URL
+
+    echo " - Unzipping"
+    #tar zxf $DL_FILE
 
     echo " - Install into ${fullnodesDir}/${FULLNODE}"
-    rm -rf ${fullnodesDir}/${FULLNODE}
-    mkdir -p ${fullnodesDir}/${FULLNODE}
-    cp -a ./FullNode.jar ${fullnodesDir}/${FULLNODE}/
+    #rm -rf ${fullnodesDir}/${FULLNODE}
+    #mv XXXXXXXXXXXXXXX ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -36,7 +38,7 @@ function fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
-    local CMD_EXEC=/usr/bin/java
+    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/dogecoind
     echo $CMD_EXEC
 }
 
@@ -45,10 +47,16 @@ function fullnode_get_run_args {
     local FULLNODE=$1
 
     local CMD_ARGS="
-        -Xmx24g
-        -XX:+UseConcMarkSweepGC
-        -jar ${fullnodesDir}/${FULLNODE}/Fullnode.jar
-        -c ${nodeConfDir}/fullnodes/${FULLNODE}/main_net_config.conf
+        -datadir=${nodeConfDir}/fullnodes/${FULLNODE}
+        -server
+        -port=22556
+        -rpcbind=0.0.0.0
+        -rpcport=22555
+        -rpcuser=user
+        -rpcpassword=pass
+        -rpcallowip=127.0.0.1
+        -rpcallowip=${IP_CRYPTO}
+        -printtoconsole
         "
     echo $CMD_ARGS
 }

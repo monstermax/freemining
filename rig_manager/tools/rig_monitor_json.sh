@@ -63,27 +63,35 @@ done <<< $(echo "$VIDEO_CARDS")
 
 
 function runService {
-    service_name=$1
+    MINER=$1
 
-    service_cmd="${JSON_MONITOR_DIR}/${service_name}.sh"
-    if [ -x $service_cmd ]; then
-        exec $service_cmd > ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
+    if [ -x ../miners_support/${MINER}.sh ]; then
+        source ../miners_support/${MINER}.sh
 
     else
-        #echo "Warning: service $service_cmd not found"
-        rm -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.json
+        MINER_FROM_ALIAS=$(jq -r ".miners[\"${MINER}\"].miner | select(. != null) // \"\"" $RIG_CONFIG_FILE 2>/dev/null)
+
+        if test -x ../miners_support/${MINER_FROM_ALIAS}.sh; then
+            source ../miners_support/${MINER_FROM_ALIAS}.sh
+
+        else
+            rm -f ${DATA_DIR}/rig_monitor_${MINER}.tmp.json
+            return
+        fi
     fi
+
+    miner_status_json $MINER >${DATA_DIR}/rig_monitor_${MINER}.tmp.json 2>/dev/null || true
 }
 
 
 function readService {
-    service_name=$1
+    MINER=$1
 
-    if ! test -f ${DATA_DIR}/rig_monitor_${service_name}.tmp.json; then
+    if ! test -f ${DATA_DIR}/rig_monitor_${MINER}.tmp.json; then
         return
     fi
 
-    SERVICE_JSON=$(cat ${DATA_DIR}/rig_monitor_${service_name}.tmp.json)
+    SERVICE_JSON=$(cat ${DATA_DIR}/rig_monitor_${MINER}.tmp.json)
 
     if [ "$SERVICE_JSON" != "" ]; then
         if [ "$SERVICES_JSON" != "" ]; then
@@ -93,7 +101,7 @@ function readService {
 
         SERVICE_JSON=$(echo "$SERVICE_JSON" |sed  '2,9999s/^/        /g')
 
-        SERVICES_JSON="${SERVICES_JSON}\"${service_name}\": ${SERVICE_JSON}"
+        SERVICES_JSON="${SERVICES_JSON}\"${MINER}\": ${SERVICE_JSON}"
 
     fi
 
@@ -107,14 +115,14 @@ SERVICES_JSON=""
 if [ "$INSTALLED_MINERS" != "" ]; then
     DATA_DIR=$(mktemp -d)
 
-    for service_name in $INSTALLED_MINERS; do
-        runService $service_name &
+    for MINER in $INSTALLED_MINERS; do
+        runService $MINER &
     done
 
     wait
 
-    for service_name in $INSTALLED_MINERS; do
-        readService $service_name
+    for MINER in $INSTALLED_MINERS; do
+        readService $MINER
     done
 
     rm -rf $DATA_DIR

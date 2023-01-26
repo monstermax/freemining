@@ -57,13 +57,13 @@ function fullnode_get_run_args {
 
 
 
-function fullnode_status_txt {
+function TODO_fullnode_status_txt {
     local FULLNODE=$1
     # not available
 }
 
 
-function fullnode_status_json {
+function TODO_fullnode_status_json {
     local FULLNODE=$1
     # not available
 }
