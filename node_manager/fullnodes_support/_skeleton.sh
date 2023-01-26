@@ -7,7 +7,7 @@ set -e
 
 
 
-function fullnode_install {
+function TODO_fullnode_install {
     local FULLNODE=$1
     local VERSION="EDIT_ME"
     local TMP_DIR=$(mktemp -d)
@@ -34,30 +34,19 @@ function fullnode_install {
 
 
 
-function fullnode_get_run_cmd {
+function TODO_fullnode_get_run_cmd {
     local FULLNODE=$1
     shift || true
 
-    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/dogecoind
+    local CMD_EXEC=${fullnodesDir}/${FULLNODE}/${FULLNODE}d
     echo $CMD_EXEC
 }
 
 
-function fullnode_get_run_args {
+function TODO_fullnode_get_run_args {
     local FULLNODE=$1
 
-    local CMD_ARGS="
-        -datadir=${nodeConfDir}/fullnodes/${FULLNODE}
-        -server
-        -port=22556
-        -rpcbind=0.0.0.0
-        -rpcport=22555
-        -rpcuser=user
-        -rpcpassword=pass
-        -rpcallowip=127.0.0.1
-        -rpcallowip=${IP_CRYPTO}
-        -printtoconsole
-        "
+    local CMD_ARGS=""
     echo $CMD_ARGS
 }
 

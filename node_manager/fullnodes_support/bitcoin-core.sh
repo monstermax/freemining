@@ -11,6 +11,12 @@ set -e
 
 function fullnode_install {
     local FULLNODE=$1
+
+    if hasOpt --btcd; then
+        fullnode_install_btcd $@
+        return
+    fi
+
     local VERSION="22.0" # bitcoin.org
     local TMP_DIR=$(mktemp -d)
     fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
@@ -29,8 +35,10 @@ function fullnode_install {
     local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
     >${INSTALL_LOG}
 
+    #sudo apt-get install -qq -y libxkbcommon-x11-0
+
     echo " - Downloading ${FULLNODE}"
-    wget  $DL_URL
+    wget -q $DL_URL
 
     echo " - Unzipping"
     tar zxf $DL_FILE
@@ -45,6 +53,33 @@ function fullnode_install {
 
     rm -rf ${fullnodesDir}/${FULLNODE}
     mv bitcoin-${VERSION} ${fullnodesDir}/${FULLNODE}
+
+    fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
+}
+
+
+function fullnode_install_btcd {
+    local FULLNODE=$1
+    local VERSION="0.23.3"
+    local TMP_DIR=$(mktemp -d)
+    fullnode_before_install "$FULLNODE" "$VERSION" $TMP_DIR
+
+    local DL_URL="https://github.com/btcsuite/btcd/releases/download/v${VERSION}/btcd-linux-amd64-v${VERSION}.tar.gz"
+    local DL_FILE=$(basename $DL_URL)
+    local UNZIP_DIR="${FULLNODE}-unzipped"
+    local INSTALL_LOG="${nodeLogDir}/fullnodes/${FULLNODE}_install.log"
+    >${INSTALL_LOG}
+
+    echo " - Downloading ${FULLNODE}"
+    wget -q $DL_URL
+
+    echo " - Unzipping"
+    tar zxf $DL_FILE
+    UNZIP_DIR=btcd-linux-amd64-v${VERSION}
+
+    echo " - Install into ${fullnodesDir}/${FULLNODE}"
+    rm -rf ${fullnodesDir}/${FULLNODE}
+    mv $UNZIP_DIR ${fullnodesDir}/${FULLNODE}
 
     fullnode_after_install "$FULLNODE" "$VERSION" $TMP_DIR
 }
@@ -72,6 +107,9 @@ function fullnode_get_run_args {
         -rpcpassword=pass
         -rpcallowip=127.0.0.1
         -rpcallowip=${IP_CRYPTO}
+        -maxmempool=100
+        -zmqpubrawblock=tcp://127.0.0.1:28332
+        -zmqpubrawtx=tcp://127.0.0.1:28333
         "
     echo $CMD_ARGS
 }

@@ -6,6 +6,8 @@ source ./fullnodes_support.sh
 set -e
 
 
+# https://www.makertronic-yt.com/monter-un-node-ergo-pour-miner-solo/
+
 
 function fullnode_install {
     local FULLNODE=$1
@@ -61,7 +63,7 @@ scorex {
     }
 
     network {
-        #nodeName = "ergo-yo"
+        #nodeName = "ergo-freemining"
         #bindAddress = "0.0.0.0:9020"
     }
 }

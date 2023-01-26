@@ -64,9 +64,16 @@ function usage {
 
 FULLNODE_LOADED="0"
 if [ "$FULLNODE" != "" -a "$FULLNODE" != "ps" -a "$FULLNODE" != "dir" ]; then
-    if test -f ../fullnodes_support/${FULLNODE}.sh; then
+    if test -x ../fullnodes_support/${FULLNODE}.sh; then
         source ../fullnodes_support/${FULLNODE}.sh
         FULLNODE_LOADED="1"
+
+    else
+        FULLNODE_FROM_ALIAS=$(jq -r ".fullnodes[\"${FULLNODE}\"].fullnode | select(. != null) // \"\"" $NODE_CONFIG_FILE 2>/dev/null)
+        if test -x ../fullnodes_support/${FULLNODE_FROM_ALIAS}.sh; then
+            source ../fullnodes_support/${FULLNODE_FROM_ALIAS}.sh
+            FULLNODE_LOADED="1"
+        fi
     fi
 fi
 
