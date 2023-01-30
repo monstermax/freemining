@@ -14,7 +14,7 @@ const defaultListenAddress = '0.0.0.0';
 const defaultListenPort = 1234;
 const defaultHttpStaticDir = `${__dirname}${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir = `${__dirname}${SEP}..${SEP}web${SEP}templates`;
-const userHomeDir = os_1.default.userInfo().homedir;
+const userHomeDir = os_1.default.userInfo().homedir.replaceAll(path_1.default.sep, SEP);
 const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
