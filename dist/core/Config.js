@@ -39,8 +39,8 @@ function loadConfig(args) {
         console.error(`${(0, utils_1.now)()} [ERROR] missing user-dir`);
         process.exit(1);
     }
-    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir, {}, false, false, true) || '';
-    //userFrmDir = stringTemplate(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // TEST for windows
+    //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
+    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // TEST for windows
     if (!fs_1.default.existsSync(userFrmDir)) {
         try {
             fs_1.default.mkdirSync(userFrmDir);
