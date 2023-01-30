@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProcesses = exports.minerRunInfos = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.minerInstallStart = exports.monitorCheckRig = exports.monitorStop = exports.monitorStart = void 0;
+exports.getRigInfos = exports.getProcesses = exports.minerRunInfos = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.minerInstallStart = exports.monitorCheckRig = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
+const os_1 = tslib_1.__importDefault(require("os"));
 const path_1 = tslib_1.__importDefault(require("path"));
+const child_process_1 = require("child_process");
 const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
 const minersConfigs_1 = require("./minersConfigs");
@@ -11,6 +13,7 @@ const minersConfigs_1 = require("./minersConfigs");
 const processes = {};
 let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
+const minersInfos = {};
 /* ########## FUNCTIONS ######### */
 /**
  * Start rig monitor (poll running processes API every x seconds)
@@ -47,23 +50,22 @@ function monitorCheckRig(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // check all services
         let procId;
-        const minersProcessesInfos = {};
         for (procId in processes) {
             const proc = processes[procId];
             if (proc.type === 'miner-run') {
                 const minerCommands = minersConfigs_1.minersCommands[proc.name];
-                const infos = yield minerCommands.getInfos(config, {});
-                minersProcessesInfos[proc.name] = infos;
+                let minerInfos;
+                try {
+                    minerInfos = yield minerCommands.getInfos(config, {});
+                    minerInfos.dataDate = new Date;
+                    minersInfos[proc.name] = minerInfos;
+                }
+                catch (err) {
+                    //throw { message: err.message };
+                    delete minersInfos[proc.name];
+                }
             }
         }
-        const rigInfos = {
-            rigName: 'noname',
-            miners: minersProcessesInfos,
-        };
-        console.log();
-        console.log(`Infos of local RIG :`);
-        console.log(rigInfos);
-        console.log();
     });
 }
 exports.monitorCheckRig = monitorCheckRig;
@@ -94,14 +96,14 @@ function minerRunStart(config, params) {
         const minerCommands = minersConfigs_1.minersCommands[params.miner];
         const cmdFile = minerCommands.getCommandFile(config, params);
         const args = minerCommands.getCommandArgs(config, params);
-        const runningDir = `${config.dataDir}/rig/miners/${params.miner}`;
-        const appDir = `${config.appDir}/rig/miners/${params.miner}`;
+        const runningDir = `${config.dataDir}${path_1.default.sep}rig${path_1.default.sep}miners${path_1.default.sep}${params.miner}`;
+        const appDir = `${config.appDir}${path_1.default.sep}rig${path_1.default.sep}miners${path_1.default.sep}${params.miner}`;
         const cmdPath = `${appDir}${path_1.default.sep}${cmdFile}`;
-        const logDir = `${config.logDir}/rig/miners`;
-        const logFile = `${logDir}/${params.miner}.run.log`;
-        const errFile = `${logDir}/${params.miner}.run.err`;
-        const pidDir = `${config.pidDir}/rig/miners`;
-        const pidFile = `${pidDir}/${params.miner}.run.pid`;
+        const logDir = `${config.logDir}${path_1.default.sep}rig${path_1.default.sep}miners`;
+        const logFile = `${logDir}${path_1.default.sep}${params.miner}.run.log`;
+        const errFile = `${logDir}${path_1.default.sep}${params.miner}.run.err`;
+        const pidDir = `${config.pidDir}${path_1.default.sep}rig${path_1.default.sep}miners`;
+        const pidFile = `${pidDir}${path_1.default.sep}${params.miner}.run.pid`;
         fs_1.default.mkdirSync(logDir, { recursive: true });
         fs_1.default.mkdirSync(pidDir, { recursive: true });
         fs_1.default.mkdirSync(runningDir, { recursive: true });
@@ -188,7 +190,13 @@ function minerRunInfos(config, params) {
             throw { message: `Unknown miner ${params.miner}` };
         }
         const miner = minersConfigs_1.minersCommands[params.miner];
-        const minerInfos = yield miner.getInfos(config, params);
+        let minerInfos;
+        try {
+            minerInfos = yield miner.getInfos(config, params);
+        }
+        catch (err) {
+            throw { message: err.message };
+        }
         return minerInfos;
     });
 }
@@ -197,3 +205,108 @@ function getProcesses() {
     return processes;
 }
 exports.getProcesses = getProcesses;
+function getRigInfos() {
+    const name = (0, utils_1.getOpt)('--rig-name') || os_1.default.hostname();
+    const hostname = os_1.default.hostname();
+    const ip = ((0, utils_1.getLocalIpAddresses)() || [])[0] || 'no-ip';
+    const rigOs = os_1.default.version();
+    const uptime = os_1.default.uptime();
+    const loadAvg = os_1.default.loadavg()[0];
+    const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
+    const memoryTotal = os_1.default.totalmem();
+    const _cpus = os_1.default.cpus();
+    const cpus = [
+        {
+            name: _cpus[0].model,
+            threads: _cpus.length,
+            avgSpeed: _cpus.map(cpu => cpu.speed).reduce((a, b) => a + b, 0) / _cpus.length,
+        }
+    ];
+    let gpuList;
+    if (os_1.default.platform() === 'linux') {
+        gpuList = (0, child_process_1.execSync)(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim();
+        // detailed output: 
+        // lspci -nnkd ::300
+        // temperatures & fanSpeeed [NVIDIA]
+        // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
+        /*
+        04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
+        07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
+        */
+    }
+    else if (os_1.default.platform() === 'win32') {
+        // detailed output: 
+        // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
+        /*
+        // temperatures & fanSpeeed
+        const MSI_Afterburner = require('msi-afterburner-api');
+        const afterburner = new MSI_Afterburner();
+        afterburner.init()
+            .then(() => {
+                afterburner.getSystemInfo()
+                    .then((systemInfo) => {
+                        console.log(`Number of GPUs: ${systemInfo.adapters.length}`);
+                        systemInfo.adapters.forEach((adapter) => {
+                            console.log(`GPU ${adapter.index}:`);
+                            console.log(`  Temperature: ${adapter.temperature}°C`);
+                            console.log(`  Fan Speed: ${adapter.fanSpeed}%`);
+                        });
+                    })
+                    .catch((err) => console.error(err));
+            })
+            .catch((err) => console.error(err));
+        */
+        gpuList = (0, child_process_1.execSync)('wmic path win32_VideoController get Name').toString().trim();
+        let tmpArr = gpuList.split(os_1.default.EOL);
+        tmpArr.shift();
+        tmpArr = tmpArr.map(item => item.trim());
+        gpuList = tmpArr.join(os_1.default.EOL);
+        /*
+        Name
+        Intel(R) HD Graphics 630
+         NVIDIA GeForce GTX 1070
+        */
+    }
+    else if (os_1.default.platform() === 'darwin') {
+        gpuList = (0, child_process_1.execSync)(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
+        /*
+        Chipset Model: AMD Radeon Pro 555X
+        Chipset Model: AMD Radeon Pro 560X
+        */
+        // temperatures & fanSpeeed
+        // iStats gpu --temp
+        // requires iStats => gem install iStats
+    }
+    else {
+        gpuList = '';
+    }
+    const gpus = gpuList.split(os_1.default.EOL).map((gpuName, idx) => {
+        return {
+            id: idx,
+            name: gpuName,
+        };
+    });
+    const rigInfos = {
+        infos: {
+            name,
+            hostname,
+            ip,
+            os: rigOs,
+            uptime,
+        },
+        usage: {
+            loadAvg,
+            memory: {
+                used: memoryUsed,
+                total: memoryTotal,
+            },
+        },
+        devices: {
+            cpus,
+            gpus,
+        },
+        minersInfos,
+    };
+    return rigInfos;
+}
+exports.getRigInfos = getRigInfos;

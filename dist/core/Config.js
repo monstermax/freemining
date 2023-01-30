@@ -4,15 +4,16 @@ exports.loadConfig = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
 const fs_1 = tslib_1.__importDefault(require("fs"));
+const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../common/utils");
 // daemon options
 const defaultWssConnTimeout = 10000;
 const defaultListenAddress = '0.0.0.0';
 const defaultListenPort = 1234;
-const defaultHttpStaticDir = __dirname + '/../web/public';
-const defaultHttpTemplatesDir = __dirname + '/../web/templates';
+const defaultHttpStaticDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}public`;
+const defaultHttpTemplatesDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}templates`;
 const userHomeDir = os_1.default.userInfo().homedir;
-const defaultUserFrmDir = `${userHomeDir}/.freemining-beta`;
+const defaultUserFrmDir = `${userHomeDir}${path_1.default.sep}.freemining-beta`;
 // cli options
 const defaultCliWssConnTimeout = 5000;
 const defaultCliWssServerAddress = '127.0.0.1';
@@ -46,9 +47,9 @@ function loadConfig(args) {
         }
     }
     // set appDir
-    let appDir = `${userFrmDir}/app`;
+    let appDir = `${userFrmDir}${path_1.default.sep}app`;
     // set confDir
-    let confDir = `${userFrmDir}/config`;
+    let confDir = `${userFrmDir}${path_1.default.sep}config`;
     /*
     if (hasOpt('--conf-dir', args)) {
         confDir = getOpt('--conf-dir', args) || '';
@@ -69,7 +70,7 @@ function loadConfig(args) {
         }
     }
     // set dataDir
-    let dataDir = `${userFrmDir}/data`;
+    let dataDir = `${userFrmDir}${path_1.default.sep}data`;
     /*
     if (hasOpt('--data-dir', args)) {
         dataDir = getOpt('--data-dir', args) || '';
@@ -90,7 +91,7 @@ function loadConfig(args) {
         }
     }
     // set logDir
-    let logDir = `${userFrmDir}/log`;
+    let logDir = `${userFrmDir}${path_1.default.sep}log`;
     /*
     if (hasOpt('--log-dir', args)) {
         logDir = getOpt('--log-dir', args) || '';
@@ -111,7 +112,7 @@ function loadConfig(args) {
         }
     }
     // set pidDir
-    let pidDir = `${userFrmDir}/run`;
+    let pidDir = `${userFrmDir}${path_1.default.sep}run`;
     /*
     if (hasOpt('--pid-dir', args)) {
         pidDir = getOpt('--pid-dir', args) || '';

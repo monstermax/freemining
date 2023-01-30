@@ -41,6 +41,8 @@ function getOpts(keyName, followCount = 0, argv = null) {
         if (idx > -1) {
             if (followCount === 0)
                 return true;
+            if (followCount === -1)
+                followCount = argv.length - idx - 1;
             const values = [];
             for (let j = 0; j < followCount; j++) {
                 let value = argv.slice(idx + j + 1, idx + j + 2).pop() || '';

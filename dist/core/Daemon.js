@@ -15,6 +15,13 @@ const routesFarm_1 = require("./http/routesFarm");
 const routesNode_1 = require("./http/routesNode");
 const routesPool_1 = require("./http/routesPool");
 const Rig = tslib_1.__importStar(require("../rig/Rig"));
+/* ########## USAGE #########
+
+# Start rig monitor
+./frmd-ts --rig-name test1
+
+
+*/
 /* ########## MAIN ######### */
 let config;
 let quitRunning = false;
@@ -117,6 +124,10 @@ function registerWssRoutes(config, wss) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                     const req = JSON.parse(messageJson);
                     switch (req.method) {
+                        case 'rigStatus':
+                            const rigInfos = Rig.getRigInfos();
+                            rpcSendResponse(ws, req.id, rigInfos);
+                            break;
                         case 'rigMonitorStart':
                             Rig.monitorStart(config, req.params);
                             rpcSendResponse(ws, req.id, 'OK');
