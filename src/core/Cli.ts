@@ -7,7 +7,6 @@ import { loadConfig } from './Config';
 import { now, hasOpt, getOpt, getOpts, buildRpcRequest, buildRpcResponse, buildRpcError } from '../common/utils';
 
 import type *  as t from '../common/types';
-import type childProcess from 'child_process';
 
 
 /* ########## USAGE #########
@@ -23,7 +22,7 @@ import type childProcess from 'child_process';
 
 
 # Start trex on JJPool for ERGO coin
-./frm-cli-ts --miner-start trex -algo autolykos2 -url eu.jjpool.fr:3056 -user 9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.test
+./frm-cli-ts --miner-start trex -algo autolykos2 -url eu.jjpool.fr:3056 -user 9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.test -- -d 0
 
 # Stop trex
 ./frm-cli-ts --miner-stop trex
