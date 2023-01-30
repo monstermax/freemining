@@ -9,7 +9,7 @@ const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
-const SEP = path_1.default.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path_1.default.sep;
 exports.minerInstall = {
     version: '6.18.1',
     install(config, params) {

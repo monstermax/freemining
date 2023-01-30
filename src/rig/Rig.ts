@@ -15,7 +15,7 @@ import type childProcess from 'child_process';
 
 /* ########## MAIN ######### */
 
-const SEP = path.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path.sep;
 
 const processes: t.MapString<t.Process> = {};
 

@@ -31,7 +31,7 @@ import type *  as t from '../common/types';
 
 let config: t.Config;
 let quitRunning = false;
-const SEP = path.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path.sep;
 
 
 /* ########## FUNCTIONS ######### */

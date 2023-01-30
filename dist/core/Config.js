@@ -7,7 +7,7 @@ const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../common/utils");
 /* ########## MAIN ######### */
-const SEP = path_1.default.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path_1.default.sep;
 // daemon options
 const defaultWssConnTimeout = 10000;
 const defaultListenAddress = '0.0.0.0';
@@ -40,7 +40,7 @@ function loadConfig(args) {
         process.exit(1);
     }
     //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
-    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // TEST for windows
+    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
     if (!fs_1.default.existsSync(userFrmDir)) {
         try {
             fs_1.default.mkdirSync(userFrmDir);

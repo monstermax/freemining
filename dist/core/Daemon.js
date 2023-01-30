@@ -26,7 +26,7 @@ const Rig = tslib_1.__importStar(require("../rig/Rig"));
 /* ########## MAIN ######### */
 let config;
 let quitRunning = false;
-const SEP = path_1.default.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 function usage(exitCode = null) {
     const _usage = `======================

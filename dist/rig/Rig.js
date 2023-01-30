@@ -10,7 +10,7 @@ const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
 const minersConfigs_1 = require("./minersConfigs");
 /* ########## MAIN ######### */
-const SEP = path_1.default.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path_1.default.sep;
 const processes = {};
 let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds

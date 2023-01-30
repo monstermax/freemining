@@ -10,7 +10,7 @@ import type *  as t from '../common/types';
 
 /* ########## MAIN ######### */
 
-const SEP = path.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path.sep;
 
 
 // daemon options
@@ -57,7 +57,7 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
     }
 
     //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
-    userFrmDir = stringTemplate(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // TEST for windows
+    userFrmDir = stringTemplate(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
 
     if (! fs.existsSync(userFrmDir)) {
         try {
