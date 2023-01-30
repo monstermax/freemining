@@ -1,6 +1,9 @@
 #!/bin/bash
 
 
+# nvidia-smi --query-gpu=index,name,memory.used,memory.total,temperature.gpu,fan.speed,utilization.gpu,utilization.memory,power.draw,clocks.sm,clocks.mem,clocks.gr --format=csv
+
+
 if [ "$1" == "-h" ]; then
     echo "Usage: "
     echo "      $0 -l           list cards"

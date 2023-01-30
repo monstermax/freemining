@@ -153,6 +153,7 @@ if test "$ACTION" = "run" || test "$ACTION" = "start" || test "$ACTION" = "resta
 
     if test "$FULLNODE_LOADED" != "1"; then
         echo "Error: ${FULLNODE} is not a valid fullnode"
+        echo " => Check if {FREEMINING_DIR}/node_manager/fullnodes_support/${FULLNODE}.sh exists and is executable"
         exit 1
     fi
 

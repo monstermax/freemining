@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# https://wiki.archlinux.org/title/AMDGPU
+
+#sudo cat /sys/kernel/debug/dri/1/amdgpu_pm_info
+#cat /sys/class/drm/card1/device/gpu_busy_percent # GPU utilisationn
+#radeontop -d- -l1
+#ipmitool sensor
+
 
 if [ "$1" == "-h" ]; then
     echo "Usage: "
@@ -72,5 +79,8 @@ TEMP_DECIMAL=$(cat /sys/class/drm/card${CARD_ID}/device/hwmon/hwmon?/temp1_input
 TEMP_ROUND=$(echo "$TEMP_DECIMAL/1000" |bc)
 FANPOWER255=$(cat /sys/class/drm/card${CARD_ID}/device/hwmon/hwmon?/pwm1)
 FANPOWER100=$(echo "${FANPOWER255}*100/255" |bc)
+
+#POWER_USAGE=$(sensors -uj |jq ".[] | select( .slowPPT != null ) .slowPPT.power1_average") # en watt
+
 echo "GPU usage: ${GPU_USAGE}% | GPU temperature: $TEMP_ROUND° | GPU fan speed: ${FANPOWER100}% | VRAM usage: ${VRAM_USED_MB}/${VRAM_TOTAL_MB} MB | GPU frequency: ${GPU_FREQ} | VRAM frequency: ${VRAM_FREQ}"
 

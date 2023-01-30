@@ -418,7 +418,7 @@ wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
                     return;
                 }
 
-                const rigName = status.infos.name || status.infos.hostname;
+                const rigName = status.infos ? (status.infos.name || status.infos.hostname) : (status.rig.name || status.rig.hostname);
 
                 if (rigName != wsClients[rigName].rigName) {
                     var debugme = 1;

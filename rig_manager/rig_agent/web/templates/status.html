@@ -97,7 +97,7 @@ ${Object.entries(rig.services).map(entry => {
                 <div class="col-1"></div>
                 <div class="col-2"><b>CPU</b> # <br /> ${cpu.id}</div>
                 <div class="col-7"><b>Name</b> <br /> ${cpu.name}</div>
-                <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(cpu.hashRate)}/sec.</div>
+                <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(cpu.hashRate, 'size')}H/sec.</div>
             </div>
         </div>
         `;

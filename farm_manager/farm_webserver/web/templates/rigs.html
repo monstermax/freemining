@@ -31,23 +31,24 @@
 <tbody>
     ${Object.entries(rigs).map(entry => {
         const [rigName, rig] = entry;
-        const dataAge = rig.dataAge;
+        const dataAge = rig.dataAge || Date.now()/1000 - (rig.dataDate || rig.rig.dateRig);
         //const dataAge = Date.now()/1000 - rig.dataDate;
         const isSuccess = (dataAge < 40) && (Object.keys(rig.services).length > 0);
         const isError = (dataAge > 40);
         const isWarning = (! isSuccess && ! isError);
         const colorClass = isSuccess ? 'bg-success' : (isError ? 'bg-danger' : 'bg-warning');
+        //const rigName2 = rig.infos ? (rig.infos.name || rig.infos.hostname) : (rig.rig.name || rig.rig.hostname);
 
         return `<tr class="bg-light" style="font-size:.9em; font-weight:bold;">
             <td rowspan="2" class="${colorClass} text-center" style="vertical-align:middle;">
-                <a class="text-light" href="./rig?rig=${rig.infos.name || rig.infos.hostname}">${rig.infos.name || rig.infos.hostname}</a>
+                <a class="text-light" href="./rig?rig=${rigName}">${rigName}</a>
             </td>
-            <td>${rig.infos.hostname}</td>
-            <td>${rig.infos.ip}</td>
-            <td>${rig.infos.os}</td>
-            <td class="text-end">${formatNumber(rig.infos.uptime, 'seconds')}</td>
-            <td class="text-end">${rig.usage.loadAvg}</td>
-            <td class="text-end">${formatNumber(rig.usage.memory.used)}/${formatNumber(rig.usage.memory.total)} MB</td>
+            <td>${(rig.infos || rig.rig).hostname}</td>
+            <td>${(rig.infos || rig.rig).ip}</td>
+            <td>${(rig.infos || rig.rig).os}</td>
+            <td class="text-end">${formatNumber((rig.infos || rig.rig).uptime, 'seconds')}</td>
+            <td class="text-end">${(rig.usage || rig.rig).loadAvg}</td>
+            <td class="text-end">${formatNumber((rig.usage || rig.rig).memory.used)}/${formatNumber((rig.usage || rig.rig).memory.total)} MB</td>
             <td class="text-end">${Object.keys(rig.services).length}</td>
             <td class="text-end"><span class="dataAge">${formatNumber(dataAge, 'seconds')}</span></td>
         </tr>

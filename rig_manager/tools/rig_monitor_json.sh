@@ -29,6 +29,11 @@ CPU_INFO=$(cat /proc/cpuinfo |grep "^model name" |cut -d":" -f2 |sort |uniq -c |
 CPU_NAME=$(echo $CPU_INFO |cut -d" " -f2-)
 CPU_COUNT=$(echo $CPU_INFO |cut -d" " -f1)
 
+#TMP_JSON_FILE=$(mktemp)
+#inxi -sC --output json --output-file ${TMP_JSON_FILE}  2>&1 || true
+#CPU_TEMP=$(jq -r '.["001#1#0#Sensors"][] | select( .["001#0#2#cpu"] != null ) | .["001#0#2#cpu"]' ${TMP_JSON_FILE} | cut -d" " -f1)
+#rm -f ${TMP_JSON_FILE}
+
 VIDEO_CARDS=$(lspci 2>/dev/null |grep VGA |cut -d":" -f3- |sed 's/^\s*//g')
 
 VIDEO_CARDS_DRIVERS=$(realpath /sys/class/drm/card*/device/driver 2>/dev/null |rev |cut -d"/" -f1 |rev)
