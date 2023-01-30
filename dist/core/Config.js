@@ -14,6 +14,7 @@ const defaultHttpStaticDir = `${__dirname}${path_1.default.sep}..${path_1.defaul
 const defaultHttpTemplatesDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}templates`;
 const userHomeDir = os_1.default.userInfo().homedir;
 const defaultUserFrmDir = `${userHomeDir}${path_1.default.sep}.freemining-beta`;
+console.debug(`DEBUG defaultUserFrmDir =`, defaultUserFrmDir);
 // cli options
 const defaultCliWssConnTimeout = 5000;
 const defaultCliWssServerAddress = '127.0.0.1';
@@ -36,6 +37,7 @@ function loadConfig(args) {
         process.exit(1);
     }
     userFrmDir = (0, utils_1.stringTemplate)(userFrmDir, {}, false, false, true) || '';
+    //userFrmDir = stringTemplate(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // TEST for windows
     if (!fs_1.default.existsSync(userFrmDir)) {
         try {
             fs_1.default.mkdirSync(userFrmDir);
