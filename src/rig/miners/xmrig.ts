@@ -83,6 +83,7 @@ export const minerInstall: t.minerInstallInfos = {
         console.debug(`${now()} [DEBUG] [RIG] Extract complete`);
 
         // Install to target dir
+        fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
         fs.renameSync( `${tempDir}${SEP}unzipped${SEP}xmrig-${this.version}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
