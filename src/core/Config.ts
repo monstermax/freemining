@@ -10,7 +10,8 @@ import type *  as t from '../common/types';
 
 /* ########## MAIN ######### */
 
-const SEP = (os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+
 
 // daemon options
 const defaultWssConnTimeout: number = 10_000;
@@ -24,7 +25,6 @@ const userHomeDir: string = os.userInfo().homedir.replaceAll(path.sep, SEP);
 const defaultUserFrmDirUnix: string = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin: string = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
-console.debug(`DEBUG defaultUserFrmDir =`, defaultUserFrmDir);
 
 // cli options
 const defaultCliWssConnTimeout: number = 5_000;

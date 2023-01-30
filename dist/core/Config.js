@@ -7,7 +7,7 @@ const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../common/utils");
 /* ########## MAIN ######### */
-const SEP = (os_1.default.platform() === 'win32') ? path_1.default.sep.repeat(2) : path_1.default.sep;
+const SEP = path_1.default.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
 // daemon options
 const defaultWssConnTimeout = 10000;
 const defaultListenAddress = '0.0.0.0';
@@ -18,7 +18,6 @@ const userHomeDir = os_1.default.userInfo().homedir.replaceAll(path_1.default.se
 const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
-console.debug(`DEBUG defaultUserFrmDir =`, defaultUserFrmDir);
 // cli options
 const defaultCliWssConnTimeout = 5000;
 const defaultCliWssServerAddress = '127.0.0.1';

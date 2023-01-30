@@ -11,7 +11,7 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
-const SEP = (os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+const SEP = path.sep; //(os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
 
 
 export const minerInstall: t.minerInstallInfos = {
