@@ -1,0 +1,15 @@
+<html>
+<head>
+    <title>frm</title>
+</head>
+<body>
+
+    <% if (typeof content !== 'undefined') { %>
+        <%- content %>
+
+    <% } else if (typeof contentTemplate !== 'undefined') { %>
+        <%- include(contentTemplate); %>
+    <% } %>
+
+</body>
+</html>
