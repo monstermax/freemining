@@ -1,6 +1,7 @@
 
 import os from 'os';
 import fs from 'fs';
+import path from 'path';
 
 import { now, hasOpt, getOpt, stringTemplate, getLocalIpAddresses } from '../common/utils';
 
@@ -12,11 +13,11 @@ const defaultWssConnTimeout: number = 10_000;
 const defaultListenAddress: string = '0.0.0.0';
 const defaultListenPort: number = 1234;
 
-const defaultHttpStaticDir: string = __dirname + '/../web/public';
-const defaultHttpTemplatesDir: string = __dirname + '/../web/templates';
+const defaultHttpStaticDir: string = `${__dirname}${path.sep}..${path.sep}web${path.sep}public`;
+const defaultHttpTemplatesDir: string = `${__dirname}${path.sep}..${path.sep}web${path.sep}templates`;
 
 const userHomeDir: string = os.userInfo().homedir;
-const defaultUserFrmDir: string = `${userHomeDir}/.freemining-beta`;
+const defaultUserFrmDir: string = `${userHomeDir}${path.sep}.freemining-beta`;
 
 // cli options
 const defaultCliWssConnTimeout: number = 5_000;
@@ -63,10 +64,10 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
 
 
     // set appDir
-    let appDir = `${userFrmDir}/app`;
+    let appDir = `${userFrmDir}${path.sep}app`;
 
     // set confDir
-    let confDir = `${userFrmDir}/config`;
+    let confDir = `${userFrmDir}${path.sep}config`;
     /*
     if (hasOpt('--conf-dir', args)) {
         confDir = getOpt('--conf-dir', args) || '';
@@ -89,7 +90,7 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
 
 
     // set dataDir
-    let dataDir = `${userFrmDir}/data`;
+    let dataDir = `${userFrmDir}${path.sep}data`;
     /*
     if (hasOpt('--data-dir', args)) {
         dataDir = getOpt('--data-dir', args) || '';
@@ -112,7 +113,7 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
 
 
     // set logDir
-    let logDir = `${userFrmDir}/log`;
+    let logDir = `${userFrmDir}${path.sep}log`;
     /*
     if (hasOpt('--log-dir', args)) {
         logDir = getOpt('--log-dir', args) || '';
@@ -135,7 +136,7 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
 
 
     // set pidDir
-    let pidDir = `${userFrmDir}/run`;
+    let pidDir = `${userFrmDir}${path.sep}run`;
     /*
     if (hasOpt('--pid-dir', args)) {
         pidDir = getOpt('--pid-dir', args) || '';

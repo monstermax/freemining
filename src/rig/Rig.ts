@@ -119,15 +119,15 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     const cmdFile = minerCommands.getCommandFile(config, params);
     const args = minerCommands.getCommandArgs(config, params);
 
-    const runningDir = `${config.dataDir}/rig/miners/${params.miner}`;
-    const appDir     = `${config.appDir}/rig/miners/${params.miner}`;
+    const runningDir = `${config.dataDir}${path.sep}rig${path.sep}miners${path.sep}${params.miner}`;
+    const appDir     = `${config.appDir}${path.sep}rig${path.sep}miners${path.sep}${params.miner}`;
     const cmdPath    = `${appDir}${path.sep}${cmdFile}`;
 
-    const logDir     = `${config.logDir}/rig/miners`;
-    const logFile    = `${logDir}/${params.miner}.run.log`;
-    const errFile    = `${logDir}/${params.miner}.run.err`;
-    const pidDir     = `${config.pidDir}/rig/miners`;
-    const pidFile    = `${pidDir}/${params.miner}.run.pid`;
+    const logDir     = `${config.logDir}${path.sep}rig${path.sep}miners`;
+    const logFile    = `${logDir}${path.sep}${params.miner}.run.log`;
+    const errFile    = `${logDir}${path.sep}${params.miner}.run.err`;
+    const pidDir     = `${config.pidDir}${path.sep}rig${path.sep}miners`;
+    const pidFile    = `${pidDir}${path.sep}${params.miner}.run.pid`;
 
     fs.mkdirSync(logDir, { recursive: true });
     fs.mkdirSync(pidDir, { recursive: true });
