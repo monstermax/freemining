@@ -6,15 +6,17 @@ const os_1 = tslib_1.__importDefault(require("os"));
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../common/utils");
+/* ########## MAIN ######### */
+const SEP = (os_1.default.platform() === 'win32') ? path_1.default.sep.repeat(2) : path_1.default.sep;
 // daemon options
 const defaultWssConnTimeout = 10000;
 const defaultListenAddress = '0.0.0.0';
 const defaultListenPort = 1234;
-const defaultHttpStaticDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}public`;
-const defaultHttpTemplatesDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}templates`;
+const defaultHttpStaticDir = `${__dirname}${SEP}..${SEP}web${SEP}public`;
+const defaultHttpTemplatesDir = `${__dirname}${SEP}..${SEP}web${SEP}templates`;
 const userHomeDir = os_1.default.userInfo().homedir;
-const defaultUserFrmDirUnix = `${userHomeDir}${path_1.default.sep}.freemining-beta`;
-const defaultUserFrmDirWin = `${userHomeDir}${path_1.default.sep}AppData${path_1.default.sep}Local${path_1.default.sep}freemining-beta`;
+const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
+const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 console.debug(`DEBUG defaultUserFrmDir =`, defaultUserFrmDir);
 // cli options
@@ -51,9 +53,9 @@ function loadConfig(args) {
         }
     }
     // set appDir
-    let appDir = `${userFrmDir}${path_1.default.sep}app`;
+    let appDir = `${userFrmDir}${SEP}app`;
     // set confDir
-    let confDir = `${userFrmDir}${path_1.default.sep}config`;
+    let confDir = `${userFrmDir}${SEP}config`;
     /*
     if (hasOpt('--conf-dir', args)) {
         confDir = getOpt('--conf-dir', args) || '';
@@ -74,7 +76,7 @@ function loadConfig(args) {
         }
     }
     // set dataDir
-    let dataDir = `${userFrmDir}${path_1.default.sep}data`;
+    let dataDir = `${userFrmDir}${SEP}data`;
     /*
     if (hasOpt('--data-dir', args)) {
         dataDir = getOpt('--data-dir', args) || '';
@@ -95,7 +97,7 @@ function loadConfig(args) {
         }
     }
     // set logDir
-    let logDir = `${userFrmDir}${path_1.default.sep}log`;
+    let logDir = `${userFrmDir}${SEP}log`;
     /*
     if (hasOpt('--log-dir', args)) {
         logDir = getOpt('--log-dir', args) || '';
@@ -116,7 +118,7 @@ function loadConfig(args) {
         }
     }
     // set pidDir
-    let pidDir = `${userFrmDir}${path_1.default.sep}run`;
+    let pidDir = `${userFrmDir}${SEP}run`;
     /*
     if (hasOpt('--pid-dir', args)) {
         pidDir = getOpt('--pid-dir', args) || '';

@@ -15,6 +15,8 @@ import type childProcess from 'child_process';
 
 /* ########## MAIN ######### */
 
+const SEP = (os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+
 const processes: t.MapString<t.Process> = {};
 
 let monitorIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -119,15 +121,15 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     const cmdFile = minerCommands.getCommandFile(config, params);
     const args = minerCommands.getCommandArgs(config, params);
 
-    const runningDir = `${config.dataDir}${path.sep}rig${path.sep}miners${path.sep}${params.miner}`;
-    const appDir     = `${config.appDir}${path.sep}rig${path.sep}miners${path.sep}${params.miner}`;
-    const cmdPath    = `${appDir}${path.sep}${cmdFile}`;
+    const runningDir = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
+    const appDir     = `${config.appDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
+    const cmdPath    = `${appDir}${SEP}${cmdFile}`;
 
-    const logDir     = `${config.logDir}${path.sep}rig${path.sep}miners`;
-    const logFile    = `${logDir}${path.sep}${params.miner}.run.log`;
-    const errFile    = `${logDir}${path.sep}${params.miner}.run.err`;
-    const pidDir     = `${config.pidDir}${path.sep}rig${path.sep}miners`;
-    const pidFile    = `${pidDir}${path.sep}${params.miner}.run.pid`;
+    const logDir     = `${config.logDir}${SEP}rig${SEP}miners`;
+    const logFile    = `${logDir}${SEP}${params.miner}.run.log`;
+    const errFile    = `${logDir}${SEP}${params.miner}.run.err`;
+    const pidDir     = `${config.pidDir}${SEP}rig${SEP}miners`;
+    const pidFile    = `${pidDir}${SEP}${params.miner}.run.pid`;
 
     fs.mkdirSync(logDir, { recursive: true });
     fs.mkdirSync(pidDir, { recursive: true });

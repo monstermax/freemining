@@ -4,6 +4,8 @@ exports.run = void 0;
 const tslib_1 = require("tslib");
 const express_1 = tslib_1.__importDefault(require("express"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
+const path_1 = tslib_1.__importDefault(require("path"));
+const os_1 = tslib_1.__importDefault(require("os"));
 const http = tslib_1.__importStar(require("http"));
 const WebSocket = tslib_1.__importStar(require("ws"));
 const ejs = require('ejs');
@@ -25,6 +27,7 @@ const Rig = tslib_1.__importStar(require("../rig/Rig"));
 /* ########## MAIN ######### */
 let config;
 let quitRunning = false;
+const SEP = (os_1.default.platform() === 'win32') ? path_1.default.sep.repeat(2) : path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 function usage(exitCode = null) {
     const _usage = `======================

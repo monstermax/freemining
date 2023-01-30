@@ -11,6 +11,8 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+const SEP = (os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
+
 
 
 export const minerInstall: t.minerInstallInfos = {
@@ -19,7 +21,7 @@ export const minerInstall: t.minerInstallInfos = {
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${path.sep}rig${path.sep}miners${path.sep}${targetAlias}`
+        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
@@ -46,19 +48,19 @@ export const minerInstall: t.minerInstallInfos = {
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
-        const dlFilePath = `${tempDir}${path.sep}${dlFileName}`;
+        const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
         console.debug(`${now()} [DEBUG] [RIG] Downloading file ${dlUrl}`);
         await downloadFile(dlUrl, dlFilePath);
         console.debug(`${now()} [DEBUG] [RIG] Download complete`);
 
         // Extracting
-        fs.mkdirSync(`${tempDir}${path.sep}unzipped`);
+        fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.debug(`${now()} [DEBUG] [RIG] Extracting file ${dlFilePath}`);
         if (path.extname(dlFilePath) === '.gz') {
             await tar.extract(
                 {
                     file: dlFilePath,
-                    cwd: `${tempDir}${path.sep}unzipped`,
+                    cwd: `${tempDir}${SEP}unzipped`,
                 }
             ).catch((err: any) => {
                 throw { message: err.message };
@@ -67,7 +69,7 @@ export const minerInstall: t.minerInstallInfos = {
         } else {
             const zipFile = new admZip(dlFilePath);
             await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${path.sep}unzipped`, true, true, (err: any) => {
+                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
                     if (err) {
                         reject(err);
                         return;
@@ -82,7 +84,7 @@ export const minerInstall: t.minerInstallInfos = {
 
         // Install to target dir
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${path.sep}unzipped${path.sep}xmrig-${this.version}${path.sep}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}xmrig-${this.version}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -113,7 +115,7 @@ export const minerCommands: t.minerCommandInfos = {
             '--cpu-priority', '3',
             '--randomx-no-rdmsr',
             '--no-color',
-            '--log-file=${path.sep}tmp${path.sep}debug_xmrig.log',
+            '--log-file=${SEP}tmp${SEP}debug_xmrig.log',
         ];
 
         if (params.algo) {

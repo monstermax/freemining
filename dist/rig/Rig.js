@@ -10,6 +10,7 @@ const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
 const minersConfigs_1 = require("./minersConfigs");
 /* ########## MAIN ######### */
+const SEP = (os_1.default.platform() === 'win32') ? path_1.default.sep.repeat(2) : path_1.default.sep;
 const processes = {};
 let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
@@ -96,14 +97,14 @@ function minerRunStart(config, params) {
         const minerCommands = minersConfigs_1.minersCommands[params.miner];
         const cmdFile = minerCommands.getCommandFile(config, params);
         const args = minerCommands.getCommandArgs(config, params);
-        const runningDir = `${config.dataDir}${path_1.default.sep}rig${path_1.default.sep}miners${path_1.default.sep}${params.miner}`;
-        const appDir = `${config.appDir}${path_1.default.sep}rig${path_1.default.sep}miners${path_1.default.sep}${params.miner}`;
-        const cmdPath = `${appDir}${path_1.default.sep}${cmdFile}`;
-        const logDir = `${config.logDir}${path_1.default.sep}rig${path_1.default.sep}miners`;
-        const logFile = `${logDir}${path_1.default.sep}${params.miner}.run.log`;
-        const errFile = `${logDir}${path_1.default.sep}${params.miner}.run.err`;
-        const pidDir = `${config.pidDir}${path_1.default.sep}rig${path_1.default.sep}miners`;
-        const pidFile = `${pidDir}${path_1.default.sep}${params.miner}.run.pid`;
+        const runningDir = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
+        const appDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
+        const cmdPath = `${appDir}${SEP}${cmdFile}`;
+        const logDir = `${config.logDir}${SEP}rig${SEP}miners`;
+        const logFile = `${logDir}${SEP}${params.miner}.run.log`;
+        const errFile = `${logDir}${SEP}${params.miner}.run.err`;
+        const pidDir = `${config.pidDir}${SEP}rig${SEP}miners`;
+        const pidFile = `${pidDir}${SEP}${params.miner}.run.pid`;
         fs_1.default.mkdirSync(logDir, { recursive: true });
         fs_1.default.mkdirSync(pidDir, { recursive: true });
         fs_1.default.mkdirSync(runningDir, { recursive: true });

@@ -1,6 +1,8 @@
 
 import express from 'express';
 import colors from 'colors/safe';
+import path from 'path';
+import os from 'os';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 const ejs = require('ejs');
@@ -29,6 +31,7 @@ import type *  as t from '../common/types';
 
 let config: t.Config;
 let quitRunning = false;
+const SEP = (os.platform() === 'win32') ? path.sep.repeat(2) : path.sep;
 
 
 /* ########## FUNCTIONS ######### */
