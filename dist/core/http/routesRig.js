@@ -77,7 +77,7 @@ function registerRigRoutes(app, urlPrefix = '') {
                 return;
             }
             const params = {
-                fullnode: minerName,
+                miner: minerName,
                 algo,
                 poolUrl,
                 poolUser,
@@ -92,7 +92,7 @@ function registerRigRoutes(app, urlPrefix = '') {
                 return;
             }
             const params = {
-                fullnode: minerName,
+                miner: minerName,
             };
             yield Rig.minerRunStop(config, params);
             res.send(`OK`);

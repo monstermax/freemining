@@ -37,6 +37,9 @@ import type *  as t from '../common/types';
 # Start xmrig on XMRPool for MONERO coin
 ./frm-cli-ts --miner-start xmrig -algo rx/0 -url xmrpool.eu:5555 -user 46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+test
 
+# Start xmrig on JJPool for Raptoreum coin
+./frm-cli-ts --miner-start xmrig -algo ghostrider -url jjpool.eu:7070 -user RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.test
+
 # Stop xmrig
 ./frm-cli-ts --miner-stop xmrig
 

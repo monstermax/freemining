@@ -102,7 +102,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             }
 
             const params = {
-                fullnode: minerName,
+                miner: minerName,
                 algo,
                 poolUrl,
                 poolUser,
@@ -118,7 +118,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             }
 
             const params = {
-                fullnode: minerName,
+                miner: minerName,
             };
             await Rig.minerRunStop(config, params);
             res.send(`OK`);

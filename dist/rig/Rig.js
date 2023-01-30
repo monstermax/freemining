@@ -273,7 +273,10 @@ function getRigPs() {
     let cmd = '';
     cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining-beta\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
     //cmd = `tasklist /v /fo csv`;
+    //cmd = `tasklist /v /fo csv /fi "pid eq <pid>"`;
+    //cmd = `tasklist /v /fo csv /fi "ppid eq <pid>"`;
     //cmd = `wmic process where "ProcessId=<pid>" get ProcessId,PercentProcessorTime`;
+    //cmd = `wmic process where "ParentProcessId=<pid>" get ProcessId,Name`;
 }
 exports.getRigPs = getRigPs;
 function getRigInfos() {
