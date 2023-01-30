@@ -9,6 +9,12 @@ const Config_1 = require("./Config");
 const utils_1 = require("../common/utils");
 /* ########## USAGE #########
 
+# Install fullnode Dogecoin
+./frm-cli-ts --fullnode-install dogecoin
+
+# Install miner Trex
+./frm-cli-ts --miner-install trex
+
 # Start rig monitor
 ./frm-cli-ts --rig-monitor-start
 
@@ -59,6 +65,7 @@ function run(args = []) {
     catchSignals();
     let config = (0, Config_1.loadConfig)(args);
     let func = null;
+    /* RIG */
     if ((0, utils_1.hasOpt)('--rig-status')) {
         func = function () {
             return rigStatus(this, args, config);
@@ -72,6 +79,11 @@ function run(args = []) {
     else if ((0, utils_1.hasOpt)('--rig-monitor-stop')) {
         func = function () {
             return rigMonitorStop(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--rig-monitor-status')) {
+        func = function () {
+            return rigMonitorStatus(this, args, config);
         };
     }
     else if ((0, utils_1.hasOpt)('--miner-stop')) {
@@ -94,7 +106,48 @@ function run(args = []) {
             return rigMinerInstallStart(this, args, config);
         };
     }
-    else {
+    /* NODE */
+    if ((0, utils_1.hasOpt)('--node-status')) {
+        func = function () {
+            return nodeStatus(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--node-monitor-start')) {
+        func = function () {
+            return nodeMonitorStart(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--node-monitor-stop')) {
+        func = function () {
+            return nodeMonitorStop(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--node-monitor-status')) {
+        func = function () {
+            return nodeMonitorStatus(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--fullnode-stop')) {
+        func = function () {
+            return nodeFullnodeRunStop(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--fullnode-start')) {
+        func = function () {
+            return nodeFullnodeRunStart(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--fullnode-infos')) {
+        func = function () {
+            return nodeFullnodeRunInfos(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--fullnode-install')) {
+        func = function () {
+            return nodeFullnodeInstallStart(this, args, config);
+        };
+    }
+    if (func === null) {
         usage(0);
         return;
     }
@@ -180,6 +233,7 @@ function rpcSendError(ws, id, result) {
     //console.debug(`${now()} [DEBUG] [CLI] sending error: ${errStr}`);
     ws.send(errStr);
 }
+/* #### RIG #### */
 function rigStatus(ws, args = [], config = {}) {
     const method = 'rigStatus';
     rpcSendRequest(ws, 1, method, {});
@@ -192,13 +246,17 @@ function rigMonitorStop(ws, args = [], config = {}) {
     const method = 'rigMonitorStop';
     rpcSendRequest(ws, 1, method, {});
 }
+function rigMonitorStatus(ws, args = [], config = {}) {
+    const method = 'rigMonitorStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
 function rigMinerInstallStart(ws, args = [], config = {}) {
     const minerNameS = (0, utils_1.getOpts)('--miner-install', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerInstallStart';
     const params = {
         miner: minerName,
-        alias: (0, utils_1.getOpt)('-alias', args) || (0, utils_1.getOpt)('-miner', args),
+        alias: (0, utils_1.getOpt)('-alias', args) || minerName,
     };
     rpcSendRequest(ws, 1, method, params);
 }
@@ -234,6 +292,63 @@ function rigMinerRunInfos(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
+/* #### NODE #### */
+function nodeStatus(ws, args = [], config = {}) {
+    const method = 'nodeStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
+function nodeMonitorStart(ws, args = [], config = {}) {
+    const method = 'nodeMonitorStart';
+    rpcSendRequest(ws, 1, method, {});
+}
+function nodeMonitorStop(ws, args = [], config = {}) {
+    const method = 'nodeMonitorStop';
+    rpcSendRequest(ws, 1, method, {});
+}
+function nodeMonitorStatus(ws, args = [], config = {}) {
+    const method = 'nodeMonitorStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
+function nodeFullnodeInstallStart(ws, args = [], config = {}) {
+    const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-install', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const method = 'nodeFullnodeInstallStart';
+    const params = {
+        fullnode: fullnodeName,
+        alias: (0, utils_1.getOpt)('-alias', args) || fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+function nodeFullnodeRunStart(ws, args = [], config = {}) {
+    const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-start', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const extraArgs = (0, utils_1.getOpts)('--', -1, args);
+    const method = 'nodeFullnodeRunStart';
+    const params = {
+        fullnode: fullnodeName,
+        extraArgs,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+function nodeFullnodeRunStop(ws, args = [], config = {}) {
+    const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-stop', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const method = 'nodeFullnodeRunStop';
+    const params = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+function nodeFullnodeRunInfos(ws, args = [], config = {}) {
+    const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-infos', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const method = 'nodeFullnodeRunInfos';
+    const params = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+/* #### MISC #### */
 function safeQuit() {
     process.exit();
 }

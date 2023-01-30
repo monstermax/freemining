@@ -1,12 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
+exports.getDirSize = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
+const path_1 = tslib_1.__importDefault(require("path"));
+//import util from 'util';
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const child_process_1 = require("child_process");
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
+/* ########## FUNCTIONS ######### */
 function hasOpt(keyName, argv = null) {
     argv = argv || process.argv;
     var keyNames = (typeof (keyName) == 'object') ? keyName : [keyName];
@@ -283,3 +286,37 @@ function downloadFile(url, targetFile) {
 }
 exports.downloadFile = downloadFile;
 ;
+function getDirFiles(dir) {
+    if (!fs_1.default.existsSync(dir)) {
+        return Promise.resolve([]);
+    }
+    //return = fs.promises.readdir(dir);
+    return new Promise((resolve, reject) => {
+        fs_1.default.readdir(dir, (err, files) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(files);
+        });
+    });
+}
+exports.getDirFiles = getDirFiles;
+function getDirSize(dir, recursive = true) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        let totalSize = 0;
+        const files = yield fs_1.default.promises.readdir(dir);
+        for (const file of files) {
+            const filePath = path_1.default.join(dir, file);
+            const stats = yield fs_1.default.promises.lstat(filePath);
+            if (stats.isFile()) {
+                totalSize += stats.size;
+            }
+            else if (stats.isDirectory() && recursive) {
+                totalSize += yield getDirSize(filePath);
+            }
+        }
+        return totalSize;
+    });
+}
+exports.getDirSize = getDirSize;

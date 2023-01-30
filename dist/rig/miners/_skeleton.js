@@ -9,9 +9,11 @@ const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+/* ########## MAIN ######### */
 const SEP = path_1.default.sep;
+/* ########## FUNCTIONS ######### */
 exports.minerInstall = {
-    version: '6.18.1',
+    version: 'edit-me',
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const targetAlias = params.alias || params.miner;
@@ -32,6 +34,8 @@ exports.minerInstall = {
             else {
                 throw { message: `No installation script available for the platform ${platform}` };
             }
+            if (dlUrl === 'edit-me')
+                throw { message: `No installation script available for the platform ${platform}` };
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
@@ -65,6 +69,7 @@ exports.minerInstall = {
             }
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
             // Install to target dir
+            fs_1.default.mkdirSync(targetDir, { recursive: true });
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
             fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);
@@ -74,7 +79,7 @@ exports.minerInstall = {
     }
 };
 exports.minerCommands = {
-    apiPort: 42099,
+    apiPort: -1,
     command: 'edit-me',
     getCommandFile(config, params) {
         return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');

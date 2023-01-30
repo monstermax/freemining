@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
 
-import { now, getOpt, getLocalIpAddresses } from '../common/utils';
+import { now, getOpt, getLocalIpAddresses, getDirFiles } from '../common/utils';
 import { exec } from '../common/exec';
 import { minersInstalls, minersCommands } from './minersConfigs';
 
@@ -25,6 +25,8 @@ const defaultPollDelay = 10_000; // 10 seconds
 
 const minersInfos: t.MapString<any> = {};
 
+let rigMainInfos: any | null = null;
+
 
 /* ########## FUNCTIONS ######### */
 
@@ -33,7 +35,7 @@ const minersInfos: t.MapString<any> = {};
  * 
  * ./ts-node frm-cli.ts --rig-monitor-start
  */
-export function monitorStart(config: t.Config, params: t.MapString<any>) {
+export function monitorStart(config: t.Config, params?: t.MapString<any>): void {
     if (monitorIntervalId) {
         return;
     }
@@ -49,13 +51,18 @@ export function monitorStart(config: t.Config, params: t.MapString<any>) {
  * 
  * ./ts-node frm-cli.ts --rig-monitor-stop
  */
-export function monitorStop(config: t.Config, params: t.MapString<any>) {
+export function monitorStop(config?: t.Config, params?: t.MapString<any>): void {
     if (monitorIntervalId) {
         clearInterval(monitorIntervalId);
         monitorIntervalId = null;
 
         console.log(`${now()} [INFO] [RIG] Rig monitor stopped`);
     }
+}
+
+
+export function monitorStatus(config?: t.Config, params?: t.MapString<any>): boolean {
+    return monitorIntervalId !== null;
 }
 
 
@@ -90,6 +97,58 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
 
 
 
+export async function getInstalledMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`
+    const minersNames = await getDirFiles(minersDir);
+    return minersNames;
+}
+
+
+export async function getRunningMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+    //const rigInfos = getRigInfos();
+    //const runningMiners = Object.keys(rigInfos.minersInfos);
+
+    let procName: string;
+    let rigProcesses = getProcesses();
+    const runningMiners: string[] = [];
+
+    for (procName in rigProcesses) {
+        const proc = rigProcesses[procName];
+        if (! proc.process) continue;
+        runningMiners.push(proc.name);
+    }
+
+    return runningMiners;
+}
+
+
+export async function getInstallableMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+    return Object.entries(minersInstalls).map(entry => {
+        const [minerName, minerInstall] = entry;
+        if (minerInstall.version === 'edit-me') return '';
+        return minerName;
+    }).filter(minerName => minerName !== '');
+}
+
+
+export async function getRunnableMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+    return Object.entries(minersCommands).map(entry => {
+        const [minerName, minerCommand] = entry;
+        if (minerCommand.command === 'edit-me') return '';
+        return minerName;
+    }).filter(minerName => minerName !== '');
+}
+
+
+export async function getManagedMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+    return Object.entries(minersCommands).map(entry => {
+        const [minerName, minerCommand] = entry;
+        if (minerCommand.apiPort === -1) return '';
+        return minerName;
+    }).filter(minerName => minerName !== '');
+}
+
+
 export async function minerInstallStart(config: t.Config, params: t.MapString<any>): Promise<any> {
     if ((params.miner + '/install') in processes) {
         throw { message: `Miner ${params.miner} install is already running` };
@@ -106,7 +165,7 @@ export async function minerInstallStart(config: t.Config, params: t.MapString<an
 
 export async function minerRunStart(config: t.Config, params: t.MapString<any>): Promise<t.Process> {
     if (! params.miner) {
-        throw { message: `Missing '-miner' parameter` };
+        throw { message: `Missing miner parameter` };
     }
 
     if (`miner-run-${params.miner}` in processes) {
@@ -121,19 +180,19 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     const cmdFile = minerCommands.getCommandFile(config, params);
     const args = minerCommands.getCommandArgs(config, params);
 
-    const runningDir = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
-    const appDir     = `${config.appDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
-    const cmdPath    = `${appDir}${SEP}${cmdFile}`;
+    const dataDir  = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
+    const appDir   = `${config.appDir}${SEP}rig${SEP}miners${SEP}${params.miner}`;
+    const cmdPath  = `${appDir}${SEP}${cmdFile}`;
 
-    const logDir     = `${config.logDir}${SEP}rig${SEP}miners`;
-    const logFile    = `${logDir}${SEP}${params.miner}.run.log`;
-    const errFile    = `${logDir}${SEP}${params.miner}.run.err`;
-    const pidDir     = `${config.pidDir}${SEP}rig${SEP}miners`;
-    const pidFile    = `${pidDir}${SEP}${params.miner}.run.pid`;
+    const logDir   = `${config.logDir}${SEP}rig${SEP}miners`;
+    const logFile  = `${logDir}${SEP}${params.miner}.run.log`;
+    const errFile  = `${logDir}${SEP}${params.miner}.run.err`;
+    const pidDir   = `${config.pidDir}${SEP}rig${SEP}miners`;
+    const pidFile  = `${pidDir}${SEP}${params.miner}.run.pid`;
 
+    fs.mkdirSync(dataDir, { recursive: true });
     fs.mkdirSync(logDir, { recursive: true });
     fs.mkdirSync(pidDir, { recursive: true });
-    fs.mkdirSync(runningDir, { recursive: true });
 
     if (true) {
         // truncate log files
@@ -149,17 +208,13 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
         throw { message: `Miner ${params.miner} cmdPath is misconfigured` };
     }
 
-    if (! fs.existsSync(runningDir)) {
-        throw { message: `Miner ${params.miner} dataDir is misconfigured` };
-    }
-
 
     const process: t.Process = {
         type: 'miner-run',
         name: params.miner,
         cmdFile,
         args,
-        runningDir,
+        dataDir,
         appDir,
         cmdPath,
         pid: undefined,
@@ -192,7 +247,9 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
         console.debug(`${now()} [DEBUG] [RIG] PROCESS COMPLETED ${params.miner} (rc: ${returnCode})`);
     }
 
-    exec(cmdPath, args, '', runningDir, onSpawn, onStdOut, onStdErr, onEnd, processName)
+    //console.debug(`${now()} [DEBUG] [RIG] Running command: ${cmdPath} ${args.join(' ')}`);
+
+    exec(cmdPath, args, '', dataDir, onSpawn, onStdOut, onStdErr, onEnd, processName)
         .catch((err: any) => {
             console.warn(`${now()} [WARNING] [RIG] PROCESS ERROR ${params.miner} : ${err.message}`);
         });
@@ -218,7 +275,7 @@ export async function minerRunStop(config: t.Config, params: t.MapString<any>, f
 
 
 
-export function minerRunStatus(config: t.Config, params: t.MapString<any>) {
+export async function minerRunStatus(config: t.Config, params: t.MapString<any>) {
     // TODO
 }
 
@@ -252,94 +309,110 @@ export function getProcesses(): t.MapString<t.Process> {
 
 
 
+export function getRigPs(): any {
+    let cmd = '';
+    cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining-beta\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
+    //cmd = `tasklist /v /fo csv`;
+    //cmd = `wmic process where "ProcessId=<pid>" get ProcessId,PercentProcessorTime`;
+}
+
 export function getRigInfos(): t.Rig {
 
-    const name = getOpt('--rig-name') || os.hostname();
-    const hostname = os.hostname();
-    const ip = (getLocalIpAddresses() || [])[0] || 'no-ip';
-    const rigOs = os.version();
+    if (rigMainInfos === null) {
+
+        const _cpus = os.cpus()
+        const cpus: any[] = [
+            {
+                name: _cpus[0].model,
+                threads: _cpus.length,
+            }
+        ];
+
+        let gpuList: string;
+        if (os.platform() === 'linux') {
+            gpuList = execSync(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim(); 
+            // detailed output: 
+            // lspci -nnkd ::300
+
+            // temperatures & fanSpeeed [NVIDIA]
+            // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
+
+            /*
+            04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
+            07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
+            */
+
+        } else if (os.platform() === 'win32') {
+            // detailed output: 
+            // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
+
+            /*
+            // temperatures & fanSpeeed
+            const MSI_Afterburner = require('msi-afterburner-api');
+            const afterburner = new MSI_Afterburner();
+            afterburner.init()
+                .then(() => {
+                    afterburner.getSystemInfo()
+                        .then((systemInfo) => {
+                            console.log(`Number of GPUs: ${systemInfo.adapters.length}`);
+                            systemInfo.adapters.forEach((adapter) => {
+                                console.log(`GPU ${adapter.index}:`);
+                                console.log(`  Temperature: ${adapter.temperature}°C`);
+                                console.log(`  Fan Speed: ${adapter.fanSpeed}%`);
+                            });
+                        })
+                        .catch((err) => console.error(err));
+                })
+                .catch((err) => console.error(err));
+            */
+
+            gpuList = execSync('wmic path win32_VideoController get Name').toString().trim();
+            let tmpArr = gpuList.split(os.EOL);
+            tmpArr.shift();
+            tmpArr = tmpArr.map(item => item.trim());
+            gpuList = tmpArr.join(os.EOL);
+            /*
+            Name
+            Intel(R) HD Graphics 630
+                NVIDIA GeForce GTX 1070
+            */
+
+        } else if (os.platform() === 'darwin') {
+            gpuList = execSync(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
+            /*
+            Chipset Model: AMD Radeon Pro 555X
+            Chipset Model: AMD Radeon Pro 560X
+            */
+
+            // temperatures & fanSpeeed
+            // iStats gpu --temp
+            // requires iStats => gem install iStats
+        } else {
+            gpuList = '';
+        }
+        const gpus: any[] = gpuList.split(os.EOL).map((gpuName: string, idx: number) => {
+            return {
+                id: idx,
+                name: gpuName,
+            };
+        });
+
+
+        rigMainInfos = {
+            name: getOpt('--rig-name') || os.hostname(),
+            hostname: os.hostname(),
+            ip: (getLocalIpAddresses() || [])[0] || 'no-ip',
+            rigOs: os.version(),
+            cpus,
+            gpus,
+        };
+    }
+
+    const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
     const uptime = os.uptime();
     const loadAvg = os.loadavg()[0];
     const memoryUsed = os.totalmem() - os.freemem();
     const memoryTotal = os.totalmem();
-
-    const _cpus = os.cpus()
-    const cpus: any[] = [
-        {
-            name: _cpus[0].model,
-            threads: _cpus.length,
-            avgSpeed: _cpus.map(cpu => cpu.speed).reduce((a, b) => a + b, 0) / _cpus.length,
-        }
-    ];
-
-    let gpuList: string;
-    if (os.platform() === 'linux') {
-        gpuList = execSync(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim(); 
-        // detailed output: 
-        // lspci -nnkd ::300
-
-        // temperatures & fanSpeeed [NVIDIA]
-        // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
-
-/*
-04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
-07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
-*/
-
-    } else if (os.platform() === 'win32') {
-        // detailed output: 
-        // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
-
-        /*
-        // temperatures & fanSpeeed
-        const MSI_Afterburner = require('msi-afterburner-api');
-        const afterburner = new MSI_Afterburner();
-        afterburner.init()
-            .then(() => {
-                afterburner.getSystemInfo()
-                    .then((systemInfo) => {
-                        console.log(`Number of GPUs: ${systemInfo.adapters.length}`);
-                        systemInfo.adapters.forEach((adapter) => {
-                            console.log(`GPU ${adapter.index}:`);
-                            console.log(`  Temperature: ${adapter.temperature}°C`);
-                            console.log(`  Fan Speed: ${adapter.fanSpeed}%`);
-                        });
-                    })
-                    .catch((err) => console.error(err));
-            })
-            .catch((err) => console.error(err));
-        */
-
-        gpuList = execSync('wmic path win32_VideoController get Name').toString().trim();
-        let tmpArr = gpuList.split(os.EOL);
-        tmpArr.shift();
-        tmpArr = tmpArr.map(item => item.trim());
-        gpuList = tmpArr.join(os.EOL);
-/*
-Name
-Intel(R) HD Graphics 630
- NVIDIA GeForce GTX 1070
-*/
-
-    } else if (os.platform() === 'darwin') {
-        gpuList = execSync(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
-/*
-Chipset Model: AMD Radeon Pro 555X
-Chipset Model: AMD Radeon Pro 560X
-*/
-
-        // temperatures & fanSpeeed
-        // iStats gpu --temp
-        // requires iStats => gem install iStats
-    } else {
-        gpuList = '';
-    }
-    const gpus: any[] = gpuList.split(os.EOL).map((gpuName: string, idx: number) => {
-        return {
-            id: idx,
-            name: gpuName,
-        };
-    });
 
     const rigInfos: t.Rig = {
         infos: {

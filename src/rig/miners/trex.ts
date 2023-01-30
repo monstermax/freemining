@@ -11,8 +11,13 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+
+/* ########## MAIN ######### */
+
 const SEP = path.sep;
 
+
+/* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
     version: '6.18.1',
@@ -75,6 +80,7 @@ export const minerInstall: t.minerInstallInfos = {
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
+        fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
         fs.renameSync( `${tempDir}${SEP}unzipped${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);

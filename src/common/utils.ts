@@ -1,12 +1,17 @@
 
 import fs from 'fs';
 import os from 'os';
+import path from 'path';
+//import util from 'util';
 import colors from 'colors/safe';
 import { exec } from 'child_process';
 import fetch from 'node-fetch';
 
 import type *  as t from './types';
 
+
+
+/* ########## FUNCTIONS ######### */
 
 export function hasOpt(keyName: string, argv: string[] | null=null): boolean {
     argv = argv || process.argv;
@@ -315,3 +320,38 @@ export async function downloadFile(url: string, targetFile: string): Promise<voi
     });
 };
 
+
+export function getDirFiles(dir: string): Promise<string[]> {
+    if (! fs.existsSync(dir)) {
+        return Promise.resolve([]);
+    }
+    //return = fs.promises.readdir(dir);
+    return new Promise((resolve, reject) => {
+        fs.readdir(dir, (err, files) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(files);
+        });
+    });
+}
+
+
+export async function getDirSize(dir: string, recursive: boolean=true): Promise<number> {
+    let totalSize = 0;
+    const files = await fs.promises.readdir(dir);
+
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stats = await fs.promises.lstat(filePath);
+
+        if (stats.isFile()) {
+            totalSize += stats.size;
+
+        } else if (stats.isDirectory() && recursive) {
+            totalSize += await getDirSize(filePath);
+        }
+    }
+    return totalSize;
+}

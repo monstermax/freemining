@@ -18,8 +18,8 @@ const defaultWssConnTimeout: number = 10_000;
 const defaultListenAddress: string = '0.0.0.0';
 const defaultListenPort: number = 1234;
 
-const defaultHttpStaticDir: string = `${__dirname}${SEP}..${SEP}web${SEP}public`;
-const defaultHttpTemplatesDir: string = `${__dirname}${SEP}..${SEP}web${SEP}templates`;
+const defaultHttpStaticDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
+const defaultHttpTemplatesDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
 
 const userHomeDir: string = os.userInfo().homedir.replaceAll(path.sep, SEP);
 const defaultUserFrmDirUnix: string = `${userHomeDir}${SEP}.freemining-beta`;

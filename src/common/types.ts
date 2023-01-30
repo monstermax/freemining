@@ -25,11 +25,21 @@ export type CliParams = (
     "--cli-wss-server-address" |
 
     // RIG
+    "--rig-monitor-start" |
+    "--rig-monitor-stop" |
+    "--rig-monitor-status" |
     "--miner-start" |
     "--miner-stop" |
     "--miner-status" |
     "--miner-infos" |
-    "--miner-install"
+    "--miner-install" |
+
+    // NODE
+    "--fullnode-start" |
+    "--fullnode-stop" |
+    "--fullnode-status" |
+    "--fullnode-infos" |
+    "--fullnode-install"
 );
 
 
@@ -96,6 +106,67 @@ export type ConfigCli = {
 }
 
 
+export type Process = {
+    type: string,
+    name: string,
+    cmdFile: string,
+    args: string[],
+    dataDir: string,
+    appDir: string,
+    cmdPath: string,
+    pid: number | undefined,
+    process: childProcess.ChildProcessWithoutNullStreams | undefined,
+}
+
+
+export type ExecOnSpawn = (proc: childProcess.ChildProcessWithoutNullStreams) => void;
+
+export type ExecOnStdOut = (data: Buffer) => void;
+
+export type ExecOnStdErr = (data: Buffer) => void;
+
+export type ExecOnEnd = (returnCode: number, err: any) => void;
+
+
+
+/* RIG */
+
+export type Rig = {
+    infos: {
+        name: string,
+        hostname: string,
+        ip: string,
+        os: string,
+        uptime: number,
+    },
+    //sizes: {
+    //    appDir: number,
+    //    dataDir: number,
+    //    confDir: number,
+    //    logDir: number,
+    //},
+    usage: {
+        loadAvg: number,
+        memory: {
+            used: number,
+            total: number,
+        },
+    },
+    devices: {
+        cpus: {
+            name: string,
+            threads: number,
+        }[],
+        gpus: {
+            id: number,
+            name: string,
+            driver: string,
+        }[]
+    },
+    minersInfos: MapString<MinerInfos>,
+    checkDate?: Date,
+};
+
 
 export type minerInstallInfos = {
     version: string,
@@ -121,6 +192,12 @@ export type MinerInfos = {
         algo: string,
         hashRate: number,
     },
+    //sizes: {
+    //    appDir: number,
+    //    dataDir: number,
+    //    confDir: number,
+    //    logDir: number,
+    //},
     pool: {
         url: string,
         account: string,
@@ -150,35 +227,12 @@ export type MinerGpuInfos = {
 };
 
 
-export type RigInfos = {
-    
-};
 
 
 
-export type Process = {
-    type: string,
-    name: string,
-    cmdFile: string,
-    args: string[],
-    runningDir: string,
-    appDir: string,
-    cmdPath: string,
-    pid: number | undefined,
-    process: childProcess.ChildProcessWithoutNullStreams | undefined,
-}
+/* NODE */
 
-
-export type ExecOnSpawn = (proc: childProcess.ChildProcessWithoutNullStreams) => void;
-
-export type ExecOnStdOut = (data: Buffer) => void;
-
-export type ExecOnStdErr = (data: Buffer) => void;
-
-export type ExecOnEnd = (returnCode: number, err: any) => void;
-
-
-export type Rig = {
+export type Node = {
     infos: {
         name: string,
         hostname: string,
@@ -186,6 +240,12 @@ export type Rig = {
         os: string,
         uptime: number,
     },
+    //sizes: {
+    //    appDir: number,
+    //    dataDir: number,
+    //    confDir: number,
+    //    logDir: number,
+    //},
     usage: {
         loadAvg: number,
         memory: {
@@ -197,14 +257,57 @@ export type Rig = {
         cpus: {
             name: string,
             threads: number,
-        }[],
-        gpus: {
-            id: number,
-            name: string,
-            driver: string,
         }[]
     },
-    minersInfos: MapString<MinerInfos>,
+    fullnodesInfos: MapString<FullnodeInfos>,
     checkDate?: Date,
 };
+
+
+export type fullnodeInstallInfos = {
+    version: string,
+    install(config: Config, params: MapString<any>): Promise<void>,
+}
+
+
+
+export type fullnodeCommandInfos = {
+    p2pPort: number,
+    rpcPort: number,
+    command: string,
+    getCommandFile(config: Config, params: MapString<any>): string,
+    getCommandArgs(config: Config, params: MapString<any>): string[],
+    getInfos(config: Config, params: MapString<any>): Promise<FullnodeInfos>,
+};
+
+
+
+export type FullnodeInfos = {
+    infos: {
+        name: string,
+        coin: string,
+        blocks: number,
+        headers?: number,
+    },
+    //sizes: {
+    //    appDir: number,
+    //    dataDir: number,
+    //    confDir: number,
+    //    logDir: number,
+    //},
+    devices: {
+        cpus: FullnodeCpuInfos[],
+    },
+    dataDate?: Date,
+};
+
+
+export type FullnodeCpuInfos = {
+    id: number,
+    name: string,
+    hashRate: number,
+    threads: number,
+};
+
+
 

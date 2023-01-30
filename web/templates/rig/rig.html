@@ -3,8 +3,72 @@ RIG HOME
 
 <hr />
 
-<a href="start">start</a>
+<a href="status">Rig status</a>
 <br />
-<a href="status">status</a>
 <br />
-<a href="stop">stop</a>
+<% if (monitorStatus) { %>
+    Monitor is running.
+    <a href="monitor-stop">Stop monitor</a>
+<% } else { %>
+    Monitor is not running.
+    <a href="monitor-start">Start monitor</a>
+<% } %>
+<br />
+<br />
+
+<hr />
+
+<h2>Running miners:</h2>
+<%
+//const runningMiners = Object.keys(rigInfos.minersInfos);
+%>
+<% runningMiners.forEach(minerName => { %>
+    <li>
+        <%- minerName %>
+        &nbsp;&nbsp;
+        <% if (managedMiners.includes(minerName)) { %>
+            [<a href="miners-run?miner=<%- minerName %>">status</a>]
+        <% } %>
+        [<a href="miners-run?miner=<%- minerName %>&action=stop">stop</a>]
+    </li>
+<% }) %>
+
+<hr />
+
+<h2>Installed miners:</h2>
+<% installedMiners.forEach(minerName => { %>
+    <li>
+        <%- minerName %>
+        &nbsp;&nbsp;
+        <% if (runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
+            [<a href="miners-run?miner=<%- minerName %>&action=start">start</a>]
+        <% } %>
+    </li>
+<% }) %>
+
+
+<hr />
+
+<h2>Installable miners:</h2>
+<% installableMiners.forEach(minerName => { %>
+    <li>
+        <%- minerName %>
+        &nbsp;&nbsp;
+        <% if (! installedMiners.includes(minerName)) { %>
+            [<a href="miners-install?miner=<%- minerName %>&action=start">install</a>]
+        <% } %>
+    </li>
+<% }) %>
+<hr />
+
+<h2>Runnable miners:</h2>
+<% runnableMiners.forEach(minerName => { %>
+    <li><%- minerName %></li>
+<% }) %>
+<hr />
+
+<h2>Managed miners:</h2>
+<% managedMiners.forEach(minerName => { %>
+    <li><%- minerName %></li>
+<% }) %>
+

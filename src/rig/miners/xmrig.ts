@@ -11,9 +11,13 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+
+/* ########## MAIN ######### */
+
 const SEP = path.sep;
 
 
+/* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
     version: '6.18.1',

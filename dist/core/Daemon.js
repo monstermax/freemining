@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
+exports.getConfig = exports.run = void 0;
 const tslib_1 = require("tslib");
 const express_1 = tslib_1.__importDefault(require("express"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
@@ -16,10 +16,11 @@ const routesFarm_1 = require("./http/routesFarm");
 const routesNode_1 = require("./http/routesNode");
 const routesPool_1 = require("./http/routesPool");
 const Rig = tslib_1.__importStar(require("../rig/Rig"));
+const Node = tslib_1.__importStar(require("../node/Node"));
 /* ########## USAGE #########
 
-# Start rig monitor
-./frmd-ts --rig-name test1
+# Start daemon
+./frmd
 
 
 */
@@ -48,7 +49,7 @@ function run(args = []) {
         usage(0);
     }
     catchSignals();
-    let config = (0, Config_1.loadConfig)(args);
+    config = (0, Config_1.loadConfig)(args);
     console.log('daemon start');
     const app = (0, express_1.default)(); // express app
     const server = http.createServer(app); // express server
@@ -74,6 +75,7 @@ function registerHttpRoutes(config, app) {
     // Static files
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] Using static folder ${config.httpStaticDir}`);
     app.use(express_1.default.static(config.httpStaticDir));
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] Using templates folder ${config.httpTemplatesDir}`);
     (0, routesCore_1.registerCoreRoutes)(app);
     (0, routesRig_1.registerRigRoutes)(app, '/rig');
     (0, routesFarm_1.registerFarmRoutes)(app, '/farm');
@@ -126,6 +128,7 @@ function registerWssRoutes(config, wss) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                     const req = JSON.parse(messageJson);
                     switch (req.method) {
+                        /* RIG */
                         case 'rigStatus':
                             const rigInfos = Rig.getRigInfos();
                             rpcSendResponse(ws, req.id, rigInfos);
@@ -137,6 +140,10 @@ function registerWssRoutes(config, wss) {
                         case 'rigMonitorStop':
                             Rig.monitorStop(config, req.params);
                             rpcSendResponse(ws, req.id, 'OK');
+                            break;
+                        case 'rigMonitorStatus':
+                            const rigMonitorStatus = Rig.monitorStatus(config, req.params);
+                            rpcSendResponse(ws, req.id, rigMonitorStatus);
                             break;
                         case 'rigMinerInstallStart':
                             try {
@@ -169,6 +176,14 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         case 'rigMinerRunStatus':
+                            try {
+                                const minerStatus = yield Rig.minerRunStatus(config, req.params);
+                                rpcSendResponse(ws, req.id, minerStatus);
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get miner run status. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
                             break;
                         case 'rigMinerRunInfos':
                             try {
@@ -180,6 +195,74 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
+                        /* NODE */
+                        case 'rigStatus':
+                            const nodeInfos = Node.getNodeInfos();
+                            rpcSendResponse(ws, req.id, nodeInfos);
+                            break;
+                        case 'nodeMonitorStart':
+                            Node.monitorStart(config, req.params);
+                            rpcSendResponse(ws, req.id, 'OK');
+                            break;
+                        case 'nodeMonitorStop':
+                            Node.monitorStop(config, req.params);
+                            rpcSendResponse(ws, req.id, 'OK');
+                            break;
+                        case 'nodeMonitorStatus':
+                            const nodeMonitorStatus = Node.monitorStatus(config, req.params);
+                            rpcSendResponse(ws, req.id, nodeMonitorStatus);
+                            break;
+                        case 'nodeFullnodeInstallStart':
+                            try {
+                                yield Node.fullnodeInstallStart(config, req.params);
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot start fullnode install. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        case 'nodeFullnodeRunStart':
+                            try {
+                                yield Node.fullnodeRunStart(config, req.params);
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot start fullnode run. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        case 'nodeFullnodeRunStop':
+                            try {
+                                yield Node.fullnodeRunStop(config, req.params);
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot stop fullnode run. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        case 'nodeFullnodeRunStatus':
+                            try {
+                                const fullnodeStatus = yield Node.fullnodeRunStatus(config, req.params);
+                                rpcSendResponse(ws, req.id, fullnodeStatus);
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get fullnode run status. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        case 'nodeFullnodeRunInfos':
+                            try {
+                                const fullnodeInfos = yield Node.fullnodeRunInfos(config, req.params);
+                                rpcSendResponse(ws, req.id, fullnodeInfos);
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get fullnode run infos. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        /* DEFAULT */
                         default:
                             rpcSendError(ws, req.id, { code: -32601, message: `the method ${req.method} does not exist/is not available` });
                             break;
@@ -317,3 +400,7 @@ function catchSignals() {
         safeQuit(5);
     }));
 }
+function getConfig() {
+    return config;
+}
+exports.getConfig = getConfig;

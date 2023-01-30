@@ -11,6 +11,12 @@ import type *  as t from '../common/types';
 
 /* ########## USAGE #########
 
+# Install fullnode Dogecoin
+./frm-cli-ts --fullnode-install dogecoin
+
+# Install miner Trex
+./frm-cli-ts --miner-install trex
+
 # Start rig monitor
 ./frm-cli-ts --rig-monitor-start
 
@@ -72,6 +78,8 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
     let config = loadConfig(args);
 
     let func: any = null;
+
+    /* RIG */
     if (hasOpt('--rig-status')) {
         func = function (this: WebSocket) {
             return rigStatus(this, args, config);
@@ -85,6 +93,11 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
     } else if (hasOpt('--rig-monitor-stop')) {
         func = function (this: WebSocket) {
             return rigMonitorStop(this, args, config);
+        }
+
+    } else if (hasOpt('--rig-monitor-status')) {
+        func = function (this: WebSocket) {
+            return rigMonitorStatus(this, args, config);
         }
 
     } else if (hasOpt('--miner-stop')) {
@@ -106,8 +119,53 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
         func = function (this: WebSocket) {
             return rigMinerInstallStart(this, args, config);
         }
+    }
 
-    } else {
+
+    /* NODE */
+    if (hasOpt('--node-status')) {
+        func = function (this: WebSocket) {
+            return nodeStatus(this, args, config);
+        }
+
+    } else if (hasOpt('--node-monitor-start')) {
+        func = function (this: WebSocket) {
+            return nodeMonitorStart(this, args, config);
+        }
+
+    } else if (hasOpt('--node-monitor-stop')) {
+        func = function (this: WebSocket) {
+            return nodeMonitorStop(this, args, config);
+        }
+
+    } else if (hasOpt('--node-monitor-status')) {
+        func = function (this: WebSocket) {
+            return nodeMonitorStatus(this, args, config);
+        }
+
+    } else if (hasOpt('--fullnode-stop')) {
+        func = function (this: WebSocket) {
+            return nodeFullnodeRunStop(this, args, config);
+        }
+
+    } else if (hasOpt('--fullnode-start')) {
+        func = function (this: WebSocket) {
+            return nodeFullnodeRunStart(this, args, config);
+        }
+
+    } else if (hasOpt('--fullnode-infos')) {
+        func = function (this: WebSocket) {
+            return nodeFullnodeRunInfos(this, args, config);
+        }
+
+    } else if (hasOpt('--fullnode-install')) {
+        func = function (this: WebSocket) {
+            return nodeFullnodeInstallStart(this, args, config);
+        }
+    }
+
+
+    if (func === null ) {
         usage(0);
         return;
     }
@@ -216,6 +274,9 @@ function rpcSendError(ws: WebSocket, id: number, result: any) {
 
 
 
+
+/* #### RIG #### */
+
 function rigStatus(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
     const method = 'rigStatus';
     rpcSendRequest(ws, 1, method, {});
@@ -231,6 +292,11 @@ function rigMonitorStop(ws: WebSocket, args: (t.CliParams & t.CommonParams & str
     rpcSendRequest(ws, 1, method, {});
 }
 
+function rigMonitorStatus(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const method = 'rigMonitorStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
+
 
 function rigMinerInstallStart(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
     const minerNameS = getOpts('--miner-install', 1, args);
@@ -239,7 +305,7 @@ function rigMinerInstallStart(ws: WebSocket, args: (t.CliParams & t.CommonParams
     const method = 'rigMinerInstallStart';
     const params: any = {
         miner: minerName,
-        alias: getOpt('-alias', args) || getOpt('-miner', args),
+        alias: getOpt('-alias', args) || minerName,
     };
     rpcSendRequest(ws, 1, method, params);
 }
@@ -286,6 +352,85 @@ function rigMinerRunInfos(ws: WebSocket, args: (t.CliParams & t.CommonParams & s
 }
 
 
+/* #### NODE #### */
+
+function nodeStatus(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const method = 'nodeStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
+
+function nodeMonitorStart(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const method = 'nodeMonitorStart';
+    rpcSendRequest(ws, 1, method, {});
+}
+
+function nodeMonitorStop(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const method = 'nodeMonitorStop';
+    rpcSendRequest(ws, 1, method, {});
+}
+
+function nodeMonitorStatus(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const method = 'nodeMonitorStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
+
+
+function nodeFullnodeInstallStart(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const fullnodeNameS = getOpts('--fullnode-install', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+
+    const method = 'nodeFullnodeInstallStart';
+    const params: any = {
+        fullnode: fullnodeName,
+        alias: getOpt('-alias', args) || fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
+function nodeFullnodeRunStart(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const fullnodeNameS = getOpts('--fullnode-start', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const extraArgs = getOpts('--', -1, args);
+
+    const method = 'nodeFullnodeRunStart';
+    const params: any = {
+        fullnode: fullnodeName,
+        extraArgs,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
+function nodeFullnodeRunStop(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const fullnodeNameS = getOpts('--fullnode-stop', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+
+    const method = 'nodeFullnodeRunStop';
+    const params: any = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
+function nodeFullnodeRunInfos(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const fullnodeNameS = getOpts('--fullnode-infos', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+
+    const method = 'nodeFullnodeRunInfos';
+    const params: any = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
+
+
+
+
+/* #### MISC #### */
 
 function safeQuit() {
 	process.exit();

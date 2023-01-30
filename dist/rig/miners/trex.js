@@ -9,7 +9,9 @@ const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+/* ########## MAIN ######### */
 const SEP = path_1.default.sep;
+/* ########## FUNCTIONS ######### */
 exports.minerInstall = {
     version: '6.18.1',
     install(config, params) {
@@ -64,6 +66,7 @@ exports.minerInstall = {
             }
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
             // Install to target dir
+            fs_1.default.mkdirSync(targetDir, { recursive: true });
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
             fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}`, targetDir);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);

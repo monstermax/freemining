@@ -11,12 +11,15 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+/* ########## MAIN ######### */
+
 const SEP = path.sep;
 
 
+/* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: '6.18.1',
+    version: 'edit-me',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
@@ -40,6 +43,8 @@ export const minerInstall: t.minerInstallInfos = {
         } else {
             throw { message: `No installation script available for the platform ${platform}` };
         }
+
+        if (dlUrl === 'edit-me') throw { message: `No installation script available for the platform ${platform}` };
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
@@ -78,6 +83,7 @@ export const minerInstall: t.minerInstallInfos = {
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
+        fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
         fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
@@ -90,7 +96,7 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: 42099, // edit-me
+    apiPort: -1, // edit-me
 
     command: 'edit-me', // the filename of the executable (without .exe extension)
 
