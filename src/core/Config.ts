@@ -17,7 +17,9 @@ const defaultHttpStaticDir: string = `${__dirname}${path.sep}..${path.sep}web${p
 const defaultHttpTemplatesDir: string = `${__dirname}${path.sep}..${path.sep}web${path.sep}templates`;
 
 const userHomeDir: string = os.userInfo().homedir;
-const defaultUserFrmDir: string = `${userHomeDir}${path.sep}.freemining-beta`;
+const defaultUserFrmDirUnix: string = `${userHomeDir}${path.sep}.freemining-beta`;
+const defaultUserFrmDirWin: string = `${userHomeDir}${path.sep}AppData${path.sep}Local${path.sep}freemining-beta`;
+const defaultUserFrmDir = (os.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 console.debug(`DEBUG defaultUserFrmDir =`, defaultUserFrmDir);
 
 // cli options

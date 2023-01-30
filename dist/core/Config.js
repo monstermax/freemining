@@ -13,7 +13,9 @@ const defaultListenPort = 1234;
 const defaultHttpStaticDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}public`;
 const defaultHttpTemplatesDir = `${__dirname}${path_1.default.sep}..${path_1.default.sep}web${path_1.default.sep}templates`;
 const userHomeDir = os_1.default.userInfo().homedir;
-const defaultUserFrmDir = `${userHomeDir}${path_1.default.sep}.freemining-beta`;
+const defaultUserFrmDirUnix = `${userHomeDir}${path_1.default.sep}.freemining-beta`;
+const defaultUserFrmDirWin = `${userHomeDir}${path_1.default.sep}AppData${path_1.default.sep}Local${path_1.default.sep}freemining-beta`;
+const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 console.debug(`DEBUG defaultUserFrmDir =`, defaultUserFrmDir);
 // cli options
 const defaultCliWssConnTimeout = 5000;
