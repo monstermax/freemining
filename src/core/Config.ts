@@ -49,7 +49,7 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
         process.exit(1);
     }
 
-    userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || '';
+    userFrmDir = stringTemplate(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || '';
 
     if (! fs.existsSync(userFrmDir)) {
         try {
