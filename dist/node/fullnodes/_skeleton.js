@@ -121,12 +121,11 @@ exports.fullnodeCommands = {
                 infos: {
                     name: fullnodeName,
                     coin,
+                },
+                blockchain: {
                     blocks,
                     headers: blockHeaders,
                 },
-                devices: {
-                    cpus,
-                }
             };
             return infos;
         });

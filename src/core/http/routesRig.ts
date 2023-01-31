@@ -238,7 +238,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const algo = req.body.algo?.toString() || '';
         const poolUrl = req.body.poolUrl?.toString() || '';
         const poolUser = req.body.poolUser?.toString() || '';
-        const extraArgs = (req.body.extraArgs?.toString() || '').split(' ');
+        const extraArgs = (req.body.extraArgs?.toString() || '').split(' ').filter((arg: string) => !!arg);
 
         if (action === 'start') {
             if (! minerName || ! algo || ! poolUrl || ! poolUser) {

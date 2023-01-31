@@ -23,10 +23,10 @@ NODE HOME
     <li>
         <%- fullnodeName %>
         &nbsp;&nbsp;
+        [<a href="fullnodes/<%- fullnodeName %>/run">Manage...</a>]
         <% if (managedFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes/<%- fullnodeName %>/status">detailed status</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/run?action=status">JSON Status</a>]
         <% } %>
-        [<a href="fullnodes/<%- fullnodeName %>/run?action=stop">stop</a>]
     </li>
 <% }) %>
 
@@ -38,7 +38,7 @@ NODE HOME
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (runnableFullnodes.includes(fullnodeName) && ! runningFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes/<%- fullnodeName %>/run?action=start">start</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/run?action=start">Start...</a>]
         <% } %>
     </li>
 <% }) %>
@@ -52,7 +52,7 @@ NODE HOME
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (! installedFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes/<%- fullnodeName %>/install?action=start">install</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/install?action=start">Install...</a>]
         <% } %>
     </li>
 <% }) %>

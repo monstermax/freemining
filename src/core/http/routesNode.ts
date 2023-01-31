@@ -188,7 +188,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         if (action === 'log') {
             //res.send( `not yet available` );
             res.header('Content-Type', 'text/plain');
-            const log = Node.fullnodeRunLog(config, { fullnode: fullnodeName, lines: 50 });
+            const log = await Node.fullnodeRunLog(config, { fullnode: fullnodeName, lines: 50 });
             res.send(log);
             return;
 

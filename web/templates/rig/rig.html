@@ -23,7 +23,7 @@ RIG HOME
     <li>
         <%- minerName %>
         &nbsp;&nbsp;
-        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Manage</a>
+        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Manage...</a>
         <% if (managedMiners.includes(minerName)) { %>
             <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=status">JSON Status</a>
         <% } %>
@@ -38,7 +38,7 @@ RIG HOME
         <%- minerName %>
         &nbsp;&nbsp;
         <% if (runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
-            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">start</a>
+            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Start...</a>
         <% } %>
     </li>
 <% }) %>
@@ -52,7 +52,7 @@ RIG HOME
         <%- minerName %>
         &nbsp;&nbsp;
         <% if (! installedMiners.includes(minerName)) { %>
-            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">install</a>
+            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">Install...</a>
         <% } %>
     </li>
 <% }) %>

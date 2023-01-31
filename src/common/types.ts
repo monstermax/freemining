@@ -292,8 +292,6 @@ export type FullnodeInfos = {
         name: string,
         //uptime: number,
         coin: string,
-        blocks: number,
-        headers?: number,
     },
     //sizes: {
     //    appDir: number,
@@ -301,18 +299,11 @@ export type FullnodeInfos = {
     //    confDir: number,
     //    logDir: number,
     //},
-    devices: {
-        cpus: FullnodeCpuInfos[],
+    blockchain: {
+        blocks: number,
+        headers?: number,
     },
     dataDate?: Date,
-};
-
-
-export type FullnodeCpuInfos = {
-    id: number,
-    name: string,
-    hashRate: number,
-    threads: number,
 };
 
 

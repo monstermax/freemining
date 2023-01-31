@@ -126,7 +126,7 @@ export const minerCommands: t.minerCommandInfos = {
             '--cpu-priority', '3',
             '--randomx-no-rdmsr',
             '--no-color',
-            '--log-file=${SEP}tmp${SEP}debug_xmrig.log',
+            //`--log-file=${SEP}tmp${SEP}debug_xmrig.log`,
         ];
 
         if (params.algo) {

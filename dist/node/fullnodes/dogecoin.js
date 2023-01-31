@@ -121,20 +121,18 @@ exports.fullnodeCommands = {
             // EDIT THESE VALUES - START //
             const fullnodeName = 'edit-me';
             const coin = 'edit-me';
-            const blocks = 0; // edit-me
-            const blockHeaders = 0; // edit-me
-            const cpus = [];
+            const blocks = -1; // edit-me
+            const blockHeaders = -1; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
                 infos: {
                     name: fullnodeName,
                     coin,
+                },
+                blockchain: {
                     blocks,
                     headers: blockHeaders,
                 },
-                devices: {
-                    cpus,
-                }
             };
             return infos;
         });

@@ -151,12 +151,11 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             infos: {
                 name: fullnodeName,
                 coin,
+            },
+            blockchain: {
                 blocks,
                 headers: blockHeaders,
             },
-            devices: {
-                cpus,
-            }
         };
 
         return infos;

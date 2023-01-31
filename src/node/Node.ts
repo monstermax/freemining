@@ -298,7 +298,7 @@ export function fullnodeRunStatus(config: t.Config, params: t.MapString<any>): b
 
 
 export async function fullnodeRunLog(config: t.Config, params: t.MapString<any>): Promise<string> {
-    const logFile = `${config.logDir}${SEP}rig${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
+    const logFile = `${config.logDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
     if (! fs.existsSync(logFile)) {
         return '';
     }

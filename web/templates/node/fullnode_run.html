@@ -8,15 +8,9 @@ Fullnode run
 //const runningFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].running).map(entry => entry[0]);
 const installedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installed).map(entry => entry[0]);
 const installableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installable).map(entry => entry[0]);
-//const runnableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].runnable).map(entry => entry[0]);
-const managedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].managed).map(entry => entry[0]);
+const runnableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].runnable).map(entry => entry[0]);
+//const managedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].managed).map(entry => entry[0]);
 %>
-
-<pre>
-<%- JSON.stringify(fullnodeInfos, null, 4) %>
-</pre>
-
-<hr />
 
 <h3>Manage</h3>
 <%- (() => {
@@ -29,11 +23,11 @@ const managedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1]
         html += ' <a class="btn btn-danger btn-sm" onclick="stopFullnode()" href="javascript:void(0)">Stop Fullnode</a>';
         html += '&nbsp;&nbsp;&nbsp;&nbsp;';
         html += ' <a class="btn btn-primary btn-sm" href="?action=log">Show logs</a>';
-        //html += '&nbsp; <a class="btn btn-secondary btn-sm" href="fullnode/' + fullnode + '/status?">detailed status</a>';
+        html += ' <a class="btn btn-secondary btn-sm" href="?action=status">JSON Status</a>';
 
     } else {
         html += fullnode + ' is <span class="badge bg-danger">not running</span>';
-        if (installedFullnodes.includes(fullnode) && managedFullnodes.includes(fullnode)) {
+        if (installedFullnodes.includes(fullnode) && runnableFullnodes.includes(fullnode)) {
             html += ' <a class="btn btn-primary btn-sm" onclick="startFullnode()" href="javascript:void(0)">Start</a>';
         }
     }

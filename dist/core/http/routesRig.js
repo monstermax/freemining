@@ -172,7 +172,7 @@ function registerRigRoutes(app, urlPrefix = '') {
         const algo = ((_d = req.body.algo) === null || _d === void 0 ? void 0 : _d.toString()) || '';
         const poolUrl = ((_e = req.body.poolUrl) === null || _e === void 0 ? void 0 : _e.toString()) || '';
         const poolUser = ((_f = req.body.poolUser) === null || _f === void 0 ? void 0 : _f.toString()) || '';
-        const extraArgs = (((_g = req.body.extraArgs) === null || _g === void 0 ? void 0 : _g.toString()) || '').split(' ');
+        const extraArgs = (((_g = req.body.extraArgs) === null || _g === void 0 ? void 0 : _g.toString()) || '').split(' ').filter((arg) => !!arg);
         if (action === 'start') {
             if (!minerName || !algo || !poolUrl || !poolUser) {
                 res.send(`Error: missing parameters`);

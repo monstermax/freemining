@@ -183,8 +183,8 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         // EDIT THESE VALUES - START //
         const fullnodeName = 'edit-me';
         const coin = 'edit-me';
-        const blocks = 0; // edit-me
-        const blockHeaders = 0; // edit-me
+        const blocks = -1; // edit-me
+        const blockHeaders = -1; // edit-me
 
         const cpus: any[] = [];
         // EDIT THESE VALUES - END //
@@ -193,12 +193,11 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             infos: {
                 name: fullnodeName,
                 coin,
+            },
+            blockchain: {
                 blocks,
                 headers: blockHeaders,
             },
-            devices: {
-                cpus,
-            }
         };
 
         return infos;

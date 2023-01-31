@@ -248,7 +248,7 @@ function fullnodeRunStatus(config, params) {
 exports.fullnodeRunStatus = fullnodeRunStatus;
 function fullnodeRunLog(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const logFile = `${config.logDir}${SEP}rig${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
+        const logFile = `${config.logDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
         if (!fs_1.default.existsSync(logFile)) {
             return '';
         }
