@@ -168,7 +168,7 @@ export type Rig = {
         }[]
     },
     minersInfos: MapString<MinerInfos>,
-    dataDate?: number,
+    dataDate?: number | null,
 };
 
 
@@ -265,7 +265,7 @@ export type Node = {
         }[]
     },
     fullnodesInfos: MapString<FullnodeInfos>,
-    dataDate?: number,
+    dataDate?: number | null,
 };
 
 

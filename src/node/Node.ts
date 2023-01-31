@@ -26,6 +26,7 @@ const defaultPollDelay = 10_000; // 10 seconds
 const fullnodesInfos: t.MapString<any> = {};
 
 let nodeMainInfos: any | null = null;
+let dateLastCheck: number | null = null;
 
 
 /* ########## FUNCTIONS ######### */
@@ -101,6 +102,8 @@ export async function monitorCheckNode(config: t.Config): Promise<void> {
             delete fullnodesInfos[fullnodeName];
         }
     }
+
+    dateLastCheck = Date.now();
 }
 
 
@@ -386,7 +389,7 @@ export function getNodeInfos(): t.Node {
             cpus,
         },
         fullnodesInfos,
-        dataDate: Date.now(),
+        dataDate: dateLastCheck,
     }
 
     return nodeInfos;

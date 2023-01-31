@@ -15,6 +15,7 @@ let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
 const fullnodesInfos = {};
 let nodeMainInfos = null;
+let dateLastCheck = null;
 /* ########## FUNCTIONS ######### */
 /**
  * Start node monitor (poll running processes API every x seconds)
@@ -78,6 +79,7 @@ function monitorCheckNode(config) {
                 delete fullnodesInfos[fullnodeName];
             }
         }
+        dateLastCheck = Date.now();
     });
 }
 exports.monitorCheckNode = monitorCheckNode;
@@ -323,7 +325,7 @@ function getNodeInfos() {
             cpus,
         },
         fullnodesInfos,
-        dataDate: Date.now(),
+        dataDate: dateLastCheck,
     };
     return nodeInfos;
 }

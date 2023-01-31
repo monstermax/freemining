@@ -28,6 +28,7 @@ const defaultPollDelay = 10_000; // 10 seconds
 const minersInfos: t.MapString<any> = {};
 
 let rigMainInfos: any | null = null;
+let dateLastCheck: number | null = null;
 
 
 /* ########## FUNCTIONS ######### */
@@ -103,6 +104,8 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
             delete minersInfos[minerName];
         }
     }
+
+    dateLastCheck = Date.now();
 }
 
 
@@ -477,7 +480,7 @@ export function getRigInfos(): t.Rig {
             gpus,
         },
         minersInfos,
-        dataDate: Date.now(),
+        dataDate: dateLastCheck,
     }
 
     return rigInfos;

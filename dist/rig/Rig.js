@@ -17,6 +17,7 @@ let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
 const minersInfos = {};
 let rigMainInfos = null;
+let dateLastCheck = null;
 /* ########## FUNCTIONS ######### */
 /**
  * Start rig monitor (poll running processes API every x seconds)
@@ -80,6 +81,7 @@ function monitorCheckRig(config) {
                 delete minersInfos[minerName];
             }
         }
+        dateLastCheck = Date.now();
     });
 }
 exports.monitorCheckRig = monitorCheckRig;
@@ -407,7 +409,7 @@ function getRigInfos() {
             gpus,
         },
         minersInfos,
-        dataDate: Date.now(),
+        dataDate: dateLastCheck,
     };
     return rigInfos;
 }
