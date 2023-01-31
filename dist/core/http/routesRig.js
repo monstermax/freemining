@@ -132,8 +132,10 @@ function registerRigRoutes(app, urlPrefix = '') {
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = yield Rig.getAllMiners(config);
         if (action === 'log') {
-            // TODO
-            res.send(`not yet available`);
+            //res.send( `not yet available` );
+            res.header('Content-Type', 'text/plain');
+            const log = yield Rig.minerRunLog(config, { miner: minerName, lines: 50 });
+            res.send(log);
             return;
         }
         else if (action === 'status') {

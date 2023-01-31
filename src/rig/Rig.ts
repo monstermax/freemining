@@ -311,7 +311,10 @@ export async function minerRunLog(config: t.Config, params: t.MapString<any>): P
         return '';
     }
 
-    return await tailFile(logFile, 50);
+    let text = await tailFile(logFile, params.lines || 50);
+    text = text.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
+
+    return text;
 }
 
 

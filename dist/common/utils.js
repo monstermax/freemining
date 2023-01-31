@@ -324,8 +324,9 @@ exports.getDirSize = getDirSize;
 function tailFile(file, numLines) {
     var _a, e_1, _b, _c;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const bufferSize = 10000000; // 10 Mo
         const fileSize = fs_1.default.statSync(file).size;
-        const stream = fs_1.default.createReadStream(file, { start: fileSize - 1000000, end: fileSize });
+        const stream = fs_1.default.createReadStream(file, { start: Math.max(0, fileSize - bufferSize), end: fileSize });
         const rl = readline_1.default.createInterface({ input: stream });
         let buffer = [];
         try {
@@ -351,7 +352,7 @@ function tailFile(file, numLines) {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        return buffer.reverse().toString();
+        return buffer.join(os_1.default.EOL);
     });
 }
 exports.tailFile = tailFile;

@@ -259,7 +259,9 @@ function minerRunLog(config, params) {
         if (!fs_1.default.existsSync(logFile)) {
             return '';
         }
-        return yield (0, utils_1.tailFile)(logFile, 50);
+        let text = yield (0, utils_1.tailFile)(logFile, params.lines || 50);
+        text = text.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
+        return text;
     });
 }
 exports.minerRunLog = minerRunLog;

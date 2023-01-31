@@ -358,9 +358,10 @@ export async function getDirSize(dir: string, recursive: boolean=true): Promise<
 }
 
 
-export async function tailFile(file: string, numLines: number): Promise<string> {
+export async function tailFile(file: string, numLines: number): Promise<any> {
+    const bufferSize = 10_000_000; // 10 Mo
     const fileSize = fs.statSync(file).size;
-    const stream = fs.createReadStream(file, { start: fileSize - 1000000, end: fileSize });
+    const stream = fs.createReadStream(file, { start: Math.max(0, fileSize - bufferSize), end: fileSize });
     const rl = readline.createInterface({ input: stream });
 
     let buffer = [];
@@ -371,6 +372,6 @@ export async function tailFile(file: string, numLines: number): Promise<string> 
         }
     }
 
-    return buffer.reverse().toString();
+    return buffer.join(os.EOL);
 }
 

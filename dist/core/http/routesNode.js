@@ -131,8 +131,10 @@ function registerNodeRoutes(app, urlPrefix = '') {
         const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
         const allFullnodes = yield Node.getAllFullnodes(config);
         if (action === 'log') {
-            // TODO
-            res.send(`not yet available`);
+            //res.send( `not yet available` );
+            res.header('Content-Type', 'text/plain');
+            const log = Node.fullnodeRunLog(config, { fullnode: fullnodeName, lines: 50 });
+            res.send(log);
             return;
         }
         else if (action === 'status') {

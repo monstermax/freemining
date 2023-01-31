@@ -187,8 +187,10 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const allMiners = await Rig.getAllMiners(config);
 
         if (action === 'log') {
-            // TODO
-            res.send( `not yet available` );
+            //res.send( `not yet available` );
+            res.header('Content-Type', 'text/plain');
+            const log = await Rig.minerRunLog(config, { miner: minerName, lines: 50 });
+            res.send(log);
             return;
 
         } else if (action === 'status') {

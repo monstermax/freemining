@@ -186,8 +186,10 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         const allFullnodes = await Node.getAllFullnodes(config);
 
         if (action === 'log') {
-            // TODO
-            res.send( `not yet available` );
+            //res.send( `not yet available` );
+            res.header('Content-Type', 'text/plain');
+            const log = Node.fullnodeRunLog(config, { fullnode: fullnodeName, lines: 50 });
+            res.send(log);
             return;
 
         } else if (action === 'status') {
