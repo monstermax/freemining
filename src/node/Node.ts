@@ -41,7 +41,7 @@ export function monitorStart(config: t.Config, params?: t.MapString<any>): void 
         return;
     }
 
-    const pollDelay = Number(getOpt('--poll-delay')) || defaultPollDelay;
+    const pollDelay = Number(getOpt('--node-monitor-poll-delay')) || defaultPollDelay;
     monitorIntervalId = setInterval(monitorCheckNode, pollDelay, config);
 
     console.log(`${now()} [INFO] [NODE] Node monitor started`);

@@ -5,6 +5,7 @@ import WebSocket from 'ws';
 
 import { loadConfig } from './Config';
 import { now, hasOpt, getOpt, getOpts, buildRpcRequest, buildRpcResponse, buildRpcError } from '../common/utils';
+import { getSystemInfos } from '../common/sysinfos';
 
 import type *  as t from '../common/types';
 
@@ -57,6 +58,36 @@ Usage:
 
 frm-cli <params>
 
+        --help                                  # display this this message
+        --sysinfos                              # display server system informations
+        --sysinfos --local                      # display cli system informations
+        --cli-wss-server-address                # default 127.0.0.1
+        --cli-wss-conn-timeout                  # default 5 seconds
+
+        --rig-status                            # display rig status
+        --rig-monitor-start                     # start rig monitor
+        --rig-monitor-stop                      # stop rig monitor
+        --rig-monitor-status                    # display rig monitor status
+
+        --miner-start                           # start a miner
+        --miner-stop                            # stop a miner
+        --miner-status                          # display a miner status
+        --miner-log                             # display a miner logs
+        --miner-infos                           # display a miner infos
+        --miner-install                         # install a miner
+
+        --node-status                           # display node status
+        --node-monitor-start                    # start node monitor
+        --node-monitor-stop                     # stop node monitor
+        --node-monitor-status                   # display node monitor status
+
+        --fullnode-start                        # start a fullnode
+        --fullnode-stop                         # stop a fullnode
+        --fullnode-status                       # display a fullnode status
+        --fullnode-log                          # display a fullnode logs
+        --fullnode-infos                        # display a fullnode infos
+        --fullnode-install                      # install a fullnode
+
 `;
 
     console.log(_usage);
@@ -82,8 +113,22 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
 
     let func: any = null;
 
+    if (hasOpt('--sysinfos')) {
+        if (hasOpt('--local')) {
+            showSysInfos();
+            return;
+        }
+
+        func = function (this: WebSocket) {
+            return sysInfos(this, args, config);
+        }
+    }
+
     /* RIG */
-    if (hasOpt('--rig-status')) {
+    if (func) {
+        // func already set
+
+    } else if (hasOpt('--rig-status')) {
         func = function (this: WebSocket) {
             return rigStatus(this, args, config);
         }
@@ -136,7 +181,10 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
 
 
     /* NODE */
-    if (hasOpt('--node-status')) {
+    if (func) {
+        // func already set
+
+    } else if (hasOpt('--node-status')) {
         func = function (this: WebSocket) {
             return nodeStatus(this, args, config);
         }
@@ -296,6 +344,14 @@ function rpcSendError(ws: WebSocket, id: number, result: any) {
 }
 
 
+
+
+/* #### CORE #### */
+
+function sysInfos(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const method = 'sysInfos';
+    rpcSendRequest(ws, 1, method, {});
+}
 
 
 /* #### RIG #### */
@@ -534,5 +590,18 @@ function catchSignals() {
         //debugger;
         safeQuit();
     });
+}
+
+
+
+async function showSysInfos() {
+    const sysInfos = await getSystemInfos();
+
+    if (hasOpt('--json')) {
+        console.log( JSON.stringify(sysInfos) );
+
+    } else {
+        console.log(sysInfos);
+    }
 }
 

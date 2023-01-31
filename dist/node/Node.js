@@ -26,7 +26,7 @@ function monitorStart(config, params) {
     if (monitorIntervalId) {
         return;
     }
-    const pollDelay = Number((0, utils_1.getOpt)('--poll-delay')) || defaultPollDelay;
+    const pollDelay = Number((0, utils_1.getOpt)('--node-monitor-poll-delay')) || defaultPollDelay;
     monitorIntervalId = setInterval(monitorCheckNode, pollDelay, config);
     console.log(`${(0, utils_1.now)()} [INFO] [NODE] Node monitor started`);
 }

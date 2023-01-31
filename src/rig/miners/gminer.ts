@@ -5,6 +5,8 @@ import os from 'os';
 import tar from 'tar';
 import fetch from 'node-fetch';
 import admZip from 'adm-zip';
+import decompress from 'decompress';
+const decompressTarxz = require('decompress-tarxz');
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 
@@ -14,9 +16,8 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download :
+Website: 
+Github : 
 
 */
 /* ########## MAIN ######### */
@@ -27,23 +28,24 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '3.27',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
+        const versionBis = this.version.replaceAll('.', '_');
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/develsoftware/GMinerRelease/releases/download/${this.version}/gminer_${versionBis}_linux64.tar.xz`;
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/develsoftware/GMinerRelease/releases/download/${this.version}/gminer_${versionBis}_windows64.zip`;
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -64,7 +66,14 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
+        if (path.extname(dlFilePath) === '.xz') {
+            await decompress(dlFilePath, `${tempDir}${SEP}unzipped`, {
+                plugins: [
+                    decompressTarxz()
+                ]
+            });
+
+        } else if (path.extname(dlFilePath) === '.gz') {
             await tar.extract(
                 {
                     file: dlFilePath,
@@ -93,7 +102,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -104,9 +113,9 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: -1, // 52006
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'miner',
 
     getCommandFile(config, params) {
         return this.command + (os.platform() === 'linux' ? '' : '.exe');
@@ -119,29 +128,30 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--api', this.apiPort.toString(),
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('--algo');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
+            args.push('--server');
+            args.push(params.poolUrl.split(':')[0] || "-");
+            args.push('--port');
+            args.push(params.poolUrl.split(':')[1] || 0);
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('--user');
             args.push(params.poolUser);
         }
 
         if (true) {
-            args.push('--edit-me-password');
+            args.push('--pass');
             args.push('x');
         }
 

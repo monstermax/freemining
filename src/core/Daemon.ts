@@ -9,6 +9,8 @@ const ejs = require('ejs');
 
 import { loadConfig } from './Config';
 import { now, sleep, hasOpt, buildRpcRequest, buildRpcResponse, buildRpcError } from '../common/utils';
+import { getSystemInfos } from '../common/sysinfos';
+
 import { registerCoreRoutes } from './http/routesCore';
 import { registerRigRoutes }  from './http/routesRig';
 import { registerFarmRoutes } from './http/routesFarm';
@@ -33,6 +35,7 @@ import type *  as t from '../common/types';
 let config: t.Config;
 let quitRunning = false;
 const SEP = path.sep;
+let sysInfos: any = null;
 
 
 /* ########## FUNCTIONS ######### */
@@ -46,6 +49,17 @@ function usage(exitCode: number | null=null) {
 Usage:
 
 frmd <params>
+     --help                                  # display this this message
+     --user-dir                              # default %HOME%/.freemining-beta OR %HOME%/AppData/Local/freemining-beta
+     --listen-address                        # default 127.0.0.1
+     --listen-port                           # default 1234
+     --wss-conn-timeout                      # default 10 seconds
+
+     -r | --rig-monitor-start                # start rig monitor at freemining start
+     -n | --node-monitor-start               # start node monitor at freemining start
+
+     --rig-monitor-poll-delay                # delay between 2 checks of the rig status
+     --node-monitor-poll-delay               # delay between 2 checks of the node status
 
 `;
 
@@ -83,6 +97,8 @@ export function run(args: (t.DaemonParams & t.CommonParams & string)[] = []): vo
     server.listen(config.listenPort, config.listenAddress, () => {
         console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] Server started on ${config.listenAddress}:${config.listenPort}`);
     });
+
+    getSysInfos();
 }
 
 
@@ -171,6 +187,12 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                 const req: t.RpcRequest = JSON.parse(messageJson);
 
                 switch (req.method) {
+
+                    /* CORE */
+                    case 'sysInfos':
+                        const sysInfos = await getSystemInfos();
+                        rpcSendResponse(ws, req.id, sysInfos);
+                        break;
 
                     /* RIG */
                     case 'rigStatus':
@@ -261,7 +283,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
 
                     /* NODE */
-                    case 'rigStatus':
+                    case 'nodeStatus':
                         const nodeInfos = Node.getNodeInfos();
                         rpcSendResponse(ws, req.id, nodeInfos);
                         break;
@@ -514,3 +536,12 @@ function catchSignals(): void {
 export function getConfig(): t.Config {
     return config;
 }
+
+
+export async function getSysInfos(refresh:boolean=false) {
+    if (sysInfos === null || refresh) {
+        sysInfos = await getSystemInfos();
+    }
+    return sysInfos;
+}
+

@@ -14,9 +14,8 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download :
+Website: 
+Github : 
 
 */
 /* ########## MAIN ######### */

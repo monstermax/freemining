@@ -16,7 +16,9 @@ export type MapString<T> = { [key: string] : T};
 
 export type CommonParams = (
     "--help" |
-    "--user-dir"
+    "--user-dir" |
+    "-r" | // == "--rig-monitor-start"
+    "-n"   // == "--node-monitor-start"
 );
 
 
@@ -28,6 +30,7 @@ export type CliParams = (
     "--rig-monitor-start" |
     "--rig-monitor-stop" |
     "--rig-monitor-status" |
+
     "--miner-start" |
     "--miner-stop" |
     "--miner-status" |
@@ -37,6 +40,10 @@ export type CliParams = (
     "--miner-uninstall" |
 
     // NODE
+    "--node-monitor-start" |
+    "--node-monitor-stop" |
+    "--node-monitor-status" |
+
     "--fullnode-start" |
     "--fullnode-stop" |
     "--fullnode-status" |
@@ -55,7 +62,8 @@ export type DaemonParams = (
     "--listen-address" |
     "--listen-port" |
     "--wss-conn-timeout" |
-    "--poll-delay"
+    "--rig-monitor-poll-delay" |
+    "--node-monitor-poll-delay"
 );
 
 

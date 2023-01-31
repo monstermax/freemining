@@ -7,6 +7,7 @@ const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const ws_1 = tslib_1.__importDefault(require("ws"));
 const Config_1 = require("./Config");
 const utils_1 = require("../common/utils");
+const sysinfos_1 = require("../common/sysinfos");
 /* ########## USAGE #########
 
 # Install fullnode Dogecoin
@@ -52,6 +53,36 @@ Usage:
 
 frm-cli <params>
 
+        --help                                  # display this this message
+        --sysinfos                              # display server system informations
+        --sysinfos --local                      # display cli system informations
+        --cli-wss-server-address                # default 127.0.0.1
+        --cli-wss-conn-timeout                  # default 5 seconds
+
+        --rig-status                            # display rig status
+        --rig-monitor-start                     # start rig monitor
+        --rig-monitor-stop                      # stop rig monitor
+        --rig-monitor-status                    # display rig monitor status
+
+        --miner-start                           # start a miner
+        --miner-stop                            # stop a miner
+        --miner-status                          # display a miner status
+        --miner-log                             # display a miner logs
+        --miner-infos                           # display a miner infos
+        --miner-install                         # install a miner
+
+        --node-status                           # display node status
+        --node-monitor-start                    # start node monitor
+        --node-monitor-stop                     # stop node monitor
+        --node-monitor-status                   # display node monitor status
+
+        --fullnode-start                        # start a fullnode
+        --fullnode-stop                         # stop a fullnode
+        --fullnode-status                       # display a fullnode status
+        --fullnode-log                          # display a fullnode logs
+        --fullnode-infos                        # display a fullnode infos
+        --fullnode-install                      # install a fullnode
+
 `;
     console.log(_usage);
     if (exitCode !== null) {
@@ -68,8 +99,20 @@ function run(args = []) {
     catchSignals();
     let config = (0, Config_1.loadConfig)(args);
     let func = null;
+    if ((0, utils_1.hasOpt)('--sysinfos')) {
+        if ((0, utils_1.hasOpt)('--local')) {
+            showSysInfos();
+            return;
+        }
+        func = function () {
+            return sysInfos(this, args, config);
+        };
+    }
     /* RIG */
-    if ((0, utils_1.hasOpt)('--rig-status')) {
+    if (func) {
+        // func already set
+    }
+    else if ((0, utils_1.hasOpt)('--rig-status')) {
         func = function () {
             return rigStatus(this, args, config);
         };
@@ -120,7 +163,10 @@ function run(args = []) {
         };
     }
     /* NODE */
-    if ((0, utils_1.hasOpt)('--node-status')) {
+    if (func) {
+        // func already set
+    }
+    else if ((0, utils_1.hasOpt)('--node-status')) {
         func = function () {
             return nodeStatus(this, args, config);
         };
@@ -255,6 +301,11 @@ function rpcSendError(ws, id, result) {
     const errStr = JSON.stringify(err);
     //console.debug(`${now()} [DEBUG] [CLI] sending error: ${errStr}`);
     ws.send(errStr);
+}
+/* #### CORE #### */
+function sysInfos(ws, args = [], config = {}) {
+    const method = 'sysInfos';
+    rpcSendRequest(ws, 1, method, {});
 }
 /* #### RIG #### */
 function rigStatus(ws, args = [], config = {}) {
@@ -434,4 +485,15 @@ function catchSignals() {
         //debugger;
         safeQuit();
     }));
+}
+function showSysInfos() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const sysInfos = yield (0, sysinfos_1.getSystemInfos)();
+        if ((0, utils_1.hasOpt)('--json')) {
+            console.log(JSON.stringify(sysInfos));
+        }
+        else {
+            console.log(sysInfos);
+        }
+    });
 }

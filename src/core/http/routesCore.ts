@@ -5,7 +5,8 @@ import path from 'path';
 import type express from 'express';
 
 import { now } from '../../common/utils';
-import * as Daemon from '../../core/Daemon';
+import { getSystemInfos } from '../../common/sysinfos';
+//import * as Daemon from '../../core/Daemon';
 
 import type *  as t from '../../common/types';
 
@@ -37,4 +38,12 @@ export function registerCoreRoutes(app: express.Express, urlPrefix: string='') {
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 
+
+    // Sysinfos => /sysinfos.json
+    app.get(`${urlPrefix}/sysinfos.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const sysInfos = await getSystemInfos();
+        let content = JSON.stringify(sysInfos, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    });
 }

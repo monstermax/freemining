@@ -160,13 +160,17 @@
 
 <br />
 
-<input type="button" value="Start new service..." class="btn btn-warning" onclick="startMinerModal()" />
+<input type="button" value="Start new service..." class="btn btn-warning" onclick="startMiner()" />
 
 
 <script>
+const minerName = '';
 
-window.onStartMinerModalSuccess = () => {
-    window.location.reload();
+function startMiner() {
+    const onStart = window.onStartMinerModalStart = null;
+    const onSuccess = window.onStartMinerModalSuccess = () => window.location.reload();
+    const onFail = window.onStartMinerModalFail = null;
+    startMinerModal(minerName, onStart, onSuccess, onFail);
 }
 
 function stopMiner(minerName) {

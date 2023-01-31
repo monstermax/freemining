@@ -16,7 +16,7 @@ import type *  as t from '../../common/types';
 
 Website  : 
 Github   : 
-Download :
+Download : 
 
 */
 /* ########## MAIN ######### */
@@ -27,23 +27,26 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '13.0.3',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
+        let subDir = `bzminer_v${this.version}_*`;
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/bzminer/bzminer/releases/download/v${this.version}/bzminer_v${this.version}_linux.tar.gz`;
+            subDir = `bzminer_v${this.version}_linux`;
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/bzminer/bzminer/releases/download/v${this.version}/bzminer_v${this.version}_windows.zip`;
+            subDir = `bzminer_v${this.version}_windows`;
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -93,7 +96,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}${subDir}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning

@@ -14,9 +14,8 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download :
+Website: 
+Github : 
 
 */
 /* ########## MAIN ######### */
@@ -27,23 +26,26 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '42.3',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
+        let subDir = 'NBMiner_*';
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/NebuTech/NBMiner/releases/download/v${this.version}/NBMiner_${this.version}_Linux.tgz`;
+            subDir = 'NBMiner_Linux';
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/NebuTech/NBMiner/releases/download/v${this.version}/NBMiner_${this.version}_Win.zip`;
+            subDir = 'NBMiner_Win';
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -93,7 +95,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}${subDir}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -104,9 +106,9 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: -1, // 52001
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'nbminer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
         return this.command + (os.platform() === 'linux' ? '' : '.exe');
@@ -119,29 +121,28 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--api', `127.0.0.1:${this.apiPort.toString()}`,
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-a');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
+            args.push('-o');
+            args.push( `stratum+tcp://${params.poolUrl}` );
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('-u');
             args.push(params.poolUser);
         }
 
         if (true) {
-            args.push('--edit-me-password');
+            args.push('-p');
             args.push('x');
         }
 

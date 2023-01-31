@@ -5,6 +5,8 @@ import os from 'os';
 import tar from 'tar';
 import fetch from 'node-fetch';
 import admZip from 'adm-zip';
+import sevenBin from '7zip-bin';
+import { extractFull } from 'node-7z';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 
@@ -14,9 +16,8 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download :
+Website: 
+Github : 
 
 */
 /* ########## MAIN ######### */
@@ -34,16 +35,16 @@ export const minerInstall: t.minerInstallInfos = {
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/firoorg/firominer/releases/download/${this.version}/firominer-Linux.7z`;
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/firoorg/firominer/releases/download/${this.version}/firominer-Windows.zip`;
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -64,7 +65,13 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
+        if (path.extname(dlFilePath) === '.7z') {
+            const pathTo7zip = sevenBin.path7za
+            const seven = extractFull(dlFilePath, `${tempDir}${SEP}unzipped`, {
+                $bin: pathTo7zip
+            });
+
+        } else if (path.extname(dlFilePath) === '.gz') {
             await tar.extract(
                 {
                     file: dlFilePath,
@@ -93,7 +100,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning

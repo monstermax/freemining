@@ -14,9 +14,8 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download :
+Website: 
+Github : 
 
 */
 /* ########## MAIN ######### */
@@ -27,23 +26,28 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '0.5.0',
+    versionWindows: '0.5.1',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
+        let version = this.version;
+        let installFileName = 'ccminer';
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/fancyIX/ccminer/releases/download/${version}/ccminer-linux-amd64`;
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            version = this.versionWindows;
+            dlUrl = `https://github.com/fancyIX/ccminer/releases/download/${version}/ccminer-win64.exe`;
+            installFileName = 'ccminer.exe';
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -61,39 +65,10 @@ export const minerInstall: t.minerInstallInfos = {
         await downloadFile(dlUrl, dlFilePath);
         console.log(`${now()} [INFO] [RIG] Download complete`);
 
-        // Extracting
-        fs.mkdirSync(`${tempDir}${SEP}unzipped`);
-        console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
-        console.log(`${now()} [INFO] [RIG] Extract complete`);
-
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.mkdirSync(targetDir, {recursive: true});
+        fs.renameSync( `${tempDir}${SEP}${dlFileName}${SEP}`, `${targetDir}/${installFileName}`);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -106,7 +81,7 @@ export const minerInstall: t.minerInstallInfos = {
 export const minerCommands: t.minerCommandInfos = {
     apiPort: -1, // edit-me
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'ccminer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
         return this.command + (os.platform() === 'linux' ? '' : '.exe');

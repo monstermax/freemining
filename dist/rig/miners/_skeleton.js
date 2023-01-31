@@ -12,8 +12,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   :
+Download :
 
 */
 /* ########## MAIN ######### */
@@ -92,10 +93,13 @@ exports.minerCommands = {
         return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
     },
     getCommandArgs(config, params) {
-        const args = [
-            '--edit-me-api-host', '127.0.0.1',
-            '--edit-me-api-port', this.apiPort.toString(),
-        ];
+        const args = [];
+        if (this.apiPort > 0) {
+            args.push(...[
+                '--edit-me-api-host', '127.0.0.1',
+                '--edit-me-api-port', this.apiPort.toString(),
+            ]);
+        }
         if (params.algo) {
             args.push('--edit-me-algo');
             args.push(params.algo);

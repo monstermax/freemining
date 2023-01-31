@@ -43,7 +43,7 @@ export function monitorStart(config: t.Config, params?: t.MapString<any>): void 
         return;
     }
 
-    const pollDelay = Number(getOpt('--poll-delay')) || defaultPollDelay;
+    const pollDelay = Number(getOpt('--rig-monitor-poll-delay')) || defaultPollDelay;
     monitorIntervalId = setInterval(monitorCheckRig, pollDelay, config);
 
     console.log(`${now()} [INFO] [RIG] Rig monitor started`);

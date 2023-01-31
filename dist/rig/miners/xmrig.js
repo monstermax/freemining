@@ -100,11 +100,6 @@ exports.minerCommands = {
     },
     getCommandArgs(config, params) {
         const args = [
-            '--http-enabled',
-            '--http-host', '127.0.0.1',
-            '--http-port', this.apiPort.toString(),
-            '--http-access-token=freemining-token',
-            '--http-no-restricted',
             '-k',
             '--cpu-max-threads-hint', '75',
             '--cpu-priority', '3',
@@ -112,6 +107,15 @@ exports.minerCommands = {
             '--no-color',
             //`--log-file=${SEP}tmp${SEP}debug_xmrig.log`,
         ];
+        if (this.apiPort > 0) {
+            args.push(...[
+                '--http-enabled',
+                '--http-host', '127.0.0.1',
+                '--http-port', this.apiPort.toString(),
+                '--http-access-token=freemining-token',
+                '--http-no-restricted',
+            ]);
+        }
         if (params.algo) {
             args.push('--algo');
             args.push(params.algo);

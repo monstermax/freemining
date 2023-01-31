@@ -14,9 +14,8 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download :
+Website: 
+Github : 
 
 */
 /* ########## MAIN ######### */
@@ -27,23 +26,23 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '1.66',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/Lolliedieb/lolMiner-releases/releases/download/${this.version}/lolMiner_v${this.version}_Lin64.tar.gz`;
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/Lolliedieb/lolMiner-releases/releases/download/${this.version}/lolMiner_v${this.version}_Win64.zip`;
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -93,7 +92,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}${this.version}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -104,9 +103,9 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: -1, // 52002
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'lolMiner', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
         return this.command + (os.platform() === 'linux' ? '' : '.exe');
@@ -119,29 +118,29 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--apihost', '127.0.0.1',
+                    '--apiport', this.apiPort.toString(),
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('--algo');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
+            args.push('--pool');
             args.push(params.poolUrl);
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('--user');
             args.push(params.poolUser);
         }
 
         if (true) {
-            args.push('--edit-me-password');
+            args.push('--pass');
             args.push('x');
         }
 

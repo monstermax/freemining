@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getConfig = exports.run = void 0;
+exports.getSysInfos = exports.getConfig = exports.run = void 0;
 const tslib_1 = require("tslib");
 const express_1 = tslib_1.__importDefault(require("express"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
@@ -10,6 +10,7 @@ const WebSocket = tslib_1.__importStar(require("ws"));
 const ejs = require('ejs');
 const Config_1 = require("./Config");
 const utils_1 = require("../common/utils");
+const sysinfos_1 = require("../common/sysinfos");
 const routesCore_1 = require("./http/routesCore");
 const routesRig_1 = require("./http/routesRig");
 const routesFarm_1 = require("./http/routesFarm");
@@ -28,6 +29,7 @@ const Node = tslib_1.__importStar(require("../node/Node"));
 let config;
 let quitRunning = false;
 const SEP = path_1.default.sep;
+let sysInfos = null;
 /* ########## FUNCTIONS ######### */
 function usage(exitCode = null) {
     const _usage = `======================
@@ -37,6 +39,17 @@ function usage(exitCode = null) {
 Usage:
 
 frmd <params>
+     --help                                  # display this this message
+     --user-dir                              # default %HOME%/.freemining-beta OR %HOME%/AppData/Local/freemining-beta
+     --listen-address                        # default 127.0.0.1
+     --listen-port                           # default 1234
+     --wss-conn-timeout                      # default 10 seconds
+
+     -r | --rig-monitor-start                # start rig monitor at freemining start
+     -n | --node-monitor-start               # start node monitor at freemining start
+
+     --rig-monitor-poll-delay                # delay between 2 checks of the rig status
+     --node-monitor-poll-delay               # delay between 2 checks of the node status
 
 `;
     console.log(_usage);
@@ -62,6 +75,7 @@ function run(args = []) {
     server.listen(config.listenPort, config.listenAddress, () => {
         console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] Server started on ${config.listenAddress}:${config.listenPort}`);
     });
+    getSysInfos();
 }
 exports.run = run;
 function registerHttpRoutes(config, app) {
@@ -128,6 +142,11 @@ function registerWssRoutes(config, wss) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                     const req = JSON.parse(messageJson);
                     switch (req.method) {
+                        /* CORE */
+                        case 'sysInfos':
+                            const sysInfos = yield (0, sysinfos_1.getSystemInfos)();
+                            rpcSendResponse(ws, req.id, sysInfos);
+                            break;
                         /* RIG */
                         case 'rigStatus':
                             const rigInfos = Rig.getRigInfos();
@@ -206,7 +225,7 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         /* NODE */
-                        case 'rigStatus':
+                        case 'nodeStatus':
                             const nodeInfos = Node.getNodeInfos();
                             rpcSendResponse(ws, req.id, nodeInfos);
                             break;
@@ -414,3 +433,12 @@ function getConfig() {
     return config;
 }
 exports.getConfig = getConfig;
+function getSysInfos(refresh = false) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        if (sysInfos === null || refresh) {
+            sysInfos = yield (0, sysinfos_1.getSystemInfos)();
+        }
+        return sysInfos;
+    });
+}
+exports.getSysInfos = getSysInfos;

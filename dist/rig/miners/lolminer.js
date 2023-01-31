@@ -12,34 +12,37 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: https://trex-miner.com/
-Github : https://github.com/trexminer/T-Rex
+Website:
+Github :
 
 */
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.minerInstall = {
-    version: '6.18.1',
+    version: '1.66',
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const targetAlias = params.alias || params.miner;
             const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
             const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`;
+            //throw { message: `edit-me then delete this line` };
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             let dlUrl;
             if (platform === 'linux') {
-                dlUrl = `https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-linux.tar.gz`;
+                dlUrl = `https://github.com/Lolliedieb/lolMiner-releases/releases/download/${this.version}/lolMiner_v${this.version}_Lin64.tar.gz`;
             }
             else if (platform === 'win32') {
-                dlUrl = `https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-win.zip`;
+                dlUrl = `https://github.com/Lolliedieb/lolMiner-releases/releases/download/${this.version}/lolMiner_v${this.version}_Win64.zip`;
             }
             else if (platform === 'darwin') {
-                throw { message: `No installation script available for the platform ${platform}` };
+                dlUrl = `edit-me`;
             }
             else {
                 throw { message: `No installation script available for the platform ${platform}` };
             }
+            if (dlUrl === 'edit-me')
+                throw { message: `No installation script available for the platform ${platform}` };
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
@@ -75,7 +78,7 @@ exports.minerInstall = {
             // Install to target dir
             fs_1.default.mkdirSync(targetDir, { recursive: true });
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}`, targetDir);
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}${this.version}${SEP}`, targetDir);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
@@ -83,8 +86,8 @@ exports.minerInstall = {
     }
 };
 exports.minerCommands = {
-    apiPort: 52005,
-    command: 't-rex',
+    apiPort: -1,
+    command: 'lolMiner',
     getCommandFile(config, params) {
         return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
     },
@@ -92,23 +95,24 @@ exports.minerCommands = {
         const args = [];
         if (this.apiPort > 0) {
             args.push(...[
-                '--api-bind-http', `127.0.0.1:${this.apiPort.toString()}`,
+                '--apihost', '127.0.0.1',
+                '--apiport', this.apiPort.toString(),
             ]);
         }
         if (params.algo) {
-            args.push('-a');
+            args.push('--algo');
             args.push(params.algo);
         }
         if (params.poolUrl) {
-            args.push('-o');
+            args.push('--pool');
             args.push(params.poolUrl);
         }
         if (params.poolUser) {
-            args.push('-u');
+            args.push('--user');
             args.push(params.poolUser);
         }
         if (true) {
-            args.push('-p');
+            args.push('--pass');
             args.push('x');
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
@@ -117,33 +121,22 @@ exports.minerCommands = {
         return args;
     },
     getInfos(config, params) {
-        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {};
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/summary`, { headers });
+            const headers = {}; // edit-me if needed
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
             const minerSummary = yield minerSummaryRes.json();
-            const minerName = 'T-Rex';
-            const algo = minerSummary.algorithm;
-            const uptime = minerSummary.uptime; // uptime until last crash/restart of the watchdoged subprocess
-            //const uptime = minerSummary.watchdog_stat.uptime as number; // full uptime
-            const poolUrl = ((_a = minerSummary.active_pool) === null || _a === void 0 ? void 0 : _a.url) || '';
-            const poolUser = ((_b = minerSummary.active_pool) === null || _b === void 0 ? void 0 : _b.user) || '';
-            const workerName = poolUser.split('.').pop() || '';
-            const cpus = [];
-            let workerHashRate = 0;
-            const gpus = minerSummary.gpus.map((gpu) => {
-                workerHashRate += gpu.hashrate;
-                return {
-                    id: gpu.gpu_id,
-                    name: gpu.name,
-                    hashRate: gpu.hashrate,
-                    temperature: gpu.temperature,
-                    fanSpeed: gpu.fan_speed,
-                    power: gpu.power,
-                };
-            });
-            const hashRate = workerHashRate;
+            // EDIT THESE VALUES - START //
+            const minerName = 'edit-me';
+            const uptime = -1; // edit-me
+            const algo = 'edit-me';
+            const workerHashRate = -1; // edit-me
+            const poolUrl = ''; // edit-me
+            const poolUser = ''; // edit-me
+            const workerName = poolUser.split('.').pop() || ''; // edit-me
+            const cpus = []; // edit-me
+            const gpus = []; // edit-me
+            // EDIT THESE VALUES - END //
             let infos = {
                 infos: {
                     name: minerName,

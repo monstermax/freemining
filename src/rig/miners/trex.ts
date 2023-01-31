@@ -109,8 +109,15 @@ export const minerCommands: t.minerCommandInfos = {
 
     getCommandArgs(config, params) {
         const args: string[] = [
-            '--api-bind-http', `127.0.0.1:${this.apiPort.toString()}`,
         ];
+
+        if (this.apiPort > 0) {
+            args.push(
+                ...[
+                    '--api-bind-http', `127.0.0.1:${this.apiPort.toString()}`,
+                ]
+            );
+        }
 
         if (params.algo) {
             args.push('-a');

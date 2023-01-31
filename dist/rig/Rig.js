@@ -28,7 +28,7 @@ function monitorStart(config, params) {
     if (monitorIntervalId) {
         return;
     }
-    const pollDelay = Number((0, utils_1.getOpt)('--poll-delay')) || defaultPollDelay;
+    const pollDelay = Number((0, utils_1.getOpt)('--rig-monitor-poll-delay')) || defaultPollDelay;
     monitorIntervalId = setInterval(monitorCheckRig, pollDelay, config);
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Rig monitor started`);
 }
