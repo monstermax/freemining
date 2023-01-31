@@ -6,7 +6,7 @@ import tar from 'tar';
 import fetch from 'node-fetch';
 import admZip from 'adm-zip';
 
-import { now, getOpt, downloadFile } from '../../common/utils';
+import { now, hasOpt, getOpt, downloadFile } from '../../common/utils';
 
 import type *  as t from '../../common/types';
 
@@ -14,9 +14,20 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website : https://dogecoin.com/
-Github  : https://github.com/dogecoin/dogecoin
-Download: https://github.com/dogecoin/dogecoin/releases
+Website : https://bitcoincore.org/
+Github  : https://github.com/bitcoin/bitcoin
+Download: https://bitcoincore.org/en/download/
+Download: https://bitcoin.org/en/download
+
+Alternative: btcd
+=================
+Github  : https://github.com/btcsuite/btcd/
+Download: https://github.com/btcsuite/btcd/releases
+version : 0.23.3
+- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-linux-amd64-v${version}.tar.gz
+- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-windows-amd64-v${version}.zip
+- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-darwin-amd64-v${version}.tar.gz
+- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-freebsd-amd64-v${version}.tar.gz
 
 */
 /* ########## MAIN ######### */
@@ -27,25 +38,45 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const fullnodeInstall: t.fullnodeInstallInfos = {
-    version: '1.14.6',
+    version: '24.0.1',
+    versionBitcoinOrg: '22.0',
 
     async install(config, params) {
+        // install bitcoincore from bitcoincore.org OR bitcoin.org
         const targetAlias: string = params.alias || params.fullnode;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`
+        let version = this.version;
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
-            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-x86_64-linux-gnu.tar.gz`;
+            if (hasOpt('--bitcoin.org')) {
+                version = this.versionBitcoinOrg;
+                dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`;
+
+            } else {
+                dlUrl = `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`;
+            }
 
         } else if (platform === 'win32') {
-            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-win64.zip`;
+            if (hasOpt('--bitcoin.org')) {
+                version = this.versionBitcoinOrg;
+                dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`;
+
+            } else {
+                dlUrl = `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`;
+            }
 
         } else if (platform === 'darwin') {
-            //dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-osx-signed.dmg`;
-            dlUrl = `edit-me`;
+            if (hasOpt('--bitcoin.org')) {
+                version = this.versionBitcoinOrg;
+                dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-osx64.tar.gz`;
+
+            } else {
+                dlUrl = `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-apple-darwin.tar.gz`;
+            }
 
         } else {
             throw { message: `No installation script available for the platform ${platform}` };
@@ -92,7 +123,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}dogecoin-${this.version}${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}bitcoin-${version}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [NODE] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -104,10 +135,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
 
 export const fullnodeCommands: t.fullnodeCommandInfos = {
-    p2pPort: 22556, // default = 22556
-    rpcPort: -1, // default = 22555
+    p2pPort: 8333, // default = 8333
+    rpcPort: -1, // default = 8332
 
-    command: 'bin/dogecoind', // the filename of the executable (without .exe extension)
+    command: 'bin/bitcoind', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
         return this.command + (os.platform() === 'linux' ? '' : '.exe');
@@ -119,6 +150,9 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             `-server`,
             `-port=${this.p2pPort.toString()}`,
             `-printtoconsole`,
+            `-maxmempool=100`,
+            `-zmqpubrawblock=tcp://127.0.0.1:28332`,
+            `-zmqpubrawtx=tcp://127.0.0.1:28333`,
         ];
 
         if (this.rpcPort !== -1) {

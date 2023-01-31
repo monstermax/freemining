@@ -3,6 +3,69 @@ Miner run
 
 <hr />
 
-<pre>
-<%- JSON.stringify(minerInfos, null, 4) %>
-</pre>
+
+<%
+//const runningMiners = Object.entries(allMiners).filter((entry) => entry[1].running).map(entry => entry[0]);
+const installedMiners = Object.entries(allMiners).filter((entry) => entry[1].installed).map(entry => entry[0]);
+const installableMiners = Object.entries(allMiners).filter((entry) => entry[1].installable).map(entry => entry[0]);
+//const runnableMiners = Object.entries(allMiners).filter((entry) => entry[1].runnable).map(entry => entry[0]);
+const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].managed).map(entry => entry[0]);
+%>
+
+
+<h3>Manage</h3>
+<%- (() => {
+    let html = '';
+
+    if (minerStatus) {
+        html += miner + ' is <span class="badge bg-success">running</span>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += ' <a class="btn btn-danger btn-sm" onclick="stopMiner()" href="javascript:void(0)">Stop Miner</a>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += ' <a class="btn btn-primary btn-sm" href="?action=log">Show logs</a>';
+        html += ' <a class="btn btn-secondary btn-sm" href="?action=status">JSON Status</a>';
+
+    } else {
+        html += miner + ' is <span class="badge bg-danger">not running</span>';
+        if (installedMiners.includes(miner) && managedMiners.includes(miner)) {
+            html += ' <a class="btn btn-primary btn-sm" onclick="startMiner()" href="javascript:void(0)">Start Miner</a>';
+        }
+    }
+
+    return html;
+})() %>
+
+
+<hr />
+
+<h3>Status</h3>
+<% if (! rigStatus) { %>
+    Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a>
+
+<% } else { %>
+    <pre>
+    <%- JSON.stringify(minerInfos, null, 4) %>
+    </pre>
+<% } %>
+
+
+<script>
+const minerName = '<%=miner%>';
+
+function startMiner() {
+    const onStart = window.onStartMinerModalStart = null;
+    const onSuccess = window.onStartMinerModalSuccess = () => window.location.reload();
+    const onFail = window.onStartMinerModalFail = null;
+    startMinerModal(minerName, onStart, onSuccess, onFail);
+}
+
+function stopMiner() {
+    const onStart = null;
+    const onSuccess = () => window.location.reload();
+    const onFail = null;
+
+    stopMinerAjax(minerName, onStart, onSuccess, onFail);
+}
+</script>
+

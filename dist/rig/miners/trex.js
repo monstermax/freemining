@@ -9,6 +9,13 @@ const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+/* ########## DESCRIPTION ######### */
+/*
+
+Website: https://trex-miner.com/
+Github : https://github.com/trexminer/T-Rex
+
+*/
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -115,6 +122,8 @@ exports.minerCommands = {
             const minerSummary = yield minerSummaryRes.json();
             const minerName = 'T-Rex';
             const algo = minerSummary.algorithm;
+            const uptime = minerSummary.uptime; // uptime until last crash/restart of the watchdoged subprocess
+            //const uptime = minerSummary.watchdog_stat.uptime as number; // full uptime
             const poolUrl = ((_a = minerSummary.active_pool) === null || _a === void 0 ? void 0 : _a.url) || '';
             const poolUser = ((_b = minerSummary.active_pool) === null || _b === void 0 ? void 0 : _b.user) || '';
             const workerName = poolUser.split('.').pop() || '';
@@ -136,6 +145,7 @@ exports.minerCommands = {
                 infos: {
                     name: minerName,
                     worker: workerName,
+                    uptime,
                     algo,
                     hashRate: workerHashRate,
                 },

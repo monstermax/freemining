@@ -11,6 +11,13 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+/* ########## DESCRIPTION ######### */
+/*
+
+Website: 
+Github : 
+
+*/
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -124,20 +131,20 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.rpcPort}`;
-        const headers: any = {};
+        const headers: any = {}; // edit-me if needed
 
         // TODO: RPC REQUEST
 
-        const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
-        const fullnodeSummary: any = await fullnodeSummaryRes.json();
+        //const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        //const fullnodeSummary: any = await fullnodeSummaryRes.json();
 
         // EDIT THESE VALUES - START //
         const fullnodeName = 'edit-me';
         const coin = 'edit-me';
-        const blocks = 0; // edit-me
-        const blockHeaders = 0; // edit-me
+        const blocks = -1; // edit-me
+        const blockHeaders = -1; // edit-me
 
-        const cpus: any[] = [];
+        const cpus: any[] = []; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeInfos = {

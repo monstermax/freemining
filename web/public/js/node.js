@@ -1,19 +1,19 @@
 
 
 // FULLNODE RUN START
-function startFullnodeAjax(fullnodeName, optionalParams='', onStart, onSuccess, onFail) {
+function startFullnodeAjax(fullnodeName, extraArgs='', onStart, onSuccess, onFail) {
     if (! fullnodeName) {
         console.warn(`Error: Missing {fullnode} parameter`);
         return;
     }
 
-    alertify.confirm("<b>Fullnode start - confirmation</b>", "Do you want to start the fullnode '<b>" + fullnodeName + "</b>' ?",
+    alertify.confirm("<b>Fullnode start - confirmation</b>", `Do you want to start the fullnode '<b>${fullnodeName}</b>' ?`,
         function(){
-            const url = '/fullnodes/fullnode-run?chain=' + fullnodeName;
+            const url = `/node/fullnodes/${fullnodeName}/run`;
             const data = {
                 action: 'start',
                 chain: fullnodeName,
-                optionalParams: optionalParams || '',
+                extraArgs: extraArgs || '',
             };
 
             if (typeof onStart === 'function') {
@@ -25,20 +25,20 @@ function startFullnodeAjax(fullnodeName, optionalParams='', onStart, onSuccess, 
                     if (typeof onSuccess === 'function') {
                         onSuccess(fullnodeName, response);
                     }
-                    alertify.success('Fullnode ' + fullnodeName + ' started');
+                    alertify.success(`Fullnode ${fullnodeName} started`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(fullnodeName, { message: response });
                     }
-                    alertify.error('Fullnode ' + fullnodeName + ' cannot be started. ' + response);
+                    alertify.error(`Fullnode ${fullnodeName} cannot be started. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(fullnodeName, err);
                 }
-                alertify.error('Fullnode ' + fullnodeName + ' cannot be started. ' + err.message);
+                alertify.error(`Fullnode ${fullnodeName} cannot be started. ${err.message}`);
             });
         },
         function(){
@@ -55,15 +55,15 @@ function stopFullnodeAjax(fullnodeName, onStart, onSuccess, onFail) {
         return;
     }
 
-    alertify.confirm("<b>Fullnode stopping - confirmation</b>", "Do you want to stop the fullnode '<b>" + fullnodeName + "</b>' ?",
+    alertify.confirm("<b>Fullnode stopping - confirmation</b>", `Do you want to stop the fullnode '<b>${fullnodeName}</b>' ?`,
         function(){
-            alertify.success('Stopping fullnode ' + fullnodeName + '...');
+            alertify.success(`Stopping fullnode ${fullnodeName}...`);
 
             if (typeof onStart === 'function') {
                 onStart(fullnodeName);
             }
 
-            const url = '/fullnodes/fullnode-run?chain=' + fullnodeName;
+            const url = `/node/fullnodes/${fullnodeName}/run`;
             const data = {
                 action: 'stop',
                 fullnode: fullnodeName,
@@ -73,13 +73,13 @@ function stopFullnodeAjax(fullnodeName, onStart, onSuccess, onFail) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(fullnodeName, response);
                     }
-                    alertify.success('Fullnode ' + fullnodeName + ' stopped<hr />');
+                    alertify.success(`Fullnode ${fullnodeName} stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(fullnodeName, { message: response });
                     }
-                    alertify.error('Fullnode ' + fullnodeName + ' cannot be stopped. ' + response);
+                    alertify.error(`Fullnode ${fullnodeName} cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
@@ -105,7 +105,7 @@ function startFullnodeInstallAjax(fullnodeName, onStart, onSuccess, onFail) {
         return;
     }
 
-    alertify.confirm("<b>Fullnode installation - confirmation</b>", "Do you want to install the fullnode '<b>" + fullnodeName + "</b>' ?",
+    alertify.confirm("<b>Fullnode installation - confirmation</b>", `Do you want to install the fullnode '<b>${fullnodeName}</b>' ?`,
         function(){
             alertify.success('Starting fullnode ' + fullnodeName + ' installation...');
 
@@ -113,7 +113,7 @@ function startFullnodeInstallAjax(fullnodeName, onStart, onSuccess, onFail) {
                 onStart(fullnodeName);
             }
 
-            const url = '/fullnodes/fullnode-install?chain=' + fullnodeName;
+            const url = `/node/fullnodes/${fullnodeName}/install`;
             const data = {
                 action: 'start',
                 fullnode: fullnodeName,
@@ -124,20 +124,20 @@ function startFullnodeInstallAjax(fullnodeName, onStart, onSuccess, onFail) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(fullnodeName, response);
                     }
-                    alertify.success('Fullnode ' + fullnodeName + ' installation started');
+                    alertify.success(`Fullnode ${fullnodeName} installation started`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(fullnodeName, { message: response });
                     }
-                    alertify.error('Fullnode ' + fullnodeName + ' installation cannot be started. ' + response);
+                    alertify.error(`Fullnode ${fullnodeName} installation cannot be started. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(fullnodeName, err);
                 }
-                alertify.error('Fullnode ' + fullnodeName + ' installation cannot be started. ' + err.message);
+                alertify.error(`Fullnode ${fullnodeName} installation cannot be started. ${err.message}`);
             });
         },
         function(){
@@ -154,15 +154,15 @@ function stopFullnodeInstallAjax() {
         return;
     }
 
-    alertify.confirm("<b>Fullnode installation stopping - confirmation</b>", "Do you want to stop the installation of the fullnode '<b>" + fullnodeName + "</b>' ?",
+    alertify.confirm("<b>Fullnode installation stopping - confirmation</b>", `Do you want to stop the installation of the fullnode '<b>${fullnodeName}</b>' ?`,
         function(){
-            alertify.success('Stopping fullnode ' + fullnodeName + ' installation...');
+            alertify.success(`Stopping fullnode ${fullnodeName} installation...`);
 
             if (typeof onStart === 'function') {
                 onStart(fullnodeName);
             }
 
-            const url = '/fullnodes/fullnode-install?chain=' + fullnodeName;
+            const url = `/node/fullnodes/${fullnodeName}/install`;
             const data = {
                 action: 'stop',
                 fullnode: fullnodeName,
@@ -172,20 +172,20 @@ function stopFullnodeInstallAjax() {
                     if (typeof onSuccess === 'function') {
                         onSuccess(fullnodeName, response);
                     }
-                    alertify.success('Fullnode ' + fullnodeName + ' installation stopped<hr />');
+                    alertify.success(`Fullnode ${fullnodeName} installation stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(fullnodeName, { message: response });
                     }
-                    alertify.error('Fullnode ' + fullnodeName + ' installation cannot be stopped. ' + response);
+                    alertify.error(`Fullnode ${fullnodeName} installation cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(fullnodeName, err);
                 }
-                alertify.error('Fullnode ' + fullnodeName + ' installation cannot be stopped. ' + err.message);
+                alertify.error(`Fullnode ${fullnodeName} installation cannot be stopped. ${err.message}`);
             });
         },
         function(){
@@ -202,7 +202,7 @@ function startFullnodeUninstallAjax(fullnodeName, onStart, onSuccess, onFail) {
         return;
     }
 
-    alertify.confirm("<b>Fullnode uninstallation - confirmation</b>", "Do you want to uninstall the fullnode '<b>" + fullnodeName + "</b>' ?",
+    alertify.confirm("<b>Fullnode uninstallation - confirmation</b>", `Do you want to uninstall the fullnode '<b>${fullnodeName}</b>' ?`,
         function(){
             alertify.success('Starting fullnode ' + fullnodeName + ' uninstallation...');
 
@@ -210,7 +210,7 @@ function startFullnodeUninstallAjax(fullnodeName, onStart, onSuccess, onFail) {
                 onStart(fullnodeName);
             }
 
-            const url = '/fullnodes/fullnode-uninstall?chain=' + fullnodeName;
+            const url = `/node/fullnodes/${fullnodeName}/uninstall`;
             const data = {
                 action: 'start',
                 fullnode: fullnodeName,
@@ -221,20 +221,20 @@ function startFullnodeUninstallAjax(fullnodeName, onStart, onSuccess, onFail) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(fullnodeName, response);
                     }
-                    alertify.success('Fullnode ' + fullnodeName + ' uninstallation started');
+                    alertify.success(`Fullnode ${fullnodeName} uninstallation started`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(fullnodeName, { message: response });
                     }
-                    alertify.error('Fullnode ' + fullnodeName + ' uninstallation cannot be started. ' + response);
+                    alertify.error(`Fullnode ${fullnodeName} uninstallation cannot be started. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(fullnodeName, err);
                 }
-                alertify.error('Fullnode ' + fullnodeName + ' uninstallation cannot be started. ' + err.message);
+                alertify.error(`Fullnode ${fullnodeName} uninstallation cannot be started. ${err.message}`);
             });
         },
         function(){
@@ -251,15 +251,15 @@ function stopFullnodeUninstallAjax() {
         return;
     }
 
-    alertify.confirm("<b>Fullnode uninstallation stopping - confirmation</b>", "Do you want to stop the uninstallation of the fullnode '<b>" + fullnodeName + "</b>' ?",
+    alertify.confirm("<b>Fullnode uninstallation stopping - confirmation</b>", `Do you want to stop the uninstallation of the fullnode '<b>${fullnodeName}</b>' ?`,
         function(){
-            alertify.success('Stopping fullnode ' + fullnodeName + ' uninstallation...');
+            alertify.success(`Stopping fullnode ${fullnodeName} uninstallation...`);
 
             if (typeof onStart === 'function') {
                 onStart(fullnodeName);
             }
 
-            const url = '/fullnodes/fullnode-uninstall?chain=' + fullnodeName;
+            const url = `/node/fullnodes/${fullnodeName}/uninstall`;
             const data = {
                 action: 'stop',
                 fullnode: fullnodeName,
@@ -269,20 +269,20 @@ function stopFullnodeUninstallAjax() {
                     if (typeof onSuccess === 'function') {
                         onSuccess(fullnodeName, response);
                     }
-                    alertify.success('Fullnode ' + fullnodeName + ' uninstallation stopped<hr />');
+                    alertify.success(`Fullnode ${fullnodeName} uninstallation stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(fullnodeName, { message: response });
                     }
-                    alertify.error('Fullnode ' + fullnodeName + ' uninstallation cannot be stopped. ' + response);
+                    alertify.error(`Fullnode ${fullnodeName} uninstallation cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(fullnodeName, err);
                 }
-                alertify.error('Fullnode ' + fullnodeName + ' uninstallation cannot be stopped. ' + err.message);
+                alertify.error(`Fullnode ${fullnodeName} uninstallation cannot be stopped. ${err.message}`);
             });
         },
         function(){

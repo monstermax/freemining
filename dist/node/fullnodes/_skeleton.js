@@ -6,9 +6,15 @@ const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const tar_1 = tslib_1.__importDefault(require("tar"));
-const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+/* ########## DESCRIPTION ######### */
+/*
+
+Website:
+Github :
+
+*/
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -100,16 +106,16 @@ exports.fullnodeCommands = {
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.rpcPort}`;
-            const headers = {};
+            const headers = {}; // edit-me if needed
             // TODO: RPC REQUEST
-            const fullnodeSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
-            const fullnodeSummary = yield fullnodeSummaryRes.json();
+            //const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+            //const fullnodeSummary: any = await fullnodeSummaryRes.json();
             // EDIT THESE VALUES - START //
             const fullnodeName = 'edit-me';
             const coin = 'edit-me';
-            const blocks = 0; // edit-me
-            const blockHeaders = 0; // edit-me
-            const cpus = [];
+            const blocks = -1; // edit-me
+            const blockHeaders = -1; // edit-me
+            const cpus = []; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
                 infos: {

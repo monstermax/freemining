@@ -9,6 +9,13 @@ const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+/* ########## DESCRIPTION ######### */
+/*
+
+Website:
+Github :
+
+*/
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -113,23 +120,25 @@ exports.minerCommands = {
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {};
+            const headers = {}; // edit-me if needed
             const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const minerName = '';
-            const algo = '';
-            const workerHashRate = 0;
-            const poolUrl = '';
-            const poolUser = '';
-            const workerName = poolUser.split('.').pop() || '';
-            const cpus = [];
-            const gpus = [];
+            const minerName = 'edit-me';
+            const uptime = -1; // edit-me
+            const algo = 'edit-me';
+            const workerHashRate = -1; // edit-me
+            const poolUrl = ''; // edit-me
+            const poolUser = ''; // edit-me
+            const workerName = poolUser.split('.').pop() || ''; // edit-me
+            const cpus = []; // edit-me
+            const gpus = []; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
                 infos: {
                     name: minerName,
                     worker: workerName,
+                    uptime,
                     algo,
                     hashRate: workerHashRate,
                 },

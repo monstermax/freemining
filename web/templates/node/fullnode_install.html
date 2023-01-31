@@ -1,0 +1,126 @@
+ 
+Fullnode <%=fullnode%> - install
+
+<hr />
+
+<%
+const runningFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].running).map(entry => entry[0]);
+const installedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installed).map(entry => entry[0]);
+const installableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installable).map(entry => entry[0]);
+const runnableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].runnable).map(entry => entry[0]);
+const managedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].managed).map(entry => entry[0]);
+%>
+
+
+<form id="form-install" method="post">
+    <input type="hidden" id="action" name="action" value="" />
+
+    Fullnode is
+
+    <%- (() => {
+        let html = '';
+
+        if (fullnodeStatus) {
+            html += '<span class="badge bg-warning">running</span>...';
+
+        } else {
+            html += '<span class="badge bg-success">not running</span>';
+        }
+
+        return html;
+    })() %>
+
+    <%- (() => {
+        let html = '';
+
+        if (installableFullnodes.includes(fullnode)) {
+            html += '<span class="badge bg-success">installable</span>';
+
+        } else {
+            html += '<span class="badge bg-danger">not installable</span>';
+        }
+
+        return html;
+    })() %>
+
+    <%- (() => {
+        let html = '';
+
+        if (installedFullnodes.includes(fullnode)) {
+            html += '<span class="badge bg-warning">installed</span>';
+
+        } else {
+            html += '<span class="badge bg-success">not installed</span>';
+        }
+
+        return html;
+    })() %>
+
+    <br />
+    <br />
+
+    <%- (() => {
+        let html = '';
+
+        if (installStatus) {
+            html += 'Installation in progress...';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-danger btn-sm" onclick="stopFullnodeInstall()" href="javascript:void(0)">Stop install</a>';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += ' <a class="btn btn-primary btn-sm" href="?action=log">Show logs</a>';
+
+        } else {
+            html += 'No running installation.';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+
+            if (! fullnodeStatus && ! uninstallStatus && installableFullnodes.includes(fullnode)) {
+                if (installedFullnodes.includes(fullnode)) {
+                    html += ' <a class="btn btn-warning btn-sm" onclick="startFullnodeInstall()" href="javascript:void(0)">Re-install</a>';
+
+                } else {
+                    html += ' <a class="btn btn-primary btn-sm" onclick="startFullnodeInstall()" href="javascript:void(0)">Install</a>';
+                }
+            }
+        }
+
+        return html;
+    })() %>
+
+    <br />
+
+    <%- (() => {
+        let html = '';
+
+        if (uninstallStatus) {
+            html += 'Uninstallation in progress...';
+            html += ' <a class="btn btn-danger btn-sm" href="./uninstall">Stop uninstall</a>';
+            html += ' <a class="btn btn-primary btn-sm" href="./uninstall?&action=log">Show logs</a>';
+
+        } else {
+            html += 'No running uninstallation.';
+        }
+
+        return html;
+    })() %>
+</form>
+
+
+<script>
+const fullnodeName = '<%=fullnode%>';
+
+function startFullnodeInstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    startFullnodeInstallAjax(fullnodeName, onStart, onSuccess, onFail);
+}
+
+function stopFullnodeInstall() {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    stopFullnodeInstallAjax(fullnodeName, onStart, onSuccess, onFail);
+}
+</script>

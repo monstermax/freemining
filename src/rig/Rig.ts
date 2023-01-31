@@ -4,13 +4,15 @@ import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
 
-import { now, getOpt, getLocalIpAddresses, getDirFiles } from '../common/utils';
+import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate } from '../common/utils';
 import { exec } from '../common/exec';
 import { minersInstalls, minersCommands } from './minersConfigs';
 
 import type *  as t from '../common/types';
 import type childProcess from 'child_process';
 
+
+// GPU infos for windows: https://github.com/FallingSnow/gpu-info
 
 
 /* ########## MAIN ######### */
@@ -75,11 +77,13 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
     // check all services
 
     let procId: string;
+    const viewedMiners = [];
     for (procId in processes) {
         const proc = processes[procId];
 
         if (proc.type === 'miner-run') {
             const minerCommands = minersCommands[proc.name];
+            viewedMiners.push(proc.name);
 
             let minerInfos: any;
             try {
@@ -93,6 +97,12 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
             }
         }
     }
+
+    for (const minerName in minersInfos) {
+        if (! viewedMiners.includes(minerName)) {
+            delete minersInfos[minerName];
+        }
+    }
 }
 
 
@@ -104,7 +114,7 @@ export async function getInstalledMiners(config: t.Config, params?: t.MapString<
 }
 
 
-export async function getRunningMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getRunningMiners(config: t.Config, params?: t.MapString<any>): string[] {
     //const rigInfos = getRigInfos();
     //const runningMiners = Object.keys(rigInfos.minersInfos);
 
@@ -122,7 +132,7 @@ export async function getRunningMiners(config: t.Config, params?: t.MapString<an
 }
 
 
-export async function getInstallableMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getInstallableMiners(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(minersInstalls).map(entry => {
         const [minerName, minerInstall] = entry;
         if (minerInstall.version === 'edit-me') return '';
@@ -131,7 +141,7 @@ export async function getInstallableMiners(config: t.Config, params?: t.MapStrin
 }
 
 
-export async function getRunnableMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getRunnableMiners(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (minerCommand.command === 'edit-me') return '';
@@ -140,7 +150,7 @@ export async function getRunnableMiners(config: t.Config, params?: t.MapString<a
 }
 
 
-export async function getManagedMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getManagedMiners(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (minerCommand.apiPort === -1) return '';
@@ -149,7 +159,7 @@ export async function getManagedMiners(config: t.Config, params?: t.MapString<an
 }
 
 
-export async function minerInstallStart(config: t.Config, params: t.MapString<any>): Promise<any> {
+export async function minerInstallStart(config: t.Config, params: t.MapString<any>): Promise<void> {
     if ((params.miner + '/install') in processes) {
         throw { message: `Miner ${params.miner} install is already running` };
     }
@@ -159,7 +169,7 @@ export async function minerInstallStart(config: t.Config, params: t.MapString<an
     }
 
     const minerInstall = minersInstalls[params.miner];
-    minerInstall.install(config, params);
+    return minerInstall.install(config, params);
 }
 
 
@@ -175,6 +185,12 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     if (! (params.miner in minersCommands)) {
         throw { message: `Unknown miner ${params.miner}` };
     }
+
+    const rigInfos = getRigInfos();
+    const opts = {
+        rigName: rigInfos.infos.name,
+    };
+    params.poolUser = stringTemplate(params.poolUser, opts, false, false, false);
 
     const minerCommands = minersCommands[params.miner];
     const cmdFile = minerCommands.getCommandFile(config, params);
@@ -258,7 +274,7 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
 }
 
 
-export async function minerRunStop(config: t.Config, params: t.MapString<any>, forceKill: boolean=false): Promise<void> {
+export function minerRunStop(config: t.Config, params: t.MapString<any>, forceKill: boolean=false): void {
     if (! (`miner-run-${params.miner}` in processes)) {
         throw { message: `Miner ${params.miner} is not running` };
     }
@@ -275,15 +291,34 @@ export async function minerRunStop(config: t.Config, params: t.MapString<any>, f
 
 
 
-export async function minerRunStatus(config: t.Config, params: t.MapString<any>) {
-    // TODO
+export function minerRunStatus(config: t.Config, params: t.MapString<any>): boolean {
+    if (! (`miner-run-${params.miner}` in processes)) {
+        return false;
+    }
+    const proc = processes[`miner-run-${params.miner}`];
+
+    if (! proc.process) {
+        return false;
+    }
+
+    return proc.process.exitCode === null;
+}
+
+
+export async function minerRunLog(config: t.Config, params: t.MapString<any>): Promise<string> {
+    const logFile = `${config.logDir}${SEP}rig${SEP}miners${SEP}${params.miner}.run.log`;
+    if (! fs.existsSync(logFile)) {
+        return '';
+    }
+
+    return await tailFile(logFile, 50);
 }
 
 
 export async function minerRunInfos(config: t.Config, params: t.MapString<any>): Promise<t.MinerInfos> {
-    //if (! (`miner-run-${params.miner}` in processes)) {
-    //    throw { message: `Miner ${params.miner} is not running` };
-    //}
+    if (! (`miner-run-${params.miner}` in processes)) {
+        throw { message: `Miner ${params.miner} is not running` };
+    }
 
     if (! (params.miner in minersCommands)) {
         throw { message: `Unknown miner ${params.miner}` };
@@ -440,5 +475,56 @@ export function getRigInfos(): t.Rig {
     }
 
     return rigInfos;
+}
+
+
+
+export async function getAllMiners(config: t.Config): Promise<any> {
+    const installedMiners = await getInstalledMiners(config);
+    const runningMiners = getRunningMiners(config);
+    const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
+    const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
+    const managedMiners = getManagedMiners(config); // TODO: mettre en cache
+
+    const minersNames = Array.from(
+        new Set( [
+            ...installedMiners,
+            ...runningMiners,
+            ...installableMiners,
+            ...runnableMiners,
+            ...managedMiners,
+        ])
+    );
+
+    const miners: any = Object.fromEntries(
+        minersNames.map(minerName => {
+            return [
+                minerName,
+                {
+                    installed: installedMiners.includes(minerName),
+                    running: runningMiners.includes(minerName),
+                    installable: installableMiners.includes(minerName),
+                    runnable: runnableMiners.includes(minerName),
+                    managed: managedMiners.includes(minerName),
+                }
+            ]
+        })
+    );
+
+    /*
+    // result: 
+    miners = {
+        miner1: {
+            installed: boolean,
+            running: boolean,
+            installable: boolean,
+            runnable: boolean,
+            managed: boolean,
+        },
+        ...
+    }
+    */
+
+    return miners;
 }
 

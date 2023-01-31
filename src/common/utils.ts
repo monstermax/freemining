@@ -2,6 +2,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import readline from 'readline';
 //import util from 'util';
 import colors from 'colors/safe';
 import { exec } from 'child_process';
@@ -355,3 +356,21 @@ export async function getDirSize(dir: string, recursive: boolean=true): Promise<
     }
     return totalSize;
 }
+
+
+export async function tailFile(file: string, numLines: number): Promise<string> {
+    const fileSize = fs.statSync(file).size;
+    const stream = fs.createReadStream(file, { start: fileSize - 1000000, end: fileSize });
+    const rl = readline.createInterface({ input: stream });
+
+    let buffer = [];
+    for await (const line of rl) {
+        buffer.push(line);
+        if (buffer.length > numLines) {
+            buffer.shift();
+        }
+    }
+
+    return buffer.reverse().toString();
+}
+

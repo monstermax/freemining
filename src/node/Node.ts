@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
 
-import { now, getOpt, getLocalIpAddresses, getDirFiles } from '../common/utils';
+import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile } from '../common/utils';
 import { exec } from '../common/exec';
 import { fullnodesInstalls, fullnodesCommands } from './fullnodesConfigs';
 
@@ -75,11 +75,13 @@ export async function monitorCheckNode(config: t.Config): Promise<void> {
     // check all services
 
     let procId: string;
+    const viewedFullnodes = [];
     for (procId in processes) {
         const proc = processes[procId];
 
         if (proc.type === 'fullnode-run') {
             const fullnodeCommands = fullnodesCommands[proc.name];
+            viewedFullnodes.push(proc.name);
 
             let fullnodeInfos: any;
             try {
@@ -93,6 +95,12 @@ export async function monitorCheckNode(config: t.Config): Promise<void> {
             }
         }
     }
+
+    for (const fullnodeName in fullnodesInfos) {
+        if (! viewedFullnodes.includes(fullnodeName)) {
+            delete fullnodesInfos[fullnodeName];
+        }
+    }
 }
 
 
@@ -104,7 +112,7 @@ export async function getInstalledFullnodes(config: t.Config, params?: t.MapStri
 }
 
 
-export async function getRunningFullnodes(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getRunningFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
     //const nodeInfos = getNodeInfos();
     //const runningFullnodes = Object.keys(nodeInfos.fullnodesInfos);
 
@@ -122,7 +130,7 @@ export async function getRunningFullnodes(config: t.Config, params?: t.MapString
 }
 
 
-export async function getInstallableFullnodes(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getInstallableFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(fullnodesInstalls).map(entry => {
         const [fullnodeName, fullnodeInstall] = entry;
         if (fullnodeInstall.version === 'edit-me') return '';
@@ -131,7 +139,7 @@ export async function getInstallableFullnodes(config: t.Config, params?: t.MapSt
 }
 
 
-export async function getRunnableFullnodes(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getRunnableFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
         if (fullnodeCommand.command === 'edit-me' && fullnodeCommand.p2pPort === -1) return '';
@@ -140,7 +148,7 @@ export async function getRunnableFullnodes(config: t.Config, params?: t.MapStrin
 }
 
 
-export async function getManagedFullnodes(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export function getManagedFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
         if (fullnodeCommand.rpcPort === -1) return '';
@@ -149,7 +157,7 @@ export async function getManagedFullnodes(config: t.Config, params?: t.MapString
 }
 
 
-export async function fullnodeInstallStart(config: t.Config, params: t.MapString<any>): Promise<any> {
+export async function fullnodeInstallStart(config: t.Config, params: t.MapString<any>): Promise<void> {
     if ((params.fullnode + '/install') in processes) {
         throw { message: `Fullnode ${params.fullnode} install is already running` };
     }
@@ -159,7 +167,7 @@ export async function fullnodeInstallStart(config: t.Config, params: t.MapString
     }
 
     const fullnodeInstall = fullnodesInstalls[params.fullnode];
-    fullnodeInstall.install(config, params);
+    return fullnodeInstall.install(config, params);
 }
 
 
@@ -258,7 +266,7 @@ export async function fullnodeRunStart(config: t.Config, params: t.MapString<any
 }
 
 
-export async function fullnodeRunStop(config: t.Config, params: t.MapString<any>, forceKill: boolean=false): Promise<void> {
+export function fullnodeRunStop(config: t.Config, params: t.MapString<any>, forceKill: boolean=false): void {
     if (! (`fullnode-run-${params.fullnode}` in processes)) {
         throw { message: `Fullnode ${params.fullnode} is not running` };
     }
@@ -275,15 +283,34 @@ export async function fullnodeRunStop(config: t.Config, params: t.MapString<any>
 
 
 
-export async function fullnodeRunStatus(config: t.Config, params: t.MapString<any>) {
-    // TODO
+export function fullnodeRunStatus(config: t.Config, params: t.MapString<any>): boolean {
+    if (! (`fullnode-run-${params.fullnode}` in processes)) {
+        return false;
+    }
+    const proc = processes[`fullnode-run-${params.fullnode}`];
+
+    if (! proc.process) {
+        return false;
+    }
+
+    return proc.process.exitCode === null;
+}
+
+
+export async function fullnodeRunLog(config: t.Config, params: t.MapString<any>): Promise<string> {
+    const logFile = `${config.logDir}${SEP}rig${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
+    if (! fs.existsSync(logFile)) {
+        return '';
+    }
+
+    return await tailFile(logFile, 50);
 }
 
 
 export async function fullnodeRunInfos(config: t.Config, params: t.MapString<any>): Promise<t.FullnodeInfos> {
-    //if (! (`fullnode-run-${params.fullnode}` in processes)) {
-    //    throw { message: `Fullnode ${params.fullnode} is not running` };
-    //}
+    if (! (`fullnode-run-${params.fullnode}` in processes)) {
+        throw { message: `Fullnode ${params.fullnode} is not running` };
+    }
 
     if (! (params.fullnode in fullnodesCommands)) {
         throw { message: `Unknown fullnode ${params.fullnode}` };
@@ -361,3 +388,52 @@ export function getNodeInfos(): t.Node {
     return nodeInfos;
 }
 
+
+export async function getAllFullnodes(config: t.Config): Promise<any> {
+    const installedFullnodes = await getInstalledFullnodes(config);
+    const runningFullnodes = getRunningFullnodes(config);
+    const installableFullnodes = getInstallableFullnodes(config); // TODO: mettre en cache
+    const runnableFullnodes = getRunnableFullnodes(config); // TODO: mettre en cache
+    const managedFullnodes = getManagedFullnodes(config); // TODO: mettre en cache
+
+    const fullnodesNames = Array.from(
+        new Set( [
+            ...installedFullnodes,
+            ...runningFullnodes,
+            ...installableFullnodes,
+            ...runnableFullnodes,
+            ...managedFullnodes,
+        ])
+    );
+
+    const fullnodes: any = Object.fromEntries(
+        fullnodesNames.map(fullnodeName => {
+            return [
+                fullnodeName,
+                {
+                    installed: installedFullnodes.includes(fullnodeName),
+                    running: runningFullnodes.includes(fullnodeName),
+                    installable: installableFullnodes.includes(fullnodeName),
+                    runnable: runnableFullnodes.includes(fullnodeName),
+                    managed: managedFullnodes.includes(fullnodeName),
+                }
+            ]
+        })
+    );
+
+    /*
+    // result: 
+    fullnodes = {
+        fullnode1: {
+            installed: boolean,
+            running: boolean,
+            installable: boolean,
+            runnable: boolean,
+            managed: boolean,
+        },
+        ...
+    }
+    */
+
+    return fullnodes;
+}

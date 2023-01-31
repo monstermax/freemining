@@ -11,7 +11,13 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+/* ########## DESCRIPTION ######### */
+/*
 
+Website: https://xmrig.com/
+Github : https://github.com/xmrig/xmrig
+
+*/
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -221,6 +227,7 @@ export const minerCommands: t.minerCommandInfos = {
             }
         }
 
+        const uptime = minerSummary.uptime as number;
         const algo = minerSummary.algo as string;
         //const algo = minerConfig.pools[0].algo as string;
         //const algo = minerSummary.connection.algo as string;
@@ -242,6 +249,7 @@ export const minerCommands: t.minerCommandInfos = {
             infos: {
                 name: 'XMRig',
                 worker,
+                uptime,
                 algo,
                 hashRate,
             },

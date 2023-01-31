@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDirSize = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
+exports.tailFile = exports.getDirSize = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const path_1 = tslib_1.__importDefault(require("path"));
+const readline_1 = tslib_1.__importDefault(require("readline"));
 //import util from 'util';
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const child_process_1 = require("child_process");
@@ -320,3 +321,37 @@ function getDirSize(dir, recursive = true) {
     });
 }
 exports.getDirSize = getDirSize;
+function tailFile(file, numLines) {
+    var _a, e_1, _b, _c;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const fileSize = fs_1.default.statSync(file).size;
+        const stream = fs_1.default.createReadStream(file, { start: fileSize - 1000000, end: fileSize });
+        const rl = readline_1.default.createInterface({ input: stream });
+        let buffer = [];
+        try {
+            for (var _d = true, rl_1 = tslib_1.__asyncValues(rl), rl_1_1; rl_1_1 = yield rl_1.next(), _a = rl_1_1.done, !_a;) {
+                _c = rl_1_1.value;
+                _d = false;
+                try {
+                    const line = _c;
+                    buffer.push(line);
+                    if (buffer.length > numLines) {
+                        buffer.shift();
+                    }
+                }
+                finally {
+                    _d = true;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (!_d && !_a && (_b = rl_1.return)) yield _b.call(rl_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return buffer.reverse().toString();
+    });
+}
+exports.tailFile = tailFile;

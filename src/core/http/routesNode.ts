@@ -24,15 +24,17 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     // NODE homepage => /node/
     app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function) => {
         const config = Daemon.getConfig();
-        const installedFullnodes = await Node.getInstalledFullnodes(config);
-
-        const runningFullnodes = await Node.getRunningFullnodes(config);
-        const installableFullnodes = await Node.getInstallableFullnodes(config);
-        const runnableFullnodes = await Node.getRunnableFullnodes(config);
-        const managedFullnodes = await Node.getManagedFullnodes(config);
-        const monitorStatus = await Node.monitorStatus(config);
-
+        const monitorStatus = Node.monitorStatus(config);
+        const allFullnodes = await Node.getAllFullnodes(config);
         const nodeInfos = Node.getNodeInfos();
+
+        // variables à ne plus utiliser... (utiliser allFullnodes à la place)
+        const runningFullnodes = Object.entries(allFullnodes).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
+        const installedFullnodes = Object.entries(allFullnodes).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
+        const installableFullnodes = Object.entries(allFullnodes).filter((entry: [string, any]) => entry[1].installable).map(entry => entry[0]);
+        const runnableFullnodes = Object.entries(allFullnodes).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
+        const managedFullnodes = Object.entries(allFullnodes).filter((entry: [string, any]) => entry[1].managed).map(entry => entry[0]);
+
 
         const data = {
             ...utilFuncs,
@@ -43,6 +45,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
             contentTemplate: `..${SEP}node${SEP}node.html`,
             nodeInfos,
             monitorStatus,
+            allFullnodes,
             installedFullnodes,
             runningFullnodes,
             installableFullnodes,
@@ -56,8 +59,23 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     // NODE status => /node/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const nodeInfos = Node.getNodeInfos();
-        let html = `Node status: <pre>${JSON.stringify(nodeInfos, null, 4)}</pre>`;
-        res.send(html);
+
+        const data = {
+            ...utilFuncs,
+            meta: {
+                title: `Freemining - Node Manager - Node Status`,
+                noIndex: false,
+            },
+            contentTemplate: `..${SEP}node${SEP}node_status.html`,
+            nodeInfos,
+            //monitorStatus,
+            //installedFullnodes,
+            //runningFullnodes,
+            //installableFullnodes,
+            //runnableFullnodes,
+            //managedFullnodes,
+        };
+        res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 
     // NODE status JSON => /node/status.json
@@ -83,49 +101,114 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         res.send('Node monitor stopped');
     });
 
-    // Fullnode run page => /node/fullnodes-run
-    app.get(`${urlPrefix}/fullnodes-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const action = req.query.action?.toString() || '';
-        const fullnodeName = req.query.fullnode?.toString() || '';
+
+    // GET Fullnode install page => /node/fullnodes/{fullnodeName}/install
+    app.get(`${urlPrefix}/fullnodes/:fullnodeName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const fullnodeName = req.params.fullnodeName;
+        //const action = req.query.action?.toString() || '';
 
         const config = Daemon.getConfig();
         const nodeInfos = Node.getNodeInfos();
         const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+        const allFullnodes = await Node.getAllFullnodes(config);
+
+        const installStatus = false;
+        const uninstallStatus = false;
+
+        const data = {
+            ...utilFuncs,
+            meta: {
+                title: `Freemining - Node Manager - Fullnode install`,
+                noIndex: false,
+            },
+            contentTemplate: `..${SEP}node${SEP}fullnode_install.html`,
+            nodeInfos,
+            fullnode: fullnodeName,
+            fullnodeStatus,
+            fullnodeInfos,
+            allFullnodes,
+            installStatus,
+            uninstallStatus,
+        };
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+
+    // POST Fullnode install page => /node/fullnodes/{fullnodeName}/install
+    app.post(`${urlPrefix}/fullnodes/:fullnodeName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const fullnodeName = req.params.fullnodeName;
+        const action = req.body.action?.toString() || '';
+
+        const config = Daemon.getConfig();
+        //const nodeInfos = Node.getNodeInfos();
+        //const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
 
         if (action === 'start') {
             if (! fullnodeName) {
-                res.send(`Error: missing parameters`);
+                res.send(`Error: missing 'fullnode' parameter`);
+                return;
+            }
+
+            if (fullnodeStatus) {
+                res.send(`Error: cannot start fullnode install while it is running`);
                 return;
             }
 
             const params = {
                 fullnode: fullnodeName,
             };
-            await Node.fullnodeRunStart(config, params);
-            res.send(`OK`);
+
+            try {
+                await Node.fullnodeInstallStart(config, params);
+                res.send(`OK: fullnode install started`);
+
+            } catch (err: any) {
+                res.send(`Error: cannot start fullnode install => ${err.message}`);
+            }
+            return;
+        }
+
+        res.send(`Error: invalid action`);
+    });
+
+
+    // GET Fullnode run page => /node/fullnodes/{fullnodeName}/run
+    app.get(`${urlPrefix}/fullnodes/:fullnodeName/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const fullnodeName = req.params.fullnodeName;
+        const action = req.query.action?.toString() || '';
+
+        const config = Daemon.getConfig();
+        const nodeStatus = Node.monitorStatus();
+        const nodeInfos = Node.getNodeInfos();
+        const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+        const allFullnodes = await Node.getAllFullnodes(config);
+
+        if (action === 'log') {
+            // TODO
+            res.send( `not yet available` );
             return;
 
-        } else if (action === 'stop') {
-            if (! fullnodeName) {
-                res.send(`Error: missing parameters`);
+        } else if (action === 'status') {
+            if (! nodeStatus) {
+                res.send( `Warning: JSON status requires node monitor to be started. Click here to <a href="/node/monitor-start">start monitor</a>` );
                 return;
             }
-
-            const params = {
-                fullnode: fullnodeName,
-            };
-            await Node.fullnodeRunStop(config, params);
-            res.send(`OK`);
-            return;
-
-        } else if (action !== '') {
-            res.send(`Error: invalid action`);
-        }
-
-        if (! fullnodeInfos) {
-            res.send(`Error: fullnode is not running or is not managed or node monitor is not started or fullnode API is not loaded`);
+            res.header('Content-Type', 'application/json');
+            res.send( JSON.stringify(fullnodeInfos) );
             return;
         }
+
+        //if (! fullnodeName) {
+        //    res.send(`Error: missing 'fullnode' parameter`);
+        //    return;
+        //}
+
+        //if (! fullnodeInfos) {
+        //    res.send(`Error: fullnode is not running or is not managed or node monitor is not started or fullnode API is not loaded`);
+        //    return;
+        //}
 
         const data = {
             ...utilFuncs,
@@ -134,10 +217,76 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}node${SEP}fullnode_run.html`,
+            nodeStatus,
             nodeInfos,
+            fullnode: fullnodeName,
+            fullnodeStatus,
             fullnodeInfos,
+            allFullnodes,
         };
         res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+
+    // POST Fullnode run page => /node/fullnodes/{fullnodeName}/run
+    app.post(`${urlPrefix}/fullnodes/:fullnodeName/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const fullnodeName = req.params.fullnodeName;
+        const action = req.body.action?.toString() || '';
+
+        const config = Daemon.getConfig();
+        //const nodeInfos = Node.getNodeInfos();
+        //const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+
+        if (action === 'start') {
+            if (! fullnodeName) {
+                res.send(`Error: missing parameters`);
+                return;
+            }
+
+            if (fullnodeStatus) {
+                res.send(`Error: cannot start fullnode run while it is already running`);
+                return;
+            }
+
+            const params = {
+                fullnode: fullnodeName,
+            };
+
+            try {
+                await Node.fullnodeRunStart(config, params);
+                res.send(`OK: fullnode run started`);
+
+            } catch (err: any) {
+                res.send(`Error: cannot start fullnode run => ${err.message}`);
+            }
+            return;
+
+        } else if (action === 'stop') {
+            if (! fullnodeName) {
+                res.send(`Error: missing parameters`);
+                return;
+            }
+
+            if (!fullnodeStatus) {
+                res.send(`Error: cannot stop fullnode run while it is not running`);
+                return;
+            }
+
+            const params = {
+                fullnode: fullnodeName,
+            };
+
+            try {
+                Node.fullnodeRunStop(config, params);
+                res.send(`OK: fullnode run stopped`);
+
+            } catch (err: any) {
+                res.send(`Error: cannot stop fullnode run => ${err.message}`);
+            }
+            return;
+        }
+
+        res.send(`Error: invalid action`);
     });
 
 }

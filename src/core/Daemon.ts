@@ -217,7 +217,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
                     case 'rigMinerRunStop':
                         try {
-                            await Rig.minerRunStop(config, req.params);
+                            Rig.minerRunStop(config, req.params);
                             rpcSendResponse(ws, req.id, 'OK');
 
                         } catch (err: any) {
@@ -228,11 +228,22 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
                     case 'rigMinerRunStatus':
                         try {
-                            const minerStatus = await Rig.minerRunStatus(config, req.params);
+                            const minerStatus = Rig.minerRunStatus(config, req.params);
                             rpcSendResponse(ws, req.id, minerStatus);
 
                         } catch (err: any) {
                             console.warn(`${now()} [${colors.blue('WARN')}] [DAEMON] cannot get miner run status. ${err.message}`);
+                            rpcSendError(ws, req.id, { code: -1, message: err.message });
+                        }
+                        break;
+
+                    case 'rigMinerRunLog':
+                        try {
+                            const minerLog = Rig.minerRunLog(config, req.params);
+                            rpcSendResponse(ws, req.id, minerLog);
+
+                        } catch (err: any) {
+                            console.warn(`${now()} [${colors.blue('WARN')}] [DAEMON] cannot get miner run log. ${err.message}`);
                             rpcSendError(ws, req.id, { code: -1, message: err.message });
                         }
                         break;
@@ -294,7 +305,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
                     case 'nodeFullnodeRunStop':
                         try {
-                            await Node.fullnodeRunStop(config, req.params);
+                            Node.fullnodeRunStop(config, req.params);
                             rpcSendResponse(ws, req.id, 'OK');
 
                         } catch (err: any) {
@@ -305,7 +316,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
                     case 'nodeFullnodeRunStatus':
                         try {
-                            const fullnodeStatus = await Node.fullnodeRunStatus(config, req.params);
+                            const fullnodeStatus = Node.fullnodeRunStatus(config, req.params);
                             rpcSendResponse(ws, req.id, fullnodeStatus);
 
                         } catch (err: any) {

@@ -11,7 +11,13 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+/* ########## DESCRIPTION ######### */
+/*
 
+Website: https://trex-miner.com/
+Github : https://github.com/trexminer/T-Rex
+
+*/
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -143,11 +149,13 @@ export const minerCommands: t.minerCommandInfos = {
 
 
         const minerName = 'T-Rex';
-        const algo = minerSummary.algorithm;
+        const algo = minerSummary.algorithm as string;
+        const uptime = minerSummary.uptime as number; // uptime until last crash/restart of the watchdoged subprocess
+        //const uptime = minerSummary.watchdog_stat.uptime as number; // full uptime
 
-        const poolUrl = minerSummary.active_pool?.url || '';
-        const poolUser = minerSummary.active_pool?.user || '';
-        const workerName = poolUser.split('.').pop() || '';
+        const poolUrl = minerSummary.active_pool?.url as string || '';
+        const poolUser = minerSummary.active_pool?.user as string || '';
+        const workerName = poolUser.split('.').pop() as string || '';
 
         const cpus: any[] = [];
 
@@ -171,6 +179,7 @@ export const minerCommands: t.minerCommandInfos = {
             infos: {
                 name: minerName,
                 worker: workerName,
+                uptime,
                 algo,
                 hashRate: workerHashRate,
             },

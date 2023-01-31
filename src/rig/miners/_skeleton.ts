@@ -11,6 +11,13 @@ import { now, getOpt, downloadFile } from '../../common/utils';
 import type *  as t from '../../common/types';
 
 
+/* ########## DESCRIPTION ######### */
+/*
+
+Website: 
+Github : 
+
+*/
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -140,28 +147,30 @@ export const minerCommands: t.minerCommandInfos = {
 
     async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-        const headers: any = {};
+        const headers: any = {}; // edit-me if needed
 
         const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const minerName = '';
-        const algo = '';
-        const workerHashRate = 0;
+        const minerName = 'edit-me';
+        const uptime = -1; // edit-me
+        const algo = 'edit-me';
+        const workerHashRate = -1; // edit-me
 
-        const poolUrl = '';
-        const poolUser = '';
-        const workerName = poolUser.split('.').pop() || '';
+        const poolUrl = ''; // edit-me
+        const poolUser = ''; // edit-me
+        const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
-        const cpus: any[] = [];
-        const gpus: any[] = [];
+        const cpus: any[] = []; // edit-me
+        const gpus: any[] = []; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerInfos = {
             infos: {
                 name: minerName,
                 worker: workerName,
+                uptime,
                 algo,
                 hashRate: workerHashRate,
             },

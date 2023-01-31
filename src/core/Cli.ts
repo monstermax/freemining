@@ -113,6 +113,16 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
             return rigMinerRunStart(this, args, config);
         }
 
+    } else if (hasOpt('--miner-status')) {
+        func = function (this: WebSocket) {
+            return rigMinerRunStatus(this, args, config);
+        }
+
+    } else if (hasOpt('--miner-log')) {
+        func = function (this: WebSocket) {
+            return rigMinerRunLog(this, args, config);
+        }
+
     } else if (hasOpt('--miner-infos')) {
         func = function (this: WebSocket) {
             return rigMinerRunInfos(this, args, config);
@@ -154,6 +164,16 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
     } else if (hasOpt('--fullnode-start')) {
         func = function (this: WebSocket) {
             return nodeFullnodeRunStart(this, args, config);
+        }
+
+    } else if (hasOpt('--fullnode-status')) {
+        func = function (this: WebSocket) {
+            return nodeFullnodeRunStatus(this, args, config);
+        }
+
+    } else if (hasOpt('--fullnode-log')) {
+        func = function (this: WebSocket) {
+            return nodeFullnodeRunLog(this, args, config);
         }
 
     } else if (hasOpt('--fullnode-infos')) {
@@ -343,6 +363,29 @@ function rigMinerRunStop(ws: WebSocket, args: (t.CliParams & t.CommonParams & st
 }
 
 
+function rigMinerRunStatus(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const minerNameS = getOpts('--miner-status', 1, args);
+    const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
+
+    const method = 'rigMinerRunStatus';
+    const params: any = {
+        miner: minerName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+function rigMinerRunLog(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const minerNameS = getOpts('--miner-log', 1, args);
+    const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
+
+    const method = 'rigMinerRunLog';
+    const params: any = {
+        miner: minerName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
 function rigMinerRunInfos(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
     const minerNameS = getOpts('--miner-infos', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
@@ -410,6 +453,30 @@ function nodeFullnodeRunStop(ws: WebSocket, args: (t.CliParams & t.CommonParams 
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
 
     const method = 'nodeFullnodeRunStop';
+    const params: any = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
+function nodeFullnodeRunStatus(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const fullnodeNameS = getOpts('--fullnode-status', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+
+    const method = 'nodeFullnodeRunStatus';
+    const params: any = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+
+
+function nodeFullnodeRunLog(ws: WebSocket, args: (t.CliParams & t.CommonParams & string)[] = [], config: any = {}) {
+    const fullnodeNameS = getOpts('--fullnode-log', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+
+    const method = 'nodeFullnodeRunLog';
     const params: any = {
         fullnode: fullnodeName,
     };

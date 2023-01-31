@@ -9,6 +9,13 @@ const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+/* ########## DESCRIPTION ######### */
+/*
+
+Website: https://xmrig.com/
+Github : https://github.com/xmrig/xmrig
+
+*/
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -187,6 +194,7 @@ exports.minerCommands = {
                     }
                 }
             }
+            const uptime = minerSummary.uptime;
             const algo = minerSummary.algo;
             //const algo = minerConfig.pools[0].algo as string;
             //const algo = minerSummary.connection.algo as string;
@@ -203,6 +211,7 @@ exports.minerCommands = {
                 infos: {
                     name: 'XMRig',
                     worker,
+                    uptime,
                     algo,
                     hashRate,
                 },

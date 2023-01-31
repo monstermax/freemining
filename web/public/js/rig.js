@@ -7,7 +7,7 @@ async function startMinerModal(minerName='') {
     let startMinerModalObj;
 
     if (! window.startMinerModalObj) {
-        const modalContent = await jQuery.get('/miners/miner-run-modal?miner=' + minerName);
+        const modalContent = await jQuery.get('/rig/miners-run-modal?miner=' + minerName);
         const $modalContainer = jQuery('<div id="modalMinerRun"></div>')
         $modalContainer.append(modalContent);
         jQuery(document.body).append($modalContainer);
@@ -31,7 +31,7 @@ function resetStartMinerModalForm() {
     jQuery('#newMiner_miner').val('');
     jQuery('#newMiner_algo').val('');
     jQuery('#newMiner_pool_url').val('');
-    jQuery('#newMiner_pool_account').val('');
+    jQuery('#newMiner_pool_user').val('');
     jQuery('#newMiner_optional_params').val('');
 }
 
@@ -46,7 +46,7 @@ function loadStartMinerConfig(selectedPreset) {
         jQuery('#newMiner_miner').val('');
         jQuery('#newMiner_algo').val('');
         jQuery('#newMiner_pool_url').val('');
-        jQuery('#newMiner_pool_account').val('');
+        jQuery('#newMiner_pool_user').val('');
         jQuery('#newMiner_optional_params').val('');
         return;
     }
@@ -57,7 +57,7 @@ function loadStartMinerConfig(selectedPreset) {
     jQuery('#newMiner_miner').val(config.miner);
     jQuery('#newMiner_algo').val(config.algo);
     jQuery('#newMiner_pool_url').val(config.poolUrl);
-    jQuery('#newMiner_pool_account').val(config.poolAccount);
+    jQuery('#newMiner_pool_user').val(config.poolUser);
     jQuery('#newMiner_optional_params').val(config.args);
 }
 
@@ -77,8 +77,8 @@ function startMinerFromModal(modalOnStart=null, modalOnSuccess=null, modalOnFail
     const minerName = jQuery('#newMiner_miner').val();
     const algo = jQuery('#newMiner_algo').val();
     const poolUrl = jQuery('#newMiner_pool_url').val();
-    const poolAccount = jQuery('#newMiner_pool_account').val();
-    const optionalParams = jQuery('#newMiner_optional_params').val();
+    const poolUser = jQuery('#newMiner_pool_user').val();
+    const extraArgs = jQuery('#newMiner_optional_params').val();
 
     const onStart = (minerName, reason) => {
         $btn.prop('disabled', true);
@@ -115,7 +115,7 @@ function startMinerFromModal(modalOnStart=null, modalOnSuccess=null, modalOnFail
             modalOnFail(minerName, response);
         }
     };
-    startMinerAjax(minerName, algo, poolUrl, poolAccount, optionalParams, onStart, onSuccess, onFail);
+    startMinerAjax(minerName, algo, poolUrl, poolUser, extraArgs, onStart, onSuccess, onFail);
 }
 
 
@@ -144,7 +144,7 @@ function checkStartMinerForm() {
 
 
 // MINER RUN START
-function startMinerAjax(minerName, algo, poolUrl, poolAccount, optionalParams='', onStart, onSuccess, onFail) {
+function startMinerAjax(minerName, algo, poolUrl, poolUser, extraArgs='', onStart, onSuccess, onFail) {
     if (! minerName) {
         console.warn(`Error: Missing {miner} parameter`);
         return;
@@ -157,19 +157,19 @@ function startMinerAjax(minerName, algo, poolUrl, poolAccount, optionalParams=''
         console.warn(`Error: Missing {poolUrl} parameter`);
         return;
     }
-    if (! poolAccount) {
-        console.warn(`Error: Missing {poolAccount} parameter`);
+    if (! poolUser) {
+        console.warn(`Error: Missing {poolUser} parameter`);
         return;
     }
 
-    const url = '/miners/miner-run?miner=' + minerName;
+    const url = `/rig/miners/${minerName}/run`;
     const data = {
         action: 'start',
         miner: minerName,
         algo,
         poolUrl,
-        poolAccount,
-        optionalParams: optionalParams || '',
+        poolUser,
+        extraArgs: extraArgs || '',
     };
 
     if (typeof onStart === 'function') {
@@ -181,20 +181,20 @@ function startMinerAjax(minerName, algo, poolUrl, poolAccount, optionalParams=''
             if (typeof onSuccess === 'function') {
                 onSuccess(minerName, response);
             }
-            alertify.success('Miner ' + minerName + ' started');
+            alertify.success(`Miner ${minerName} started`);
 
         } else {
             if (typeof onFail === 'function') {
                 onFail(minerName, { message: response });
             }
-            alertify.error('Miner ' + minerName + ' cannot be started. ' + response);
+            alertify.error(`Miner ${minerName} cannot be started. ${response}`);
         }
 
     }, (err) => {
         if (typeof onFail === 'function') {
             onFail(minerName, err);
         }
-        alertify.error('Miner ' + minerName + ' cannot be started. ' + err.message);
+        alertify.error(`Miner ${minerName} cannot be started. ${err.message}`);
     });
 }
 
@@ -206,15 +206,15 @@ function stopMinerAjax(minerName, onStart, onSuccess, onFail) {
         return;
     }
 
-    alertify.confirm("<b>Miner stopping - confirmation</b>", "Do you want to stop the miner '<b>" + minerName + "</b>' ?",
+    alertify.confirm("<b>Miner stopping - confirmation</b>", `Do you want to stop the miner '<b>${minerName}</b>' ?`,
         function(){
-            alertify.success('Stopping miner ' + minerName + '...');
+            alertify.success(`Stopping miner ${minerName}...`);
 
             if (typeof onStart === 'function') {
                 onStart(minerName);
             }
 
-            const url = '/miners/miner-run?miner=' + minerName;
+            const url = `/rig/miners/${minerName}/run`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -224,20 +224,20 @@ function stopMinerAjax(minerName, onStart, onSuccess, onFail) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, response);
                     }
-                    alertify.success('Miner ' + minerName + ' stopped<hr />');
+                    alertify.success(`Miner ${minerName} stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(minerName, { message: response });
                     }
-                    alertify.error('Miner ' + minerName + ' cannot be stopped. ' + response);
+                    alertify.error(`Miner ${minerName} cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(minerName, err);
                 }
-                alertify.error('Miner ' + minerName + ' cannot be stopped. ' + err.message);
+                alertify.error(`Miner ${minerName} cannot be stopped. ${err.message}`);
             });
         },
         function(){
@@ -255,15 +255,15 @@ function startMinerInstallAjax(minerName, onStart, onSuccess, onFail) {
         return;
     }
 
-    alertify.confirm("<b>Miner installation - confirmation</b>", "Do you want to install the miner '<b>" + minerName + "</b>' ?",
+    alertify.confirm("<b>Miner installation - confirmation</b>", `Do you want to install the miner '<b>${minerName}</b>' ?`,
         function(){
-            alertify.success('Starting miner ' + minerName + ' installation...');
+            alertify.success(`Starting miner ${minerName} installation...`);
 
             if (typeof onStart === 'function') {
                 onStart(minerName);
             }
 
-            const url = '/miners/miner-install?miner=' + minerName;
+            const url = `/miners/${minerName}/install`;
             const data = {
                 action: 'start',
                 miner: minerName,
@@ -274,20 +274,20 @@ function startMinerInstallAjax(minerName, onStart, onSuccess, onFail) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, response);
                     }
-                    alertify.success('Miner ' + minerName + ' installation started');
+                    alertify.success(`Miner ${minerName} installation started`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(minerName, { message: response });
                     }
-                    alertify.error('Miner ' + minerName + ' installation cannot be started. ' + response);
+                    alertify.error(`Miner ${minerName} installation cannot be started. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(minerName, err);
                 }
-                alertify.error('Miner ' + minerName + ' installation cannot be started. ' + err.message);
+                alertify.error(`Miner ${minerName} installation cannot be started. ${err.message}`);
             });
         },
         function(){
@@ -304,15 +304,15 @@ function stopMinerInstallAjax() {
         return;
     }
 
-    alertify.confirm("<b>Miner installation stopping - confirmation</b>", "Do you want to stop the installation of the miner '<b>" + minerName + "</b>' ?",
+    alertify.confirm("<b>Miner installation stopping - confirmation</b>", `Do you want to stop the installation of the miner '<b>${minerName}</b>' ?`,
         function(){
-            alertify.success('Stopping miner ' + minerName + ' installation...');
+            alertify.success(`Stopping miner ${minerName} installation...`);
 
             if (typeof onStart === 'function') {
                 onStart(minerName);
             }
 
-            const url = '/miners/miner-install?miner=' + minerName;
+            const url = `/miners/${minerName}/install`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -322,20 +322,20 @@ function stopMinerInstallAjax() {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, response);
                     }
-                    alertify.success('Miner ' + minerName + ' installation stopped<hr />');
+                    alertify.success(`Miner ${minerName} installation stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(minerName, { message: response });
                     }
-                    alertify.error('Miner ' + minerName + ' installation cannot be stopped. ' + response);
+                    alertify.error(`Miner ${minerName} installation cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(minerName, err);
                 }
-                alertify.error('Miner ' + minerName + ' installation cannot be stopped. ' + err.message);
+                alertify.error(`Miner ${minerName} installation cannot be stopped. ${err.message}`);
             });
         },
         function(){
@@ -352,15 +352,15 @@ function startMinerUninstallAjax(minerName, onStart, onSuccess, onFail) {
         return;
     }
 
-    alertify.confirm("<b>Miner uninstallation - confirmation</b>", "Do you want to uninstall the miner '<b>" + minerName + "</b>' ?",
+    alertify.confirm("<b>Miner uninstallation - confirmation</b>", `Do you want to uninstall the miner '<b>${minerName}</b>' ?`,
         function(){
-            alertify.success('Starting miner ' + minerName + ' uninstallation...');
+            alertify.success(`Starting miner ${minerName} uninstallation...`);
 
             if (typeof onStart === 'function') {
                 onStart(minerName);
             }
 
-            const url = '/miners/miner-uninstall?miner=' + minerName;
+            const url = `/miners/${minerName}/uninstall`;
             const data = {
                 action: 'start',
                 miner: minerName,
@@ -371,20 +371,20 @@ function startMinerUninstallAjax(minerName, onStart, onSuccess, onFail) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, response);
                     }
-                    alertify.success('Miner ' + minerName + ' uninstallation started');
+                    alertify.success(`Miner ${minerName} uninstallation started`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(minerName, { message: response });
                     }
-                    alertify.error('Miner ' + minerName + ' uninstallation cannot be started. ' + response);
+                    alertify.error(`Miner ${minerName} uninstallation cannot be started. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(minerName, err);
                 }
-                alertify.error('Miner ' + minerName + ' uninstallation cannot be started. ' + err.message);
+                alertify.error(`Miner ${minerName} uninstallation cannot be started. ${err.message}`);
             });
         },
         function(){
@@ -401,15 +401,15 @@ function stopMinerUninstallAjax() {
         return;
     }
 
-    alertify.confirm("<b>Miner uninstallation stopping - confirmation</b>", "Do you want to stop the uninstallation of the miner '<b>" + minerName + "</b>' ?",
+    alertify.confirm("<b>Miner uninstallation stopping - confirmation</b>", `Do you want to stop the uninstallation of the miner '<b>${minerName}</b>' ?`,
         function(){
-            alertify.success('Stopping miner ' + minerName + ' uninstallation...');
+            alertify.success(`Stopping miner ${minerName} uninstallation...`);
 
             if (typeof onStart === 'function') {
                 onStart(minerName);
             }
 
-            const url = '/miners/miner-uninstall?miner=' + minerName;
+            const url = `/miners/${minerName}/uninstall`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -419,20 +419,20 @@ function stopMinerUninstallAjax() {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, response);
                     }
-                    alertify.success('Miner ' + minerName + ' uninstallation stopped<hr />');
+                    alertify.success(`Miner ${minerName} uninstallation stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
                         onFail(minerName, { message: response });
                     }
-                    alertify.error('Miner ' + minerName + ' uninstallation cannot be stopped. ' + response);
+                    alertify.error(`Miner ${minerName} uninstallation cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
                     onFail(minerName, err);
                 }
-                alertify.error('Miner ' + minerName + ' uninstallation cannot be stopped. ' + err.message);
+                alertify.error(`Miner ${minerName} uninstallation cannot be stopped. ${err.message}`);
             });
         },
         function(){

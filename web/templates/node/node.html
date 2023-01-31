@@ -19,17 +19,14 @@ NODE HOME
 <hr />
 
 <h2>Running fullnodes:</h2>
-<%
-//const runningFullnodes = Object.keys(nodeInfos.fullnodesInfos);
-%>
 <% runningFullnodes.forEach(fullnodeName => { %>
     <li>
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (managedFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes-run?fullnode=<%- fullnodeName %>">status</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/status">detailed status</a>]
         <% } %>
-        [<a href="fullnodes-run?fullnode=<%- fullnodeName %>&action=stop">stop</a>]
+        [<a href="fullnodes/<%- fullnodeName %>/run?action=stop">stop</a>]
     </li>
 <% }) %>
 
@@ -41,7 +38,7 @@ NODE HOME
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (runnableFullnodes.includes(fullnodeName) && ! runningFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes-run?fullnode=<%- fullnodeName %>&action=start">start</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/run?action=start">start</a>]
         <% } %>
     </li>
 <% }) %>
@@ -55,7 +52,7 @@ NODE HOME
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (! installedFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes-install?fullnode=<%- fullnodeName %>&action=start">install</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/install?action=start">install</a>]
         <% } %>
     </li>
 <% }) %>

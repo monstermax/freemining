@@ -99,6 +99,16 @@ function run(args = []) {
             return rigMinerRunStart(this, args, config);
         };
     }
+    else if ((0, utils_1.hasOpt)('--miner-status')) {
+        func = function () {
+            return rigMinerRunStatus(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--miner-log')) {
+        func = function () {
+            return rigMinerRunLog(this, args, config);
+        };
+    }
     else if ((0, utils_1.hasOpt)('--miner-infos')) {
         func = function () {
             return rigMinerRunInfos(this, args, config);
@@ -138,6 +148,16 @@ function run(args = []) {
     else if ((0, utils_1.hasOpt)('--fullnode-start')) {
         func = function () {
             return nodeFullnodeRunStart(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--fullnode-status')) {
+        func = function () {
+            return nodeFullnodeRunStatus(this, args, config);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--fullnode-log')) {
+        func = function () {
+            return nodeFullnodeRunLog(this, args, config);
         };
     }
     else if ((0, utils_1.hasOpt)('--fullnode-infos')) {
@@ -286,6 +306,24 @@ function rigMinerRunStop(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
+function rigMinerRunStatus(ws, args = [], config = {}) {
+    const minerNameS = (0, utils_1.getOpts)('--miner-status', 1, args);
+    const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
+    const method = 'rigMinerRunStatus';
+    const params = {
+        miner: minerName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+function rigMinerRunLog(ws, args = [], config = {}) {
+    const minerNameS = (0, utils_1.getOpts)('--miner-log', 1, args);
+    const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
+    const method = 'rigMinerRunLog';
+    const params = {
+        miner: minerName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
 function rigMinerRunInfos(ws, args = [], config = {}) {
     const minerNameS = (0, utils_1.getOpts)('--miner-infos', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
@@ -337,6 +375,24 @@ function nodeFullnodeRunStop(ws, args = [], config = {}) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-stop', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
     const method = 'nodeFullnodeRunStop';
+    const params = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+function nodeFullnodeRunStatus(ws, args = [], config = {}) {
+    const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-status', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const method = 'nodeFullnodeRunStatus';
+    const params = {
+        fullnode: fullnodeName,
+    };
+    rpcSendRequest(ws, 1, method, params);
+}
+function nodeFullnodeRunLog(ws, args = [], config = {}) {
+    const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-log', 1, args);
+    const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
+    const method = 'nodeFullnodeRunLog';
     const params = {
         fullnode: fullnodeName,
     };

@@ -19,17 +19,14 @@ RIG HOME
 <hr />
 
 <h2>Running miners:</h2>
-<%
-//const runningMiners = Object.keys(rigInfos.minersInfos);
-%>
 <% runningMiners.forEach(minerName => { %>
     <li>
         <%- minerName %>
         &nbsp;&nbsp;
+        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Manage</a>
         <% if (managedMiners.includes(minerName)) { %>
-            [<a href="miners-run?miner=<%- minerName %>">status</a>]
+            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=status">JSON Status</a>
         <% } %>
-        [<a href="miners-run?miner=<%- minerName %>&action=stop">stop</a>]
     </li>
 <% }) %>
 
@@ -41,7 +38,7 @@ RIG HOME
         <%- minerName %>
         &nbsp;&nbsp;
         <% if (runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
-            [<a href="miners-run?miner=<%- minerName %>&action=start">start</a>]
+            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">start</a>
         <% } %>
     </li>
 <% }) %>
@@ -55,7 +52,7 @@ RIG HOME
         <%- minerName %>
         &nbsp;&nbsp;
         <% if (! installedMiners.includes(minerName)) { %>
-            [<a href="miners-install?miner=<%- minerName %>&action=start">install</a>]
+            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">install</a>
         <% } %>
     </li>
 <% }) %>

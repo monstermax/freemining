@@ -167,7 +167,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'rigMinerRunStop':
                             try {
-                                yield Rig.minerRunStop(config, req.params);
+                                Rig.minerRunStop(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {
@@ -177,11 +177,21 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'rigMinerRunStatus':
                             try {
-                                const minerStatus = yield Rig.minerRunStatus(config, req.params);
+                                const minerStatus = Rig.minerRunStatus(config, req.params);
                                 rpcSendResponse(ws, req.id, minerStatus);
                             }
                             catch (err) {
                                 console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get miner run status. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        case 'rigMinerRunLog':
+                            try {
+                                const minerLog = Rig.minerRunLog(config, req.params);
+                                rpcSendResponse(ws, req.id, minerLog);
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get miner run log. ${err.message}`);
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
@@ -234,7 +244,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'nodeFullnodeRunStop':
                             try {
-                                yield Node.fullnodeRunStop(config, req.params);
+                                Node.fullnodeRunStop(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {
@@ -244,7 +254,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'nodeFullnodeRunStatus':
                             try {
-                                const fullnodeStatus = yield Node.fullnodeRunStatus(config, req.params);
+                                const fullnodeStatus = Node.fullnodeRunStatus(config, req.params);
                                 rpcSendResponse(ws, req.id, fullnodeStatus);
                             }
                             catch (err) {

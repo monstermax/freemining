@@ -31,15 +31,19 @@ export type CliParams = (
     "--miner-start" |
     "--miner-stop" |
     "--miner-status" |
+    "--miner-log" |
     "--miner-infos" |
     "--miner-install" |
+    "--miner-uninstall" |
 
     // NODE
     "--fullnode-start" |
     "--fullnode-stop" |
     "--fullnode-status" |
+    "--fullnode-log" |
     "--fullnode-infos" |
-    "--fullnode-install"
+    "--fullnode-install" |
+    "--fullnode-uninstall"
 );
 
 
@@ -171,7 +175,7 @@ export type Rig = {
 export type minerInstallInfos = {
     version: string,
     install(config: Config, params: MapString<any>): Promise<void>,
-}
+} & MapString<any>;
 
 
 
@@ -181,7 +185,7 @@ export type minerCommandInfos = {
     getCommandFile(config: Config, params: MapString<any>): string,
     getCommandArgs(config: Config, params: MapString<any>): string[],
     getInfos(config: Config, params: MapString<any>): Promise<MinerInfos>,
-};
+} & MapString<any>;
 
 
 
@@ -189,6 +193,7 @@ export type MinerInfos = {
     infos: {
         name: string,
         worker: string,
+        uptime: number,
         algo: string,
         hashRate: number,
     },
@@ -267,7 +272,7 @@ export type Node = {
 export type fullnodeInstallInfos = {
     version: string,
     install(config: Config, params: MapString<any>): Promise<void>,
-}
+} & MapString<any>;
 
 
 
@@ -278,13 +283,14 @@ export type fullnodeCommandInfos = {
     getCommandFile(config: Config, params: MapString<any>): string,
     getCommandArgs(config: Config, params: MapString<any>): string[],
     getInfos(config: Config, params: MapString<any>): Promise<FullnodeInfos>,
-};
+} & MapString<any>;
 
 
 
 export type FullnodeInfos = {
     infos: {
         name: string,
+        //uptime: number,
         coin: string,
         blocks: number,
         headers?: number,

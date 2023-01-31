@@ -1,0 +1,109 @@
+
+
+<!-- Start miner Modal -->
+<div class="modal modal-lg fade" id="startMinerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="startMinerLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="startMinerForm" onchange="checkStartMinerForm()">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="startMinerLabel">Starting a miner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="action" id="action" value="" />
+
+                    <!--
+                    <div class="mb-3">
+                        <label for="newMiner_coin" class="form-label">Coin</label>
+                        <select id="newMiner_coin" name="coin" class="form-select" aria-describedby="newMiner_coin_Help">
+                            <option></option>
+                        </select>
+                        <div id="newMiner_coin_Help" class="form-text">optional. used to suggest algos. not yet implemented. do nothing</div>
+                    </div>
+                    -->
+
+                    <div class="mb-3">
+                        <label for="newMiner_preset" class="form-label">Load config</label>
+                        <select id="newMiner_preset" name="preset" class="form-select" aria-describedby="newMiner_preset_Help" onchange="loadStartMinerConfig(this.value)">
+                            <option value=""></option>
+
+                            <%- Object.entries(presets).map((entry, idx) => {
+                                const [poolName, poolConfigs] = entry;
+
+                                let poolHtml = '';
+
+                                if (idx > 0) {
+                                    poolHtml += '<option value=""></option>';
+                                }
+
+                                poolHtml += '<optgroup label="+ ' + poolName + '">';
+
+                                poolHtml += Object.entries(poolConfigs).map(entry2 => {
+                                    const [coinName, preset] = entry2;
+                                    if (miner && preset.miner != miner) return;
+
+                                    let coinHtml = '<option value="' + poolName + '.' + coinName + '"> * ' + coinName + '&gt; ' + preset.name + ' (' + preset.miner + ')</option>';
+                                    return coinHtml;
+                                }).join('');
+
+                                poolHtml += '</optgroup>';
+
+                                return poolHtml;
+                            }).join('') %>
+                        </select>
+                        <div id="newMiner_preset_Help" class="form-text"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newMiner_miner" class="form-label">Miner<sup>*</sup></label>
+                        <select id="newMiner_miner" name="miner" class="form-select required" aria-describedby="newMiner_miner_Help">
+                            <option></option>
+
+                            <%- runnableMiners.map(miner => {
+                                if (miner in rigInfos.minersInfos) {
+                                    return '<option value="' + miner + '" disabled>' + miner + '</option>';
+
+                                } else {
+                                    return '<option value="' + miner + '">' + miner + '</option>';
+                                }
+                            }).join('') %>
+                        </select>
+                        <div id="newMiner_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newMiner_algo" class="form-label">Algo<sup>*</sup></label>
+                        <input type="text" class="form-control required" id="newMiner_algo" name="algo" aria-describedby="newMiner_algo_Help">
+                        <div id="newMiner_algo_Help" class="form-text"> &gt; Algorithm of the coin to mine</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newMiner_pool_url" class="form-label">Pool url<sup>*</sup></label>
+                        <input type="text" class="form-control required" id="newMiner_pool_url" name="pool_url" aria-describedby="newMiner_pool_url_Help">
+                        <div id="newMiner_pool_url_Help" class="form-text"> &gt; HOST:PORT only (no tcp/stratum/ssl)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newMiner_pool_user" class="form-label">Pool account<sup>*</sup></label>
+                        <input type="text" class="form-control required" id="newMiner_pool_user" name="pool_user" aria-describedby="newMiner_pool_user_Help">
+                        <div id="newMiner_pool_user_Help" class="form-text"> &gt; your mining address + worker name<br />Example: myPoolMiningAddress.myWorkerName</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newMiner_optional_params" class="form-label">Miner optional parameters</label>
+                        <input type="text" class="form-control" id="newMiner_optional_params" name="optional_params" aria-describedby="newMiner_optional_params_Help">
+                        <div id="newMiner_optional_params_Help" class="form-text"> &gt; optional miner arguments<br />Example: -d 0,1,2 -log</div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-secondary" onclick="resetStartMinerModalForm()">Reset</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary ms-auto" id="startMinerBtnStart" onclick="startMinerFromModal(window.onStartMinerModalStart, window.onStartMinerModalSuccess, window.onStartMinerModalFail)">Start !</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="startMinerPresets" class="d-none">
+        <%- JSON.stringify(presets) %>
+    </div>
+</div>
