@@ -4,7 +4,7 @@ import path from 'path';
 //import colors from 'colors/safe';
 import type express from 'express';
 
-import { now } from '../../common/utils';
+import { now, formatNumber } from '../../common/utils';
 import * as Node from '../../node/Node';
 import * as Daemon from '../../core/Daemon';
 
@@ -14,6 +14,7 @@ import * as Daemon from '../../core/Daemon';
 const SEP = path.sep;
 const utilFuncs = {
     now,
+    formatNumber,
 };
 
 
@@ -58,6 +59,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
 
     // NODE status => /node/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const nodeStatus = Node.monitorStatus();
         const nodeInfos = Node.getNodeInfos();
 
         const data = {
@@ -67,6 +69,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}node${SEP}node_status.html`,
+            nodeStatus,
             nodeInfos,
             //monitorStatus,
             //installedFullnodes,

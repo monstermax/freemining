@@ -168,7 +168,7 @@ export type Rig = {
         }[]
     },
     minersInfos: MapString<MinerInfos>,
-    checkDate?: Date,
+    dataDate?: number,
 };
 
 
@@ -211,7 +211,7 @@ export type MinerInfos = {
         cpus: MinerCpuInfos[],
         gpus: MinerGpuInfos[],
     },
-    dataDate?: Date,
+    dataDate?: number,
 };
 
 
@@ -265,7 +265,7 @@ export type Node = {
         }[]
     },
     fullnodesInfos: MapString<FullnodeInfos>,
-    checkDate?: Date,
+    dataDate?: number,
 };
 
 
@@ -303,7 +303,7 @@ export type FullnodeInfos = {
         blocks: number,
         headers?: number,
     },
-    dataDate?: Date,
+    dataDate?: number,
 };
 
 

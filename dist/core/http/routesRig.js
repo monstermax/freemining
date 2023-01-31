@@ -11,6 +11,7 @@ const Daemon = tslib_1.__importStar(require("../../core/Daemon"));
 const SEP = path_1.default.sep;
 const utilFuncs = {
     now: utils_1.now,
+    formatNumber: utils_1.formatNumber,
 };
 /* ########## FUNCTIONS ######### */
 function registerRigRoutes(app, urlPrefix = '') {
@@ -41,11 +42,13 @@ function registerRigRoutes(app, urlPrefix = '') {
     }));
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigStatus = Rig.monitorStatus();
         const rigInfos = Rig.getRigInfos();
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager - Rig Status`,
                 noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}rig_status.html`, rigInfos });
+            }, contentTemplate: `..${SEP}rig${SEP}rig_status.html`, rigStatus,
+            rigInfos });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     }));
     // GET Rig status JSON => /rig/status.json
@@ -54,6 +57,18 @@ function registerRigRoutes(app, urlPrefix = '') {
         let content = JSON.stringify(rigInfos, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
+    }));
+    // GET Rig farm-agent start => /rig/farm-agent-start
+    app.get(`${urlPrefix}/farm-agent-start`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
+        //Rig.farmAgentStart(config);
+        res.send('Rig farm-agent started [TODO]');
+    }));
+    // GET Rig farm-agent stop => /rig/farm-agent-stop
+    app.get(`${urlPrefix}/farm-agent-stop`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
+        //Rig.farmAgentStop(config);
+        res.send('Rig farm-agent stopped [TODO]');
     }));
     // GET Rig monitor start => /rig/monitor-start
     app.get(`${urlPrefix}/monitor-start`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {

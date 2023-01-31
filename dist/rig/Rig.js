@@ -66,7 +66,7 @@ function monitorCheckRig(config) {
                 let minerInfos;
                 try {
                     minerInfos = yield minerCommands.getInfos(config, {});
-                    minerInfos.dataDate = new Date;
+                    minerInfos.dataDate = Date.now();
                     minersInfos[proc.name] = minerInfos;
                 }
                 catch (err) {
@@ -304,25 +304,35 @@ function getRigInfos() {
         const _cpus = os_1.default.cpus();
         const cpus = [
             {
-                name: _cpus[0].model,
+                name: _cpus[0].model.trim(),
                 threads: _cpus.length,
             }
         ];
         let gpuList;
         if (os_1.default.platform() === 'linux') {
             gpuList = (0, child_process_1.execSync)(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim();
-            // detailed output: 
-            // lspci -nnkd ::300
-            // temperatures & fanSpeeed [NVIDIA]
-            // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
             /*
             04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
             07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
             */
+            // detailed output: 
+            // lspci -nnkd ::300
+            // temperatures & fanSpeeed [NVIDIA]
+            // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
         }
         else if (os_1.default.platform() === 'win32') {
             // detailed output: 
             // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
+            gpuList = (0, child_process_1.execSync)('wmic path win32_VideoController get Name').toString().trim();
+            let tmpArr = gpuList.split(os_1.default.EOL);
+            tmpArr.shift();
+            tmpArr = tmpArr.map(item => item.trim());
+            gpuList = tmpArr.join(os_1.default.EOL);
+            /*
+            Name
+            Intel(R) HD Graphics 630
+                NVIDIA GeForce GTX 1070
+            */
             /*
             // temperatures & fanSpeeed
             const MSI_Afterburner = require('msi-afterburner-api');
@@ -342,16 +352,6 @@ function getRigInfos() {
                 })
                 .catch((err) => console.error(err));
             */
-            gpuList = (0, child_process_1.execSync)('wmic path win32_VideoController get Name').toString().trim();
-            let tmpArr = gpuList.split(os_1.default.EOL);
-            tmpArr.shift();
-            tmpArr = tmpArr.map(item => item.trim());
-            gpuList = tmpArr.join(os_1.default.EOL);
-            /*
-            Name
-            Intel(R) HD Graphics 630
-                NVIDIA GeForce GTX 1070
-            */
         }
         else if (os_1.default.platform() === 'darwin') {
             gpuList = (0, child_process_1.execSync)(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
@@ -370,6 +370,7 @@ function getRigInfos() {
             return {
                 id: idx,
                 name: gpuName,
+                driver: '', // TODO
             };
         });
         rigMainInfos = {
@@ -406,6 +407,7 @@ function getRigInfos() {
             gpus,
         },
         minersInfos,
+        dataDate: Date.now(),
     };
     return rigInfos;
 }

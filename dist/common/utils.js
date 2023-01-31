@@ -210,13 +210,19 @@ function getLocalIpAddresses() {
     const interfaces = os_1.default.networkInterfaces();
     let ifName;
     const addresses = [];
+    const internalAddresses = [];
     for (ifName in interfaces) {
         let interfaceInfos = interfaces[ifName];
         interfaceInfos = (interfaceInfos || []).filter(interfaceInfo => interfaceInfo.family === 'IPv4');
-        const interfaceAddresses = interfaceInfos.map(interfaceInfo => interfaceInfo.address);
+        const interfaceAddresses = interfaceInfos.filter((intf) => !intf.internal).map(interfaceInfo => interfaceInfo.address);
         addresses.push(...interfaceAddresses);
+        const internalInterfaceAddresses = interfaceInfos.filter((intf) => intf.internal).map(interfaceInfo => interfaceInfo.address);
+        internalAddresses.push(...internalInterfaceAddresses);
     }
-    return addresses;
+    return [
+        ...addresses,
+        ...internalAddresses,
+    ];
 }
 exports.getLocalIpAddresses = getLocalIpAddresses;
 function buildRpcRequest(id, method, params = []) {

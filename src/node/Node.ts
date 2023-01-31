@@ -86,7 +86,7 @@ export async function monitorCheckNode(config: t.Config): Promise<void> {
             let fullnodeInfos: any;
             try {
                 fullnodeInfos = await fullnodeCommands.getInfos(config, {});
-                fullnodeInfos.dataDate = new Date;
+                fullnodeInfos.dataDate = Date.now();
                 fullnodesInfos[proc.name] = fullnodeInfos;
 
             } catch (err: any) {
@@ -386,6 +386,7 @@ export function getNodeInfos(): t.Node {
             cpus,
         },
         fullnodesInfos,
+        dataDate: Date.now(),
     }
 
     return nodeInfos;

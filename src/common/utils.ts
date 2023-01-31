@@ -234,17 +234,24 @@ export function getLocalIpAddresses(): string[] {
     const interfaces = os.networkInterfaces();
     let ifName: string;
     const addresses: string[] = [];
+    const internalAddresses: string[] = [];
 
 
     for (ifName in interfaces) {
         let interfaceInfos = interfaces[ifName];
         interfaceInfos = (interfaceInfos || []).filter(interfaceInfo => interfaceInfo.family === 'IPv4');
 
-        const interfaceAddresses = interfaceInfos.map(interfaceInfo => interfaceInfo.address);
+        const interfaceAddresses = interfaceInfos.filter((intf: os.NetworkInterfaceInfo) => ! intf.internal).map(interfaceInfo => interfaceInfo.address);
         addresses.push(...interfaceAddresses);
+
+        const internalInterfaceAddresses = interfaceInfos.filter((intf: os.NetworkInterfaceInfo) => intf.internal).map(interfaceInfo => interfaceInfo.address);
+        internalAddresses.push(...internalInterfaceAddresses);
     }
 
-    return addresses;
+    return [
+        ...addresses,
+        ...internalAddresses,
+    ];
 }
 
 

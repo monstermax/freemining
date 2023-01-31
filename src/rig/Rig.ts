@@ -88,7 +88,7 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
             let minerInfos: any;
             try {
                 minerInfos = await minerCommands.getInfos(config, {});
-                minerInfos.dataDate = new Date;
+                minerInfos.dataDate = Date.now();
                 minersInfos[proc.name] = minerInfos;
 
             } catch (err: any) {
@@ -364,28 +364,40 @@ export function getRigInfos(): t.Rig {
         const _cpus = os.cpus()
         const cpus: any[] = [
             {
-                name: _cpus[0].model,
+                name: _cpus[0].model.trim(),
                 threads: _cpus.length,
             }
         ];
 
         let gpuList: string;
         if (os.platform() === 'linux') {
-            gpuList = execSync(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim(); 
+            gpuList = execSync(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim();
+            /*
+            04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
+            07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
+            */
+
             // detailed output: 
             // lspci -nnkd ::300
 
             // temperatures & fanSpeeed [NVIDIA]
             // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
 
-            /*
-            04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
-            07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
-            */
 
         } else if (os.platform() === 'win32') {
             // detailed output: 
             // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
+
+            gpuList = execSync('wmic path win32_VideoController get Name').toString().trim();
+            let tmpArr = gpuList.split(os.EOL);
+            tmpArr.shift();
+            tmpArr = tmpArr.map(item => item.trim());
+            gpuList = tmpArr.join(os.EOL);
+            /*
+            Name
+            Intel(R) HD Graphics 630
+                NVIDIA GeForce GTX 1070
+            */
 
             /*
             // temperatures & fanSpeeed
@@ -407,17 +419,6 @@ export function getRigInfos(): t.Rig {
                 .catch((err) => console.error(err));
             */
 
-            gpuList = execSync('wmic path win32_VideoController get Name').toString().trim();
-            let tmpArr = gpuList.split(os.EOL);
-            tmpArr.shift();
-            tmpArr = tmpArr.map(item => item.trim());
-            gpuList = tmpArr.join(os.EOL);
-            /*
-            Name
-            Intel(R) HD Graphics 630
-                NVIDIA GeForce GTX 1070
-            */
-
         } else if (os.platform() === 'darwin') {
             gpuList = execSync(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
             /*
@@ -435,6 +436,7 @@ export function getRigInfos(): t.Rig {
             return {
                 id: idx,
                 name: gpuName,
+                driver: '', // TODO
             };
         });
 
@@ -475,6 +477,7 @@ export function getRigInfos(): t.Rig {
             gpus,
         },
         minersInfos,
+        dataDate: Date.now(),
     }
 
     return rigInfos;

@@ -3,15 +3,29 @@ RIG HOME
 
 <hr />
 
+<h2>Rig status:</h2>
 <a href="status">Rig status</a>
 <br />
 <br />
+
 <% if (monitorStatus) { %>
     Monitor is running.
     <a href="monitor-stop">Stop monitor</a>
 <% } else { %>
     Monitor is not running.
     <a href="monitor-start">Start monitor</a>
+<% } %>
+<br />
+<br />
+
+<% if (false) { %>
+    Farm connection is active.
+    Server: xxxx
+    <a href="farm-agent-stop">Stop connection</a>
+
+<% } else { %>
+    Farm connection is not active.
+    <a href="farm-agent-start">Start connection</a>
 <% } %>
 <br />
 <br />

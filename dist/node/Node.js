@@ -64,7 +64,7 @@ function monitorCheckNode(config) {
                 let fullnodeInfos;
                 try {
                     fullnodeInfos = yield fullnodeCommands.getInfos(config, {});
-                    fullnodeInfos.dataDate = new Date;
+                    fullnodeInfos.dataDate = Date.now();
                     fullnodesInfos[proc.name] = fullnodeInfos;
                 }
                 catch (err) {
@@ -323,6 +323,7 @@ function getNodeInfos() {
             cpus,
         },
         fullnodesInfos,
+        dataDate: Date.now(),
     };
     return nodeInfos;
 }

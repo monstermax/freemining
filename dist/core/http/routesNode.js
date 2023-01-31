@@ -10,6 +10,7 @@ const Daemon = tslib_1.__importStar(require("../../core/Daemon"));
 const SEP = path_1.default.sep;
 const utilFuncs = {
     now: utils_1.now,
+    formatNumber: utils_1.formatNumber,
 };
 /* ########## FUNCTIONS ######### */
 function registerNodeRoutes(app, urlPrefix = '') {
@@ -40,11 +41,13 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // NODE status => /node/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const nodeStatus = Node.monitorStatus();
         const nodeInfos = Node.getNodeInfos();
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Node Manager - Node Status`,
                 noIndex: false,
-            }, contentTemplate: `..${SEP}node${SEP}node_status.html`, nodeInfos });
+            }, contentTemplate: `..${SEP}node${SEP}node_status.html`, nodeStatus,
+            nodeInfos });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     }));
     // NODE status JSON => /node/status.json

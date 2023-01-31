@@ -58,7 +58,7 @@ function loadStartMinerConfig(selectedPreset) {
     jQuery('#newMiner_algo').val(config.algo);
     jQuery('#newMiner_pool_url').val(config.poolUrl);
     jQuery('#newMiner_pool_user').val(config.poolUser);
-    jQuery('#newMiner_optional_params').val(config.args);
+    jQuery('#newMiner_optional_params').val(config.extraArgs);
 }
 
 

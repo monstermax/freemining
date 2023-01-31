@@ -1,8 +1,182 @@
 
-Rig status
+
+<h1 class="h3">Rig Management - Status</h1>
 
 <hr />
 
-<pre>
-<%- JSON.stringify(rigInfos, null, 4) %>
-</pre>
+<div>
+
+    <h1 class="d-inline-block">
+        RIG: <b><%=rigInfos.infos.name%></b>
+    </h1>
+
+    <div class="d-inline-block h3 ms-3">
+        <% const dataAge = (Date.now() - rigInfos.dataDate) / 1000 %>
+        <%- dataAge > 40 ? 
+            `<span class="badge bg-danger">Offline</span>`
+            : (
+                Object.keys(rigInfos.minersInfos).length == 0 || dataAge > 20 ?
+                    `<span class="badge bg-warning">IDLE</span>`
+                :
+                    `<span class="badge bg-success">UP</span>`
+            )
+        %>
+    </div>
+    <div class="d-inline-block h3 ms-3">
+        <a href="./status" class="btn btn-secondary">🌀 refresh</a>
+    </div>
+
+    <small class="d-inline-block ms-3">
+        Freshness: <span id="dataAge"><%= formatNumber(dataAge, 'seconds') %></span> ago
+    </small>
+
+</div>
+
+<br />
+
+
+<h2>System informations</h2>
+
+<div class="alert alert-secondary">
+    <div class="row">
+        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> <%= rigInfos.infos.hostname %></div>
+        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> <%= rigInfos.infos.ip %></div>
+        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> <%= rigInfos.infos.os %></div>
+        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> <%= rigInfos.usage.loadAvg %></div>
+        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> <%= formatNumber(rigInfos.infos.uptime, 'seconds') %></div>
+        <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> <%= formatNumber(rigInfos.usage.memory.used, 'size') %>B / <%= formatNumber(rigInfos.usage.memory.total, 'size') %>B</div>
+    </div>
+</div>
+
+<br />
+
+<h2>Hardware devices</h2>
+
+<div class="alert alert-secondary">
+    <div class="row mb-1">
+        <div class="col-12">
+            <b>CPU</b>
+        </div>
+        <div class="col-12">
+            <div class="border border-dark rounded bg-light m-1 p-1">
+                <%= rigInfos.devices.cpus[0].threads %> X <%= rigInfos.devices.cpus[0].name %>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <b>GPU</b>
+        </div>
+        <%- rigInfos.devices.gpus.map(gpu => {
+            return `
+                <div class="col-12 col-lg-6">
+                    <div class="border border-primary rounded bg-light m-1 p-1">
+                        #${gpu.id} : ${gpu.name} [driver=${gpu.driver}]
+                    </div>
+                </div>
+            `;
+        }).join('') %>
+    </div>
+</div>
+
+<br />
+
+
+<h2>Mining services</h2>
+
+<% if (! rigStatus) { %>
+    <div class="alert alert-warning">Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a></div>
+<% } %>
+
+<%- Object.entries(rigInfos.minersInfos).map(entry => {
+    const [minerName, service] = entry;
+
+    let devicesHtml = '';
+
+    if (service.devices.cpus.length > 0) {
+        const cpu = service.devices.cpus[0];
+
+        devicesHtml += `
+        <div class="border border-dark rounded bg-light">
+            <div class="row">
+                <div class="col-1"></div>
+                <div class="col-2"><b>CPU</b> # <br /> ${cpu.id}</div>
+                <div class="col-7"><b>Name</b> <br /> ${cpu.name}</div>
+                <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(cpu.hashRate, 'size')}H/sec.</div>
+            </div>
+        </div>
+        `;
+    }
+
+    if (service.devices.gpus.length > 0) {
+        service.devices.gpus.forEach(gpu => {
+            devicesHtml += `
+            <div class="border border-dark rounded bg-light my-2">
+                <div class="row">
+                    <div class="col-1"></div>
+                    <div class="col-2"><b>GPU #</b> <br /> ${gpu.id}</div>
+                    <div class="col-5"><b>Name</b> <br /> ${gpu.name}</div>
+                    <div class="col-1"><b>Temperature</b> <br /> ${gpu.temperature}°</div>
+                    <div class="col-1"><b>Fan speed</b> <br /> ${gpu.fanSpeed}%</div>
+                    <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(gpu.hashRate, 'size')}H/sec.</div>
+                </div>
+            </div>
+            `;
+        });
+    }
+
+    let html = `
+        <div id="rig-service-${minerName}" class="alert alert-success rig-service">
+            <div class="row">
+                <div class="col-12 col-lg-2 text-truncate"><div class="alert alert-dark h4 text-center">${service.infos.name}<br /><small class="text-muted">${minerName}</small></div></div>
+                <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.infos.algo}</div>
+                <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.infos.worker}</div>
+                <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.infos.uptime, 'seconds')}</div>
+                <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.infos.hashRate, 'size')}H/sec.</div>
+                <div class="col-12 col-lg-1">
+                    <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('${minerName}')" />
+                </div>
+            </div>
+
+            <br />
+
+            <div class="row">
+                <div class="col-6 col-lg-6 text-truncate"><b>Pool url</b> <br /> ${service.pool.url}</div>
+                <div class="col-6 col-lg-6 text-truncate"><b>Pool account</b> <br /> ${service.pool.account}</div>
+            </div>
+
+            ${devicesHtml.length > 0 ? '<br /><h4>Mining devices</h4>' : ''}
+
+            <div>
+                ${devicesHtml}
+            </div>
+        </div>
+    `;
+
+    return html;
+}).join('<br />') %>
+
+
+<br />
+
+<input type="button" value="Start new service..." class="btn btn-warning" onclick="startMinerModal()" />
+
+
+<script>
+
+window.onStartMinerModalSuccess = () => {
+    window.location.reload();
+}
+
+function stopMiner(minerName) {
+    const onStart = null;
+    const onSuccess = () => {
+        jQuery('#rig-service-' + minerName).remove();
+        jQuery('#startMinerModal').remove();
+    };
+    const onFail = () => {
+    };
+    stopMinerAjax(minerName, onStart, onSuccess, onFail);
+}
+</script>

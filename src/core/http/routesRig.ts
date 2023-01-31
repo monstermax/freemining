@@ -5,7 +5,7 @@ import path from 'path';
 //import colors from 'colors/safe';
 import type express from 'express';
 
-import { now } from '../../common/utils';
+import { now, formatNumber } from '../../common/utils';
 import * as Rig from '../../rig/Rig';
 import * as Daemon from '../../core/Daemon';
 
@@ -15,6 +15,7 @@ import * as Daemon from '../../core/Daemon';
 const SEP = path.sep;
 const utilFuncs = {
     now,
+    formatNumber,
 };
 
 
@@ -58,6 +59,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigStatus = Rig.monitorStatus();
         const rigInfos = Rig.getRigInfos();
 
         const data = {
@@ -67,6 +69,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
+            rigStatus,
             rigInfos,
             //monitorStatus,
             //installedMiners,
@@ -84,6 +87,21 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         let content = JSON.stringify(rigInfos, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
+    });
+
+
+    // GET Rig farm-agent start => /rig/farm-agent-start
+    app.get(`${urlPrefix}/farm-agent-start`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const config = Daemon.getConfig();
+        //Rig.farmAgentStart(config);
+        res.send('Rig farm-agent started [TODO]');
+    });
+
+    // GET Rig farm-agent stop => /rig/farm-agent-stop
+    app.get(`${urlPrefix}/farm-agent-stop`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const config = Daemon.getConfig();
+        //Rig.farmAgentStop(config);
+        res.send('Rig farm-agent stopped [TODO]');
     });
 
 

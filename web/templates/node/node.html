@@ -38,7 +38,7 @@ NODE HOME
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (runnableFullnodes.includes(fullnodeName) && ! runningFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes/<%- fullnodeName %>/run?action=start">Start...</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/run">Start...</a>]
         <% } %>
     </li>
 <% }) %>
@@ -52,7 +52,7 @@ NODE HOME
         <%- fullnodeName %>
         &nbsp;&nbsp;
         <% if (! installedFullnodes.includes(fullnodeName)) { %>
-            [<a href="fullnodes/<%- fullnodeName %>/install?action=start">Install...</a>]
+            [<a href="fullnodes/<%- fullnodeName %>/install">Install...</a>]
         <% } %>
     </li>
 <% }) %>
