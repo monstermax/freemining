@@ -12,8 +12,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   : https://github.com/todxx/teamredminer
+Download : https://github.com/todxx/teamredminer/releases/
 
 */
 /* ########## MAIN ######### */

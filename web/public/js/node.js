@@ -291,3 +291,88 @@ function stopFullnodeUninstallAjax() {
     );
 }
 
+
+
+function startNodeMonitorAjax(onStart, onSuccess, onFail) {
+    alertify.confirm("<b>Monitor run - confirmation</b>", `Do you want to start node monitor' ?`,
+        function(){
+            alertify.success(`Starting node monitor...`);
+
+            if (typeof onStart === 'function') {
+                onStart();
+            }
+
+            const url = `/node/monitor-run`;
+            const data = {
+                action: 'start',
+            };
+
+            jQuery.post(url, data).then((response) => {
+                if (response.startsWith('OK:')) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(response);
+                    }
+                    alertify.success(`Node monitor started`);
+
+                } else {
+                    if (typeof onFail === 'function') {
+                        onFail({ message: response });
+                    }
+                    alertify.error(`Node monitor cannot be started. ${response}`);
+                }
+
+            }, (err) => {
+                if (typeof onFail === 'function') {
+                    onFail(err);
+                }
+                alertify.error(`Node monitor cannot be started. ${err.message}`);
+            });
+        },
+        function(){
+            //alertify.error('Cancel');
+        }
+    );
+}
+
+
+function stopNodeMonitorAjax(onStart, onSuccess, onFail) {
+    alertify.confirm("<b>Monitor run - confirmation</b>", `Do you want to stop node monitor' ?`,
+        function(){
+            alertify.success(`Stopping node monitor...`);
+
+            if (typeof onStart === 'function') {
+                onStart();
+            }
+
+            const url = `/node/monitor-run`;
+            const data = {
+                action: 'stop',
+            };
+
+            jQuery.post(url, data).then((response) => {
+                if (response.startsWith('OK:')) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(response);
+                    }
+                    alertify.success(`Node monitor stopped`);
+
+                } else {
+                    if (typeof onFail === 'function') {
+                        onFail({ message: response });
+                    }
+                    alertify.error(`Node monitor cannot be stopped. ${response}`);
+                }
+
+            }, (err) => {
+                if (typeof onFail === 'function') {
+                    onFail(err);
+                }
+                alertify.error(`Node monitor cannot be stopped. ${err.message}`);
+            });
+        },
+        function(){
+            //alertify.error('Cancel');
+        }
+    );
+}
+

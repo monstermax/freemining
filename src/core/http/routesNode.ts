@@ -90,19 +90,54 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     });
 
 
-    // NODE monitor start => /node/monitor-start
-    app.get(`${urlPrefix}/monitor-start`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const config = Daemon.getConfig();
-        Node.monitorStart(config);
-        res.send('Node monitor started');
+
+    // GET Node monitor run => /node/monitor-run
+    app.get(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        //const config = Daemon.getConfig();
+        const nodeStatus = Node.monitorStatus();
+
+        const data = {
+            ...utilFuncs,
+            meta: {
+                title: `Freemining - Node Manager - Monitor run`,
+                noIndex: false,
+            },
+            contentTemplate: `..${SEP}node${SEP}monitor_run.html`,
+            nodeStatus,
+        };
+        res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 
-    // NODE monitor stop => /node/monitor-stop
-    app.get(`${urlPrefix}/monitor-stop`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+    // POST Node monitor run => /node/monitor-run
+    app.post(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        Node.monitorStop(config);
-        res.send('Node monitor stopped');
+        const action = req.body.action?.toString() || '';
+        const nodeStatus = Node.monitorStatus();
+
+        if (action === 'start') {
+            if (nodeStatus) {
+                res.send('OK: Node monitor is running');
+
+            } else {
+                Node.monitorStart(config);
+                res.send('OK: Node monitor started');
+            }
+            return;
+
+        } else if (action === 'stop') {
+            if (nodeStatus) {
+                Node.monitorStop(config);
+                res.send('OK: Node monitor stopped');
+
+            } else {
+                res.send('OK: Node monitor is not running');
+            }
+            return;
+        }
+
+        res.send(`Error: invalid action`);
     });
+
 
 
     // GET Fullnode install page => /node/fullnodes/{fullnodeName}/install
@@ -198,6 +233,22 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         } else if (action === 'status') {
             if (! nodeStatus) {
                 res.send( `Warning: JSON status requires node monitor to be started. Click here to <a href="/node/monitor-start">start monitor</a>` );
+                return;
+            }
+            if (! allFullnodes[fullnodeName]) {
+                res.send( `Warning: invalid fullnode` );
+                return;
+            }
+            if (! fullnodeStatus) {
+                res.send( `Warning: this fullnode is not running` );
+                return;
+            }
+            if (! allFullnodes[fullnodeName].managed) {
+                res.send( `Warning: this fullnode is not managed` );
+                return;
+            }
+            if (! fullnodeInfos) {
+                res.send( `Warning: data not yet available` );
                 return;
             }
             res.header('Content-Type', 'application/json');

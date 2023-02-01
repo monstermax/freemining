@@ -263,7 +263,7 @@ function startMinerInstallAjax(minerName, onStart, onSuccess, onFail) {
                 onStart(minerName);
             }
 
-            const url = `/miners/${minerName}/install`;
+            const url = `/rig/miners/${minerName}/install`;
             const data = {
                 action: 'start',
                 miner: minerName,
@@ -312,7 +312,7 @@ function stopMinerInstallAjax() {
                 onStart(minerName);
             }
 
-            const url = `/miners/${minerName}/install`;
+            const url = `/rig/miners/${minerName}/install`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -360,7 +360,7 @@ function startMinerUninstallAjax(minerName, onStart, onSuccess, onFail) {
                 onStart(minerName);
             }
 
-            const url = `/miners/${minerName}/uninstall`;
+            const url = `/rig/miners/${minerName}/uninstall`;
             const data = {
                 action: 'start',
                 miner: minerName,
@@ -409,7 +409,7 @@ function stopMinerUninstallAjax() {
                 onStart(minerName);
             }
 
-            const url = `/miners/${minerName}/uninstall`;
+            const url = `/rig/miners/${minerName}/uninstall`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -440,3 +440,88 @@ function stopMinerUninstallAjax() {
         }
     );
 }
+
+
+function startRigMonitorAjax(onStart, onSuccess, onFail) {
+    alertify.confirm("<b>Monitor run - confirmation</b>", `Do you want to start rig monitor' ?`,
+        function(){
+            alertify.success(`Starting rig monitor...`);
+
+            if (typeof onStart === 'function') {
+                onStart();
+            }
+
+            const url = `/rig/monitor-run`;
+            const data = {
+                action: 'start',
+            };
+
+            jQuery.post(url, data).then((response) => {
+                if (response.startsWith('OK:')) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(response);
+                    }
+                    alertify.success(`Rig monitor started`);
+
+                } else {
+                    if (typeof onFail === 'function') {
+                        onFail({ message: response });
+                    }
+                    alertify.error(`Rig monitor cannot be started. ${response}`);
+                }
+
+            }, (err) => {
+                if (typeof onFail === 'function') {
+                    onFail(err);
+                }
+                alertify.error(`Rig monitor cannot be started. ${err.message}`);
+            });
+        },
+        function(){
+            //alertify.error('Cancel');
+        }
+    );
+}
+
+
+function stopRigMonitorAjax(onStart, onSuccess, onFail) {
+    alertify.confirm("<b>Monitor run - confirmation</b>", `Do you want to stop rig monitor' ?`,
+        function(){
+            alertify.success(`Stopping rig monitor...`);
+
+            if (typeof onStart === 'function') {
+                onStart();
+            }
+
+            const url = `/rig/monitor-run`;
+            const data = {
+                action: 'stop',
+            };
+
+            jQuery.post(url, data).then((response) => {
+                if (response.startsWith('OK:')) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(response);
+                    }
+                    alertify.success(`Rig monitor stopped`);
+
+                } else {
+                    if (typeof onFail === 'function') {
+                        onFail({ message: response });
+                    }
+                    alertify.error(`Rig monitor cannot be stopped. ${response}`);
+                }
+
+            }, (err) => {
+                if (typeof onFail === 'function') {
+                    onFail(err);
+                }
+                alertify.error(`Rig monitor cannot be stopped. ${err.message}`);
+            });
+        },
+        function(){
+            //alertify.error('Cancel');
+        }
+    );
+}
+

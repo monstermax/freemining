@@ -1,5 +1,13 @@
 
-RIG HOME
+<div class="row">
+    <div class="col-8">
+        <h1>RIG HOME</h1>
+    </div>
+    <div class="col-4 text-end">
+        <img src="/img/mining2.png" class="rounded me-2" style="width:128px; height:128px;" />
+    </div>
+</div>
+
 
 <hr />
 
@@ -10,10 +18,10 @@ RIG HOME
 
 <% if (monitorStatus) { %>
     Monitor is running.
-    <a href="monitor-stop">Stop monitor</a>
+    <a href="monitor-run">Stop monitor</a>
 <% } else { %>
     Monitor is not running.
-    <a href="monitor-start">Start monitor</a>
+    <a href="monitor-run">Start monitor</a>
 <% } %>
 <br />
 <br />

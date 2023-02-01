@@ -1,0 +1,48 @@
+
+Monitor run
+
+<hr />
+
+
+<h3>Manage</h3>
+<%- (() => {
+    let html = '';
+
+    if (rigStatus) {
+        html += 'Rig monitor is <span class="badge bg-success">running</span>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += ' <a class="btn btn-danger btn-sm" onclick="stopMonitor()" href="javascript:void(0)">Stop Monitor</a>';
+
+    } else {
+        html += 'Rig monitor is <span class="badge bg-danger">not running</span>';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        html += ' <a class="btn btn-primary btn-sm" onclick="startMonitor()" href="javascript:void(0)">Start Monitor</a>';
+    }
+
+    return html;
+})() %>
+
+
+
+<script>
+
+function startMonitor() {
+    const onStart = null;
+    const onSuccess = () => window.location.reload();
+    const onFail = null;
+    startRigMonitorAjax(onStart, onSuccess, onFail);
+}
+
+function stopMonitor() {
+    const onStart = null;
+    const onSuccess = () => window.location.reload();
+    const onFail = null;
+
+    stopRigMonitorAjax(onStart, onSuccess, onFail);
+}
+</script>
+

@@ -1,7 +1,7 @@
 
 import fs from 'fs';
+//import os from 'os';
 import path from 'path';
-import os from 'os';
 
 import tar from 'tar';
 import admZip from 'adm-zip';
@@ -11,18 +11,19 @@ import decompress from 'decompress';
 const decompressTarxz = require('decompress-tarxz');
 
 
-export async function decompressFile(filePath: string, targetDir: string) {
+export async function decompressFile(filePath: string, targetDir: string): Promise<void> {
+    const ext = path.extname(filePath);
 
-    if (path.extname(filePath) === '.xz') {
+    if (ext === '.xz') {
         return decompressTarXz(filePath, targetDir);
 
-    } else if (path.extname(filePath) === '.7z') {
+    } else if (ext === '.7z') {
         return decompress7z(filePath, targetDir);
 
-    } else if (path.extname(filePath) === '.gz') {
+    } else if (ext === '.gz' || ext === '.tgz') {
         return decompressTarGz(filePath, targetDir);
 
-    } else if (path.extname(filePath) === '.zip') {
+    } else if (ext === '.zip') {
         return decompressZip(filePath, targetDir);
     }
 
@@ -39,8 +40,8 @@ export async function decompressTarGz(filePath: string, targetDir: string) {
     ).catch((err: any) => {
         throw { message: err.message };
     });
-
 }
+
 
 export async function decompressTarXz(filePath: string, targetDir: string) {
     await decompress(filePath, targetDir, {
@@ -48,11 +49,12 @@ export async function decompressTarXz(filePath: string, targetDir: string) {
             decompressTarxz()
         ]
     });
-
 }
+
 
 export async function decompressZip(filePath: string, targetDir: string) {
     const zipFile = new admZip(filePath);
+
     await new Promise((resolve, reject) => {
         zipFile.extractAllToAsync(targetDir, true, true, (err: any) => {
             if (err) {
@@ -64,13 +66,26 @@ export async function decompressZip(filePath: string, targetDir: string) {
     }).catch((err:any) => {
         throw { message: err.message };
     });
-
 }
 
+
 export async function decompress7z(filePath: string, targetDir: string) {
-    const pathTo7zip = sevenBin.path7za
+    const pathTo7zip = sevenBin.path7za; // `${__dirname}/../../node_modules/7zip-bin/linux/x64/7za`
+    const binStats = fs.statSync(pathTo7zip);
+    const isExecutable = Boolean(binStats.mode & 1 || (binStats.mode & 8) && process.getgid && binStats.gid === process.getgid());
+
+    if (! isExecutable) {
+        fs.chmodSync(pathTo7zip, 0o755);
+    }
+
     const seven = extractFull(filePath, targetDir, {
         $bin: pathTo7zip
+    });
+
+    await new Promise((resolve, reject) => {
+        seven.on('end', function () {
+            resolve(true);
+        })
     });
 }
 

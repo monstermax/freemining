@@ -12,8 +12,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   : https://github.com/Lolliedieb/lolMiner-releases
+Download : https://github.com/Lolliedieb/lolMiner-releases/releases/
 
 */
 /* ########## MAIN ######### */

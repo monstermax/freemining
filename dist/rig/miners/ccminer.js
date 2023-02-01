@@ -10,8 +10,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   : https://github.com/fancyIX/ccminer
+Download : https://github.com/fancyIX/ccminer/releases/
 
 */
 /* ########## MAIN ######### */

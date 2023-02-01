@@ -172,7 +172,7 @@ export async function minerInstallStart(config: t.Config, params: t.MapString<an
     }
 
     const minerInstall = minersInstalls[params.miner];
-    return minerInstall.install(config, params);
+    /* await */ minerInstall.install(config, params);
 }
 
 

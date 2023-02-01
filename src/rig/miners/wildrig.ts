@@ -2,11 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -14,8 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: 
-Github : 
+Website  : 
+Github   : https://github.com/andru-kun/wildrig-multi
+Download : https://github.com/andru-kun/wildrig-multi/releases/
 
 */
 /* ########## MAIN ######### */
@@ -26,23 +26,24 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '0.36.5b',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
+        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`;
+        let subDir = ``;
 
-        throw { message: `edit-me then delete this line` };
+        //throw { message: `edit-me then delete this line` };
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/andru-kun/wildrig-multi/releases/download/${this.version}/wildrig-multi-linux-${this.version}.tar.xz`;
 
         } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
+            dlUrl = `https://github.com/andru-kun/wildrig-multi/releases/download/${this.version}/wildrig-multi-windows-${this.version}.7z`;
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -63,36 +64,17 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
 
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
+        if (os.platform() === 'linux') {
+            fs.renameSync(`${targetDir}${SEP}wildrig-multi`, `${targetDir}${SEP}wildrig`);
+        }
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -103,44 +85,42 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: 52013,
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'wildrig', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {
         const args: string[] = [
+            '--no-color',
         ];
 
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--api-port', this.apiPort.toString(),
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('--algo');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
+            args.push('--url');
             args.push(params.poolUrl);
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('--user');
             args.push(params.poolUser);
-        }
 
-        if (true) {
-            args.push('--edit-me-password');
+            args.push('--pass');
             args.push('x');
         }
 

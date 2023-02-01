@@ -86,7 +86,7 @@
 <h2>Mining services</h2>
 
 <% if (! rigStatus) { %>
-    <div class="alert alert-warning">Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a></div>
+    <div class="alert alert-warning">Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-run">start monitor</a></div>
 <% } %>
 
 <%- Object.entries(rigInfos.minersInfos).map(entry => {

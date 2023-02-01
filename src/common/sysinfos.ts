@@ -1,6 +1,21 @@
 
 import si from 'systeminformation';
 
+// https://systeminformation.io/
+
+
+export async function getProcessesInfos() {
+    const processesInfos: any = {};
+
+    await si.processes().then(data => {
+        processesInfos.processes = data;
+    }).catch((err: any) => {
+        console.warn(`[getSystemInfos] Error: ${err.message}`)
+    });
+
+    return processesInfos;
+}
+
 
 export async function getSystemInfos() {
     const sysInfos: any = {};
@@ -21,7 +36,6 @@ export async function getSystemInfos() {
     } catch (err: any) {
         console.warn(`[getSystemInfos] Error: ${err.message}`)
     }
-
 
     // GRAPHICS
     try {
@@ -101,7 +115,6 @@ export async function getSystemInfos() {
         console.warn(`[getSystemInfos] Error: ${err.message}`)
     });
 
-
     await si.osInfo().then(data => {
         sysInfos.os = data;
     }).catch((err: any) => {
@@ -110,7 +123,24 @@ export async function getSystemInfos() {
 
     //await si.versions().then(data => console.log(data));
     //await si.versions('npm, java, python, python3').then(data => console.log(data));
-    //await si.users().then(data => console.log(data));
+
+    //await si.users().then(data => {
+    //    sysInfos.users = data;
+    //}).catch((err: any) => {
+    //    console.warn(`[getSystemInfos] Error: ${err.message}`)
+    //});
+
+    //await si.processLoad('node, xmrig, nbminer, lolMiner, trex').then(data => {
+    //    sysInfos.processLoad = data;
+    //}).catch((err: any) => {
+    //    console.warn(`[getSystemInfos] Error: ${err.message}`)
+    //});
+
+    //await si.currentLoad().then(data => {
+    //    sysInfos.currentLoad = data;
+    //}).catch((err: any) => {
+    //    console.warn(`[getSystemInfos] Error: ${err.message}`)
+    //});
 
     return sysInfos;
 }

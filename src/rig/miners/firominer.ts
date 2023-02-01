@@ -2,13 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
-import sevenBin from '7zip-bin';
-import { extractFull } from 'node-7z';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -16,8 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: 
-Github : 
+Website  : 
+Github   : https://github.com/firoorg/firominer
+Download : https://github.com/firoorg/firominer/releases/
 
 */
 /* ########## MAIN ######### */
@@ -28,7 +26,7 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: 'edit-me',
+    version: '1.1.0',
 
     async install(config, params) {
         const targetAlias: string = params.alias || params.miner;
@@ -39,12 +37,14 @@ export const minerInstall: t.minerInstallInfos = {
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
+        let installFileName = 'firominer';
 
         if (platform === 'linux') {
             dlUrl = `https://github.com/firoorg/firominer/releases/download/${this.version}/firominer-Linux.7z`;
 
         } else if (platform === 'win32') {
             dlUrl = `https://github.com/firoorg/firominer/releases/download/${this.version}/firominer-Windows.zip`;
+            installFileName = 'firominer.exe';
 
         } else if (platform === 'darwin') {
             dlUrl = `edit-me`;
@@ -65,42 +65,14 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.7z') {
-            const pathTo7zip = sevenBin.path7za
-            const seven = extractFull(dlFilePath, `${tempDir}${SEP}unzipped`, {
-                $bin: pathTo7zip
-            });
-
-        } else if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
         fs.renameSync( `${tempDir}${SEP}unzipped${SEP}`, targetDir);
+        fs.chmodSync(`${targetDir}/${installFileName}`, 0o755);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -111,12 +83,12 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: 52012,
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'firominer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {
@@ -126,30 +98,19 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--api-bind',
+                    '--api-port', this.apiPort.toString(),
+                    //'--api-password', 'pass',
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
-            args.push(params.algo);
         }
 
-        if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
-        }
-
-        if (params.poolUser) {
-            args.push('--edit-me-user');
-            args.push(params.poolUser);
-        }
-
-        if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+        if (params.poolUrl && params.poolUser) {
+            args.push('--pool');
+            args.push( `stratum+tcp://${params.poolUser}:x@${params.poolUrl}` );
         }
 
         if (params.extraArgs && params.extraArgs.length > 0) {

@@ -14,8 +14,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   : https://github.com/develsoftware/GMinerRelease
+Download : https://github.com/develsoftware/GMinerRelease/releases/
 
 */
 /* ########## MAIN ######### */

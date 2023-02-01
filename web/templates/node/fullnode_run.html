@@ -9,7 +9,7 @@ Fullnode run
 const installedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installed).map(entry => entry[0]);
 const installableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installable).map(entry => entry[0]);
 const runnableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].runnable).map(entry => entry[0]);
-//const managedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].managed).map(entry => entry[0]);
+const managedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].managed).map(entry => entry[0]);
 %>
 
 <h3>Manage</h3>
@@ -40,8 +40,11 @@ const runnableFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1
 
 <h3>Status</h3>
 <% if (! nodeStatus) { %>
-    Warning: JSON status requires node monitor to be started. Click here to <a href="/node/monitor-start">start monitor</a>
+    <div class="alert alert-warning">Warning: JSON status requires node monitor to be started. Click here to <a href="/node/monitor-start">start monitor</a></div>
 
+<% } else if ( ! managedFullnodes.includes(fullnode) ) { %>
+    <div class="alert alert-warning">Warning: this fullnode is not managed</div>
+    
 <% } else { %>
     <pre>
     <%- JSON.stringify(fullnodeInfos, null, 4) %>

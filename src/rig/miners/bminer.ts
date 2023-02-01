@@ -2,13 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
-import decompress from 'decompress';
-const decompressTarxz = require('decompress-tarxz');
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -66,37 +63,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.xz') {
-            await decompress(dlFilePath, `${tempDir}${SEP}unzipped`, {
-                plugins: [
-                    decompressTarxz()
-                ]
-            });
-
-        } else if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
@@ -113,12 +80,12 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: 52009,
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'bminer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {
@@ -128,30 +95,19 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '-api', `127.0.0.1:${this.apiPort.toString()}`,
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-pers');
             args.push(params.algo);
         }
 
-        if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
-        }
-
-        if (params.poolUser) {
-            args.push('--edit-me-user');
-            args.push(params.poolUser);
-        }
-
-        if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+        if (params.poolUrl && params.poolUser) {
+            args.push('-uri');
+            args.push( `stratum://${params.poolUser}@${params.poolUrl}` );
         }
 
         if (params.extraArgs && params.extraArgs.length > 0) {

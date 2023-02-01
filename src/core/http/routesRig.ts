@@ -105,18 +105,51 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     });
 
 
-    // GET Rig monitor start => /rig/monitor-start
-    app.get(`${urlPrefix}/monitor-start`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const config = Daemon.getConfig();
-        Rig.monitorStart(config);
-        res.send('Rig monitor started');
+    // GET Rig monitor run => /rig/monitor-run
+    app.get(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        //const config = Daemon.getConfig();
+        const rigStatus = Rig.monitorStatus();
+
+        const data = {
+            ...utilFuncs,
+            meta: {
+                title: `Freemining - Rig Manager - Monitor run`,
+                noIndex: false,
+            },
+            contentTemplate: `..${SEP}rig${SEP}monitor_run.html`,
+            rigStatus,
+        };
+        res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 
-    // GET Rig monitor stop => /rig/monitor-stop
-    app.get(`${urlPrefix}/monitor-stop`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+    // POST Rig monitor run => /rig/monitor-run
+    app.post(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        Rig.monitorStop(config);
-        res.send('Rig monitor stopped');
+        const action = req.body.action?.toString() || '';
+        const rigStatus = Rig.monitorStatus();
+
+        if (action === 'start') {
+            if (rigStatus) {
+                res.send('OK: Rig monitor is running');
+
+            } else {
+                Rig.monitorStart(config);
+                res.send('OK: Rig monitor started');
+            }
+            return;
+
+        } else if (action === 'stop') {
+            if (rigStatus) {
+                Rig.monitorStop(config);
+                res.send('OK: Rig monitor stopped');
+
+            } else {
+                res.send('OK: Rig monitor is not running');
+            }
+            return;
+        }
+
+        res.send(`Error: invalid action`);
     });
 
 
@@ -214,6 +247,22 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         } else if (action === 'status') {
             if (! rigStatus) {
                 res.send( `Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a>` );
+                return;
+            }
+            if (! allMiners[minerName]) {
+                res.send( `Warning: invalid miner` );
+                return;
+            }
+            if (! minerStatus) {
+                res.send( `Warning: this miner is not running` );
+                return;
+            }
+            if (! allMiners[minerName].managed) {
+                res.send( `Warning: this miner is not managed` );
+                return;
+            }
+            if (! minerInfos) {
+                res.send( `Warning: data not yet available` );
                 return;
             }
             res.header('Content-Type', 'application/json');

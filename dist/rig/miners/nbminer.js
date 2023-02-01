@@ -12,8 +12,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   : https://github.com/NebuTech/NBMiner
+Download : https://github.com/NebuTech/NBMiner/releases/
 
 */
 /* ########## MAIN ######### */

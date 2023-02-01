@@ -2,11 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -14,8 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: https://xmrig.com/
-Github : https://github.com/xmrig/xmrig
+Website  : https://xmrig.com/
+Github   : https://github.com/xmrig/xmrig
+Download : https://github.com/xmrig/xmrig/releases/
 
 */
 /* ########## MAIN ######### */
@@ -66,30 +66,8 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.debug(`${now()} [DEBUG] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
 
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
         console.debug(`${now()} [DEBUG] [RIG] Extract complete`);
 
         // Install to target dir
@@ -111,7 +89,7 @@ export const minerCommands: t.minerCommandInfos = {
     command: 'xmrig',
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {

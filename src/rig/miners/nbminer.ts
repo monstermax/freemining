@@ -2,11 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -14,8 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: 
-Github : 
+Website  : 
+Github   : https://github.com/NebuTech/NBMiner
+Download : https://github.com/NebuTech/NBMiner/releases/
 
 */
 /* ########## MAIN ######### */
@@ -66,30 +66,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
@@ -106,16 +83,22 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // 52001
+    apiPort: 52001,
 
     command: 'nbminer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {
+        const logDir   = `${config.logDir}${SEP}rig${SEP}miners`;
+        const logFile  = `${logDir}${SEP}${params.miner}.run.log`;
+
         const args: string[] = [
+            '--no-color',
+            '--no-watchdog',
+            //'--log-file', logFile + '.debug.log',
         ];
 
         if (this.apiPort > 0) {

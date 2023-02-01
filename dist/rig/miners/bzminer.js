@@ -13,8 +13,8 @@ const utils_1 = require("../../common/utils");
 /*
 
 Website  :
-Github   :
-Download :
+Github   : https://github.com/bzminer/bzminer
+Download : https://github.com/bzminer/bzminer/releases/
 
 */
 /* ########## MAIN ######### */

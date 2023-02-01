@@ -12,8 +12,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: https://xmrig.com/
-Github : https://github.com/xmrig/xmrig
+Website  : https://xmrig.com/
+Github   : https://github.com/xmrig/xmrig
+Download : https://github.com/xmrig/xmrig/releases/
 
 */
 /* ########## MAIN ######### */

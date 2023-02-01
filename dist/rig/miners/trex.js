@@ -12,8 +12,9 @@ const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: https://trex-miner.com/
-Github : https://github.com/trexminer/T-Rex
+Website  : https://trex-miner.com/
+Github   : https://github.com/trexminer/T-Rex
+Download : https://github.com/trexminer/T-Rex/releases/
 
 */
 /* ########## MAIN ######### */

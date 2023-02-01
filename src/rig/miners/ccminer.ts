@@ -2,11 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+//import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -14,8 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website: 
-Github : 
+Website  : 
+Github   : https://github.com/fancyIX/ccminer
+Download : https://github.com/fancyIX/ccminer/releases/
 
 */
 /* ########## MAIN ######### */
@@ -68,7 +68,8 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.rmSync(targetDir, { recursive: true, force: true });
         fs.mkdirSync(targetDir, {recursive: true});
-        fs.renameSync( `${tempDir}${SEP}${dlFileName}${SEP}`, `${targetDir}/${installFileName}`);
+        fs.renameSync( `${tempDir}${SEP}${dlFileName}`, `${targetDir}/${installFileName}`);
+        fs.chmodSync(`${targetDir}/${installFileName}`, 0o755);
         console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -84,7 +85,7 @@ export const minerCommands: t.minerCommandInfos = {
     command: 'ccminer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {
@@ -94,30 +95,27 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    `--api-bind=${this.apiPort.toString()}`,
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-a');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
+            args.push('-o');
             args.push(params.poolUrl);
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('-u');
             args.push(params.poolUser);
-        }
 
-        if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+            //args.push('-p');
+            //args.push('x');
         }
 
         if (params.extraArgs && params.extraArgs.length > 0) {

@@ -20,6 +20,8 @@ export const exec = (command: string, args: string[], stdin: string, cwd?: strin
 
         const spawnOptions = { maxBuffer: TEN_MEBIBYTE, cwd, argv0 };
 
+        console.debug('DEBUG CMD:', command, args.join(' '));
+
         const process = childProcess.spawn(command, args, spawnOptions);
 
         if (typeof onSpawn === 'function') {

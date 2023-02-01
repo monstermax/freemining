@@ -2,11 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
 import fetch from 'node-fetch';
-import admZip from 'adm-zip';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -14,9 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : 
-Download : 
+Website  : https://www.bzminer.com/
+Github   : https://github.com/bzminer/bzminer
+Download : https://github.com/bzminer/bzminer/releases/
 
 */
 /* ########## MAIN ######### */
@@ -67,30 +66,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Extracting
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
@@ -107,12 +83,12 @@ export const minerInstall: t.minerInstallInfos = {
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    apiPort: 52008,
 
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: 'bzminer', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os.platform() === 'win32' ? '.exe' : '');
     },
 
     getCommandArgs(config, params) {
@@ -122,30 +98,30 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--http_enabled', '1',
+                    '--http_address', '127.0.0.1',
+                    '--http_port', this.apiPort.toString(),
+                    //'--http_password', 'pass',
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-a');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
+            args.push('-p');
+            args.push( `stratum+tcp://${params.poolUrl}` );
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('-w');
             args.push(params.poolUser);
-        }
 
-        if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+            //args.push('--edit-me-password');
+            //args.push('x');
         }
 
         if (params.extraArgs && params.extraArgs.length > 0) {
@@ -160,21 +136,32 @@ export const minerCommands: t.minerCommandInfos = {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
         const headers: any = {}; // edit-me if needed
 
-        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        const minerSummaryRes = await fetch(`${apiUrl}/status`, {headers}); // EDIT API URL
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const minerName = 'edit-me';
-        const uptime = -1; // edit-me
-        const algo = 'edit-me';
-        const workerHashRate = -1; // edit-me
+        const minerName = 'BzMiner';
+        const uptime = minerSummary.uptime_s as number;
+        const poolInfos = minerSummary.pools[0] || {} as any;
+        const algo = poolInfos.algorithm as string;
+        const workerHashRate = poolInfos.hashrate as number;
 
-        const poolUrl = ''; // edit-me
-        const poolUser = ''; // edit-me
-        const workerName = poolUser.split('.').pop() as string || ''; // edit-me
+        const poolUrl = poolInfos.url[0] as string;
+        const poolUser = poolInfos.wallet as string;
+        const workerName = poolInfos.username as string;
 
-        const cpus: any[] = []; // edit-me
-        const gpus: any[] = []; // edit-me
+        const cpus: any[] = [];
+
+        const gpus: any[] = minerSummary.devices.map((gpu:any, idx:number) => {
+            return {
+                id: idx,
+                name: gpu.name as string,
+                hashRate: gpu.hashrate[0] as number || 0,
+                temperature: gpu.core_temp as number,
+                fanSpeed: gpu.fan as number,
+                power: gpu.power as number,
+            };
+        });
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerInfos = {
