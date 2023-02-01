@@ -148,12 +148,12 @@ export const minerCommands: t.minerCommandInfos = {
         const gpus = minerSummary.gpus.map((gpu: any) => {
             workerHashRate += gpu.hashrate;
             return {
-                id: gpu.gpu_id,
-                name: gpu.name,
-                hashRate: gpu.hashrate,
-                temperature: gpu.temperature,
-                fanSpeed: gpu.fan_speed,
-                power: gpu.power,
+                id: gpu.gpu_id as number,
+                name: gpu.name as string,
+                hashRate: gpu.hashrate as number,
+                temperature: gpu.temperature as number,
+                fanSpeed: gpu.fan_speed as number,
+                power: gpu.power as number,
             }
         });
 
