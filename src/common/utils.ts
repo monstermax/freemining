@@ -7,6 +7,7 @@ import readline from 'readline';
 import colors from 'colors/safe';
 import { exec } from 'child_process';
 import fetch from 'node-fetch';
+import net from 'net';
 
 import type *  as t from './types';
 
@@ -381,4 +382,22 @@ export async function tailFile(file: string, numLines: number): Promise<any> {
 
     return buffer.join(os.EOL);
 }
+
+
+export function sendSocketMessage(message: string, host: string, port: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const client = new net.Socket();
+        client.connect(port, host, () => {
+            client.write(message);
+        });
+        client.on('data', (data) => {
+            resolve(data.toString());
+            client.destroy();
+        });
+        client.on('error', (error) => {
+            reject(error);
+            client.destroy();
+        });
+    });
+};
 

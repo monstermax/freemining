@@ -2,9 +2,11 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import fetch from 'node-fetch';
+//import fetch from 'node-fetch';
+//import net from 'net';
 
-import { now, getOpt, downloadFile } from '../../common/utils';
+
+import { now, getOpt, downloadFile, sendSocketMessage } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
@@ -98,7 +100,8 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    `--api_listen=0.0.0.0:${this.apiPort.toString()}`,
+                    `--api_listen=0.0.0.0:${this.apiPort.toString()}`, // sgminer style API
+                    //`cm_api_listen=0.0.0.0:${this.apiPort.toString()}`, // claymore style API
                 ]
             );
         }
@@ -132,11 +135,13 @@ export const minerCommands: t.minerCommandInfos = {
 
 
     async getInfos(config, params) {
-        const apiUrl = `http://127.0.0.1:${this.apiPort}`;
+        //const apiUrl = `http://127.0.0.1:${this.apiPort}`;
+        const apiHost = '127.0.0.1';
         const headers: any = {}; // edit-me if needed
 
-        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
-        const minerSummary: any = await minerSummaryRes.json();
+        //const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        const minerSummaryRes = await sendSocketMessage(`summary`, apiHost, this.apiPort) as any;
+        const minerSummary: any = JSON.parse(minerSummaryRes)
 
         // EDIT THESE VALUES - START //
         const minerName = 'edit-me';
