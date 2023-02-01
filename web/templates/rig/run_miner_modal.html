@@ -59,7 +59,8 @@
                         <select id="newMiner_miner" name="miner" class="form-select required" aria-describedby="newMiner_miner_Help">
                             <option></option>
 
-                            <%- runnableMiners.map(miner => {
+                            <%- installedMiners.map(miner => {
+                                if (! runnableMiners.includes(miner)) return;
                                 if (miner in rigInfos.minersInfos) {
                                     return '<option value="' + miner + '" disabled>' + miner + '</option>';
 

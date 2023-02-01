@@ -144,7 +144,7 @@ function minerInstallStart(config, params) {
             throw { message: `Unknown miner ${params.miner}` };
         }
         const minerInstall = minersConfigs_1.minersInstalls[params.miner];
-        return minerInstall.install(config, params);
+        /* await */ minerInstall.install(config, params);
     });
 }
 exports.minerInstallStart = minerInstallStart;

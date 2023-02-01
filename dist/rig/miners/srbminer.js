@@ -5,35 +5,36 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
-const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
-const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+const decompress_archive_1 = require("../../common/decompress_archive");
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website  :
+Github   : https://github.com/doktor83/SRBMiner-Multi
+Download : https://github.com/doktor83/SRBMiner-Multi/releases/
 
 */
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.minerInstall = {
-    version: 'edit-me',
+    version: '2.1.0',
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const targetAlias = params.alias || params.miner;
             const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
             const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`;
-            throw { message: `edit-me then delete this line` };
+            //throw { message: `edit-me then delete this line` };
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             let dlUrl;
+            const versionBis = this.version.replaceAll('.', '-');
             if (platform === 'linux') {
-                dlUrl = `edit-me`;
+                dlUrl = `https://github.com/doktor83/SRBMiner-Multi/releases/download/${this.version}/SRBMiner-Multi-${versionBis}-Linux.tar.xz`;
             }
             else if (platform === 'win32') {
-                dlUrl = `edit-me`;
+                dlUrl = `https://github.com/doktor83/SRBMiner-Multi/releases/download/${this.version}/SRBMiner-Multi-${versionBis}-win64.zip`;
             }
             else if (platform === 'darwin') {
                 dlUrl = `edit-me`;
@@ -52,33 +53,12 @@ exports.minerInstall = {
             // Extracting
             fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-            if (path_1.default.extname(dlFilePath) === '.gz') {
-                yield tar_1.default.extract({
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }).catch((err) => {
-                    throw { message: err.message };
-                });
-            }
-            else {
-                const zipFile = new adm_zip_1.default(dlFilePath);
-                yield new Promise((resolve, reject) => {
-                    zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err) => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        resolve(null);
-                    });
-                }).catch((err) => {
-                    throw { message: err.message };
-                });
-            }
+            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
             // Install to target dir
             fs_1.default.mkdirSync(targetDir, { recursive: true });
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}SRBMiner-Multi-${versionBis}${SEP}`, targetDir);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
@@ -86,34 +66,34 @@ exports.minerInstall = {
     }
 };
 exports.minerCommands = {
-    apiPort: -1,
-    command: 'edit-me',
+    apiPort: 52011,
+    command: 'SRBMiner-MULTI',
     getCommandFile(config, params) {
-        return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
     },
     getCommandArgs(config, params) {
-        const args = [];
+        const args = [
+            '--disable-cpu',
+        ];
         if (this.apiPort > 0) {
             args.push(...[
-                '--edit-me-api-host', '127.0.0.1',
-                '--edit-me-api-port', this.apiPort.toString(),
+                '--api-enable',
+                '--api-port', this.apiPort.toString(),
             ]);
         }
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('--algorithm');
             args.push(params.algo);
         }
         if (params.poolUrl) {
-            args.push('--edit-me-url');
+            args.push('--pool');
             args.push(params.poolUrl);
         }
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('--wallet');
             args.push(params.poolUser);
-        }
-        if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+            //args.push('--edit-me-password');
+            //args.push('x');
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);

@@ -14,6 +14,7 @@ const exec = (command, args, stdin, cwd, onSpawn, onStdOut, onStdErr, onEnd, arg
         let stdout = '';
         let stderr = '';
         const spawnOptions = { maxBuffer: TEN_MEBIBYTE, cwd, argv0 };
+        console.debug('DEBUG CMD:', command, args.join(' '));
         const process = child_process_1.default.spawn(command, args, spawnOptions);
         if (typeof onSpawn === 'function') {
             onSpawn(process);

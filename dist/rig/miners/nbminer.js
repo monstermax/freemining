@@ -5,10 +5,9 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
-const tar_1 = tslib_1.__importDefault(require("tar"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
-const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+const decompress_archive_1 = require("../../common/decompress_archive");
 /* ########## DESCRIPTION ######### */
 /*
 
@@ -56,28 +55,7 @@ exports.minerInstall = {
             // Extracting
             fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-            if (path_1.default.extname(dlFilePath) === '.gz') {
-                yield tar_1.default.extract({
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }).catch((err) => {
-                    throw { message: err.message };
-                });
-            }
-            else {
-                const zipFile = new adm_zip_1.default(dlFilePath);
-                yield new Promise((resolve, reject) => {
-                    zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err) => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        resolve(null);
-                    });
-                }).catch((err) => {
-                    throw { message: err.message };
-                });
-            }
+            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
             // Install to target dir
             fs_1.default.mkdirSync(targetDir, { recursive: true });
@@ -90,13 +68,19 @@ exports.minerInstall = {
     }
 };
 exports.minerCommands = {
-    apiPort: -1,
+    apiPort: 52001,
     command: 'nbminer',
     getCommandFile(config, params) {
-        return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
     },
     getCommandArgs(config, params) {
-        const args = [];
+        const logDir = `${config.logDir}${SEP}rig${SEP}miners`;
+        const logFile = `${logDir}${SEP}${params.miner}.run.log`;
+        const args = [
+            '--no-color',
+            '--no-watchdog',
+            //'--log-file', logFile + '.debug.log',
+        ];
         if (this.apiPort > 0) {
             args.push(...[
                 '--api', `127.0.0.1:${this.apiPort.toString()}`,

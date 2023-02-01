@@ -365,7 +365,9 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const config = Daemon.getConfig();
         const rigInfos = Rig.getRigInfos();
         const allMiners = await Rig.getAllMiners(config);
+        const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
         const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
+        const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
 
         if (! rigInfos) {
             res.send(`Rig not initialized`);
@@ -385,6 +387,8 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             rigInfos,
             miners: allMiners,
             runnableMiners,
+            runningMiners,
+            installedMiners,
             presets,
             miner: minerName,
         };

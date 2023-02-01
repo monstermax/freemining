@@ -56,7 +56,8 @@ exports.minerInstall = {
             // Install to target dir
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
             fs_1.default.mkdirSync(targetDir, { recursive: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}${dlFileName}${SEP}`, `${targetDir}/${installFileName}`);
+            fs_1.default.renameSync(`${tempDir}${SEP}${dlFileName}`, `${targetDir}/${installFileName}`);
+            fs_1.default.chmodSync(`${targetDir}/${installFileName}`, 0o755);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
@@ -67,31 +68,28 @@ exports.minerCommands = {
     apiPort: -1,
     command: 'ccminer',
     getCommandFile(config, params) {
-        return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
+        return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
     },
     getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {
             args.push(...[
-                '--edit-me-api-host', '127.0.0.1',
-                '--edit-me-api-port', this.apiPort.toString(),
+                `--api-bind=${this.apiPort.toString()}`,
             ]);
         }
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-a');
             args.push(params.algo);
         }
         if (params.poolUrl) {
-            args.push('--edit-me-url');
+            args.push('-o');
             args.push(params.poolUrl);
         }
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('-u');
             args.push(params.poolUser);
-        }
-        if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+            //args.push('-p');
+            //args.push('x');
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);

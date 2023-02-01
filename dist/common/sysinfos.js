@@ -1,8 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSystemInfos = void 0;
+exports.getSystemInfos = exports.getProcessesInfos = void 0;
 const tslib_1 = require("tslib");
 const systeminformation_1 = tslib_1.__importDefault(require("systeminformation"));
+// https://systeminformation.io/
+function getProcessesInfos() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const processesInfos = {};
+        yield systeminformation_1.default.processes().then(data => {
+            processesInfos.processes = data;
+        }).catch((err) => {
+            console.warn(`[getSystemInfos] Error: ${err.message}`);
+        });
+        return processesInfos;
+    });
+}
+exports.getProcessesInfos = getProcessesInfos;
 function getSystemInfos() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const sysInfos = {};
@@ -94,7 +107,21 @@ function getSystemInfos() {
         });
         //await si.versions().then(data => console.log(data));
         //await si.versions('npm, java, python, python3').then(data => console.log(data));
-        //await si.users().then(data => console.log(data));
+        //await si.users().then(data => {
+        //    sysInfos.users = data;
+        //}).catch((err: any) => {
+        //    console.warn(`[getSystemInfos] Error: ${err.message}`)
+        //});
+        //await si.processLoad('node, xmrig, nbminer, lolMiner, trex').then(data => {
+        //    sysInfos.processLoad = data;
+        //}).catch((err: any) => {
+        //    console.warn(`[getSystemInfos] Error: ${err.message}`)
+        //});
+        //await si.currentLoad().then(data => {
+        //    sysInfos.currentLoad = data;
+        //}).catch((err: any) => {
+        //    console.warn(`[getSystemInfos] Error: ${err.message}`)
+        //});
         return sysInfos;
     });
 }

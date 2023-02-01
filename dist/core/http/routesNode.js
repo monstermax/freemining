@@ -57,17 +57,43 @@ function registerNodeRoutes(app, urlPrefix = '') {
         res.header('Content-Type', 'application/json');
         res.send(content);
     }));
-    // NODE monitor start => /node/monitor-start
-    app.get(`${urlPrefix}/monitor-start`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const config = Daemon.getConfig();
-        Node.monitorStart(config);
-        res.send('Node monitor started');
+    // GET Node monitor run => /node/monitor-run
+    app.get(`${urlPrefix}/monitor-run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        //const config = Daemon.getConfig();
+        const nodeStatus = Node.monitorStatus();
+        const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Node Manager - Monitor run`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}node${SEP}monitor_run.html`, nodeStatus });
+        res.render(`.${SEP}core${SEP}layout.html`, data);
     }));
-    // NODE monitor stop => /node/monitor-stop
-    app.get(`${urlPrefix}/monitor-stop`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    // POST Node monitor run => /node/monitor-run
+    app.post(`${urlPrefix}/monitor-run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        var _a;
         const config = Daemon.getConfig();
-        Node.monitorStop(config);
-        res.send('Node monitor stopped');
+        const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        const nodeStatus = Node.monitorStatus();
+        if (action === 'start') {
+            if (nodeStatus) {
+                res.send('OK: Node monitor is running');
+            }
+            else {
+                Node.monitorStart(config);
+                res.send('OK: Node monitor started');
+            }
+            return;
+        }
+        else if (action === 'stop') {
+            if (nodeStatus) {
+                Node.monitorStop(config);
+                res.send('OK: Node monitor stopped');
+            }
+            else {
+                res.send('OK: Node monitor is not running');
+            }
+            return;
+        }
+        res.send(`Error: invalid action`);
     }));
     // GET Fullnode install page => /node/fullnodes/{fullnodeName}/install
     app.get(`${urlPrefix}/fullnodes/:fullnodeName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -92,9 +118,9 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // POST Fullnode install page => /node/fullnodes/{fullnodeName}/install
     app.post(`${urlPrefix}/fullnodes/:fullnodeName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _b;
         const fullnodeName = req.params.fullnodeName;
-        const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        const action = ((_b = req.body.action) === null || _b === void 0 ? void 0 : _b.toString()) || '';
         const config = Daemon.getConfig();
         //const nodeInfos = Node.getNodeInfos();
         //const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
@@ -124,9 +150,9 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // GET Fullnode run page => /node/fullnodes/{fullnodeName}/run
     app.get(`${urlPrefix}/fullnodes/:fullnodeName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _b;
+        var _c;
         const fullnodeName = req.params.fullnodeName;
-        const action = ((_b = req.query.action) === null || _b === void 0 ? void 0 : _b.toString()) || '';
+        const action = ((_c = req.query.action) === null || _c === void 0 ? void 0 : _c.toString()) || '';
         const config = Daemon.getConfig();
         const nodeStatus = Node.monitorStatus();
         const nodeInfos = Node.getNodeInfos();
@@ -143,6 +169,22 @@ function registerNodeRoutes(app, urlPrefix = '') {
         else if (action === 'status') {
             if (!nodeStatus) {
                 res.send(`Warning: JSON status requires node monitor to be started. Click here to <a href="/node/monitor-start">start monitor</a>`);
+                return;
+            }
+            if (!allFullnodes[fullnodeName]) {
+                res.send(`Warning: invalid fullnode`);
+                return;
+            }
+            if (!fullnodeStatus) {
+                res.send(`Warning: this fullnode is not running`);
+                return;
+            }
+            if (!allFullnodes[fullnodeName].managed) {
+                res.send(`Warning: this fullnode is not managed`);
+                return;
+            }
+            if (!fullnodeInfos) {
+                res.send(`Warning: data not yet available`);
                 return;
             }
             res.header('Content-Type', 'application/json');
@@ -168,9 +210,9 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // POST Fullnode run page => /node/fullnodes/{fullnodeName}/run
     app.post(`${urlPrefix}/fullnodes/:fullnodeName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _c;
+        var _d;
         const fullnodeName = req.params.fullnodeName;
-        const action = ((_c = req.body.action) === null || _c === void 0 ? void 0 : _c.toString()) || '';
+        const action = ((_d = req.body.action) === null || _d === void 0 ? void 0 : _d.toString()) || '';
         const config = Daemon.getConfig();
         //const nodeInfos = Node.getNodeInfos();
         //const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
