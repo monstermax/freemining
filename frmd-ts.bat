@@ -2,4 +2,4 @@
 
 pushd %~dp0
 
-exec ./ts-node src/frmd.ts %*
+node -r ts-node/register src/frmd.ts %*

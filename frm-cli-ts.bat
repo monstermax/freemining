@@ -2,4 +2,4 @@
 
 pushd %~dp0
 
-exec ./ts-node src/frm-cli.ts %*
+node -r ts-node/register src/frm-cli.ts %*
