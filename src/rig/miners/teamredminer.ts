@@ -142,31 +142,37 @@ export const minerCommands: t.minerCommandInfos = {
         //const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
         const minerSummaryRes = await sendSocketMessage(`{"command":"summary","parameter":""}`, apiHost, this.apiPort) as any;
         const minerSummary: any = JSON.parse(minerSummaryRes)
-        
+
+        const poolsRes = await sendSocketMessage(`{"command":"pools","parameter":""}`, apiHost, this.apiPort) as any;
+        const pools: any = JSON.parse(poolsRes);
+
         const minerDevRes = await sendSocketMessage(`{"command":"devs","parameter":""}`, apiHost, this.apiPort) as any;
         const minerDev: any = JSON.parse(minerDevRes);
 
+        const minerDevDetailsRes = await sendSocketMessage(`{"command":"devdetails","parameter":""}`, apiHost, this.apiPort) as any;
+        const minerDevDetails: any = JSON.parse(minerDevDetailsRes);
+
         // EDIT THESE VALUES - START //
         const minerName = 'TeamRedMiner';
-        const uptime = -1; // edit-me
-        const algo = 'edit-me';
+        const uptime = minerSummary.Elapsed as number;
+        const algo = pools[0].Algorithm as string;
         const workerHashRate = (minerSummary['KHS 30s'] || 0) / 1000;
 
-        const poolUrl = ''; // edit-me
-        const poolUser = ''; // edit-me
+        const poolUrl = pools[0].url as string;
+        const poolUser = pools[0].user as string;
         const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
         const cpus: any[] = [];
 
         const gpus: any[] = await minerDev.DEVS.map(async (gpu: any, idx: number) => {
-            const minerGpuRes = await sendSocketMessage(`{"command":"devs","parameter":""}`, apiHost, this.apiPort) as any;
+            const minerGpuRes = await sendSocketMessage(`{"command":"gpu","parameter":"${idx}"}`, apiHost, this.apiPort) as any;
             const minerGpu: any = JSON.parse(minerGpuRes);
 
             return {
                 id: gpu.GPU as number,
-                name: gpu.name as string,
-                hashRate: gpu.hashrate as number,
-                temperature: gpu['Temperature'] as number,
+                name: minerDevDetails[idx]['Model'] as string,
+                hashRate: (minerGpu['KHS 30s'] as number || 0) / 1000,
+                temperature: minerGpu['Temperature'] as number,
                 fanSpeed: gpu['Fan Percent'] as number,
                 power: gpu['GPU Power'] as number,
             }
