@@ -8,6 +8,7 @@ const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const utils_1 = require("../../common/utils");
 const decompress_archive_1 = require("../../common/decompress_archive");
+const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /* ########## DESCRIPTION ######### */
 /*
 
@@ -16,30 +17,36 @@ Github   : https://github.com/trexminer/T-Rex
 Download : https://github.com/trexminer/T-Rex/releases/
 
 */
+/* ########## CONFIG ######### */
+const minerName = 'trex';
+const minerTitle = 'T-Rex';
+const github = 'trexminer/T-Rex';
+const lastVersion = '0.26.8';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
-exports.minerInstall = {
-    version: '6.18.1',
+exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), { minerName,
+    minerTitle,
+    lastVersion,
+    github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const targetAlias = params.alias || params.miner;
-            const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-            const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`;
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-            let dlUrl;
-            if (platform === 'linux') {
-                dlUrl = `https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-linux.tar.gz`;
-            }
-            else if (platform === 'win32') {
-                dlUrl = `https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-win.zip`;
-            }
-            else if (platform === 'darwin') {
+            const setAsDefaultAlias = params.default || false;
+            let version = params.version || this.lastVersion;
+            let subDir = ``;
+            // Download url selection
+            const dlUrls = {
+                'linux': `https://github.com/trexminer/T-Rex/releases/download/${version}/t-rex-${version}-linux.tar.gz`,
+                'win32': `https://github.com/trexminer/T-Rex/releases/download/${version}/t-rex-${version}-win.zip`,
+                'darwin': ``,
+                'freebsd': ``,
+            };
+            let dlUrl = dlUrls[platform] || '';
+            if (!dlUrl)
                 throw { message: `No installation script available for the platform ${platform}` };
-            }
-            else {
-                throw { message: `No installation script available for the platform ${platform}` };
-            }
+            // Some common install options
+            const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
@@ -52,19 +59,18 @@ exports.minerInstall = {
             yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
             // Install to target dir
-            fs_1.default.mkdirSync(targetDir, { recursive: true });
-            fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}`, targetDir);
-            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);
+            fs_1.default.mkdirSync(aliasDir, { recursive: true });
+            fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+            // Write report files
+            this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
+            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
-    }
-};
-exports.minerCommands = {
-    apiPort: 52005,
-    command: 't-rex',
-    getCommandFile(config, params) {
+    } });
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52005, command: 't-rex', getCommandFile(config, params) {
         return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
     },
     getCommandArgs(config, params) {
@@ -142,5 +148,4 @@ exports.minerCommands = {
             };
             return infos;
         });
-    }
-};
+    } });

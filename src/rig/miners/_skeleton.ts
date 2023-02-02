@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
+import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';
 
@@ -18,7 +19,15 @@ Github   :
 Download :
 
 */
+/* ########## CONFIG ######### */
+
+const minerName   = ''; // edit-me
+const minerTitle  = ''; // edit-me
+const github      = ''; // edit-me
+const lastVersion = ''; // edit-me
+
 /* ########## MAIN ######### */
+
 
 const SEP = path.sep;
 
@@ -26,32 +35,36 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
+    ...baseMiner.minerInstall,
+    minerName,
+    minerTitle,
+    lastVersion,
+    github,
+
     version: 'edit-me',
 
     async install(config, params) {
-        const targetAlias: string = params.alias || params.miner;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
+        const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
+        const setAsDefaultAlias = params.default || false;
+        let version = params.version || this.version;
+        let subDir = ``; // edit-me
+
+        // Download url selection
+        const dlUrls: any = {
+            'linux':   ``, // edit-me
+            'win32':   ``, // edit-me
+            'darwin':  ``, // edit-me
+            'freebsd': ``, // edit-me
+        }
+        let dlUrl = dlUrls[platform] || '';
 
         throw { message: `edit-me then delete this line` };
 
-        const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
+        if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
-        if (platform === 'linux') {
-            dlUrl = `edit-me`;
+        // Some common install options
+        const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
 
-        } else if (platform === 'win32') {
-            dlUrl = `edit-me`;
-
-        } else if (platform === 'darwin') {
-            dlUrl = `edit-me`;
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
-        }
-
-        if (dlUrl === 'edit-me') throw { message: `No installation script available for the platform ${platform}` };
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
@@ -67,21 +80,27 @@ export const minerInstall: t.minerInstallInfos = {
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+
+        // Write report files
+        this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
+
+        console.log(`${now()} [INFO] [RIG] Install complete into ${aliasDir}`);
     }
 };
 
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: -1, // edit-me
+    ...baseMiner.minerCommands,
 
+    apiPort: -1, // edit-me
     command: 'edit-me', // the filename of the executable (without .exe extension)
 
     getCommandFile(config, params) {

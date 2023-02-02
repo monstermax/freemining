@@ -8,6 +8,7 @@ import os from 'os';
 
 import { now, getOpt, downloadFile, sendSocketMessage } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
+import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';
 
@@ -20,6 +21,13 @@ Github   : https://github.com/todxx/teamredminer
 Download : https://github.com/todxx/teamredminer/releases/
 
 */
+/* ########## CONFIG ######### */
+
+const minerName = 'teamredminer';
+const minerTitle = 'TeamRedMiner';
+const github = 'todxx/teamredminer';
+const lastVersion = '0.10.8';
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -28,35 +36,39 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: '0.10.8',
+    ...baseMiner.minerInstall,
+    minerName,
+    minerTitle,
+    lastVersion,
+    github,
 
     async install(config, params) {
-        const targetAlias: string = params.alias || params.miner;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
-
-        //throw { message: `edit-me then delete this line` };
-
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
-        let subDir = `teamredminer-v${this.version}-*`;
+        const setAsDefaultAlias = params.default || false;
+        let version = params.version || this.lastVersion;
+        let subDir = `${SEP}teamredminer-v${version}-*`;
+
+        // Download url selection
+        const dlUrls: any = {
+            'linux':   `https://github.com/todxx/teamredminer/releases/download/v${version}/teamredminer-v${version}-linux.tgz`,
+            'win32':   `https://github.com/todxx/teamredminer/releases/download/v${version}/teamredminer-v${version}-win.zip`,
+            'darwin':  ``,
+            'freebsd': ``,
+        }
+        let dlUrl = dlUrls[platform] || '';
+
+        if (! dlUrl) throw { message: `No installation script available for the platform ${platform}` };
+
+        // Some common install options
+        const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
 
         if (platform === 'linux') {
-            dlUrl = `https://github.com/todxx/teamredminer/releases/download/v${this.version}/teamredminer-v${this.version}-linux.tgz`;
-            subDir = `teamredminer-v${this.version}-linux`;
+            subDir = `${SEP}teamredminer-v${version}-linux`;
 
         } else if (platform === 'win32') {
-            dlUrl = `https://github.com/todxx/teamredminer/releases/download/v${this.version}/teamredminer-v${this.version}-win.zip`;
-            subDir = `teamredminer-v${this.version}-win`;
-
-        } else if (platform === 'darwin') {
-            dlUrl = `edit-me`;
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
+            subDir = `${SEP}teamredminer-v${version}-win`;
         }
 
-        if (dlUrl === 'edit-me') throw { message: `No installation script available for the platform ${platform}` };
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
@@ -72,26 +84,28 @@ export const minerInstall: t.minerInstallInfos = {
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}${subDir}${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+
+        // Write report files
+        this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
+
+        console.log(`${now()} [INFO] [RIG] Install complete into ${aliasDir}`);
     }
 };
 
 
 
 export const minerCommands: t.minerCommandInfos = {
+    ...baseMiner.minerCommands,
+
     apiPort: 52004,
-
     command: 'teamredminer', // the filename of the executable (without .exe extension)
-
-    getCommandFile(config, params) {
-        return this.command + (os.platform() === 'win32' ? '.exe' : '');
-    },
 
     getCommandArgs(config, params) {
         const args: string[] = [
@@ -154,9 +168,9 @@ export const minerCommands: t.minerCommandInfos = {
 
         // EDIT THESE VALUES - START //
         const minerName = 'TeamRedMiner';
-        const uptime = minerSummary.Elapsed as number;
+        const uptime = minerSummary[0].Elapsed as number;
         const algo = pools[0].Algorithm as string;
-        const workerHashRate = (minerSummary['KHS 30s'] || 0) / 1000;
+        const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) / 1000;
 
         const poolUrl = pools[0].url as string;
         const poolUser = pools[0].user as string;

@@ -26,16 +26,18 @@ exports.fullnodeInstall = {
             const targetAlias = params.alias || params.fullnode;
             const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
             const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`;
+            let version = params.version || this.version;
+            let subDir = `${SEP}dogecoin-${version}`;
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             let dlUrl;
             if (platform === 'linux') {
-                dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-x86_64-linux-gnu.tar.gz`;
+                dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-x86_64-linux-gnu.tar.gz`;
             }
             else if (platform === 'win32') {
-                dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-win64.zip`;
+                dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-win64.zip`;
             }
             else if (platform === 'darwin') {
-                //dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-osx-signed.dmg`;
+                //dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-osx-signed.dmg`;
                 dlUrl = `edit-me`;
             }
             else {
@@ -78,7 +80,7 @@ exports.fullnodeInstall = {
             // Install to target dir
             fs_1.default.mkdirSync(targetDir, { recursive: true });
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}dogecoin-${this.version}${SEP}`, targetDir);
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${targetDir}`);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });

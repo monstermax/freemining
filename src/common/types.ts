@@ -121,6 +121,8 @@ export type ConfigCli = {
 export type Process = {
     type: string,
     name: string,
+    miner?: string,
+    fullnode?: string,
     cmdFile: string,
     args: string[],
     dataDir: string,
@@ -181,8 +183,13 @@ export type Rig = {
 
 
 export type minerInstallInfos = {
-    version: string,
+    minerName: string,
+    minerTitle: string,
+    lastVersion: string,
+    github: string,
     install(config: Config, params: MapString<any>): Promise<void>,
+    getLastVersion?(github?: string): Promise<string>,
+    getAllVersions?(github?: string): Promise<string[]>,
 } & MapString<any>;
 
 
@@ -279,7 +286,10 @@ export type Node = {
 
 export type fullnodeInstallInfos = {
     version: string,
+    github?: string,
     install(config: Config, params: MapString<any>): Promise<void>,
+    getLastVersion?(): Promise<string>,
+    getAllVersions?(): Promise<string[]>,
 } & MapString<any>;
 
 

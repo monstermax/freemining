@@ -1,0 +1,63 @@
+{
+    "ERG": {
+        "trex": {
+            "algo": "autolykos2"
+        },
+        "teamredminer": {
+            "algo": "ergo"
+        },
+        "nbminer": {
+            "algo": "ergo"
+        },
+        "lolminer": {
+            "algo": "AUTOLYKOS2"
+        }
+    },
+    "FIRO": {
+        "lolminer": {
+            "algo": "ZEL"
+        },
+        "firominer": {
+            "algo": "auto"
+        },
+        "trex": {
+            "algo": "firopow"
+        }
+    },
+    "FLUX": {
+        "gminer": {
+            "algo": "125_4",
+            "extraArgs": "-d 0"
+        },
+        "lolminer": {
+            "algo": "ZEL",
+            "extraArgs": "--devices 0"
+        }
+    },
+    "MEWC": {
+        "gminer": {
+            "algo": "kawpow",
+            "extraArgs": "-d 0"
+        }
+    },
+    "RTM": {
+        "xmrig": {
+            "algo": "ghostrider"
+        }
+    },
+    "RVN": {
+        "gminer": {
+            "algo": "kawpow"
+        }
+    },
+    "RXD": {
+        "bzminer": {
+            "algo": "radiant"
+        }
+    },
+    "XMR": {
+        "xmrig": {
+            "algo": "rx/0"
+        }
+    },
+}

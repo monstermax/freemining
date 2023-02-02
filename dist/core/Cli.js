@@ -53,35 +53,35 @@ Usage:
 
 frm-cli <params>
 
-        --help                                  # display this this message
-        --sysinfos                              # display server system informations
-        --sysinfos --local                      # display cli system informations
-        --cli-wss-server-address                # default 127.0.0.1
-        --cli-wss-conn-timeout                  # default 5 seconds
+        --help                                      # display this this message
+        --sysinfos                                  # display server system informations
+        --sysinfos --local                          # display cli system informations
+        --cli-wss-server-address                    # default 127.0.0.1
+        --cli-wss-conn-timeout                      # default 5 seconds
 
-        --rig-status                            # display rig status
-        --rig-monitor-start                     # start rig monitor
-        --rig-monitor-stop                      # stop rig monitor
-        --rig-monitor-status                    # display rig monitor status
+        --rig-status                                # display rig status
+        --rig-monitor-start                         # start rig monitor
+        --rig-monitor-stop                          # stop rig monitor
+        --rig-monitor-status                        # display rig monitor status
 
-        --miner-start                           # start a miner
-        --miner-stop                            # stop a miner
-        --miner-status                          # display a miner status
-        --miner-log                             # display a miner logs
-        --miner-infos                           # display a miner infos
-        --miner-install                         # install a miner
+        --miner-start                               # start a miner
+        --miner-stop                                # stop a miner
+        --miner-status                              # display a miner status
+        --miner-log                                 # display a miner logs
+        --miner-infos                               # display a miner infos
+        --miner-install [--alias xx] [--version vv] # install a miner
 
-        --node-status                           # display node status
-        --node-monitor-start                    # start node monitor
-        --node-monitor-stop                     # stop node monitor
-        --node-monitor-status                   # display node monitor status
+        --node-status                               # display node status
+        --node-monitor-start                        # start node monitor
+        --node-monitor-stop                         # stop node monitor
+        --node-monitor-status                       # display node monitor status
 
-        --fullnode-start                        # start a fullnode
-        --fullnode-stop                         # stop a fullnode
-        --fullnode-status                       # display a fullnode status
-        --fullnode-log                          # display a fullnode logs
-        --fullnode-infos                        # display a fullnode infos
-        --fullnode-install                      # install a fullnode
+        --fullnode-start                            # start a fullnode
+        --fullnode-stop                             # stop a fullnode
+        --fullnode-status                           # display a fullnode status
+        --fullnode-log                              # display a fullnode logs
+        --fullnode-infos                            # display a fullnode infos
+        --fullnode-install                          # install a fullnode
 
 `;
     console.log(_usage);
@@ -330,7 +330,9 @@ function rigMinerInstallStart(ws, args = [], config = {}) {
     const method = 'rigMinerInstallStart';
     const params = {
         miner: minerName,
-        alias: (0, utils_1.getOpt)('-alias', args) || minerName,
+        version: (0, utils_1.getOpt)('--version', args),
+        alias: (0, utils_1.getOpt)('--alias', args),
+        default: (0, utils_1.hasOpt)('--default', args), // install as default version of the miner
     };
     rpcSendRequest(ws, 1, method, params);
 }
@@ -407,7 +409,9 @@ function nodeFullnodeInstallStart(ws, args = [], config = {}) {
     const method = 'nodeFullnodeInstallStart';
     const params = {
         fullnode: fullnodeName,
-        alias: (0, utils_1.getOpt)('-alias', args) || fullnodeName,
+        version: (0, utils_1.getOpt)('--version', args),
+        alias: (0, utils_1.getOpt)('--alias', args),
+        default: (0, utils_1.hasOpt)('--default', args), // install as default version of the fullnode
     };
     rpcSendRequest(ws, 1, method, params);
 }

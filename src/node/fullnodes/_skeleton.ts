@@ -32,6 +32,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const targetAlias: string = params.alias || params.fullnode;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`
+        let version = params.version || this.version;
 
         throw { message: `edit-me then delete this line` };
 

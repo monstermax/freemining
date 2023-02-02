@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
+import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';
 
@@ -18,6 +19,13 @@ Github   : https://github.com/trexminer/T-Rex
 Download : https://github.com/trexminer/T-Rex/releases/
 
 */
+/* ########## CONFIG ######### */
+
+const minerName = 'trex';
+const minerTitle = 'T-Rex';
+const github = 'trexminer/T-Rex';
+const lastVersion = '0.26.8';
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -26,28 +34,32 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: '6.18.1',
+    ...baseMiner.minerInstall,
+    minerName,
+    minerTitle,
+    lastVersion,
+    github,
 
     async install(config, params) {
-        const targetAlias: string = params.alias || params.miner;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
-
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
+        const setAsDefaultAlias = params.default || false;
+        let version = params.version || this.lastVersion;
+        let subDir = ``;
 
-        if (platform === 'linux') {
-            dlUrl = `https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-linux.tar.gz`;
-
-        } else if (platform === 'win32') {
-            dlUrl = `https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-win.zip`;
-
-        } else if (platform === 'darwin') {
-            throw { message: `No installation script available for the platform ${platform}` };
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
+        // Download url selection
+        const dlUrls: any = {
+            'linux':   `https://github.com/trexminer/T-Rex/releases/download/${version}/t-rex-${version}-linux.tar.gz`,
+            'win32':   `https://github.com/trexminer/T-Rex/releases/download/${version}/t-rex-${version}-win.zip`,
+            'darwin':  ``,
+            'freebsd': ``,
         }
+        let dlUrl = dlUrls[platform] || '';
+
+        if (! dlUrl) throw { message: `No installation script available for the platform ${platform}` };
+
+        // Some common install options
+        const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
+
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
@@ -64,21 +76,27 @@ export const minerInstall: t.minerInstallInfos = {
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+
+        // Write report files
+        this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
+
+        console.log(`${now()} [INFO] [RIG] Install complete into ${aliasDir}`);
     }
 };
 
 
 
 export const minerCommands: t.minerCommandInfos = {
-    apiPort: 52005,
+    ...baseMiner.minerCommands,
 
+    apiPort: 52005,
     command: 't-rex',
 
     getCommandFile(config, params) {

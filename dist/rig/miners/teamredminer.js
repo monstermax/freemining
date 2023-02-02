@@ -5,9 +5,11 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
-const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
+//import fetch from 'node-fetch';
+//import net from 'net';
 const utils_1 = require("../../common/utils");
 const decompress_archive_1 = require("../../common/decompress_archive");
+const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /* ########## DESCRIPTION ######### */
 /*
 
@@ -16,36 +18,42 @@ Github   : https://github.com/todxx/teamredminer
 Download : https://github.com/todxx/teamredminer/releases/
 
 */
+/* ########## CONFIG ######### */
+const minerName = 'teamredminer';
+const minerTitle = 'TeamRedMiner';
+const github = 'todxx/teamredminer';
+const lastVersion = '0.10.8';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
-exports.minerInstall = {
-    version: '0.10.8',
+exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), { minerName,
+    minerTitle,
+    lastVersion,
+    github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const targetAlias = params.alias || params.miner;
-            const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-            const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`;
-            //throw { message: `edit-me then delete this line` };
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-            let dlUrl;
-            let subDir = `teamredminer-v${this.version}-*`;
+            const setAsDefaultAlias = params.default || false;
+            let version = params.version || this.lastVersion;
+            let subDir = `${SEP}teamredminer-v${version}-*`;
+            // Download url selection
+            const dlUrls = {
+                'linux': `https://github.com/todxx/teamredminer/releases/download/v${version}/teamredminer-v${version}-linux.tgz`,
+                'win32': `https://github.com/todxx/teamredminer/releases/download/v${version}/teamredminer-v${version}-win.zip`,
+                'darwin': ``,
+                'freebsd': ``,
+            };
+            let dlUrl = dlUrls[platform] || '';
+            if (!dlUrl)
+                throw { message: `No installation script available for the platform ${platform}` };
+            // Some common install options
+            const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
             if (platform === 'linux') {
-                dlUrl = `https://github.com/todxx/teamredminer/releases/download/v${this.version}/teamredminer-v${this.version}-linux.tgz`;
-                subDir = `teamredminer-v${this.version}-linux`;
+                subDir = `${SEP}teamredminer-v${version}-linux`;
             }
             else if (platform === 'win32') {
-                dlUrl = `https://github.com/todxx/teamredminer/releases/download/v${this.version}/teamredminer-v${this.version}-win.zip`;
-                subDir = `teamredminer-v${this.version}-win`;
+                subDir = `${SEP}teamredminer-v${version}-win`;
             }
-            else if (platform === 'darwin') {
-                dlUrl = `edit-me`;
-            }
-            else {
-                throw { message: `No installation script available for the platform ${platform}` };
-            }
-            if (dlUrl === 'edit-me')
-                throw { message: `No installation script available for the platform ${platform}` };
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
@@ -58,26 +66,24 @@ exports.minerInstall = {
             yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
             // Install to target dir
-            fs_1.default.mkdirSync(targetDir, { recursive: true });
-            fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}${subDir}${SEP}`, targetDir);
-            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${targetDir}`);
+            fs_1.default.mkdirSync(aliasDir, { recursive: true });
+            fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+            // Write report files
+            this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
+            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
-    }
-};
-exports.minerCommands = {
-    apiPort: 52004,
-    command: 'teamredminer',
-    getCommandFile(config, params) {
-        return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
-    },
+    } });
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52004, command: 'teamredminer', // the filename of the executable (without .exe extension)
     getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {
             args.push(...[
-                `--api_listen=0.0.0.0:${this.apiPort.toString()}`,
+                `--api_listen=0.0.0.0:${this.apiPort.toString()}`, // sgminer style API
+                //`cm_api_listen=0.0.0.0:${this.apiPort.toString()}`, // claymore style API
             ]);
         }
         if (params.algo) {
@@ -103,20 +109,39 @@ exports.minerCommands = {
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const apiUrl = `http://127.0.0.1:${this.apiPort}`;
+            //const apiUrl = `http://127.0.0.1:${this.apiPort}`;
+            const apiHost = '127.0.0.1';
             const headers = {}; // edit-me if needed
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
-            const minerSummary = yield minerSummaryRes.json();
+            //const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+            const minerSummaryRes = yield (0, utils_1.sendSocketMessage)(`{"command":"summary","parameter":""}`, apiHost, this.apiPort);
+            const minerSummary = JSON.parse(minerSummaryRes);
+            const poolsRes = yield (0, utils_1.sendSocketMessage)(`{"command":"pools","parameter":""}`, apiHost, this.apiPort);
+            const pools = JSON.parse(poolsRes);
+            const minerDevRes = yield (0, utils_1.sendSocketMessage)(`{"command":"devs","parameter":""}`, apiHost, this.apiPort);
+            const minerDev = JSON.parse(minerDevRes);
+            const minerDevDetailsRes = yield (0, utils_1.sendSocketMessage)(`{"command":"devdetails","parameter":""}`, apiHost, this.apiPort);
+            const minerDevDetails = JSON.parse(minerDevDetailsRes);
             // EDIT THESE VALUES - START //
-            const minerName = 'edit-me';
-            const uptime = -1; // edit-me
-            const algo = 'edit-me';
-            const workerHashRate = -1; // edit-me
-            const poolUrl = ''; // edit-me
-            const poolUser = ''; // edit-me
+            const minerName = 'TeamRedMiner';
+            const uptime = minerSummary[0].Elapsed;
+            const algo = pools[0].Algorithm;
+            const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) / 1000;
+            const poolUrl = pools[0].url;
+            const poolUser = pools[0].user;
             const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = []; // edit-me
-            const gpus = []; // edit-me
+            const cpus = [];
+            const gpus = yield minerDev.DEVS.map((gpu, idx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const minerGpuRes = yield (0, utils_1.sendSocketMessage)(`{"command":"gpu","parameter":"${idx}"}`, apiHost, this.apiPort);
+                const minerGpu = JSON.parse(minerGpuRes);
+                return {
+                    id: gpu.GPU,
+                    name: minerDevDetails[idx]['Model'],
+                    hashRate: (minerGpu['KHS 30s'] || 0) / 1000,
+                    temperature: minerGpu['Temperature'],
+                    fanSpeed: gpu['Fan Percent'],
+                    power: gpu['GPU Power'],
+                };
+            }));
             // EDIT THESE VALUES - END //
             let infos = {
                 infos: {
@@ -137,5 +162,4 @@ exports.minerCommands = {
             };
             return infos;
         });
-    }
-};
+    } });

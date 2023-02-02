@@ -4,8 +4,9 @@ import path from 'path';
 import os from 'os';
 import fetch from 'node-fetch';
 
-import { now, getOpt, downloadFile } from '../../common/utils';
+import { now, hasOpt, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
+import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';
 
@@ -18,43 +19,54 @@ Github   : https://github.com/xmrig/xmrig
 Download : https://github.com/xmrig/xmrig/releases/
 
 */
+/* ########## CONFIG ######### */
+
+const minerName = 'xmrig';
+const minerTitle = 'XMRig';
+const github = 'xmrig/xmrig';
+const lastVersion = '6.18.1';
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
 
-
 /* ########## FUNCTIONS ######### */
 
+
 export const minerInstall: t.minerInstallInfos = {
-    version: '6.18.1',
+    ...baseMiner.minerInstall,
+    minerName,
+    minerTitle,
+    lastVersion,
+    github,
 
     async install(config, params) {
-        const targetAlias: string = params.alias || params.miner;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
-
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
-        if (platform === 'linux') {
-            dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-linux-x64.tar.gz`;
+        let version = params.version || this.lastVersion;
+        let subDir = `${SEP}xmrig-${version}`;
+        const setAsDefaultAlias = params.default || false;
 
+        // Download url selection
+        const dlUrls: any = {
+            'linux':   `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-linux-x64.tar.gz`,
+            'win32':   `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-gcc-win64.zip`,
+            'darwin':  `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-macos-x64.tar.gz`,
+            'freebsd': `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-freebsd-static-x64.tar.gz`,
+        };
+        let dlUrl = dlUrls[platform] || '';
+
+        if (platform === 'linux' && hasOpt('--variant', config._args)) {
             const variant = getOpt('--variant', config._args);
-            if (variant == 'static') dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-linux-static-x64.tar.gz`;
-            if (variant == 'bionic') dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-bionic-x64.tar.gz`;
-            if (variant == 'focal')  dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-focal-x64.tar.gz`;
-
-        } else if (platform === 'win32') {
-            dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-gcc-win64.zip`;
-
-        } else if (platform === 'darwin') {
-            dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-macos-x64.tar.gz`;
-
-        } else if (platform === 'freebsd') {
-            dlUrl = `https://github.com/xmrig/xmrig/releases/download/v${this.version}/xmrig-${this.version}-freebsd-static-x64.tar.gz`;
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
+            if (variant == 'static') dlUrl = `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-linux-static-x64.tar.gz`;
+            if (variant == 'bionic') dlUrl = `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-bionic-x64.tar.gz`;
+            if (variant == 'focal')  dlUrl = `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-focal-x64.tar.gz`;
         }
+
+        if (! dlUrl) throw { message: `No installation script available for the platform ${platform}` };
+
+        // Some common install options
+        const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
+
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
@@ -71,26 +83,29 @@ export const minerInstall: t.minerInstallInfos = {
         console.debug(`${now()} [DEBUG] [RIG] Extract complete`);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}xmrig-${this.version}${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+
+        // Write report files
+        this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
-    }
+
+        console.log(`${now()} [INFO] [RIG] Install complete into ${aliasDir}`);
+    },
+
 };
 
 
 
 export const minerCommands: t.minerCommandInfos = {
+    ...baseMiner.minerCommands,
+
     apiPort: 52003,
-
     command: 'xmrig',
-
-    getCommandFile(config, params) {
-        return this.command + (os.platform() === 'win32' ? '.exe' : '');
-    },
 
     getCommandArgs(config, params) {
         const args: string[] = [
@@ -232,7 +247,7 @@ export const minerCommands: t.minerCommandInfos = {
 
         let infos: t.MinerInfos = {
             infos: {
-                name: 'XMRig',
+                name: minerTitle,
                 worker,
                 uptime,
                 algo,

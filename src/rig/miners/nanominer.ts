@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
+import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';
 
@@ -18,6 +19,13 @@ Github   : https://github.com/nanopool/nanominer
 Download : https://github.com/nanopool/nanominer/releases/
 
 */
+/* ########## CONFIG ######### */
+
+const minerName = 'nanominer';
+const minerTitle = 'NanoMiner';
+const github = 'nanopool/nanominer';
+const lastVersion = '3.7.6';
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -26,35 +34,39 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const minerInstall: t.minerInstallInfos = {
-    version: '3.7.6',
+    ...baseMiner.minerInstall,
+    minerName,
+    minerTitle,
+    lastVersion,
+    github,
 
     async install(config, params) {
-        const targetAlias: string = params.alias || params.miner;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${params.miner}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${targetAlias}`
-
-        //throw { message: `edit-me then delete this line` };
-
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
-        let subDir = `${SEP}nanominer-*-${this.version}`;
+        const setAsDefaultAlias = params.default || false;
+        let version = params.version || this.lastVersion;
+        let subDir = `${SEP}nanominer-*-${version}`;
+
+        // Download url selection
+        const dlUrls: any = {
+            'linux':   `https://github.com/nanopool/nanominer/releases/download/v${version}/nanominer-linux-${version}.tar.gz`,
+            'win32':   `https://github.com/nanopool/nanominer/releases/download/v${version}/nanominer-windows-${version}.zip`,
+            'darwin':  ``,
+            'freebsd': ``,
+        }
+        let dlUrl = dlUrls[platform] || '';
+
+        if (! dlUrl) throw { message: `No installation script available for the platform ${platform}` };
+
+        // Some common install options
+        const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
 
         if (platform === 'linux') {
-            dlUrl = `https://github.com/nanopool/nanominer/releases/download/v${this.version}/nanominer-linux-${this.version}.tar.gz`;
             subDir = '';
 
         } else if (platform === 'win32') {
-            dlUrl = `https://github.com/nanopool/nanominer/releases/download/v${this.version}/nanominer-windows-${this.version}.zip`;
-            subDir = `${SEP}nanominer-windows-${this.version}`;
-
-        } else if (platform === 'darwin') {
-            dlUrl = `edit-me`;
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
+            subDir = `${SEP}nanominer-windows-${version}`;
         }
 
-        if (dlUrl === 'edit-me') throw { message: `No installation script available for the platform ${platform}` };
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
@@ -70,26 +82,28 @@ export const minerInstall: t.minerInstallInfos = {
         console.log(`${now()} [INFO] [RIG] Extract complete`);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [RIG] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
+
+        // Write report files
+        this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
+
+        console.log(`${now()} [INFO] [RIG] Install complete into ${aliasDir}`);
     }
 };
 
 
 
 export const minerCommands: t.minerCommandInfos = {
+    ...baseMiner.minerCommands,
+
     apiPort: 52014,
-
     command: 'nanominer', // the filename of the executable (without .exe extension)
-
-    getCommandFile(config, params) {
-        return this.command + (os.platform() === 'win32' ? '.exe' : '');
-    },
 
     getCommandArgs(config, params) {
         const args: string[] = [

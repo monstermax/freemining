@@ -33,18 +33,20 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const targetAlias: string = params.alias || params.fullnode;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`
+        let version = params.version || this.version;
+        let subDir = `${SEP}dogecoin-${version}`;
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
-            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-x86_64-linux-gnu.tar.gz`;
+            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-x86_64-linux-gnu.tar.gz`;
 
         } else if (platform === 'win32') {
-            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-win64.zip`;
+            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-win64.zip`;
 
         } else if (platform === 'darwin') {
-            //dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${this.version}/dogecoin-${this.version}-osx-signed.dmg`;
+            //dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-osx-signed.dmg`;
             dlUrl = `edit-me`;
 
         } else {
@@ -92,7 +94,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}dogecoin-${this.version}${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [NODE] Install complete into ${targetDir}`);
 
         // Cleaning

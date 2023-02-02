@@ -25,6 +25,7 @@ exports.fullnodeInstall = {
             const targetAlias = params.alias || params.fullnode;
             const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
             const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`;
+            let version = params.version || this.version;
             throw { message: `edit-me then delete this line` };
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             let dlUrl;

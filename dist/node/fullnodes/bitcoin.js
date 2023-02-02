@@ -6,7 +6,8 @@ const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const tar_1 = tslib_1.__importDefault(require("tar"));
-const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
+const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
+const adm_zip_1 = tslib_1.__importDefault(require("adm-zip")); //
 const utils_1 = require("../../common/utils");
 /* ########## DESCRIPTION ######### */
 /*
@@ -30,21 +31,21 @@ version : 0.23.3
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
-exports.fullnodeInstall = {
-    version: '24.0.1',
-    versionBitcoinOrg: '22.0',
-    install(config, params) {
+exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { version: '24.0.1', versionBitcoinOrg: '22.0', install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // install bitcoincore from bitcoincore.org OR bitcoin.org
             const targetAlias = params.alias || params.fullnode;
             const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
             const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`;
-            let version = this.version;
+            let version = params.version || this.version;
+            if ((0, utils_1.hasOpt)('--bitcoin.org')) {
+                version = params.version || this.versionBitcoinOrg;
+            }
+            let subDir = `${SEP}bitcoin-${version}`;
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             let dlUrl;
             if (platform === 'linux') {
                 if ((0, utils_1.hasOpt)('--bitcoin.org')) {
-                    version = this.versionBitcoinOrg;
                     dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`;
                 }
                 else {
@@ -53,7 +54,6 @@ exports.fullnodeInstall = {
             }
             else if (platform === 'win32') {
                 if ((0, utils_1.hasOpt)('--bitcoin.org')) {
-                    version = this.versionBitcoinOrg;
                     dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`;
                 }
                 else {
@@ -62,7 +62,6 @@ exports.fullnodeInstall = {
             }
             else if (platform === 'darwin') {
                 if ((0, utils_1.hasOpt)('--bitcoin.org')) {
-                    version = this.versionBitcoinOrg;
                     dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-osx64.tar.gz`;
                 }
                 else {
@@ -109,17 +108,13 @@ exports.fullnodeInstall = {
             // Install to target dir
             fs_1.default.mkdirSync(targetDir, { recursive: true });
             fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}bitcoin-${version}${SEP}`, targetDir);
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${targetDir}`);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
         });
-    }
-};
-exports.fullnodeCommands = {
-    p2pPort: 8333,
-    rpcPort: -1,
-    command: 'bin/bitcoind',
+    } });
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: 8333, rpcPort: -1, command: 'bin/bitcoind', // the filename of the executable (without .exe extension)
     getCommandFile(config, params) {
         return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
     },
@@ -171,5 +166,4 @@ exports.fullnodeCommands = {
             };
             return infos;
         });
-    }
-};
+    } });

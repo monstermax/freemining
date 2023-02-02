@@ -3,8 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import tar from 'tar';
-import fetch from 'node-fetch';
-import admZip from 'adm-zip';
+import * as baseFullnode from './_baseFullnode';
+
+import admZip from 'adm-zip'; //
 
 import { now, hasOpt, getOpt, downloadFile } from '../../common/utils';
 
@@ -38,6 +39,8 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const fullnodeInstall: t.fullnodeInstallInfos = {
+    ...baseFullnode.fullnodeInstall,
+
     version: '24.0.1',
     versionBitcoinOrg: '22.0',
 
@@ -46,14 +49,19 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const targetAlias: string = params.alias || params.fullnode;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
         const targetDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`
-        let version = this.version;
+        let version = params.version || this.version;
+
+        if (hasOpt('--bitcoin.org')) {
+            version = params.version || this.versionBitcoinOrg;
+        }
+
+        let subDir = `${SEP}bitcoin-${version}`;
 
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         let dlUrl: string;
 
         if (platform === 'linux') {
             if (hasOpt('--bitcoin.org')) {
-                version = this.versionBitcoinOrg;
                 dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`;
 
             } else {
@@ -62,7 +70,6 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         } else if (platform === 'win32') {
             if (hasOpt('--bitcoin.org')) {
-                version = this.versionBitcoinOrg;
                 dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`;
 
             } else {
@@ -71,7 +78,6 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         } else if (platform === 'darwin') {
             if (hasOpt('--bitcoin.org')) {
-                version = this.versionBitcoinOrg;
                 dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-osx64.tar.gz`;
 
             } else {
@@ -123,7 +129,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         // Install to target dir
         fs.mkdirSync(targetDir, {recursive: true});
         fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${SEP}bitcoin-${version}${SEP}`, targetDir);
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
         console.log(`${now()} [INFO] [NODE] Install complete into ${targetDir}`);
 
         // Cleaning
@@ -135,6 +141,8 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
 
 export const fullnodeCommands: t.fullnodeCommandInfos = {
+    ...baseFullnode.fullnodeCommands,
+
     p2pPort: 8333, // default = 8333
     rpcPort: -1, // default = 8332
 

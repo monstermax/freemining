@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tailFile = exports.getDirSize = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
+exports.sendSocketMessage = exports.tailFile = exports.getDirSize = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -10,6 +10,7 @@ const readline_1 = tslib_1.__importDefault(require("readline"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const child_process_1 = require("child_process");
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
+const net_1 = tslib_1.__importDefault(require("net"));
 /* ########## FUNCTIONS ######### */
 function hasOpt(keyName, argv = null) {
     argv = argv || process.argv;
@@ -362,3 +363,21 @@ function tailFile(file, numLines) {
     });
 }
 exports.tailFile = tailFile;
+function sendSocketMessage(message, host, port) {
+    return new Promise((resolve, reject) => {
+        const client = new net_1.default.Socket();
+        client.connect(port, host, () => {
+            client.write(message);
+        });
+        client.on('data', (data) => {
+            resolve(data.toString());
+            client.destroy();
+        });
+        client.on('error', (error) => {
+            reject(error);
+            client.destroy();
+        });
+    });
+}
+exports.sendSocketMessage = sendSocketMessage;
+;
