@@ -36,7 +36,7 @@ let dateLastCheck: number | null = null;
  * 
  * ./ts-node frm-cli.ts --node-monitor-start
  */
-export function monitorStart(config: t.Config, params?: t.MapString<any>): void {
+export function monitorStart(config: t.Config): void {
     if (monitorIntervalId) {
         return;
     }
@@ -52,7 +52,7 @@ export function monitorStart(config: t.Config, params?: t.MapString<any>): void 
  * 
  * ./ts-node frm-cli.ts --node-monitor-stop
  */
-export function monitorStop(config?: t.Config, params?: t.MapString<any>): void {
+export function monitorStop(): void {
     if (monitorIntervalId) {
         clearInterval(monitorIntervalId);
         monitorIntervalId = null;
@@ -62,7 +62,7 @@ export function monitorStop(config?: t.Config, params?: t.MapString<any>): void 
 }
 
 
-export function monitorStatus(config?: t.Config, params?: t.MapString<any>): boolean {
+export function monitorStatus(): boolean {
     return monitorIntervalId !== null;
 }
 

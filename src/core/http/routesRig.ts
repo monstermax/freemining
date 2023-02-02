@@ -26,7 +26,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     // GET Rig homepage => /rig/
     app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function) => {
         const config = Daemon.getConfig();
-        const monitorStatus = Rig.monitorStatus(config);
+        const monitorStatus = Rig.monitorStatus();
         const allMiners = await Rig.getAllMiners(config);
         const rigInfos = Rig.getRigInfos();
 
@@ -145,7 +145,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
         } else if (action === 'stop') {
             if (rigStatus) {
-                Rig.monitorStop(config);
+                Rig.monitorStop();
                 res.send('OK: Rig monitor stopped');
 
             } else {

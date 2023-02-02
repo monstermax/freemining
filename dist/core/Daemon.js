@@ -76,6 +76,12 @@ function run(args = []) {
         console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] Server started on ${config.listenAddress}:${config.listenPort}`);
     });
     getSysInfos();
+    if ((0, utils_1.hasOpt)('-r', args) || (0, utils_1.hasOpt)('--rig-monitor-start', args)) {
+        Rig.monitorStart(config);
+    }
+    if ((0, utils_1.hasOpt)('-n', args) || (0, utils_1.hasOpt)('--node-monitor-start', args)) {
+        Node.monitorStart(config);
+    }
 }
 exports.run = run;
 function registerHttpRoutes(config, app) {
@@ -153,15 +159,15 @@ function registerWssRoutes(config, wss) {
                             rpcSendResponse(ws, req.id, rigInfos);
                             break;
                         case 'rigMonitorStart':
-                            Rig.monitorStart(config, req.params);
+                            Rig.monitorStart(config);
                             rpcSendResponse(ws, req.id, 'OK');
                             break;
                         case 'rigMonitorStop':
-                            Rig.monitorStop(config, req.params);
+                            Rig.monitorStop();
                             rpcSendResponse(ws, req.id, 'OK');
                             break;
                         case 'rigMonitorStatus':
-                            const rigMonitorStatus = Rig.monitorStatus(config, req.params);
+                            const rigMonitorStatus = Rig.monitorStatus();
                             rpcSendResponse(ws, req.id, rigMonitorStatus);
                             break;
                         case 'rigMinerInstallStart':
@@ -230,15 +236,15 @@ function registerWssRoutes(config, wss) {
                             rpcSendResponse(ws, req.id, nodeInfos);
                             break;
                         case 'nodeMonitorStart':
-                            Node.monitorStart(config, req.params);
+                            Node.monitorStart(config);
                             rpcSendResponse(ws, req.id, 'OK');
                             break;
                         case 'nodeMonitorStop':
-                            Node.monitorStop(config, req.params);
+                            Node.monitorStop();
                             rpcSendResponse(ws, req.id, 'OK');
                             break;
                         case 'nodeMonitorStatus':
-                            const nodeMonitorStatus = Node.monitorStatus(config, req.params);
+                            const nodeMonitorStatus = Node.monitorStatus();
                             rpcSendResponse(ws, req.id, nodeMonitorStatus);
                             break;
                         case 'nodeFullnodeInstallStart':

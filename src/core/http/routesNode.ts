@@ -25,7 +25,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     // NODE homepage => /node/
     app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function) => {
         const config = Daemon.getConfig();
-        const monitorStatus = Node.monitorStatus(config);
+        const monitorStatus = Node.monitorStatus();
         const allFullnodes = await Node.getAllFullnodes(config);
         const nodeInfos = Node.getNodeInfos();
 
@@ -126,7 +126,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
 
         } else if (action === 'stop') {
             if (nodeStatus) {
-                Node.monitorStop(config);
+                Node.monitorStop();
                 res.send('OK: Node monitor stopped');
 
             } else {

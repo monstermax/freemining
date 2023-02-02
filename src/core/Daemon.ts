@@ -99,6 +99,14 @@ export function run(args: (t.DaemonParams & t.CommonParams & string)[] = []): vo
     });
 
     getSysInfos();
+
+    if (hasOpt('-r', args) || hasOpt('--rig-monitor-start', args)) {
+        Rig.monitorStart(config);
+    }
+
+    if (hasOpt('-n', args) || hasOpt('--node-monitor-start', args)) {
+        Node.monitorStart(config);
+    }
 }
 
 
@@ -201,17 +209,17 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         break;
 
                     case 'rigMonitorStart':
-                        Rig.monitorStart(config, req.params);
+                        Rig.monitorStart(config);
                         rpcSendResponse(ws, req.id, 'OK');
                         break;
 
                     case 'rigMonitorStop':
-                        Rig.monitorStop(config, req.params);
+                        Rig.monitorStop();
                         rpcSendResponse(ws, req.id, 'OK');
                         break;
 
                     case 'rigMonitorStatus':
-                        const rigMonitorStatus = Rig.monitorStatus(config, req.params);
+                        const rigMonitorStatus = Rig.monitorStatus();
                         rpcSendResponse(ws, req.id, rigMonitorStatus);
                         break;
 
@@ -289,17 +297,17 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         break;
 
                     case 'nodeMonitorStart':
-                        Node.monitorStart(config, req.params);
+                        Node.monitorStart(config);
                         rpcSendResponse(ws, req.id, 'OK');
                         break;
 
                     case 'nodeMonitorStop':
-                        Node.monitorStop(config, req.params);
+                        Node.monitorStop();
                         rpcSendResponse(ws, req.id, 'OK');
                         break;
 
                     case 'nodeMonitorStatus':
-                        const nodeMonitorStatus = Node.monitorStatus(config, req.params);
+                        const nodeMonitorStatus = Node.monitorStatus();
                         rpcSendResponse(ws, req.id, nodeMonitorStatus);
                         break;
 

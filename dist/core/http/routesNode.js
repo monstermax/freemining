@@ -17,7 +17,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
     // NODE homepage => /node/
     app.get(`${urlPrefix}/`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         const config = Daemon.getConfig();
-        const monitorStatus = Node.monitorStatus(config);
+        const monitorStatus = Node.monitorStatus();
         const allFullnodes = yield Node.getAllFullnodes(config);
         const nodeInfos = Node.getNodeInfos();
         // variables à ne plus utiliser... (utiliser allFullnodes à la place)
@@ -85,7 +85,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         }
         else if (action === 'stop') {
             if (nodeStatus) {
-                Node.monitorStop(config);
+                Node.monitorStop();
                 res.send('OK: Node monitor stopped');
             }
             else {

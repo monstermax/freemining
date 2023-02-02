@@ -25,7 +25,7 @@ let dateLastCheck = null;
  *
  * ./ts-node frm-cli.ts --rig-monitor-start
  */
-function monitorStart(config, params) {
+function monitorStart(config) {
     if (monitorIntervalId) {
         return;
     }
@@ -38,7 +38,7 @@ exports.monitorStart = monitorStart;
  *
  * ./ts-node frm-cli.ts --rig-monitor-stop
  */
-function monitorStop(config, params) {
+function monitorStop() {
     if (monitorIntervalId) {
         clearTimeout(monitorIntervalId);
         monitorIntervalId = null;
@@ -46,7 +46,7 @@ function monitorStop(config, params) {
     }
 }
 exports.monitorStop = monitorStop;
-function monitorStatus(config, params) {
+function monitorStatus() {
     return monitorIntervalId !== null;
 }
 exports.monitorStatus = monitorStatus;
