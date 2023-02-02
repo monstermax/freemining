@@ -7,9 +7,10 @@ import { execSync } from 'child_process';
 import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate } from '../common/utils';
 import { exec } from '../common/exec';
 import { minersInstalls, minersCommands } from './minersConfigs';
+import * as farmAgentWebsocket from './farmAgentWebsocket';
 
 import type *  as t from '../common/types';
-import type childProcess from 'child_process';
+//import type childProcess from 'child_process';
 
 
 // GPU infos for windows: https://github.com/FallingSnow/gpu-info
@@ -31,7 +32,6 @@ const minersInfos: t.MapString<any> = {};
 let rigMainInfos: any | null = null;
 let dateLastCheck: number | null = null;
 
-
 /* ########## FUNCTIONS ######### */
 
 /**
@@ -40,9 +40,7 @@ let dateLastCheck: number | null = null;
  * ./ts-node frm-cli.ts --rig-monitor-start
  */
 export function monitorStart(config: t.Config): void {
-    if (monitorIntervalId) {
-        return;
-    }
+    if (monitorIntervalId) return;
 
     /* await */ monitorAutoCheckRig(config);
 
@@ -55,12 +53,12 @@ export function monitorStart(config: t.Config): void {
  * ./ts-node frm-cli.ts --rig-monitor-stop
  */
 export function monitorStop(): void {
-    if (monitorIntervalId) {
-        clearTimeout(monitorIntervalId);
-        monitorIntervalId = null;
+    if (! monitorIntervalId) return;
 
-        console.log(`${now()} [INFO] [RIG] Rig monitor stopped`);
-    }
+    clearTimeout(monitorIntervalId);
+    monitorIntervalId = null;
+
+    console.log(`${now()} [INFO] [RIG] Rig monitor stopped`);
 }
 
 
@@ -68,6 +66,22 @@ export function monitorStatus(): boolean {
     return monitorIntervalId !== null;
 }
 
+
+export function farmAgentStart(config: t.Config): void {
+    farmAgentWebsocket.start(config);
+    console.log(`${now()} [INFO] [RIG] Farm agent started`);
+}
+
+
+export function farmAgentStop(): void {
+    farmAgentWebsocket.stop();
+    console.log(`${now()} [INFO] [RIG] Farm agent stopped`);
+}
+
+export function farmAgentStatus(): boolean {
+    // TODO
+    return false;
+}
 
 
 async function monitorAutoCheckRig(config: t.Config) {

@@ -180,7 +180,14 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
             //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
 
             // try
-            const message: t.RpcResponse | t.RpcRequest = JSON.parse(messageJson);
+            let message: t.RpcResponse | t.RpcRequest;
+            try {
+                message = JSON.parse(messageJson);
+
+            } catch (err: any) {
+                console.warn(`${now()} [${colors.yellow('WARNING')}] [DAEMON] received invalid json from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                return;
+            }
 
             if ('error' in message) {
                 console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received error from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
@@ -366,6 +373,18 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
+                    /* FARM */
+                    case 'farmAuth':
+                        // TODO
+
+                        break;
+                    case 'farmRigStatus':
+                        {
+                            const rigInfos = req.params;
+                            var debugme = 1;
+                        }
+                        break;
+
                     /* DEFAULT */
 
                     default:
@@ -375,7 +394,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                 }
 
             } else {
-                console.warn(`${now()} [${colors.blue('WARNING')}] [DAEMON] received invalid message from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                console.warn(`${now()} [${colors.yellow('WARNING')}] [DAEMON] received invalid message from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                 ws.close();
             }
 

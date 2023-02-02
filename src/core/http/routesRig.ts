@@ -9,6 +9,9 @@ import { now, formatNumber } from '../../common/utils';
 import * as Rig from '../../rig/Rig';
 import * as Daemon from '../../core/Daemon';
 
+import type * as t from '../../common/types';
+
+
 
 /* ########## MAIN ######### */
 
@@ -95,18 +98,53 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     });
 
 
-    // GET Rig farm-agent start => /rig/farm-agent-start
-    app.get(`${urlPrefix}/farm-agent-start`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+    // GET Rig farm-agent start => /rig/farm-agent/run
+    app.get(`${urlPrefix}/farm-agent/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        //Rig.farmAgentStart(config);
-        res.send('Rig farm-agent started [TODO]');
+        const action = req.query.action?.toString() || '';
+
+        if (action === 'start') {
+            Rig.farmAgentStart(config);
+            res.send('Rig farm-agent started [TODO]');
+            return;
+
+        } else if (action === 'stop') {
+            Rig.farmAgentStop();
+            res.send('Rig farm-agent started [TODO]');
+            return;
+        }
+
+        res.send(`try action start/stop`);
+
+        // TODO: afficher page html
     });
 
-    // GET Rig farm-agent stop => /rig/farm-agent-stop
-    app.get(`${urlPrefix}/farm-agent-stop`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+    // POST Rig farm-agent start => /rig/farm-agent/run
+    app.post(`${urlPrefix}/farm-agent/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        //Rig.farmAgentStop(config);
-        res.send('Rig farm-agent stopped [TODO]');
+        const action = req.body.action?.toString() || '';
+        const farmAgentStatus = Rig.farmAgentStatus();
+
+        if (action === 'start') {
+            if (farmAgentStatus) {
+                res.send('OK: Farm agent is running');
+
+            } else {
+                Rig.farmAgentStart(config);
+                res.send('OK: Farm agent started');
+            }
+            return;
+
+        } else if (action === 'stop') {
+            if (farmAgentStatus) {
+                Rig.farmAgentStop();
+                res.send('OK: Farm agent stopped');
+
+            } else {
+                res.send('OK: Farm agent is not running');
+            }
+            return;
+        }
     });
 
 
@@ -200,6 +238,9 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     app.post(`${urlPrefix}/miners/:minerName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const minerName = req.params.minerName;
         const action = req.body.action?.toString() || '';
+        const minerAlias = req.body.alias?.toString() || '';
+        const minerDefault = req.body.default?.toString() || '';
+        const version = req.body.version?.toString() || '';
 
         const config = Daemon.getConfig();
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
@@ -217,6 +258,9 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
             const params = {
                 miner: minerName,
+                alias: minerAlias,
+                default: (minerDefault === '1'),
+                version,
             };
 
             try {

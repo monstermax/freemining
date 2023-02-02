@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMiners = exports.getRigInfos = exports.getRigPs = exports.getProcesses = exports.minerRunInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.monitorStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllMiners = exports.getRigInfos = exports.getRigPs = exports.getProcesses = exports.minerRunInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -9,6 +9,8 @@ const child_process_1 = require("child_process");
 const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
 const minersConfigs_1 = require("./minersConfigs");
+const farmAgentWebsocket = tslib_1.__importStar(require("./farmAgentWebsocket"));
+//import type childProcess from 'child_process';
 // GPU infos for windows: https://github.com/FallingSnow/gpu-info
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
@@ -26,9 +28,8 @@ let dateLastCheck = null;
  * ./ts-node frm-cli.ts --rig-monitor-start
  */
 function monitorStart(config) {
-    if (monitorIntervalId) {
+    if (monitorIntervalId)
         return;
-    }
     /* await */ monitorAutoCheckRig(config);
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Rig monitor started`);
 }
@@ -39,17 +40,32 @@ exports.monitorStart = monitorStart;
  * ./ts-node frm-cli.ts --rig-monitor-stop
  */
 function monitorStop() {
-    if (monitorIntervalId) {
-        clearTimeout(monitorIntervalId);
-        monitorIntervalId = null;
-        console.log(`${(0, utils_1.now)()} [INFO] [RIG] Rig monitor stopped`);
-    }
+    if (!monitorIntervalId)
+        return;
+    clearTimeout(monitorIntervalId);
+    monitorIntervalId = null;
+    console.log(`${(0, utils_1.now)()} [INFO] [RIG] Rig monitor stopped`);
 }
 exports.monitorStop = monitorStop;
 function monitorStatus() {
     return monitorIntervalId !== null;
 }
 exports.monitorStatus = monitorStatus;
+function farmAgentStart(config) {
+    farmAgentWebsocket.start(config);
+    console.log(`${(0, utils_1.now)()} [INFO] [RIG] Farm agent started`);
+}
+exports.farmAgentStart = farmAgentStart;
+function farmAgentStop() {
+    farmAgentWebsocket.stop();
+    console.log(`${(0, utils_1.now)()} [INFO] [RIG] Farm agent stopped`);
+}
+exports.farmAgentStop = farmAgentStop;
+function farmAgentStatus() {
+    // TODO
+    return false;
+}
+exports.farmAgentStatus = farmAgentStatus;
 function monitorAutoCheckRig(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const pollDelay = Number((0, utils_1.getOpt)('--rig-monitor-poll-delay')) || defaultPollDelay;

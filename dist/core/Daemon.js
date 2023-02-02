@@ -135,7 +135,14 @@ function registerWssRoutes(config, wss) {
                 const messageJson = data.toString();
                 //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                 // try
-                const message = JSON.parse(messageJson);
+                let message;
+                try {
+                    message = JSON.parse(messageJson);
+                }
+                catch (err) {
+                    console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [DAEMON] received invalid json from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                    return;
+                }
                 if ('error' in message) {
                     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received error from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                     const err = JSON.parse(messageJson);
@@ -297,6 +304,16 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
+                        /* FARM */
+                        case 'farmAuth':
+                            // TODO
+                            break;
+                        case 'farmRigStatus':
+                            {
+                                const rigInfos = req.params;
+                                var debugme = 1;
+                            }
+                            break;
                         /* DEFAULT */
                         default:
                             rpcSendError(ws, req.id, { code: -32601, message: `the method ${req.method} does not exist/is not available` });
@@ -304,7 +321,7 @@ function registerWssRoutes(config, wss) {
                     }
                 }
                 else {
-                    console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARNING')}] [DAEMON] received invalid message from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                    console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [DAEMON] received invalid message from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                     ws.close();
                 }
             });
