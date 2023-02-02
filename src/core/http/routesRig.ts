@@ -159,8 +159,12 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         //const action = req.query.action?.toString() || '';
 
         const config = Daemon.getConfig();
+        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
+        const minerFullName = `${minerName}-${minerAlias}`;
+
         const rigInfos = Rig.getRigInfos();
-        const minerInfos = rigInfos.minersInfos[minerName];
+        const minerInfos = rigInfos.minersInfos[minerFullName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
 
@@ -192,8 +196,6 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const action = req.body.action?.toString() || '';
 
         const config = Daemon.getConfig();
-        //const rigInfos = Rig.getRigInfos();
-        //const minerInfos = rigInfos.minersInfos[minerName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
 
         if (action === 'start') {
@@ -231,9 +233,13 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const action = req.query.action?.toString() || '';
 
         const config = Daemon.getConfig();
+        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
+        const minerFullName = `${minerName}-${minerAlias}`;
+
         const rigStatus = Rig.monitorStatus();
         const rigInfos = Rig.getRigInfos();
-        const minerInfos = rigInfos.minersInfos[minerName];
+        const minerInfos = rigInfos.minersInfos[minerFullName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
 
@@ -298,8 +304,6 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const action = req.body.action?.toString() || '';
 
         const config = Daemon.getConfig();
-        //const rigInfos = Rig.getRigInfos();
-        //const minerInfos = rigInfos.minersInfos[minerName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
 
         const algo = req.body.algo?.toString() || '';

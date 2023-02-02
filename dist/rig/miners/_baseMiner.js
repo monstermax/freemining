@@ -54,9 +54,9 @@ exports.minerInstall = {
         const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.miner-install-${this.minerName}-${minerAlias}-`), {});
         const minerDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners${SEP}${this.minerName}`;
         const aliasDir = `${minerDir}${SEP}${minerAlias}`;
-        if (minerAlias === 'default') {
-            throw { message: `invalid alias. 'default' is a reserved word` };
-        }
+        //if (minerAlias === 'default') {
+        //    throw { message: `invalid alias. 'default' is a reserved word` };
+        //}
         return {
             minerAlias,
             tempDir,
@@ -65,16 +65,17 @@ exports.minerInstall = {
         };
     },
     setDefault(minerDir, aliasDir, setAsDefaultAlias) {
-        const symlinkExists = fs_1.default.existsSync(`${minerDir}/default`);
-        if (!symlinkExists || setAsDefaultAlias) {
-            if (symlinkExists) {
-                fs_1.default.unlinkSync(`${minerDir}/default`);
-            }
-            //fs.symlinkSync(aliasDir, `${minerDir}/default`);
-            process.chdir(minerDir);
-            const minerAlias = path_1.default.basename(aliasDir);
-            fs_1.default.symlinkSync(minerAlias, `default`);
-        }
+        // Disabled because symlinks do not work properly on Windows
+        //const symlinkExists = fs.existsSync(`${minerDir}/default`);
+        //if (! symlinkExists || setAsDefaultAlias) {
+        //    if (symlinkExists) {
+        //        fs.unlinkSync(`${minerDir}/default`);
+        //    }
+        //    //fs.symlinkSync(aliasDir, `${minerDir}/default`);
+        //    process.chdir(minerDir);
+        //    const minerAlias = path.basename(aliasDir);
+        //    fs.symlinkSync(minerAlias, `default`);
+        //}
     },
     writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias = false) {
         // Alias report

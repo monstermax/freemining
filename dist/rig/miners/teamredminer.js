@@ -114,34 +114,34 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const headers = {}; // edit-me if needed
             //const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
             const minerSummaryRes = yield (0, utils_1.sendSocketMessage)(`{"command":"summary","parameter":""}`, apiHost, this.apiPort);
-            const minerSummary = JSON.parse(minerSummaryRes);
+            const minerSummary = JSON.parse(minerSummaryRes).SUMMARY;
             const poolsRes = yield (0, utils_1.sendSocketMessage)(`{"command":"pools","parameter":""}`, apiHost, this.apiPort);
-            const pools = JSON.parse(poolsRes);
+            const pools = JSON.parse(poolsRes).POOLS;
             const minerDevRes = yield (0, utils_1.sendSocketMessage)(`{"command":"devs","parameter":""}`, apiHost, this.apiPort);
-            const minerDev = JSON.parse(minerDevRes);
+            const minerDev = JSON.parse(minerDevRes).DEVS;
             const minerDevDetailsRes = yield (0, utils_1.sendSocketMessage)(`{"command":"devdetails","parameter":""}`, apiHost, this.apiPort);
-            const minerDevDetails = JSON.parse(minerDevDetailsRes);
+            const minerDevDetails = JSON.parse(minerDevDetailsRes).DEVDETAILS;
+            //const minerGpuRes = await sendSocketMessage(`{"command":"gpu","parameter":""}`, apiHost, this.apiPort) as any;
+            //const minerGpu: any = JSON.parse(minerGpuRes).GPU;
             // EDIT THESE VALUES - START //
             const minerName = 'TeamRedMiner';
             const uptime = minerSummary[0].Elapsed;
             const algo = pools[0].Algorithm;
             const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) / 1000;
-            const poolUrl = pools[0].url;
-            const poolUser = pools[0].user;
+            const poolUrl = pools[0].URL;
+            const poolUser = pools[0].User;
             const workerName = poolUser.split('.').pop() || ''; // edit-me
             const cpus = [];
-            const gpus = yield minerDev.DEVS.map((gpu, idx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const minerGpuRes = yield (0, utils_1.sendSocketMessage)(`{"command":"gpu","parameter":"${idx}"}`, apiHost, this.apiPort);
-                const minerGpu = JSON.parse(minerGpuRes);
+            const gpus = yield Promise.all(minerDev.map((gpu, idx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 return {
                     id: gpu.GPU,
                     name: minerDevDetails[idx]['Model'],
-                    hashRate: (minerGpu['KHS 30s'] || 0) / 1000,
-                    temperature: minerGpu['Temperature'],
+                    hashRate: (gpu['KHS 30s'] || 0) / 1000,
+                    temperature: gpu['Temperature'],
                     fanSpeed: gpu['Fan Percent'],
-                    power: gpu['GPU Power'],
+                    power: gpu['GPU Power'], // minerGpu[idx]['GPU Power']
                 };
-            }));
+            })));
             // EDIT THESE VALUES - END //
             let infos = {
                 infos: {

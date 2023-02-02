@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMiners = exports.getRigInfos = exports.getRigPs = exports.getProcesses = exports.minerRunInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMiners = exports.getInstalledMiners = exports.monitorCheckRig = exports.monitorStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllMiners = exports.getRigInfos = exports.getRigPs = exports.getProcesses = exports.minerRunInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMiners = exports.getInstalledMiners = exports.monitorCheckRig = exports.monitorStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -13,6 +13,7 @@ const minersConfigs_1 = require("./minersConfigs");
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 const processes = {};
+//const installs: t.MapString<any> = {}; // TODO: insert l'install en cours, puis delete à la fin de l'install
 let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
 const minersInfos = {};
@@ -64,7 +65,6 @@ function monitorCheckRig(config) {
             if (proc.type === 'miner-run') {
                 const minerAlias = proc.name;
                 const minerName = proc.miner || '';
-                //const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
                 const minerFullName = `${minerName}-${minerAlias}`;
                 const minerCommands = minersConfigs_1.minersCommands[minerName];
                 viewedMiners.push(minerFullName);
@@ -143,7 +143,7 @@ function minerInstallStart(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
         if (!minerName) {
-            throw { message: `Missing miner parameter` };
+            throw new Error(`Missing miner parameter`);
         }
         //if (`miner-install-${minerName}` in processes) {
         //    throw { message: `Miner ${minerName} install is already running` };
@@ -156,14 +156,33 @@ function minerInstallStart(config, params) {
     });
 }
 exports.minerInstallStart = minerInstallStart;
+function getInstalledMinerConfiguration(config, minerName) {
+    const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
+    const configFile = `${minerDir}/freemining.json`;
+    let minerConfig = {};
+    if (fs_1.default.existsSync(configFile)) {
+        const minerConfigJson = fs_1.default.readFileSync(configFile).toString();
+        try {
+            minerConfig = JSON.parse(minerConfigJson);
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot get miner configuration of miner ${minerName} : ${err.message}`);
+        }
+    }
+    return minerConfig;
+}
+exports.getInstalledMinerConfiguration = getInstalledMinerConfiguration;
 function minerRunStart(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
-        const minerAlias = params.alias || 'default';
+        const minerConfig = getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = params.alias || minerConfig.defaultAlias;
         const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
-        const minerFullName = `${minerName}-${minerAlias}`;
         if (!minerName) {
-            throw { message: `Missing miner parameter` };
+            throw new Error(`Missing miner parameter`);
+        }
+        if (!minerAlias) {
+            throw new Error(`Missing alias parameter`);
         }
         if (!(minerName in minersConfigs_1.minersCommands)) {
             throw { message: `Unknown miner ${minerName}` };
@@ -247,27 +266,38 @@ function minerRunStart(config, params) {
 exports.minerRunStart = minerRunStart;
 function minerRunStop(config, params, forceKill = false) {
     const minerName = params.miner;
-    const minerAlias = params.alias || 'default';
+    const minerConfig = getInstalledMinerConfiguration(config, minerName);
+    const minerAlias = params.alias || minerConfig.defaultAlias;
+    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
     if (!minerName) {
-        throw { message: `Missing miner parameter` };
+        throw new Error(`Missing miner parameter`);
+    }
+    if (!minerAlias) {
+        throw new Error(`Missing alias parameter`);
     }
     if (!(`miner-run-${minerName}-${minerAlias}` in processes)) {
-        throw { message: `Miner ${minerName} is not running` };
+        throw { message: `Miner ${minerFullTitle} is not running` };
     }
     const proc = processes[`miner-run-${minerName}-${minerAlias}`];
     if (!proc.process) {
-        throw { message: `Miner ${minerName} process is not killable` };
+        throw { message: `Miner ${minerFullTitle} process is not killable` };
     }
     const signal = forceKill ? 'SIGKILL' : 'SIGINT';
-    console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] KILLING PROCESS ${minerName} with signal ${signal}...`);
+    console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] KILLING PROCESS ${minerFullTitle} with signal ${signal}...`);
     proc.process.kill(signal);
 }
 exports.minerRunStop = minerRunStop;
 function minerRunStatus(config, params) {
     const minerName = params.miner;
-    const minerAlias = params.alias || 'default';
+    const minerConfig = getInstalledMinerConfiguration(config, minerName);
+    const minerAlias = params.alias || minerConfig.defaultAlias;
     if (!minerName) {
-        throw { message: `Missing miner parameter` };
+        throw new Error(`Missing miner parameter`);
+        return false;
+    }
+    if (!minerAlias) {
+        //throw new Error(`Missing alias parameter`);
+        return false;
     }
     if (!(`miner-run-${minerName}-${minerAlias}` in processes)) {
         return false;
@@ -282,9 +312,13 @@ exports.minerRunStatus = minerRunStatus;
 function minerRunLog(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
-        const minerAlias = params.alias || 'default';
+        const minerConfig = getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = params.alias || minerConfig.defaultAlias;
         if (!minerName) {
-            throw { message: `Missing miner parameter` };
+            throw new Error(`Missing miner parameter`);
+        }
+        if (!minerAlias) {
+            throw new Error(`Missing alias parameter`);
         }
         const logFile = `${config.logDir}${SEP}rig${SEP}miners${SEP}${minerName}${SEP}${minerAlias}.run.log`;
         if (!fs_1.default.existsSync(logFile)) {
@@ -299,12 +333,17 @@ exports.minerRunLog = minerRunLog;
 function minerRunInfos(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
-        const minerAlias = params.alias || 'default';
+        const minerConfig = getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = params.alias || minerConfig.defaultAlias;
+        const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
         if (!minerName) {
-            throw { message: `Missing miner parameter` };
+            throw new Error(`Missing miner parameter`);
+        }
+        if (!minerAlias) {
+            throw new Error(`Missing alias parameter`);
         }
         if (!(`miner-run-${minerName}-${minerAlias}` in processes)) {
-            throw { message: `Miner ${minerName} is not running` };
+            throw { message: `Miner ${minerFullTitle} is not running` };
         }
         if (!(minerName in minersConfigs_1.minersCommands)) {
             throw { message: `Unknown miner ${minerName}` };
