@@ -110,6 +110,10 @@ export type ConfigDaemon = {
     wssConnTimeout: number,
     httpTemplatesDir: string,
     httpStaticDir: string,
+    rigName: string,
+    farmName: string,
+    nodeName: string,
+    poolName: string,
 }
 
 export type ConfigCli = {
@@ -145,8 +149,8 @@ export type ExecOnEnd = (returnCode: number, err: any) => void;
 
 /* RIG */
 
-export type Rig = {
-    infos: {
+export type RigInfos = {
+    rig: {
         name: string,
         hostname: string,
         ip: string,
@@ -205,12 +209,14 @@ export type minerCommandInfos = {
 
 
 export type MinerInfos = {
-    infos: {
+    miner: {
         name: string,
         worker: string,
         uptime: number,
         algo: string,
         hashRate: number,
+        minerName?: string,
+        minerAlias?: string,
     },
     //sizes: {
     //    appDir: number,
@@ -247,13 +253,19 @@ export type MinerGpuInfos = {
 };
 
 
+export type runningMiner = {
+    miner: string,
+    alias: string,
+    pid: number,
+};
+
 
 
 
 /* NODE */
 
-export type Node = {
-    infos: {
+export type NodeInfos = {
+    node: {
         name: string,
         hostname: string,
         ip: string,
@@ -306,7 +318,7 @@ export type fullnodeCommandInfos = {
 
 
 export type FullnodeInfos = {
-    infos: {
+    fullnode: {
         name: string,
         //uptime: number,
         coin: string,
@@ -325,11 +337,45 @@ export type FullnodeInfos = {
 };
 
 
-
-
-export type runningMiner = {
-    miner: string,
+export type runningFullnode = {
+    fullnode: string,
     alias: string,
     pid: number,
 };
+
+
+/* FARM */
+
+export type FarmInfos = {
+    farm: {
+        name: string,
+        hostname: string,
+        ip: string,
+        os: string,
+        uptime: number,
+    },
+    usage: {
+        loadAvg: number,
+        memory: {
+            used: number,
+            total: number,
+        },
+    },
+    rigsInfos: MapString<RigInfos>,
+    dataDate?: number | null,
+}
+
+
+/* POOL */
+
+export type PoolInfos = {
+    pool: any,
+    usage: any,
+    dataDate?: number | null,
+}
+
+
+
+
+/* MISC */
 

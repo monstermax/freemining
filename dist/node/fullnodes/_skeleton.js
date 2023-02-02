@@ -119,7 +119,7 @@ exports.fullnodeCommands = {
             const cpus = []; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
-                infos: {
+                fullnode: {
                     name: fullnodeName,
                     coin,
                 },

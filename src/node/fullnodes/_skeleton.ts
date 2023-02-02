@@ -149,7 +149,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeInfos = {
-            infos: {
+            fullnode: {
                 name: fullnodeName,
                 coin,
             },

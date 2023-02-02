@@ -3,7 +3,7 @@ import os from 'os';
 import WebSocket from 'ws';
 import colors from 'colors/safe';
 
-import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate } from '../common/utils';
+import { now, buildRpcRequest } from '../common/utils';
 import * as Rig from './Rig';
 import * as Daemon from '../core/Daemon';
 
@@ -19,12 +19,11 @@ const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x
 const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
 const sendStatusInterval = 10_000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
 let connectionCount = 0;
+let requestsCount = 0;
 let sendStatusTimeout: any = null;
 //let checkStatusTimeout: any = null;
 
 
-const rigName = 'test-ws' || os.hostname();
-const websocketPassword = 'xxx'; // password to access farm websocket server
 let active = false;
 
 
@@ -34,7 +33,7 @@ export function start(config: t.Config) {
 
     active = true;
 
-    websocketConnect();
+    websocketConnect(config);
     //console.log(`${now()} [INFO] [RIG] Farm agent started`);
 }
 
@@ -59,6 +58,19 @@ export function stop() {
 }
 
 
+export function status() {
+    return active;
+}
+
+
+
+export function sendStatusToFarm() {
+    if (websocket) {
+        sendStatusAuto(websocket);
+    }
+}
+
+
 function sendStatusAuto(ws: WebSocket) {
     if (sendStatusTimeout) {
         clearTimeout(sendStatusTimeout);
@@ -70,8 +82,8 @@ function sendStatusAuto(ws: WebSocket) {
 }
 
 
-function sendStatus(ws: WebSocket, rigInfos: t.Rig): void {
-    console.log(`${now()} [${colors.blue('INFO')}] sending rigInfos to server`);
+function sendStatus(ws: WebSocket, rigInfos: t.RigInfos): void {
+    console.log(`${now()} [${colors.blue('INFO')}] [RIG] Sending rigInfos to farm agent`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
 
     const req: any = {
@@ -83,8 +95,11 @@ function sendStatus(ws: WebSocket, rigInfos: t.Rig): void {
 
 
 // WEBSOCKET
-function websocketConnect() {
+function websocketConnect(config: t.Config) {
     let newConnectionTimeout: any = null;
+    const rigName = config.rigName || os.hostname();
+    const websocketPassword = 'xxx'; // password to access farm websocket server
+
 
     if (! active) return;
 
@@ -92,24 +107,26 @@ function websocketConnect() {
         throw new Error( `websocket already up` );
     }
 
-    const connectionId = connectionCount++;
+    const connectionId = ++connectionCount;
+    requestsCount = 0;
 
-    console.log(`${now()} [${colors.blue('INFO')}] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [conn ${connectionId}]`);
+    console.log(`${now()} [${colors.blue('INFO')}] [RIG] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [conn ${connectionId}]`);
 
     try {
         websocket = new WebSocket(`ws://${wsServerHost}:${wsServerPort}/`);
 
     } catch (err: any) {
-        console.log(`${now()} [${colors.red('ERROR')}] cannot connect to websocket server [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.red('ERROR')}] [RIG] cannot connect to websocket server [conn ${connectionId}]`);
         if (newConnectionTimeout === null && active) {
-            newConnectionTimeout = setTimeout(() => websocketConnect(), serverNewConnDelay);
+            websocket = null;
+            newConnectionTimeout = setTimeout(websocketConnect, serverNewConnDelay, config);
         }
         return;
     }
 
 
     websocket.on('error', function (err: any) {
-        console.log(`${now()} [${colors.red('ERROR')}] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
         this.terminate();
     });
 
@@ -118,14 +135,22 @@ function websocketConnect() {
         const rigInfos = Rig.getRigInfos();
 
         // Send auth
-        this.send(`{ "method": "farmAuth", "params": {\"rig\": \"${rigName}\", \"pass\": \"${websocketPassword}\"} }`);
+        const reqId = ++requestsCount;
+        const req = buildRpcRequest(reqId, "farmAuth", {
+            user: rigName,
+            pass: websocketPassword,
+        });
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending auth to server (open) [conn ${connectionId}]`)
+        this.send( JSON.stringify(req) );
+
+        //await waitForRequestResponse(reqId, serverConnTimeout, () => {}, () => { thow new Error(`Auth failed with timeout`) });
 
         // Send rig config
-        //console.log(`${now()} [${colors.blue('INFO')}] sending rigConfig to server (open) [conn ${connectionId}]`)
+        //console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`)
         //this.send( `rigConfig ${JSON.stringify(configRig)}`);
 
         if (! rigInfos) {
-            console.log(`${now()} [${colors.yellow('WARNING')}] cannot send rigInfos to server (open) [conn ${connectionId}]`)
+            console.log(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [conn ${connectionId}]`)
             this.close();
             websocket = null;
             return;
@@ -156,7 +181,7 @@ function websocketConnect() {
     // Handle incoming message from server
     websocket.on('message', async function message(data: Buffer) {
         const message = data.toString();
-        console.log(`${now()} [${colors.blue('INFO')}] received: ${message} [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] received: ${message} [conn ${connectionId}]`);
 
         const args = message.split(' ');
 
@@ -186,7 +211,7 @@ function websocketConnect() {
                         params = JSON.parse(paramsJson);
 
                     } catch (err: any) {
-                        console.error(`${now()} [${colors.red('ERROR')}] cannot start service : ${err.message}`);
+                        console.error(`${now()} [${colors.red('ERROR')}] [RIG] cannot start service : ${err.message}`);
                         return;
                     }
 
@@ -231,7 +256,7 @@ function websocketConnect() {
 
     // Handle connection close
     websocket.on('close', function close() {
-        console.log(`${now()} [${colors.blue('INFO')}] disconnected from server [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] disconnected from server [conn ${connectionId}]`);
 
         if (sendStatusTimeout) {
             clearTimeout(sendStatusTimeout);
@@ -242,7 +267,8 @@ function websocketConnect() {
 
         // handle reconnection
         if (newConnectionTimeout === null && active) {
-            newConnectionTimeout = setTimeout(() => websocketConnect(), 10_000);
+            websocket = null;
+            newConnectionTimeout = setTimeout(websocketConnect, 10_000, config);
         }
     });
 
@@ -256,13 +282,15 @@ function websocketConnect() {
         // sends out pings plus a conservative assumption of the latency.
         (this as any).pingTimeout = setTimeout(() => {
             if (! active) return;
+            if (! websocket || websocket !== this) return;
 
-            console.log(`${now()} [${colors.blue('INFO')}] terminate connection with the server [conn ${connectionId}]`);
+            console.log(`${now()} [${colors.blue('INFO')}] [RIG] terminate connection with the server [conn ${connectionId}]`);
             this.terminate();
             websocket = null;
 
             if (newConnectionTimeout === null && active) {
-                newConnectionTimeout = setTimeout(() => websocketConnect(), 5_000);
+                websocket = null;
+                newConnectionTimeout = setTimeout(websocketConnect, 5_000, config);
             }
 
         }, serverConnTimeout + 1000);

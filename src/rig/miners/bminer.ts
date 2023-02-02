@@ -150,7 +150,7 @@ export const minerCommands: t.minerCommandInfos = {
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerInfos = {
-            infos: {
+            miner: {
                 name: minerName,
                 worker: workerName,
                 uptime,

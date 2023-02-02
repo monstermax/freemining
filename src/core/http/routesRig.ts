@@ -32,6 +32,8 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const monitorStatus = Rig.monitorStatus();
         const allMiners = await Rig.getAllMiners(config);
         const rigInfos = Rig.getRigInfos();
+        const farmAgentStatus = Rig.farmAgentStatus();
+        const farmAgentHostPort = `*hardcoded*`; // TODO: `${wsServerHost}:${wsServerPort}`
 
         // variables à ne plus utiliser... (utiliser allMiners à la place)
         const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
@@ -49,6 +51,8 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             contentTemplate: `..${SEP}rig${SEP}rig.html`,
             rigInfos,
             monitorStatus,
+            farmAgentStatus,
+            farmAgentHostPort,
             allMiners,
             installedMiners,
             runningMiners,
@@ -441,7 +445,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
         const data = {
             ...utilFuncs,
-            rigName: rigInfos.infos.name,
+            rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
             rigInfos,
             miners: allMiners,
             runnableMiners,

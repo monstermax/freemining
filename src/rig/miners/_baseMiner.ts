@@ -161,7 +161,7 @@ export const minerCommands: t.minerCommandInfos = {
         const hashRate = 0;
 
         let infos: t.MinerInfos = {
-            infos: {
+            miner: {
                 name: '',
                 worker,
                 uptime,

@@ -30,6 +30,11 @@ const defaultUserFrmDir = (os.platform() === 'win32') ? defaultUserFrmDirWin : d
 const defaultCliWssConnTimeout: number = 5_000;
 const defaultCliWssServerAddress: string = '127.0.0.1';
 
+const hostname = os.hostname();
+const defaultRigName = `${hostname}-rig-01`;
+const defaultFarmName = `${hostname}-farm-01`;
+const defaultNodeName = `${hostname}-node-01`;
+const defaultPoolName = `${hostname}-pool-01`;
 
 
 /* ########## FUNCTIONS ######### */
@@ -219,6 +224,15 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
         process.exit(1);
     }
 
+    // set rigName
+    let rigName = defaultRigName;
+    let farmName = defaultFarmName;
+    let nodeName = defaultNodeName;
+    let poolName = defaultPoolName;
+
+
+    // TODO: load json config file (cli & daemon. separated cases ?)
+
 
     return {
         listenAddress,
@@ -233,6 +247,10 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
         wssConnTimeout,
         cliWssConnTimeout,
         cliWssServerAddress,
+        rigName,
+        farmName,
+        nodeName,
+        poolName,
         _args: args,
     } as t.Config;
 }

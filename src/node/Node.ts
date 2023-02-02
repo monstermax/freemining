@@ -342,7 +342,7 @@ export function getProcesses(): t.MapString<t.Process> {
 
 
 
-export function getNodeInfos(): t.Node {
+export function getNodeInfos(): t.NodeInfos {
 
     if (nodeMainInfos === null) {
 
@@ -370,8 +370,8 @@ export function getNodeInfos(): t.Node {
     const memoryUsed = os.totalmem() - os.freemem();
     const memoryTotal = os.totalmem();
 
-    const nodeInfos: t.Node = {
-        infos: {
+    const nodeInfos: t.NodeInfos = {
+        node: {
             name,
             hostname,
             ip,

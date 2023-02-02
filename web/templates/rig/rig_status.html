@@ -7,7 +7,7 @@
 <div>
 
     <h1 class="d-inline-block">
-        RIG: <b><%=rigInfos.infos.name%></b>
+        RIG: <b><%=rigInfos.rig.name%></b>
     </h1>
 
     <div class="d-inline-block h3 ms-3">
@@ -39,11 +39,11 @@
 
 <div class="alert alert-secondary">
     <div class="row">
-        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> <%= rigInfos.infos.hostname %></div>
-        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> <%= rigInfos.infos.ip %></div>
-        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> <%= rigInfos.infos.os %></div>
+        <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> <%= rigInfos.rig.hostname %></div>
+        <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> <%= rigInfos.rig.ip %></div>
+        <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> <%= rigInfos.rig.os %></div>
         <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> <%= rigInfos.usage.loadAvg %></div>
-        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> <%= formatNumber(rigInfos.infos.uptime, 'seconds') %></div>
+        <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> <%= formatNumber(rigInfos.rig.uptime, 'seconds') %></div>
         <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> <%= formatNumber(rigInfos.usage.memory.used, 'size') %>B / <%= formatNumber(rigInfos.usage.memory.total, 'size') %>B</div>
     </div>
 </div>
@@ -136,12 +136,12 @@
             <div id="rig-service-${minerFullName.replaceAll('.', '-')}" class="alert alert-success rig-service">
                 <div class="row">
                     <div class="col-12 col-lg-2 text-truncate">
-                        <div class="alert alert-dark h4 text-center">${service.infos.name}<br /><small class="text-muted">${alias}</small></div>
+                        <div class="alert alert-dark h4 text-center">${service.miner.name}<br /><small class="text-muted">${alias}</small></div>
                     </div>
-                    <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.infos.algo}</div>
-                    <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.infos.worker}</div>
-                    <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.infos.uptime, 'seconds')}</div>
-                    <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.infos.hashRate, 'size')}H/sec.</div>
+                    <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.miner.algo}</div>
+                    <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.miner.worker}</div>
+                    <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.miner.uptime, 'seconds')}</div>
+                    <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.miner.hashRate, 'size')}H/sec.</div>
                     <div class="col-12 col-lg-1">
                         <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('${miner}', '${alias}')" />
                     </div>

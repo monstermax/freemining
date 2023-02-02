@@ -9,7 +9,7 @@ const child_process_1 = require("child_process");
 const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
 const minersConfigs_1 = require("./minersConfigs");
-const farmAgentWebsocket = tslib_1.__importStar(require("./farmAgentWebsocket"));
+const rigFarmAgentWebsocket = tslib_1.__importStar(require("./rigFarmAgentWebsocket"));
 //import type childProcess from 'child_process';
 // GPU infos for windows: https://github.com/FallingSnow/gpu-info
 /* ########## MAIN ######### */
@@ -52,18 +52,17 @@ function monitorStatus() {
 }
 exports.monitorStatus = monitorStatus;
 function farmAgentStart(config) {
-    farmAgentWebsocket.start(config);
+    rigFarmAgentWebsocket.start(config);
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Farm agent started`);
 }
 exports.farmAgentStart = farmAgentStart;
 function farmAgentStop() {
-    farmAgentWebsocket.stop();
+    rigFarmAgentWebsocket.stop();
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Farm agent stopped`);
 }
 exports.farmAgentStop = farmAgentStop;
 function farmAgentStatus() {
-    // TODO
-    return false;
+    return rigFarmAgentWebsocket.status();
 }
 exports.farmAgentStatus = farmAgentStatus;
 function monitorAutoCheckRig(config) {
@@ -73,6 +72,9 @@ function monitorAutoCheckRig(config) {
             clearTimeout(monitorIntervalId);
         }
         yield monitorCheckRig(config);
+        if (farmAgentStatus()) {
+            rigFarmAgentWebsocket.sendStatusToFarm();
+        }
         monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
     });
 }
@@ -97,8 +99,9 @@ function monitorCheckRig(config) {
                 try {
                     minerInfos = yield minerCommands.getInfos(config, {});
                     minerInfos.dataDate = Date.now();
-                    minerInfos.miner = minerName;
-                    minerInfos.alias = minerAlias;
+                    minerInfos.miner = minerInfos.miner || {};
+                    minerInfos.miner.minerName = minerName;
+                    minerInfos.miner.minerAlias = minerAlias;
                     minersInfos[minerFullName] = minerInfos;
                 }
                 catch (err) {
@@ -221,7 +224,7 @@ function minerRunStart(config, params) {
         }
         const rigInfos = getRigInfos();
         const opts = {
-            rigName: rigInfos.infos.name,
+            rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
         };
         params.poolUser = (0, utils_1.stringTemplate)(params.poolUser, opts, false, false, false);
         const minerCommands = minersConfigs_1.minersCommands[minerName];
@@ -495,7 +498,7 @@ function getRigInfos() {
     const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
     const memoryTotal = os_1.default.totalmem();
     const rigInfos = {
-        infos: {
+        rig: {
             name,
             hostname,
             ip,

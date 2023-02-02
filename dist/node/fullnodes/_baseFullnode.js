@@ -66,7 +66,7 @@ exports.fullnodeCommands = {
             const blocks = -1; // edit-me
             const blockHeaders = -1; // edit-me
             let infos = {
-                infos: {
+                fullnode: {
                     name: fullnodeName,
                     coin,
                 },

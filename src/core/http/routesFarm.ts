@@ -6,6 +6,7 @@ import type express from 'express';
 
 import { now } from '../../common/utils';
 import * as Daemon from '../../core/Daemon';
+import * as Farm from '../../farm/Farm';
 
 
 /* ########## MAIN ######### */
@@ -34,6 +35,15 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
             //farmInfos,
         };
         res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+
+
+    // GET Farm status JSON => /farm/status.json
+    app.get(`${urlPrefix}/status.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const farmInfos = Farm.getFarmInfos();
+        let content = JSON.stringify(farmInfos, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
     });
 
 }

@@ -267,7 +267,9 @@ function run(args = []) {
             }
             else {
                 //console.warn(`${now()} [${colors.blue('WARNING')}] [CLI] received invalid message from server : \n${messageJson}`);
-                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARNING')}] [CLI] received invalid message from server`);
+                //console.warn(`${now()} [${colors.blue('WARNING')}] [CLI] received invalid message from server`);
+                console.warn(`Error: received invalid message from server`);
+                console.log(messageJson);
                 ws.close();
             }
         });

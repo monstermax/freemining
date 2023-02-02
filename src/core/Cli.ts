@@ -295,7 +295,9 @@ export function run(args: (t.CliParams & t.CommonParams & string)[] = []): void 
 
         } else {
             //console.warn(`${now()} [${colors.blue('WARNING')}] [CLI] received invalid message from server : \n${messageJson}`);
-            console.warn(`${now()} [${colors.blue('WARNING')}] [CLI] received invalid message from server`);
+            //console.warn(`${now()} [${colors.blue('WARNING')}] [CLI] received invalid message from server`);
+            console.warn(`Error: received invalid message from server`);
+            console.log(messageJson);
             ws.close();
         }
 

@@ -17,7 +17,9 @@ import { registerFarmRoutes } from './http/routesFarm';
 import { registerNodeRoutes } from './http/routesNode';
 import { registerPoolRoutes } from './http/routesPool';
 import * as Rig from '../rig/Rig';
+import * as Farm from '../farm/Farm';
 import * as Node from '../node/Node';
+import * as Pool from '../pool/Pool';
 
 import type *  as t from '../common/types';
 
@@ -57,6 +59,7 @@ frmd <params>
 
      -r | --rig-monitor-start                # start rig monitor at freemining start
      -n | --node-monitor-start               # start node monitor at freemining start
+     -f | --farm-server-start                # start farm rigs server at freemining start
 
      --rig-monitor-poll-delay                # delay between 2 checks of the rig status
      --node-monitor-poll-delay               # delay between 2 checks of the node status
@@ -80,7 +83,7 @@ export function run(args: (t.DaemonParams & t.CommonParams & string)[] = []): vo
 
     config = loadConfig(args);
 
-    console.log('daemon start');
+    console.log( `${now()} [DEBUG] [DAEMON] Daemon start...` );
 
     const app = express(); // express app
     const server = http.createServer(app); // express server
@@ -106,6 +109,9 @@ export function run(args: (t.DaemonParams & t.CommonParams & string)[] = []): vo
 
     if (hasOpt('-n', args) || hasOpt('--node-monitor-start', args)) {
         Node.monitorStart(config);
+    }
+    if (hasOpt('-f', args) || hasOpt('--farm-server-start', args)) {
+        Farm.rigsServerStart(config);
     }
 }
 
@@ -198,36 +204,47 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                 const res: t.RpcResponse = JSON.parse(messageJson);
 
             } else if ('method' in message && 'params' in message) {
-                console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) (${messageJson.length} chars.)`);
                 const req: t.RpcRequest = JSON.parse(messageJson);
 
                 switch (req.method) {
 
                     /* CORE */
                     case 'sysInfos':
-                        const sysInfos = await getSystemInfos();
-                        rpcSendResponse(ws, req.id, sysInfos);
+                        {
+                            const sysInfos = await getSystemInfos();
+                            rpcSendResponse(ws, req.id, sysInfos);
+                        }
                         break;
 
                     /* RIG */
                     case 'rigStatus':
-                        const rigInfos = Rig.getRigInfos();
-                        rpcSendResponse(ws, req.id, rigInfos);
+                        {
+                            const rigInfos = Rig.getRigInfos();
+                            rpcSendResponse(ws, req.id, rigInfos);
+                        }
                         break;
 
                     case 'rigMonitorStart':
-                        Rig.monitorStart(config);
-                        rpcSendResponse(ws, req.id, 'OK');
+                        {
+                            Rig.monitorStart(config);
+                            rpcSendResponse(ws, req.id, 'OK');
+                        }
                         break;
 
                     case 'rigMonitorStop':
-                        Rig.monitorStop();
-                        rpcSendResponse(ws, req.id, 'OK');
+                        {
+                            Rig.monitorStop();
+                            rpcSendResponse(ws, req.id, 'OK');
+                        }
                         break;
 
                     case 'rigMonitorStatus':
-                        const rigMonitorStatus = Rig.monitorStatus();
-                        rpcSendResponse(ws, req.id, rigMonitorStatus);
+                        {
+                            const rigMonitorStatus = Rig.monitorStatus();
+                            rpcSendResponse(ws, req.id, rigMonitorStatus);
+                        }
                         break;
 
                     case 'rigMinerInstallStart':
@@ -299,23 +316,31 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
                     /* NODE */
                     case 'nodeStatus':
-                        const nodeInfos = Node.getNodeInfos();
-                        rpcSendResponse(ws, req.id, nodeInfos);
+                        {
+                            const nodeInfos = Node.getNodeInfos();
+                            rpcSendResponse(ws, req.id, nodeInfos);
+                        }
                         break;
 
                     case 'nodeMonitorStart':
-                        Node.monitorStart(config);
-                        rpcSendResponse(ws, req.id, 'OK');
+                        {
+                            Node.monitorStart(config);
+                            rpcSendResponse(ws, req.id, 'OK');
+                        }
                         break;
 
                     case 'nodeMonitorStop':
-                        Node.monitorStop();
-                        rpcSendResponse(ws, req.id, 'OK');
+                        {
+                            Node.monitorStop();
+                            rpcSendResponse(ws, req.id, 'OK');
+                        }
                         break;
 
                     case 'nodeMonitorStatus':
-                        const nodeMonitorStatus = Node.monitorStatus();
-                        rpcSendResponse(ws, req.id, nodeMonitorStatus);
+                        {
+                            const nodeMonitorStatus = Node.monitorStatus();
+                            rpcSendResponse(ws, req.id, nodeMonitorStatus);
+                        }
                         break;
 
                     case 'nodeFullnodeInstallStart':
@@ -373,17 +398,59 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    /* FARM */
-                    case 'farmAuth':
-                        // TODO
 
-                        break;
-                    case 'farmRigStatus':
+                    /* FARM */
+                    case 'farmStatus':
                         {
+                            const farmInfos = Farm.getFarmInfos();
+                            rpcSendResponse(ws, req.id, farmInfos);
+                        }
+                        break;
+
+                    case 'farmAuth':
+                        if (! req.params.user) {
+                            rpcSendError(ws, req.id, { code: -1, message: `Missing auth` } );
+                            ws.close();
+                            break;
+                        }
+                        const authResult = Farm.rigAuthRequest(config, req.params);
+                        if (authResult) {
+                            (ws as any).auth = {
+                                name: req.params.user, // rigName
+                                ip: clientIP,
+                                type: 'rig',
+                            };
+                            rpcSendResponse(ws, req.id, 'OK');
+
+                        } else {
+                            rpcSendError(ws, req.id, { code: -1, message: `Auth rejected` } );
+                            ws.close();
+                        }
+                        break;
+
+                    case 'farmRigStatus': // requires auth
+                        {
+                            if (! (ws as any).auth) {
+                                rpcSendError(ws, req.id, { code: -1, message: `Auth required` } );
+                                ws.close();
+                                break;
+                            }
+                            const rigName = (ws as any).auth.name;
                             const rigInfos = req.params;
+                            Farm.setRigStatus(rigName, rigInfos);
                             var debugme = 1;
                         }
                         break;
+
+
+                    /* POOL */
+                    case 'poolStatus':
+                        {
+                            const poolInfos = Pool.getPoolInfos();
+                            rpcSendResponse(ws, req.id, poolInfos);
+                        }
+                        break;
+
 
                     /* DEFAULT */
 
@@ -488,7 +555,7 @@ async function safeQuit(returnCode: number=1): Promise<void> {
             throw { message: `The processus ${(proc.process || {} as any).pid} is not killable` };
         }
 
-        console.log(`Sending SIGINT signal to rig process PID ${proc.process.pid}`);
+        console.log(`${now()} [DEBUG] [DAEMON] Sending SIGINT signal to rig process PID ${proc.process.pid}`);
         proc.process.kill('SIGINT');
     }
 
@@ -505,7 +572,7 @@ async function safeQuit(returnCode: number=1): Promise<void> {
             break;
         }
         if (rigProcessesCount !== lastRigProcessesCount) {
-            console.log(`Remaining rig processes: ${rigProcessesCount}`);
+            console.log(`${now()} [DEBUG] [DAEMON] Remaining rig processes: ${rigProcessesCount}`);
             lastRigProcessesCount = rigProcessesCount;
         }
         await sleep(waitDelayBetweenPools);
@@ -516,7 +583,7 @@ async function safeQuit(returnCode: number=1): Promise<void> {
             for (procName in rigProcesses) {
                 const proc = rigProcesses[procName];
                 if (! proc.process) continue;
-                console.log(`Sending SIGKILL signal to rig process PID ${proc.process.pid}`);
+                console.log(`${now()} [DEBUG] [DAEMON] Sending SIGKILL signal to rig process PID ${proc.process.pid}`);
                 proc.process.kill('SIGKILL');
             }
         }

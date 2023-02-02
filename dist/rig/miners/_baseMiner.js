@@ -133,7 +133,7 @@ exports.minerCommands = {
             const worker = '';
             const hashRate = 0;
             let infos = {
-                infos: {
+                miner: {
                     name: '',
                     worker,
                     uptime,

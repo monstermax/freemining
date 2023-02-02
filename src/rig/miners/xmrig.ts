@@ -246,7 +246,7 @@ export const minerCommands: t.minerCommandInfos = {
         const hashRate = (minerSummary.hashrate.total || [])[0] || 0 as number;
 
         let infos: t.MinerInfos = {
-            infos: {
+            miner: {
                 name: minerTitle,
                 worker,
                 uptime,

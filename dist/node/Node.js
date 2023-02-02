@@ -307,7 +307,7 @@ function getNodeInfos() {
     const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
     const memoryTotal = os_1.default.totalmem();
     const nodeInfos = {
-        infos: {
+        node: {
             name,
             hostname,
             ip,

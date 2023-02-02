@@ -14,6 +14,8 @@
 <h2>Rig status:</h2>
 <a href="status">Rig status</a>
 <br />
+<a href="status.json">JSON status</a>
+<br />
 <br />
 
 <% if (monitorStatus) { %>
@@ -26,9 +28,9 @@
 <br />
 <br />
 
-<% if (false) { %>
+<% if (farmAgentStatus) { %>
     Farm connection is active.
-    Server: xxxx
+    Server: <%=farmAgentHostPort%>
     <a href="farm-agent/run">Stop connection</a>
 
 <% } else { %>

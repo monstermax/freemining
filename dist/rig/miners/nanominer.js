@@ -133,7 +133,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             });
             // EDIT THESE VALUES - END //
             let infos = {
-                infos: {
+                miner: {
                     name: minerName,
                     worker: workerName,
                     uptime,

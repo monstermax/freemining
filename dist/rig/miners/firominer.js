@@ -114,7 +114,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const gpus = []; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
-                infos: {
+                miner: {
                     name: minerName,
                     worker: workerName,
                     uptime,

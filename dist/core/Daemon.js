@@ -17,7 +17,9 @@ const routesFarm_1 = require("./http/routesFarm");
 const routesNode_1 = require("./http/routesNode");
 const routesPool_1 = require("./http/routesPool");
 const Rig = tslib_1.__importStar(require("../rig/Rig"));
+const Farm = tslib_1.__importStar(require("../farm/Farm"));
 const Node = tslib_1.__importStar(require("../node/Node"));
+const Pool = tslib_1.__importStar(require("../pool/Pool"));
 /* ########## USAGE #########
 
 # Start daemon
@@ -47,6 +49,7 @@ frmd <params>
 
      -r | --rig-monitor-start                # start rig monitor at freemining start
      -n | --node-monitor-start               # start node monitor at freemining start
+     -f | --farm-server-start                # start farm rigs server at freemining start
 
      --rig-monitor-poll-delay                # delay between 2 checks of the rig status
      --node-monitor-poll-delay               # delay between 2 checks of the node status
@@ -63,7 +66,7 @@ function run(args = []) {
     }
     catchSignals();
     config = (0, Config_1.loadConfig)(args);
-    console.log('daemon start');
+    console.log(`${(0, utils_1.now)()} [DEBUG] [DAEMON] Daemon start...`);
     const app = (0, express_1.default)(); // express app
     const server = http.createServer(app); // express server
     const wss = new WebSocket.Server({ server }); // websocket server
@@ -81,6 +84,9 @@ function run(args = []) {
     }
     if ((0, utils_1.hasOpt)('-n', args) || (0, utils_1.hasOpt)('--node-monitor-start', args)) {
         Node.monitorStart(config);
+    }
+    if ((0, utils_1.hasOpt)('-f', args) || (0, utils_1.hasOpt)('--farm-server-start', args)) {
+        Farm.rigsServerStart(config);
     }
 }
 exports.run = run;
@@ -152,30 +158,41 @@ function registerWssRoutes(config, wss) {
                     const res = JSON.parse(messageJson);
                 }
                 else if ('method' in message && 'params' in message) {
-                    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                    //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
+                    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) (${messageJson.length} chars.)`);
                     const req = JSON.parse(messageJson);
                     switch (req.method) {
                         /* CORE */
                         case 'sysInfos':
-                            const sysInfos = yield (0, sysinfos_1.getSystemInfos)();
-                            rpcSendResponse(ws, req.id, sysInfos);
+                            {
+                                const sysInfos = yield (0, sysinfos_1.getSystemInfos)();
+                                rpcSendResponse(ws, req.id, sysInfos);
+                            }
                             break;
                         /* RIG */
                         case 'rigStatus':
-                            const rigInfos = Rig.getRigInfos();
-                            rpcSendResponse(ws, req.id, rigInfos);
+                            {
+                                const rigInfos = Rig.getRigInfos();
+                                rpcSendResponse(ws, req.id, rigInfos);
+                            }
                             break;
                         case 'rigMonitorStart':
-                            Rig.monitorStart(config);
-                            rpcSendResponse(ws, req.id, 'OK');
+                            {
+                                Rig.monitorStart(config);
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
                             break;
                         case 'rigMonitorStop':
-                            Rig.monitorStop();
-                            rpcSendResponse(ws, req.id, 'OK');
+                            {
+                                Rig.monitorStop();
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
                             break;
                         case 'rigMonitorStatus':
-                            const rigMonitorStatus = Rig.monitorStatus();
-                            rpcSendResponse(ws, req.id, rigMonitorStatus);
+                            {
+                                const rigMonitorStatus = Rig.monitorStatus();
+                                rpcSendResponse(ws, req.id, rigMonitorStatus);
+                            }
                             break;
                         case 'rigMinerInstallStart':
                             try {
@@ -239,20 +256,28 @@ function registerWssRoutes(config, wss) {
                             break;
                         /* NODE */
                         case 'nodeStatus':
-                            const nodeInfos = Node.getNodeInfos();
-                            rpcSendResponse(ws, req.id, nodeInfos);
+                            {
+                                const nodeInfos = Node.getNodeInfos();
+                                rpcSendResponse(ws, req.id, nodeInfos);
+                            }
                             break;
                         case 'nodeMonitorStart':
-                            Node.monitorStart(config);
-                            rpcSendResponse(ws, req.id, 'OK');
+                            {
+                                Node.monitorStart(config);
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
                             break;
                         case 'nodeMonitorStop':
-                            Node.monitorStop();
-                            rpcSendResponse(ws, req.id, 'OK');
+                            {
+                                Node.monitorStop();
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
                             break;
                         case 'nodeMonitorStatus':
-                            const nodeMonitorStatus = Node.monitorStatus();
-                            rpcSendResponse(ws, req.id, nodeMonitorStatus);
+                            {
+                                const nodeMonitorStatus = Node.monitorStatus();
+                                rpcSendResponse(ws, req.id, nodeMonitorStatus);
+                            }
                             break;
                         case 'nodeFullnodeInstallStart':
                             try {
@@ -305,13 +330,50 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         /* FARM */
-                        case 'farmAuth':
-                            // TODO
-                            break;
-                        case 'farmRigStatus':
+                        case 'farmStatus':
                             {
+                                const farmInfos = Farm.getFarmInfos();
+                                rpcSendResponse(ws, req.id, farmInfos);
+                            }
+                            break;
+                        case 'farmAuth':
+                            if (!req.params.user) {
+                                rpcSendError(ws, req.id, { code: -1, message: `Missing auth` });
+                                ws.close();
+                                break;
+                            }
+                            const authResult = Farm.rigAuthRequest(config, req.params);
+                            if (authResult) {
+                                ws.auth = {
+                                    name: req.params.user,
+                                    ip: clientIP,
+                                    type: 'rig',
+                                };
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
+                            else {
+                                rpcSendError(ws, req.id, { code: -1, message: `Auth rejected` });
+                                ws.close();
+                            }
+                            break;
+                        case 'farmRigStatus': // requires auth
+                            {
+                                if (!ws.auth) {
+                                    rpcSendError(ws, req.id, { code: -1, message: `Auth required` });
+                                    ws.close();
+                                    break;
+                                }
+                                const rigName = ws.auth.name;
                                 const rigInfos = req.params;
+                                Farm.setRigStatus(rigName, rigInfos);
                                 var debugme = 1;
+                            }
+                            break;
+                        /* POOL */
+                        case 'poolStatus':
+                            {
+                                const poolInfos = Pool.getPoolInfos();
+                                rpcSendResponse(ws, req.id, poolInfos);
                             }
                             break;
                         /* DEFAULT */
@@ -389,7 +451,7 @@ function safeQuit(returnCode = 1) {
             if (!proc.process) {
                 throw { message: `The processus ${(proc.process || {}).pid} is not killable` };
             }
-            console.log(`Sending SIGINT signal to rig process PID ${proc.process.pid}`);
+            console.log(`${(0, utils_1.now)()} [DEBUG] [DAEMON] Sending SIGINT signal to rig process PID ${proc.process.pid}`);
             proc.process.kill('SIGINT');
         }
         // waiting for kills are done...
@@ -405,7 +467,7 @@ function safeQuit(returnCode = 1) {
                 break;
             }
             if (rigProcessesCount !== lastRigProcessesCount) {
-                console.log(`Remaining rig processes: ${rigProcessesCount}`);
+                console.log(`${(0, utils_1.now)()} [DEBUG] [DAEMON] Remaining rig processes: ${rigProcessesCount}`);
                 lastRigProcessesCount = rigProcessesCount;
             }
             yield (0, utils_1.sleep)(waitDelayBetweenPools);
@@ -416,7 +478,7 @@ function safeQuit(returnCode = 1) {
                     const proc = rigProcesses[procName];
                     if (!proc.process)
                         continue;
-                    console.log(`Sending SIGKILL signal to rig process PID ${proc.process.pid}`);
+                    console.log(`${(0, utils_1.now)()} [DEBUG] [DAEMON] Sending SIGKILL signal to rig process PID ${proc.process.pid}`);
                     proc.process.kill('SIGKILL');
                 }
             }

@@ -21,6 +21,11 @@ const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrm
 // cli options
 const defaultCliWssConnTimeout = 5000;
 const defaultCliWssServerAddress = '127.0.0.1';
+const hostname = os_1.default.hostname();
+const defaultRigName = `${hostname}-rig-01`;
+const defaultFarmName = `${hostname}-farm-01`;
+const defaultNodeName = `${hostname}-node-01`;
+const defaultPoolName = `${hostname}-pool-01`;
 /* ########## FUNCTIONS ######### */
 function loadConfig(args) {
     let wssConnTimeout = defaultWssConnTimeout;
@@ -184,6 +189,12 @@ function loadConfig(args) {
         console.error(`${(0, utils_1.now)()} [ERROR] invalid cli-wss-server-address`);
         process.exit(1);
     }
+    // set rigName
+    let rigName = defaultRigName;
+    let farmName = defaultFarmName;
+    let nodeName = defaultNodeName;
+    let poolName = defaultPoolName;
+    // TODO: load json config file (cli & daemon. separated cases ?)
     return {
         listenAddress,
         listenPort,
@@ -197,6 +208,10 @@ function loadConfig(args) {
         wssConnTimeout,
         cliWssConnTimeout,
         cliWssServerAddress,
+        rigName,
+        farmName,
+        nodeName,
+        poolName,
         _args: args,
     };
 }

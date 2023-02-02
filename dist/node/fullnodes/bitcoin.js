@@ -155,7 +155,7 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
             const cpus = [];
             // EDIT THESE VALUES - END //
             let infos = {
-                infos: {
+                fullnode: {
                     name: fullnodeName,
                     coin,
                 },

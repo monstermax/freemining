@@ -7,7 +7,7 @@ import { execSync } from 'child_process';
 import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate } from '../common/utils';
 import { exec } from '../common/exec';
 import { minersInstalls, minersCommands } from './minersConfigs';
-import * as farmAgentWebsocket from './farmAgentWebsocket';
+import * as rigFarmAgentWebsocket from './rigFarmAgentWebsocket';
 
 import type *  as t from '../common/types';
 //import type childProcess from 'child_process';
@@ -31,6 +31,7 @@ const minersInfos: t.MapString<any> = {};
 
 let rigMainInfos: any | null = null;
 let dateLastCheck: number | null = null;
+
 
 /* ########## FUNCTIONS ######### */
 
@@ -68,19 +69,18 @@ export function monitorStatus(): boolean {
 
 
 export function farmAgentStart(config: t.Config): void {
-    farmAgentWebsocket.start(config);
+    rigFarmAgentWebsocket.start(config);
     console.log(`${now()} [INFO] [RIG] Farm agent started`);
 }
 
 
 export function farmAgentStop(): void {
-    farmAgentWebsocket.stop();
+    rigFarmAgentWebsocket.stop();
     console.log(`${now()} [INFO] [RIG] Farm agent stopped`);
 }
 
 export function farmAgentStatus(): boolean {
-    // TODO
-    return false;
+    return rigFarmAgentWebsocket.status();
 }
 
 
@@ -92,6 +92,10 @@ async function monitorAutoCheckRig(config: t.Config) {
     }
 
     await monitorCheckRig(config);
+
+    if (farmAgentStatus()) {
+        rigFarmAgentWebsocket.sendStatusToFarm();
+    }
 
     monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
 }
@@ -121,8 +125,9 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
             try {
                 minerInfos = await minerCommands.getInfos(config, {});
                 minerInfos.dataDate = Date.now();
-                minerInfos.miner = minerName;
-                minerInfos.alias = minerAlias;
+                minerInfos.miner = minerInfos.miner || {};
+                minerInfos.miner.minerName = minerName;
+                minerInfos.miner.minerAlias = minerAlias;
                 minersInfos[minerFullName] = minerInfos;
 
             } catch (err: any) {
@@ -260,7 +265,7 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
 
     const rigInfos = getRigInfos();
     const opts = {
-        rigName: rigInfos.infos.name,
+        rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
     };
     params.poolUser = stringTemplate(params.poolUser, opts, false, false, false);
 
@@ -485,7 +490,7 @@ export function getRigPs(): any {
     //cmd = `wmic process where "ParentProcessId=<pid>" get ProcessId,Name`;
 }
 
-export function getRigInfos(): t.Rig {
+export function getRigInfos(): t.RigInfos {
 
     if (rigMainInfos === null) {
 
@@ -585,8 +590,8 @@ export function getRigInfos(): t.Rig {
     const memoryUsed = os.totalmem() - os.freemem();
     const memoryTotal = os.totalmem();
 
-    const rigInfos: t.Rig = {
-        infos: {
+    const rigInfos: t.RigInfos = {
+        rig: {
             name,
             hostname,
             ip,

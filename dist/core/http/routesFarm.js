@@ -5,6 +5,7 @@ const tslib_1 = require("tslib");
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../../common/utils");
 const Daemon = tslib_1.__importStar(require("../../core/Daemon"));
+const Farm = tslib_1.__importStar(require("../../farm/Farm"));
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 const utilFuncs = {
@@ -20,6 +21,13 @@ function registerFarmRoutes(app, urlPrefix = '') {
                 noIndex: false,
             }, contentTemplate: `..${SEP}farm${SEP}farm.html` });
         res.render(`.${SEP}core${SEP}layout.html`, data);
+    }));
+    // GET Farm status JSON => /farm/status.json
+    app.get(`${urlPrefix}/status.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const farmInfos = Farm.getFarmInfos();
+        let content = JSON.stringify(farmInfos, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
     }));
 }
 exports.registerFarmRoutes = registerFarmRoutes;

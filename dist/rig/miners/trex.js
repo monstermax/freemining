@@ -130,7 +130,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             });
             const hashRate = workerHashRate;
             let infos = {
-                infos: {
+                miner: {
                     name: minerName,
                     worker: workerName,
                     uptime,

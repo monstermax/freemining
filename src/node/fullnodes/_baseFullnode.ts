@@ -82,7 +82,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         const blockHeaders = -1; // edit-me
 
         let infos: t.FullnodeInfos = {
-            infos: {
+            fullnode: {
                 name: fullnodeName,
                 coin,
             },

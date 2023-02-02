@@ -21,6 +21,8 @@ function registerRigRoutes(app, urlPrefix = '') {
         const monitorStatus = Rig.monitorStatus();
         const allMiners = yield Rig.getAllMiners(config);
         const rigInfos = Rig.getRigInfos();
+        const farmAgentStatus = Rig.farmAgentStatus();
+        const farmAgentHostPort = `*hardcoded*`; // TODO: `${wsServerHost}:${wsServerPort}`
         // variables à ne plus utiliser... (utiliser allMiners à la place)
         const runningMiners = Object.entries(allMiners).filter((entry) => entry[1].running).map(entry => entry[0]);
         const installedMiners = Object.entries(allMiners).filter((entry) => entry[1].installed).map(entry => entry[0]);
@@ -32,6 +34,8 @@ function registerRigRoutes(app, urlPrefix = '') {
                 noIndex: false,
             }, contentTemplate: `..${SEP}rig${SEP}rig.html`, rigInfos,
             monitorStatus,
+            farmAgentStatus,
+            farmAgentHostPort,
             allMiners,
             installedMiners,
             runningMiners,
@@ -343,7 +347,7 @@ function registerRigRoutes(app, urlPrefix = '') {
         if (fs_1.default.existsSync(poolsFilePath)) {
             presets = require(poolsFilePath);
         }
-        const data = Object.assign(Object.assign({}, utilFuncs), { rigName: rigInfos.infos.name, rigInfos, miners: allMiners, runnableMiners,
+        const data = Object.assign(Object.assign({}, utilFuncs), { rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig', rigInfos, miners: allMiners, runnableMiners,
             runningMiners,
             installedMiners,
             presets, miner: minerName, minerAlias });
