@@ -326,3 +326,10 @@ export type FullnodeInfos = {
 
 
 
+
+export type runningMiner = {
+    miner: string,
+    alias: string,
+    pid: number,
+};
+

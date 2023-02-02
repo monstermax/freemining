@@ -59,8 +59,11 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const config = Daemon.getConfig();
         const rigStatus = Rig.monitorStatus();
         const rigInfos = Rig.getRigInfos();
+        //const allMiners = await Rig.getAllMiners(config);
+        const runningMinersAliases = Rig.getRunningMinersAliases(config);
 
         const data = {
             ...utilFuncs,
@@ -71,6 +74,8 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
             rigStatus,
             rigInfos,
+            runningMinersAliases,
+            //allMiners,
             //monitorStatus,
             //installedMiners,
             //runningMiners,
@@ -180,6 +185,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             contentTemplate: `..${SEP}rig${SEP}miner_install.html`,
             rigInfos,
             miner: minerName,
+            minerAlias,
             minerStatus,
             minerInfos,
             allMiners,
@@ -291,6 +297,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             rigStatus,
             rigInfos,
             miner: minerName,
+            minerAlias,
             minerStatus,
             minerInfos,
             allMiners,
@@ -367,6 +374,9 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const minerName = req.query.miner as string || '';
 
         const config = Daemon.getConfig();
+        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
+
         const rigInfos = Rig.getRigInfos();
         const allMiners = await Rig.getAllMiners(config);
         const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
@@ -395,6 +405,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             installedMiners,
             presets,
             miner: minerName,
+            minerAlias,
         };
         res.render(`.${SEP}rig${SEP}run_miner_modal.html`, data);
     });

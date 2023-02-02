@@ -42,13 +42,17 @@ function registerRigRoutes(app, urlPrefix = '') {
     }));
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
         const rigStatus = Rig.monitorStatus();
         const rigInfos = Rig.getRigInfos();
+        //const allMiners = await Rig.getAllMiners(config);
+        const runningMinersAliases = Rig.getRunningMinersAliases(config);
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager - Rig Status`,
                 noIndex: false,
             }, contentTemplate: `..${SEP}rig${SEP}rig_status.html`, rigStatus,
-            rigInfos });
+            rigInfos,
+            runningMinersAliases });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     }));
     // GET Rig status JSON => /rig/status.json
@@ -126,7 +130,8 @@ function registerRigRoutes(app, urlPrefix = '') {
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager - Miner install`,
                 noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}miner_install.html`, rigInfos, miner: minerName, minerStatus,
+            }, contentTemplate: `..${SEP}rig${SEP}miner_install.html`, rigInfos, miner: minerName, minerAlias,
+            minerStatus,
             minerInfos,
             allMiners,
             installStatus,
@@ -217,7 +222,8 @@ function registerRigRoutes(app, urlPrefix = '') {
                 title: `Freemining - Rig Manager - Miner run`,
                 noIndex: false,
             }, contentTemplate: `..${SEP}rig${SEP}miner_run.html`, rigStatus,
-            rigInfos, miner: minerName, minerStatus,
+            rigInfos, miner: minerName, minerAlias,
+            minerStatus,
             minerInfos,
             allMiners });
         res.render(`.${SEP}core${SEP}layout.html`, data);
@@ -278,8 +284,11 @@ function registerRigRoutes(app, urlPrefix = '') {
         res.send(`Error: invalid action`);
     }));
     app.get(`${urlPrefix}/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        var _l;
         const minerName = req.query.miner || '';
         const config = Daemon.getConfig();
+        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
+        const minerAlias = ((_l = req.query.alias) === null || _l === void 0 ? void 0 : _l.toString()) || minerConfig.defaultAlias;
         const rigInfos = Rig.getRigInfos();
         const allMiners = yield Rig.getAllMiners(config);
         const runningMiners = Object.entries(allMiners).filter((entry) => entry[1].running).map(entry => entry[0]);
@@ -298,7 +307,7 @@ function registerRigRoutes(app, urlPrefix = '') {
         const data = Object.assign(Object.assign({}, utilFuncs), { rigName: rigInfos.infos.name, rigInfos, miners: allMiners, runnableMiners,
             runningMiners,
             installedMiners,
-            presets, miner: minerName });
+            presets, miner: minerName, minerAlias });
         res.render(`.${SEP}rig${SEP}run_miner_modal.html`, data);
     }));
 }

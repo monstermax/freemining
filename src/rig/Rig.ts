@@ -44,8 +44,7 @@ export function monitorStart(config: t.Config, params?: t.MapString<any>): void 
         return;
     }
 
-    const pollDelay = Number(getOpt('--rig-monitor-poll-delay')) || defaultPollDelay;
-    monitorIntervalId = setInterval(monitorCheckRig, pollDelay, config);
+    /* await */ monitorAutoCheckRig(config);
 
     console.log(`${now()} [INFO] [RIG] Rig monitor started`);
 }
@@ -57,7 +56,7 @@ export function monitorStart(config: t.Config, params?: t.MapString<any>): void 
  */
 export function monitorStop(config?: t.Config, params?: t.MapString<any>): void {
     if (monitorIntervalId) {
-        clearInterval(monitorIntervalId);
+        clearTimeout(monitorIntervalId);
         monitorIntervalId = null;
 
         console.log(`${now()} [INFO] [RIG] Rig monitor stopped`);
@@ -69,6 +68,19 @@ export function monitorStatus(config?: t.Config, params?: t.MapString<any>): boo
     return monitorIntervalId !== null;
 }
 
+
+
+async function monitorAutoCheckRig(config: t.Config) {
+    const pollDelay = Number(getOpt('--rig-monitor-poll-delay')) || defaultPollDelay;
+
+    if (monitorIntervalId) {
+        clearTimeout(monitorIntervalId);
+    }
+
+    await monitorCheckRig(config);
+
+    monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
+}
 
 
 /**
@@ -95,6 +107,8 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
             try {
                 minerInfos = await minerCommands.getInfos(config, {});
                 minerInfos.dataDate = Date.now();
+                minerInfos.miner = minerName;
+                minerInfos.alias = minerAlias;
                 minersInfos[minerFullName] = minerInfos;
 
             } catch (err: any) {
@@ -122,18 +136,19 @@ export async function getInstalledMiners(config: t.Config, params?: t.MapString<
 }
 
 
-export function getRunningMiners(config: t.Config, params?: t.MapString<any>): string[] {
-    //const rigInfos = getRigInfos();
-    //const runningMiners = Object.keys(rigInfos.minersInfos);
-
+export function getRunningMinersAliases(config: t.Config, params?: t.MapString<any>): t.runningMiner[] {
     let procName: string;
     let rigProcesses = getProcesses();
-    const runningMiners: string[] = [];
+    const runningMiners: t.runningMiner[] = [];
 
     for (procName in rigProcesses) {
         const proc = rigProcesses[procName];
         if (! proc.process) continue;
-        runningMiners.push(proc.name);
+        runningMiners.push({
+            miner: proc.miner || '',
+            alias: proc.name,
+            pid: proc.pid || 0,
+        });
     }
 
     return runningMiners;
@@ -143,7 +158,7 @@ export function getRunningMiners(config: t.Config, params?: t.MapString<any>): s
 export function getInstallableMiners(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(minersInstalls).map(entry => {
         const [minerName, minerInstall] = entry;
-        if (minerInstall.version === 'edit-me') return '';
+        if (! minerInstall.version || minerInstall.version === 'edit-me') return '';
         return minerName;
     }).filter(minerName => minerName !== '');
 }
@@ -152,7 +167,7 @@ export function getInstallableMiners(config: t.Config, params?: t.MapString<any>
 export function getRunnableMiners(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
-        if (minerCommand.command === 'edit-me') return '';
+        if (! minerCommand.command || minerCommand.command === 'edit-me') return '';
         return minerName;
     }).filter(minerName => minerName !== '');
 }
@@ -161,7 +176,7 @@ export function getRunnableMiners(config: t.Config, params?: t.MapString<any>): 
 export function getManagedMiners(config: t.Config, params?: t.MapString<any>): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
-        if (minerCommand.apiPort === -1) return '';
+        if (minerCommand.apiPort <= 0) return '';
         return minerName;
     }).filter(minerName => minerName !== '');
 }
@@ -210,7 +225,7 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
-    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
+    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
@@ -285,12 +300,14 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
 
     const processName = `[freemining-beta.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
 
-    console.log(`${now()} [INFO] [RIG] Miner Run Start: ${minerAlias} (${minerName})`);
+    console.log(`${now()} [INFO] [RIG] Miner Run Start: ${minerName} (${minerAlias}))`);
 
     const onSpawn: t.ExecOnSpawn = function (proc) {
         processes[`miner-run-${minerName}-${minerAlias}`].pid = proc.pid;
         processes[`miner-run-${minerName}-${minerAlias}`].process = proc;
         fs.writeFileSync(pidFile, (proc.pid || -1).toString());
+        console.debug(`${now()} [DEBUG] [RIG] PROCESS SPWANED ${minerName}-${minerAlias} (pid: ${proc.pid})`);
+        /* await */ monitorAutoCheckRig(config);
     }
     const onStdOut: t.ExecOnStdOut = function (data) {
         //console.log('RECEIVED FROM CMD STDOUT:', data.toString());
@@ -304,6 +321,7 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     const onEnd: t.ExecOnEnd = function (returnCode, err) {
         delete processes[`miner-run-${minerName}-${minerAlias}`];
         fs.rmSync(pidFile, { force: true });
+        /* await */ monitorAutoCheckRig(config);
         console.debug(`${now()} [DEBUG] [RIG] PROCESS COMPLETED ${minerName}-${minerAlias} (rc: ${returnCode})`);
     }
 
@@ -322,7 +340,7 @@ export function minerRunStop(config: t.Config, params: t.MapString<any>, forceKi
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
-    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
+    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
@@ -405,7 +423,7 @@ export async function minerRunInfos(config: t.Config, params: t.MapString<any>):
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
-    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerAlias} (${minerName})`;
+    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
@@ -583,7 +601,7 @@ export function getRigInfos(): t.Rig {
 
 export async function getAllMiners(config: t.Config): Promise<any> {
     const installedMiners = await getInstalledMiners(config);
-    const runningMiners = getRunningMiners(config);
+    const runningMinersAliases = getRunningMinersAliases(config);
     const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
     const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
     const managedMiners = getManagedMiners(config); // TODO: mettre en cache
@@ -591,7 +609,7 @@ export async function getAllMiners(config: t.Config): Promise<any> {
     const minersNames = Array.from(
         new Set( [
             ...installedMiners,
-            ...runningMiners,
+            ...runningMinersAliases.map(runningMiner => runningMiner.miner),
             ...installableMiners,
             ...runnableMiners,
             ...managedMiners,
@@ -604,7 +622,7 @@ export async function getAllMiners(config: t.Config): Promise<any> {
                 minerName,
                 {
                     installed: installedMiners.includes(minerName),
-                    running: runningMiners.includes(minerName),
+                    running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
                     installable: installableMiners.includes(minerName),
                     runnable: runnableMiners.includes(minerName),
                     managed: managedMiners.includes(minerName),

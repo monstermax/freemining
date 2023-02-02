@@ -63,12 +63,12 @@ function startMiner() {
     startMinerModal(minerName, onStart, onSuccess, onFail);
 }
 
-function stopMiner() {
+function stopMiner(minerAlias='') {
     const onStart = null;
     const onSuccess = () => window.location.reload();
     const onFail = null;
 
-    stopMinerAjax(minerName, onStart, onSuccess, onFail);
+    stopMinerAjax(minerName, minerAlias, onStart, onSuccess, onFail);
 }
 </script>
 
