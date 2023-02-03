@@ -93,7 +93,9 @@ function run(args = []) {
         Farm.rigsServerStart(config);
     }
     if ((0, utils_1.hasOpt)('-a', args) || (0, utils_1.hasOpt)('--rig-farm-agent-start', args)) {
-        Rig.farmAgentStart(config);
+        setTimeout(() => {
+            Rig.farmAgentStart(config);
+        }, 1000);
     }
 }
 exports.run = run;
@@ -144,7 +146,7 @@ function registerWssRoutes(config, wss) {
         ws.on('message', function message(data) {
             var _a;
             return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const clientName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.clientName) || 'anonymous';
+                const clientName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.name) || 'anonymous';
                 const messageJson = data.toString();
                 //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
                 // try
@@ -384,7 +386,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'farmRigUpdateStatus': // requires auth
                             {
-                                if (!ws.auth) {
+                                if (!ws.auth || ws.auth.type !== 'rig') {
                                     rpcSendError(ws, req.id, { code: -1, message: `Auth required` });
                                     ws.close();
                                     break;
@@ -417,7 +419,7 @@ function registerWssRoutes(config, wss) {
         // Handle connection close
         ws.on('close', function message(data) {
             var _a;
-            const clientName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.clientName) || 'anonymous';
+            const clientName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.name) || 'anonymous';
             console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] client ${clientName} (${clientIP}) disconnected`);
         });
         // Send a welcome message

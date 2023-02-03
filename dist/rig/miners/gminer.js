@@ -86,7 +86,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             args.push('--server');
             args.push(params.poolUrl.split(':')[0] || "-");
             args.push('--port');
-            args.push(params.poolUrl.split(':')[1] || 0);
+            args.push((Number(params.poolUrl.split(':')[1]) || 0).toString());
         }
         if (params.poolUser) {
             args.push('--user');

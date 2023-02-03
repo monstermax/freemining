@@ -65,7 +65,7 @@ export function status() {
 
 
 export function sendRigStatusToFarm() {
-    if (websocket) {
+    if (websocket && websocket.readyState === websocket.OPEN) {
         sendRigStatusAuto(websocket);
     }
 }
@@ -79,20 +79,20 @@ function sendRigStatusAuto(ws: WebSocket) {
     const rigInfos = Rig.getRigInfos();
 
     try {
-        if (! ws || ! ws.OPEN) throw new Error(`Websocket not opened`);
+        if (! ws || ws.readyState !== ws.OPEN) throw new Error(`Websocket not opened`);
 
         sendRigStatus(ws, rigInfos);
 
     } catch (err: any) {
-        console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message}`);
+        console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${(ws as any)._connId}]`);
     }
 
-    sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws);
+    //sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws);
 }
 
 
 function sendRigStatus(ws: WebSocket, rigInfos: t.RigInfos): void {
-    console.log(`${now()} [${colors.blue('INFO')}] [RIG] Sending rigInfos to farm agent...`);
+    console.log(`${now()} [${colors.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${(websocket as any)._connId}]`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
 
     const req: any = {
@@ -119,7 +119,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
     const connectionId = ++connectionCount;
     requestsCount = 0;
 
-    console.log(`${now()} [${colors.blue('INFO')}] [RIG] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [conn ${connectionId}]`);
+    console.log(`${now()} [${colors.blue('INFO')}] [RIG] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [connId ${connectionId}]`);
 
     try {
         websocket = new WebSocket(`ws://${wsServerHost}:${wsServerPort}/`);
@@ -133,9 +133,11 @@ function websocketConnect(config: t.DaemonConfigAll) {
         return;
     }
 
+    (websocket as any)._connId = connectionId;
+
 
     websocket.on('error', function (err: any) {
-        console.warn(`${now()} [${colors.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
+        console.warn(`${now()} [${colors.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [connId ${connectionId}]`);
         this.terminate();
     });
 
@@ -148,7 +150,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
             user: rigName,
             pass: websocketPassword,
         });
-        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending auth to server (open) [conn ${connectionId}]`)
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending auth to server (open) [connId ${connectionId}]`)
         this.send( JSON.stringify(req) );
 
         //await waitForRequestResponse(reqId, serverConnTimeout, () => {}, () => { thow new Error(`Auth failed with timeout`) });
@@ -162,7 +164,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
         // Send rig status
         const rigInfos = Rig.getRigInfos();
         if (! rigInfos) {
-            console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [conn ${connectionId}]`)
+            console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [connId ${connectionId}]`)
             this.close();
             websocket = null;
             return;
@@ -192,7 +194,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
     // Handle incoming message from server
     websocket.on('message', async function message(data: Buffer) {
         const message = data.toString();
-        console.log(`${now()} [${colors.blue('INFO')}] [RIG] received: ${message} [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] received: ${message} [connId ${connectionId}]`);
 
         const args = message.split(' ');
 
@@ -222,7 +224,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
                         params = JSON.parse(paramsJson);
 
                     } catch (err: any) {
-                        console.error(`${now()} [${colors.red('ERROR')}] [RIG] cannot start service : ${err.message}`);
+                        console.error(`${now()} [${colors.red('ERROR')}] [RIG] cannot start service : ${err.message} [connId: ${connectionId}]`);
                         return;
                     }
 
@@ -267,7 +269,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
 
     // Handle connection close
     websocket.on('close', function close() {
-        console.log(`${now()} [${colors.blue('INFO')}] [RIG] disconnected from server [conn ${connectionId}]`);
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] disconnected from server [connId ${connectionId}]`);
 
         if (sendStatusTimeout) {
             clearTimeout(sendStatusTimeout);

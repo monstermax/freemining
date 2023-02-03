@@ -46,4 +46,23 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
         res.send(content);
     });
 
+
+    app.get(`${urlPrefix}/rigs/`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const config = Daemon.getConfig();
+        const farmInfos = Farm.getFarmInfos();
+        const rigsInfos = farmInfos.rigsInfos;
+
+        const data = {
+            ...utilFuncs,
+            meta: {
+                title: `Freemining - Farm Manager`,
+                noIndex: false,
+            },
+            contentTemplate: `..${SEP}farm${SEP}farm_rigs.html`,
+            //farmInfos,
+            rigsInfos,
+        };
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+
 }

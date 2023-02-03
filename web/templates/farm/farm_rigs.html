@@ -1,0 +1,113 @@
+
+<div>
+
+    <h1 class="d-inline-block">
+        Rigs list
+    </h1>
+
+    <div class="d-inline-block h3 ms-3">
+        <a href="./" class="btn btn-secondary">🌀 refresh</a>
+    </div>
+
+</div>
+
+<br />
+<br />
+
+<table class="table table-bordered table-hover table-sm">
+<thead class="table-dark">
+    <tr>
+        <th class="text-center">Rig</th>
+        <th>Hostname</th>
+        <th>IP</th>
+        <th>Operating system</th>
+        <th class="text-end">Uptime</th>
+        <th class="text-end">Load avg.</th>
+        <th class="text-end">Memory</th>
+        <th class="text-end">Services</th>
+        <th class="text-end">Freshness</th>
+    </tr>
+</thead>
+<tbody>
+    <% Object.entries(rigsInfos).map(entry => {
+        const [rigName, rigInfos] = entry;
+        const dataAge = rigInfos.dataAge || Date.now()/1000 - (rigInfos.dataDate || rigInfos.rig.dateRig);
+        //const dataAge = Date.now()/1000 - rigInfos.dataDate;
+        const isSuccess = (dataAge < 40) && (Object.keys(rigInfos.services).length > 0);
+        const isError = (dataAge > 40);
+        const isWarning = (! isSuccess && ! isError);
+        const colorClass = isSuccess ? 'bg-success' : (isError ? 'bg-danger' : 'bg-warning');
+        //const rigName2 = rigInfos.rig.name || rigInfos.rig.hostname;
+
+        return `<tr class="bg-light" style="font-size:.9em; font-weight:bold;">
+            <td rowspan="2" class="${colorClass} text-center" style="vertical-align:middle;">
+                <a class="text-light" href="./rig?rig=${rigName}">${rigName}</a>
+            </td>
+            <td>${(rigInfos.infos || rigInfos.rig).hostname}</td>
+            <td>${(rigInfos.infos || rigInfos.rig).ip}</td>
+            <td>${(rigInfos.infos || rigInfos.rig).os}</td>
+            <td class="text-end">${formatNumber((rigInfos.infos || rigInfos.rig).uptime, 'seconds')}</td>
+            <td class="text-end">${(rigInfos.usage || rigInfos.rig).loadAvg}</td>
+            <td class="text-end">${formatNumber((rigInfos.usage || rigInfos.rig).memory.used)}/${formatNumber((rigInfos.usage || rigInfos.rig).memory.total)} MB</td>
+            <td class="text-end">${Object.keys(rigInfos.services).length}</td>
+            <td class="text-end"><span class="dataAge">${formatNumber(dataAge, 'seconds')}</span></td>
+        </tr>
+        <tr class="bg-light">
+            <td colspan="8" class="">
+                ${Object.entries(rigInfos.services).map(entry => {
+                    const [minerName, service] = entry;
+
+                    let html = '';
+
+                    html += service.cpu.map(cpu => {
+                        let cpuHtml = '';
+                        cpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
+                        //cpuHtml += '    <div class="col-12 text-start">';
+                        cpuHtml += '        <div class="badge col-3 text-start text-truncate">CPU [<b class="text-warning">' + cpu.name + '</b>]</div>';
+                        cpuHtml += '        <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning">' + formatNumber(cpu.hashRate, 'size') + 'H/s</span></div>';
+                        cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
+                        cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
+                        cpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
+                        cpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        cpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.worker.uptime, 'seconds') + '</span></div>';
+                        //cpuHtml += '    </div>';
+                        cpuHtml += '</div>';
+                        return cpuHtml;
+                    }).join('');
+                    html += service.gpu.map(gpu => {
+                        const gpuSuffix = (service.gpu.length > 1) ? ('.' + gpu.id) : '';
+                        let gpuHtml = '';
+                        gpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
+                        //gpuHtml += '    <div class="col-12 text-start">';
+                        gpuHtml += '        <div class="badge col-3 text-start text-truncate">GPU' + gpuSuffix + ' [<b class="text-warning">' + gpu.name + '</b>]</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning">' + formatNumber(gpu.hashRate, 'size') + 'H/s</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>temp.</b>: <span class="text-info">' + gpu.temperature + '°</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>fan</b>: <span class="text-info">' + gpu.fanSpeed + '%</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.worker.uptime, 'seconds') + '</span></div>';
+                        //gpuHtml += '    </div>';
+                        gpuHtml += '</div>';
+                        return gpuHtml;
+                    }).join('');
+
+                    return html; //'<li>GPU</li>';
+                }).join('')}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="9" class="py-2"></td>
+        </tr>
+        `
+    }).join('') %>
+</tbody>
+</table>
+
+<script>
+//setInterval(() => {
+//    jQuery('.dataAge').each(function () {
+//        const age = jQuery(this).text();
+//        jQuery(this).text(age*1 + 1);
+//    });
+//}, 1000);
+</script>

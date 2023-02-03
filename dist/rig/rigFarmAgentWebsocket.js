@@ -49,7 +49,7 @@ function status() {
 }
 exports.status = status;
 function sendRigStatusToFarm() {
-    if (websocket) {
+    if (websocket && websocket.readyState === websocket.OPEN) {
         sendRigStatusAuto(websocket);
     }
 }
@@ -61,17 +61,17 @@ function sendRigStatusAuto(ws) {
     }
     const rigInfos = Rig.getRigInfos();
     try {
-        if (!ws || !ws.OPEN)
+        if (!ws || ws.readyState !== ws.OPEN)
             throw new Error(`Websocket not opened`);
         sendRigStatus(ws, rigInfos);
     }
     catch (err) {
-        console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message}`);
+        console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${ws._connId}]`);
     }
-    sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws);
+    //sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws);
 }
 function sendRigStatus(ws, rigInfos) {
-    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent...`);
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${websocket._connId}]`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
     const req = {
         method: "farmRigUpdateStatus",
@@ -91,7 +91,7 @@ function websocketConnect(config) {
     }
     const connectionId = ++connectionCount;
     requestsCount = 0;
-    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [conn ${connectionId}]`);
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] connecting to websocket server ${wsServerHost}:${wsServerPort} ... [connId ${connectionId}]`);
     try {
         websocket = new ws_1.default(`ws://${wsServerHost}:${wsServerPort}/`);
     }
@@ -103,8 +103,9 @@ function websocketConnect(config) {
         }
         return;
     }
+    websocket._connId = connectionId;
     websocket.on('error', function (err) {
-        console.warn(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
+        console.warn(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [connId ${connectionId}]`);
         this.terminate();
     });
     websocket.on('open', function open() {
@@ -115,7 +116,7 @@ function websocketConnect(config) {
                 user: rigName,
                 pass: websocketPassword,
             });
-            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] sending auth to server (open) [conn ${connectionId}]`);
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] sending auth to server (open) [connId ${connectionId}]`);
             this.send(JSON.stringify(req));
             //await waitForRequestResponse(reqId, serverConnTimeout, () => {}, () => { thow new Error(`Auth failed with timeout`) });
             // Send rig config
@@ -125,7 +126,7 @@ function websocketConnect(config) {
             // Send rig status
             const rigInfos = Rig.getRigInfos();
             if (!rigInfos) {
-                console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [conn ${connectionId}]`);
+                console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [connId ${connectionId}]`);
                 this.close();
                 websocket = null;
                 return;
@@ -148,7 +149,7 @@ function websocketConnect(config) {
     websocket.on('message', function message(data) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const message = data.toString();
-            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] received: ${message} [conn ${connectionId}]`);
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] received: ${message} [connId ${connectionId}]`);
             const args = message.split(' ');
             if (args[0] === 'miner-install') {
                 // TODO
@@ -172,7 +173,7 @@ function websocketConnect(config) {
                             params = JSON.parse(paramsJson);
                         }
                         catch (err) {
-                            console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] cannot start service : ${err.message}`);
+                            console.error(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] cannot start service : ${err.message} [connId: ${connectionId}]`);
                             return;
                         }
                         params.miner = minerName;
@@ -209,7 +210,7 @@ function websocketConnect(config) {
     });
     // Handle connection close
     websocket.on('close', function close() {
-        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] disconnected from server [conn ${connectionId}]`);
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] disconnected from server [connId ${connectionId}]`);
         if (sendStatusTimeout) {
             clearTimeout(sendStatusTimeout);
             sendStatusTimeout = null;

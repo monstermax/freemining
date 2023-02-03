@@ -120,7 +120,9 @@ export function run(args: (t.DaemonParamsAll)[] = []): void {
     }
 
     if (hasOpt('-a', args) || hasOpt('--rig-farm-agent-start', args)) {
-        Rig.farmAgentStart(config);
+        setTimeout(() => {
+            Rig.farmAgentStart(config);
+        }, 1000);
     }
 }
 
@@ -188,7 +190,7 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
 
         // Handle incoming message from client
         ws.on('message', async function message(data: Buffer) {
-            const clientName = (ws as any).auth?.clientName || 'anonymous';
+            const clientName = (ws as any).auth?.name || 'anonymous';
 
             const messageJson = data.toString();
 
@@ -462,7 +464,7 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
 
                     case 'farmRigUpdateStatus': // requires auth
                         {
-                            if (! (ws as any).auth) {
+                            if (! (ws as any).auth || (ws as any).auth.type !== 'rig') {
                                 rpcSendError(ws, req.id, { code: -1, message: `Auth required` } );
                                 ws.close();
                                 break;
@@ -502,7 +504,7 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
 
         // Handle connection close
         ws.on('close', function message(data: Buffer) {
-            const clientName = (ws as any).auth?.clientName || 'anonymous';
+            const clientName = (ws as any).auth?.name || 'anonymous';
             console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] client ${clientName} (${clientIP}) disconnected`);
         });
 

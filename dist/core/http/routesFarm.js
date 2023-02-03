@@ -29,5 +29,17 @@ function registerFarmRoutes(app, urlPrefix = '') {
         res.header('Content-Type', 'application/json');
         res.send(content);
     }));
+    app.get(`${urlPrefix}/rigs/`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
+        const farmInfos = Farm.getFarmInfos();
+        const rigsInfos = farmInfos.rigsInfos;
+        const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Farm Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}farm${SEP}farm_rigs.html`, 
+            //farmInfos,
+            rigsInfos });
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    }));
 }
 exports.registerFarmRoutes = registerFarmRoutes;

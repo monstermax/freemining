@@ -237,7 +237,7 @@ export type minerInstallInfos = {
     minerTitle: string,
     lastVersion: string,
     github: string,
-    install(config: DaemonConfig, params: MapString<any>): Promise<void>,
+    install(config: DaemonConfig, params: minerInstallStartParams): Promise<void>,
     getLastVersion?(github?: string): Promise<string>,
     getAllVersions?(github?: string): Promise<string[]>,
 } & MapString<any>;
@@ -247,9 +247,9 @@ export type minerInstallInfos = {
 export type minerCommandInfos = {
     apiPort: number,
     command: string,
-    getCommandFile(config: DaemonConfig, params: MapString<any>): string,
-    getCommandArgs(config: DaemonConfig, params: MapString<any>): string[],
-    getInfos(config: DaemonConfig, params: MapString<any>): Promise<MinerStats>,
+    getCommandFile(config: DaemonConfig, params: getMinerCommandFileParams): string,
+    getCommandArgs(config: DaemonConfig, params: getMinerCommandArgsParams): string[],
+    getInfos(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
 } & MapString<any>;
 
 
@@ -344,6 +344,20 @@ export type minerRunInfosParams = {
     alias?: string,
 }
 
+export type getMinerCommandArgsParams = {
+    miner: string,
+    algo: string,
+    poolUrl: string,
+    poolUser: string,
+    extraArgs?: string,
+}
+
+export type getMinerCommandFileParams = {
+}
+
+export type getMinerInfosParams = {
+}
+
 export type AllMiners = {
     [minerName: string]: {
         installed: boolean,
@@ -398,7 +412,7 @@ export type NodeInfos = {
 export type fullnodeInstallInfos = {
     version: string,
     github?: string,
-    install(config: DaemonConfig, params: MapString<any>): Promise<void>,
+    install(config: DaemonConfig, params: fullnodeInstallStartParams): Promise<void>,
     getLastVersion?(): Promise<string>,
     getAllVersions?(): Promise<string[]>,
 } & MapString<any>;
@@ -409,9 +423,9 @@ export type fullnodeCommandInfos = {
     p2pPort: number,
     rpcPort: number,
     command: string,
-    getCommandFile(config: DaemonConfig, params: MapString<any>): string,
-    getCommandArgs(config: DaemonConfig, params: MapString<any>): string[],
-    getInfos(config: DaemonConfig, params: MapString<any>): Promise<FullnodeStats>,
+    getCommandFile(config: DaemonConfig, params: getFullnodeCommandFileParams): string,
+    getCommandArgs(config: DaemonConfig, params: getFullnodeCommandArgsParams): string[],
+    getInfos(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
 } & MapString<any>;
 
 
@@ -511,6 +525,19 @@ export type AllFullnodes = {
 };
 
 
+export type getFullnodeCommandArgsParams = {
+    fullnode: string,
+    extraArgs?: string,
+}
+
+export type getFullnodeCommandFileParams = {
+}
+
+export type getFullnodeInfosParams = {
+}
+
+
+
 
 /* FARM */
 
@@ -529,7 +556,7 @@ export type FarmInfos = {
             total: number,
         },
     },
-    rigsInfos: MapString<RigInfos>,
+    rigsInfos: { [rigName: string]: RigInfos },
     dataDate?: number | null,
 }
 
