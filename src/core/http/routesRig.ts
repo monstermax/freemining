@@ -29,10 +29,10 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     // GET Rig homepage => /rig/
     app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function) => {
         const config = Daemon.getConfig();
-        const monitorStatus = Rig.monitorStatus();
+        const monitorStatus = Rig.monitorGetStatus();
         const allMiners = await Rig.getAllMiners(config);
         const rigInfos = Rig.getRigInfos();
-        const farmAgentStatus = Rig.farmAgentStatus();
+        const farmAgentStatus = Rig.farmAgentGetStatus();
         const farmAgentHostPort = `*hardcoded*`; // TODO: `${wsServerHost}:${wsServerPort}`
 
         // variables à ne plus utiliser... (utiliser allMiners à la place)
@@ -67,7 +67,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        const rigStatus = Rig.monitorStatus();
+        const monitorStatus = Rig.monitorGetStatus();
         const rigInfos = Rig.getRigInfos();
         //const allMiners = await Rig.getAllMiners(config);
         const runningMinersAliases = Rig.getRunningMinersAliases(config);
@@ -79,11 +79,10 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
-            rigStatus,
+            monitorStatus,
             rigInfos,
             runningMinersAliases,
             //allMiners,
-            //monitorStatus,
             //installedMiners,
             //runningMiners,
             //installableMiners,
@@ -127,7 +126,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     app.post(`${urlPrefix}/farm-agent/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
         const action = req.body.action?.toString() || '';
-        const farmAgentStatus = Rig.farmAgentStatus();
+        const farmAgentStatus = Rig.farmAgentGetStatus();
 
         if (action === 'start') {
             if (farmAgentStatus) {
@@ -155,7 +154,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     // GET Rig monitor run => /rig/monitor-run
     app.get(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         //const config = Daemon.getConfig();
-        const rigStatus = Rig.monitorStatus();
+        const monitorStatus = Rig.monitorGetStatus();
 
         const data = {
             ...utilFuncs,
@@ -164,7 +163,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}rig${SEP}monitor_run.html`,
-            rigStatus,
+            monitorStatus,
         };
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
@@ -173,10 +172,10 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     app.post(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
         const action = req.body.action?.toString() || '';
-        const rigStatus = Rig.monitorStatus();
+        const monitorStatus = Rig.monitorGetStatus();
 
         if (action === 'start') {
-            if (rigStatus) {
+            if (monitorStatus) {
                 res.send('OK: Rig monitor is running');
 
             } else {
@@ -186,7 +185,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             return;
 
         } else if (action === 'stop') {
-            if (rigStatus) {
+            if (monitorStatus) {
                 Rig.monitorStop();
                 res.send('OK: Rig monitor stopped');
 
@@ -211,7 +210,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const minerFullName = `${minerName}-${minerAlias}`;
 
         const rigInfos = Rig.getRigInfos();
-        const minerInfos = rigInfos.minersInfos[minerFullName];
+        const minerInfos = rigInfos.status?.minersStats[minerFullName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
 
@@ -291,9 +290,9 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
         const minerFullName = `${minerName}-${minerAlias}`;
 
-        const rigStatus = Rig.monitorStatus();
+        const monitorStatus = Rig.monitorGetStatus();
         const rigInfos = Rig.getRigInfos();
-        const minerInfos = rigInfos.minersInfos[minerFullName];
+        const minerInfos = rigInfos.status?.minersStats[minerFullName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
 
@@ -305,7 +304,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             return;
 
         } else if (action === 'status') {
-            if (! rigStatus) {
+            if (! monitorStatus) {
                 res.send( `Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a>` );
                 return;
             }
@@ -342,7 +341,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}rig${SEP}miner_run.html`,
-            rigStatus,
+            monitorStatus,
             rigInfos,
             miner: minerName,
             minerAlias,

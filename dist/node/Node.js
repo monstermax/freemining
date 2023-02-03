@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFullnodes = exports.getNodeInfos = exports.getProcesses = exports.fullnodeRunInfos = exports.fullnodeRunLog = exports.fullnodeRunStatus = exports.fullnodeRunStop = exports.fullnodeRunStart = exports.fullnodeInstallStart = exports.getManagedFullnodes = exports.getRunnableFullnodes = exports.getInstallableFullnodes = exports.getRunningFullnodes = exports.getInstalledFullnodes = exports.monitorCheckNode = exports.monitorStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllFullnodes = exports.getNodeInfos = exports.getProcesses = exports.fullnodeRunGetInfos = exports.fullnodeRunLog = exports.fullnodeRunGetStatus = exports.fullnodeRunStop = exports.fullnodeRunStart = exports.fullnodeInstallStart = exports.getManagedFullnodes = exports.getRunnableFullnodes = exports.getInstallableFullnodes = exports.getRunningFullnodes = exports.getInstalledFullnodes = exports.monitorCheckNode = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -13,9 +13,9 @@ const SEP = path_1.default.sep;
 const processes = {};
 let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
-const fullnodesInfos = {};
+const fullnodesStats = {};
 let nodeMainInfos = null;
-let dateLastCheck = null;
+let dateLastCheck;
 /* ########## FUNCTIONS ######### */
 /**
  * Start node monitor (poll running processes API every x seconds)
@@ -44,10 +44,10 @@ function monitorStop() {
     }
 }
 exports.monitorStop = monitorStop;
-function monitorStatus() {
+function monitorGetStatus() {
     return monitorIntervalId !== null;
 }
-exports.monitorStatus = monitorStatus;
+exports.monitorGetStatus = monitorGetStatus;
 /**
  * Check node active processes
  *
@@ -62,28 +62,28 @@ function monitorCheckNode(config) {
             if (proc.type === 'fullnode-run') {
                 const fullnodeCommands = fullnodesConfigs_1.fullnodesCommands[proc.name];
                 viewedFullnodes.push(proc.name);
-                let fullnodeInfos;
+                let fullnodeStats;
                 try {
-                    fullnodeInfos = yield fullnodeCommands.getInfos(config, {});
-                    fullnodeInfos.dataDate = Date.now();
-                    fullnodesInfos[proc.name] = fullnodeInfos;
+                    fullnodeStats = yield fullnodeCommands.getInfos(config, {});
+                    fullnodeStats.dataDate = Date.now();
+                    fullnodesStats[proc.name] = fullnodeStats;
                 }
                 catch (err) {
                     //throw { message: err.message };
-                    delete fullnodesInfos[proc.name];
+                    delete fullnodesStats[proc.name];
                 }
             }
         }
-        for (const fullnodeName in fullnodesInfos) {
+        for (const fullnodeName in fullnodesStats) {
             if (!viewedFullnodes.includes(fullnodeName)) {
-                delete fullnodesInfos[fullnodeName];
+                delete fullnodesStats[fullnodeName];
             }
         }
         dateLastCheck = Date.now();
     });
 }
 exports.monitorCheckNode = monitorCheckNode;
-function getInstalledFullnodes(config, params) {
+function getInstalledFullnodes(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const fullnodesDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}node${SEP}fullnodes`;
         const fullnodesNames = yield (0, utils_1.getDirFiles)(fullnodesDir);
@@ -91,9 +91,9 @@ function getInstalledFullnodes(config, params) {
     });
 }
 exports.getInstalledFullnodes = getInstalledFullnodes;
-function getRunningFullnodes(config, params) {
+function getRunningFullnodes(config) {
     //const nodeInfos = getNodeInfos();
-    //const runningFullnodes = Object.keys(nodeInfos.fullnodesInfos);
+    //const runningFullnodes = Object.keys(nodeInfos.fullnodesStats);
     let procName;
     let nodeProcesses = getProcesses();
     const runningFullnodes = [];
@@ -106,7 +106,7 @@ function getRunningFullnodes(config, params) {
     return runningFullnodes;
 }
 exports.getRunningFullnodes = getRunningFullnodes;
-function getInstallableFullnodes(config, params) {
+function getInstallableFullnodes(config) {
     return Object.entries(fullnodesConfigs_1.fullnodesInstalls).map(entry => {
         const [fullnodeName, fullnodeInstall] = entry;
         if (fullnodeInstall.version === 'edit-me')
@@ -115,7 +115,7 @@ function getInstallableFullnodes(config, params) {
     }).filter(fullnodeName => fullnodeName !== '');
 }
 exports.getInstallableFullnodes = getInstallableFullnodes;
-function getRunnableFullnodes(config, params) {
+function getRunnableFullnodes(config) {
     return Object.entries(fullnodesConfigs_1.fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
         if (fullnodeCommand.command === 'edit-me' && fullnodeCommand.p2pPort === -1)
@@ -124,7 +124,7 @@ function getRunnableFullnodes(config, params) {
     }).filter(fullnodeName => fullnodeName !== '');
 }
 exports.getRunnableFullnodes = getRunnableFullnodes;
-function getManagedFullnodes(config, params) {
+function getManagedFullnodes(config) {
     return Object.entries(fullnodesConfigs_1.fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
         if (fullnodeCommand.rpcPort === -1)
@@ -237,7 +237,7 @@ function fullnodeRunStop(config, params, forceKill = false) {
     proc.process.kill(signal);
 }
 exports.fullnodeRunStop = fullnodeRunStop;
-function fullnodeRunStatus(config, params) {
+function fullnodeRunGetStatus(config, params) {
     if (!(`fullnode-run-${params.fullnode}` in processes)) {
         return false;
     }
@@ -247,7 +247,7 @@ function fullnodeRunStatus(config, params) {
     }
     return proc.process.exitCode === null;
 }
-exports.fullnodeRunStatus = fullnodeRunStatus;
+exports.fullnodeRunGetStatus = fullnodeRunGetStatus;
 function fullnodeRunLog(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const logFile = `${config.logDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
@@ -260,7 +260,7 @@ function fullnodeRunLog(config, params) {
     });
 }
 exports.fullnodeRunLog = fullnodeRunLog;
-function fullnodeRunInfos(config, params) {
+function fullnodeRunGetInfos(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (!(`fullnode-run-${params.fullnode}` in processes)) {
             throw { message: `Fullnode ${params.fullnode} is not running` };
@@ -269,17 +269,17 @@ function fullnodeRunInfos(config, params) {
             throw { message: `Unknown fullnode ${params.fullnode}` };
         }
         const fullnode = fullnodesConfigs_1.fullnodesCommands[params.fullnode];
-        let fullnodeInfos;
+        let fullnodeStats;
         try {
-            fullnodeInfos = yield fullnode.getInfos(config, params);
+            fullnodeStats = yield fullnode.getInfos(config, params);
         }
         catch (err) {
             throw { message: err.message };
         }
-        return fullnodeInfos;
+        return fullnodeStats;
     });
 }
-exports.fullnodeRunInfos = fullnodeRunInfos;
+exports.fullnodeRunGetInfos = fullnodeRunGetInfos;
 function getProcesses() {
     return processes;
 }
@@ -306,15 +306,20 @@ function getNodeInfos() {
     const loadAvg = os_1.default.loadavg()[0];
     const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
     const memoryTotal = os_1.default.totalmem();
+    const freeminingVersion = ''; // TODO
+    const monitorStatus = false; // TODO
+    const runningFullnodes = []; // TODO
+    const installedFullnodes = []; // TODO
     const nodeInfos = {
         node: {
             name,
             hostname,
             ip,
             os: nodeOs,
-            uptime,
+            freeminingVersion,
         },
         usage: {
+            uptime,
             loadAvg,
             memory: {
                 used: memoryUsed,
@@ -324,7 +329,12 @@ function getNodeInfos() {
         devices: {
             cpus,
         },
-        fullnodesInfos,
+        status: {
+            monitorStatus,
+            runningFullnodes,
+            installedFullnodes,
+            fullnodesStats,
+        },
         dataDate: dateLastCheck,
     };
     return nodeInfos;

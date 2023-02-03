@@ -148,7 +148,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         const cpus: any[] = []; // edit-me
         // EDIT THESE VALUES - END //
 
-        let infos: t.FullnodeInfos = {
+        let infos: t.FullnodeStats = {
             fullnode: {
                 name: fullnodeName,
                 coin,

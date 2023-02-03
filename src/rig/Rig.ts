@@ -20,17 +20,17 @@ import type *  as t from '../common/types';
 
 const SEP = path.sep;
 
-const processes: t.MapString<t.Process> = {};
+const processes: { [processName: string]: t.Process } = {};
 //const installs: t.MapString<any> = {}; // TODO: insert l'install en cours, puis delete à la fin de l'install
 
 let monitorIntervalId: ReturnType<typeof setInterval> | null = null;
 
 const defaultPollDelay = 10_000; // 10 seconds
 
-const minersInfos: t.MapString<any> = {};
+const minersStats: { [minerFullName: string]: t.MinerStats } = {};
 
 let rigMainInfos: any | null = null;
-let dateLastCheck: number | null = null;
+let dateLastCheck: number;
 
 
 /* ########## FUNCTIONS ######### */
@@ -40,7 +40,7 @@ let dateLastCheck: number | null = null;
  * 
  * ./ts-node frm-cli.ts --rig-monitor-start
  */
-export function monitorStart(config: t.Config): void {
+export function monitorStart(config: t.DaemonConfigAll): void {
     if (monitorIntervalId) return;
 
     /* await */ monitorAutoCheckRig(config);
@@ -63,12 +63,12 @@ export function monitorStop(): void {
 }
 
 
-export function monitorStatus(): boolean {
+export function monitorGetStatus(): boolean {
     return monitorIntervalId !== null;
 }
 
 
-export function farmAgentStart(config: t.Config): void {
+export function farmAgentStart(config: t.DaemonConfigAll): void {
     rigFarmAgentWebsocket.start(config);
     console.log(`${now()} [INFO] [RIG] Farm agent started`);
 }
@@ -79,12 +79,12 @@ export function farmAgentStop(): void {
     console.log(`${now()} [INFO] [RIG] Farm agent stopped`);
 }
 
-export function farmAgentStatus(): boolean {
+export function farmAgentGetStatus(): boolean {
     return rigFarmAgentWebsocket.status();
 }
 
 
-async function monitorAutoCheckRig(config: t.Config) {
+async function monitorAutoCheckRig(config: t.DaemonConfigAll) {
     const pollDelay = Number(getOpt('--rig-monitor-poll-delay')) || defaultPollDelay;
 
     if (monitorIntervalId) {
@@ -93,8 +93,8 @@ async function monitorAutoCheckRig(config: t.Config) {
 
     await monitorCheckRig(config);
 
-    if (farmAgentStatus()) {
-        rigFarmAgentWebsocket.sendStatusToFarm();
+    if (farmAgentGetStatus()) {
+        rigFarmAgentWebsocket.sendRigStatusToFarm();
     }
 
     monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
@@ -105,7 +105,7 @@ async function monitorAutoCheckRig(config: t.Config) {
  * Check rig active processes
  * 
  */
-export async function monitorCheckRig(config: t.Config): Promise<void> {
+export async function monitorCheckRig(config: t.DaemonConfigAll): Promise<void> {
     // check all services
 
     let procId: string;
@@ -121,25 +121,25 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
             const minerCommands = minersCommands[minerName];
             viewedMiners.push(minerFullName);
 
-            let minerInfos: any;
+            let minerStats: t.MinerStats;
             try {
-                minerInfos = await minerCommands.getInfos(config, {});
-                minerInfos.dataDate = Date.now();
-                minerInfos.miner = minerInfos.miner || {};
-                minerInfos.miner.minerName = minerName;
-                minerInfos.miner.minerAlias = minerAlias;
-                minersInfos[minerFullName] = minerInfos;
+                minerStats = await minerCommands.getInfos(config, {});
+                minerStats.dataDate = Date.now();
+                minerStats.miner = minerStats.miner || {};
+                minerStats.miner.minerName = minerName;
+                minerStats.miner.minerAlias = minerAlias;
+                minersStats[minerFullName] = minerStats;
 
             } catch (err: any) {
                 //throw { message: err.message };
-                delete minersInfos[minerFullName];
+                delete minersStats[minerFullName];
             }
         }
     }
 
-    for (const minerFullName in minersInfos) {
+    for (const minerFullName in minersStats) {
         if (! viewedMiners.includes(minerFullName)) {
-            delete minersInfos[minerFullName];
+            delete minersStats[minerFullName];
         }
     }
 
@@ -148,14 +148,14 @@ export async function monitorCheckRig(config: t.Config): Promise<void> {
 
 
 
-export async function getInstalledMiners(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export async function getInstalledMiners(config: t.DaemonConfigAll): Promise<string[]> {
     const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`
     const minersNames = await getDirFiles(minersDir);
     return minersNames;
 }
 
 
-export function getRunningMinersAliases(config: t.Config, params?: t.MapString<any>): t.runningMiner[] {
+export function getRunningMinersAliases(config: t.DaemonConfigAll): t.runningMiner[] {
     let procName: string;
     let rigProcesses = getProcesses();
     const runningMiners: t.runningMiner[] = [];
@@ -174,7 +174,7 @@ export function getRunningMinersAliases(config: t.Config, params?: t.MapString<a
 }
 
 
-export function getInstallableMiners(config: t.Config, params?: t.MapString<any>): string[] {
+export function getInstallableMiners(config: t.DaemonConfigAll): string[] {
     return Object.entries(minersInstalls).map(entry => {
         const [minerName, minerInstall] = entry;
         if (! minerInstall.version || minerInstall.version === 'edit-me') return '';
@@ -183,7 +183,7 @@ export function getInstallableMiners(config: t.Config, params?: t.MapString<any>
 }
 
 
-export function getRunnableMiners(config: t.Config, params?: t.MapString<any>): string[] {
+export function getRunnableMiners(config: t.DaemonConfigAll): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (! minerCommand.command || minerCommand.command === 'edit-me') return '';
@@ -192,7 +192,7 @@ export function getRunnableMiners(config: t.Config, params?: t.MapString<any>): 
 }
 
 
-export function getManagedMiners(config: t.Config, params?: t.MapString<any>): string[] {
+export function getManagedMiners(config: t.DaemonConfigAll): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (minerCommand.apiPort <= 0) return '';
@@ -201,7 +201,7 @@ export function getManagedMiners(config: t.Config, params?: t.MapString<any>): s
 }
 
 
-export async function minerInstallStart(config: t.Config, params: t.MapString<any>): Promise<void> {
+export async function minerInstallStart(config: t.DaemonConfigAll, params: t.minerInstallStartParams): Promise<void> {
     const minerName = params.miner;
 
     if (! minerName) {
@@ -221,10 +221,28 @@ export async function minerInstallStart(config: t.Config, params: t.MapString<an
 }
 
 
-export function getInstalledMinerConfiguration(config: t.Config, minerName: string): any {
+export async function minerInstallStop(config: t.DaemonConfigAll, params: t.minerInstallStopParams): Promise<void> {
+    const minerName = params.miner;
+
+    if (! minerName) {
+        throw new Error(`Missing miner parameter`);
+    }
+
+    // TODO
+}
+
+
+export function getInstalledMinerConfiguration(config: t.DaemonConfigAll, minerName: string): t.InstalledMinerConfig {
     const minerDir = `${config.appDir }${SEP}rig${SEP}miners${SEP}${minerName}`;
     const configFile = `${minerDir}/freemining.json`;
-    let minerConfig = {};
+
+    let minerConfig: t.InstalledMinerConfig = {
+        name: minerName,
+        title: minerName,
+        lastVersion: "",
+        defaultAlias: "",
+        versions: {},
+    };
 
     if (fs.existsSync(configFile)) {
         const minerConfigJson = fs.readFileSync(configFile).toString();
@@ -240,7 +258,7 @@ export function getInstalledMinerConfiguration(config: t.Config, minerName: stri
 }
 
 
-export async function minerRunStart(config: t.Config, params: t.MapString<any>): Promise<t.Process> {
+export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRunStartParams): Promise<t.Process> {
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
@@ -267,7 +285,7 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
     const opts = {
         rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
     };
-    params.poolUser = stringTemplate(params.poolUser, opts, false, false, false);
+    params.poolUser = stringTemplate(params.poolUser, opts, false, false, false) || '';
 
     const minerCommands = minersCommands[minerName];
     const cmdFile = minerCommands.getCommandFile(config, params);
@@ -355,7 +373,7 @@ export async function minerRunStart(config: t.Config, params: t.MapString<any>):
 }
 
 
-export function minerRunStop(config: t.Config, params: t.MapString<any>, forceKill: boolean=false): void {
+export function minerRunStop(config: t.DaemonConfigAll, params: t.minerRunStopParams, forceKill: boolean=false): void {
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
@@ -385,7 +403,7 @@ export function minerRunStop(config: t.Config, params: t.MapString<any>, forceKi
 
 
 
-export function minerRunStatus(config: t.Config, params: t.MapString<any>): boolean {
+export function minerRunStatus(config: t.DaemonConfigAll, params: t.minerRunStatusParams): boolean {
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
@@ -413,7 +431,7 @@ export function minerRunStatus(config: t.Config, params: t.MapString<any>): bool
 }
 
 
-export async function minerRunLog(config: t.Config, params: t.MapString<any>): Promise<string> {
+export async function minerRunLog(config: t.DaemonConfigAll, params: t.minerRunLogParams): Promise<string> {
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
@@ -438,7 +456,7 @@ export async function minerRunLog(config: t.Config, params: t.MapString<any>): P
 }
 
 
-export async function minerRunInfos(config: t.Config, params: t.MapString<any>): Promise<t.MinerInfos> {
+export async function minerRunGetInfos(config: t.DaemonConfigAll, params: t.minerRunInfosParams): Promise<t.MinerStats> {
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
@@ -462,25 +480,25 @@ export async function minerRunInfos(config: t.Config, params: t.MapString<any>):
 
     const miner = minersCommands[minerName];
 
-    let minerInfos: any;
+    let minerStats: t.MinerStats;
     try {
-        minerInfos = await miner.getInfos(config, params);
+        minerStats = await miner.getInfos(config, params);
 
     } catch (err: any) {
         throw { message: err.message };
     }
 
-    return minerInfos;
+    return minerStats;
 }
 
 
-export function getProcesses(): t.MapString<t.Process> {
+export function getProcesses(): { [processName: string]: t.Process } {
     return processes;
 }
 
 
-
-export function getRigPs(): any {
+/*
+export function getRigPs(): string {
     let cmd = '';
     cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining-beta\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
     //cmd = `tasklist /v /fo csv`;
@@ -489,6 +507,23 @@ export function getRigPs(): any {
     //cmd = `wmic process where "ProcessId=<pid>" get ProcessId,PercentProcessorTime`;
     //cmd = `wmic process where "ParentProcessId=<pid>" get ProcessId,Name`;
 }
+*/
+
+
+function getRigUsage() {
+    const uptime = os.uptime();
+    const loadAvg = os.loadavg()[0];
+    const memoryUsed = os.totalmem() - os.freemem();
+    const memoryTotal = os.totalmem();
+
+    return {
+        uptime,
+        loadAvg,
+        memoryUsed,
+        memoryTotal,
+    };
+}
+
 
 export function getRigInfos(): t.RigInfos {
 
@@ -585,10 +620,14 @@ export function getRigInfos(): t.RigInfos {
     }
 
     const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
-    const uptime = os.uptime();
-    const loadAvg = os.loadavg()[0];
-    const memoryUsed = os.totalmem() - os.freemem();
-    const memoryTotal = os.totalmem();
+    const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
+
+    const freeminingVersion = '0.0.0'; // TODO
+    const installedMiners: string[] = []; // TODO
+    const runningMiners: string[] = []; // TODO
+    const monitorStatus = monitorGetStatus();
+    const pools: t.UserPoolsCoinsPoolsConfig = {};
+    const wallets: t.UserWalletsCoinsWalletsConfig = {};
 
     const rigInfos: t.RigInfos = {
         rig: {
@@ -596,20 +635,30 @@ export function getRigInfos(): t.RigInfos {
             hostname,
             ip,
             os: rigOs,
-            uptime,
+            freeminingVersion,
+        },
+        devices: {
+            cpus,
+            gpus,
         },
         usage: {
+            uptime,
             loadAvg,
             memory: {
                 used: memoryUsed,
                 total: memoryTotal,
             },
         },
-        devices: {
-            cpus,
-            gpus,
+        config: {
+            pools,
+            wallets,
         },
-        minersInfos,
+        status: {
+            minersStats: minersStats,
+            monitorStatus,
+            installedMiners,
+            runningMiners,
+        },
         dataDate: dateLastCheck,
     }
 
@@ -618,7 +667,7 @@ export function getRigInfos(): t.RigInfos {
 
 
 
-export async function getAllMiners(config: t.Config): Promise<any> {
+export async function getAllMiners(config: t.DaemonConfigAll): Promise<t.AllMiners> {
     const installedMiners = await getInstalledMiners(config);
     const runningMinersAliases = getRunningMinersAliases(config);
     const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
@@ -635,7 +684,7 @@ export async function getAllMiners(config: t.Config): Promise<any> {
         ])
     );
 
-    const miners: any = Object.fromEntries(
+    const miners: t.AllMiners = Object.fromEntries(
         minersNames.map(minerName => {
             return [
                 minerName,

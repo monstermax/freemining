@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFarmInfos = exports.getRigStatus = exports.setRigStatus = exports.rigAuthRequest = exports.farmAgentStatus = exports.farmAgentStop = exports.farmAgentStart = exports.rigsServerStatus = exports.rigsServerStop = exports.rigsServerStart = void 0;
+exports.getFarmInfos = exports.getRigStatus = exports.setRigStatus = exports.rigAuthRequest = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.rigsServerGetStatus = exports.rigsServerStop = exports.rigsServerStart = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
 const farmRigsServerWebsocket = tslib_1.__importStar(require("./farmRigsServerWebsocket"));
@@ -10,12 +10,21 @@ const rigsInfos = {};
 /*
 TODO: a transformer en :
 {
+    rig: {
+        name: string,
+        hostname: string,
+        ip: string,
+        os: string,
+        uptime: number,
+    }
+    usage
+    devices
     freeminingVersion: string,
     installableMiners: string[],
     installedMiners: string[], // + aliases ?
     runningMiners: string[], // + aliases ?
-    monitorStatus; boolean,
-    minerStats: t.RigInfos (renommer RigInfos en MinersStats)
+    monitorStatus: boolean,
+    minersStats: t.RigInfos (renommer RigInfos en MinersStats)
 }
 */
 const websocketPassword = 'xxx'; // password to access farm websocket server
@@ -29,10 +38,10 @@ function rigsServerStop() {
     farmRigsServerWebsocket.stop();
 }
 exports.rigsServerStop = rigsServerStop;
-function rigsServerStatus() {
+function rigsServerGetStatus() {
     return farmRigsServerWebsocket.status();
 }
-exports.rigsServerStatus = rigsServerStatus;
+exports.rigsServerGetStatus = rigsServerGetStatus;
 function farmAgentStart(config) {
     farmRigsServerWebsocket.start(config);
     console.log(`${(0, utils_1.now)()} [INFO] [FARM] Rigs server started`);
@@ -43,11 +52,11 @@ function farmAgentStop() {
     console.log(`${(0, utils_1.now)()} [INFO] [FARM] Rigs server stopped`);
 }
 exports.farmAgentStop = farmAgentStop;
-function farmAgentStatus() {
+function farmAgentGetStatus() {
     // TODO
     return false;
 }
-exports.farmAgentStatus = farmAgentStatus;
+exports.farmAgentGetStatus = farmAgentGetStatus;
 function rigAuthRequest(config, params) {
     if (!farmRigsServerWebsocket.status())
         return;

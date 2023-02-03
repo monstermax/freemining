@@ -169,7 +169,7 @@ export const minerCommands: t.minerCommandInfos = {
         const gpus: any[] = []; // edit-me
         // EDIT THESE VALUES - END //
 
-        let infos: t.MinerInfos = {
+        let infos: t.MinerStats = {
             miner: {
                 name: minerName,
                 worker: workerName,

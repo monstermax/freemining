@@ -17,16 +17,16 @@ import type childProcess from 'child_process';
 
 const SEP = path.sep;
 
-const processes: t.MapString<t.Process> = {};
+const processes: { [processName: string]: t.Process } = {};
 
 let monitorIntervalId: ReturnType<typeof setInterval> | null = null;
 
 const defaultPollDelay = 10_000; // 10 seconds
 
-const fullnodesInfos: t.MapString<any> = {};
+const fullnodesStats: { [minerFullName: string]: t.FullnodeStats } = {};
 
 let nodeMainInfos: any | null = null;
-let dateLastCheck: number | null = null;
+let dateLastCheck: number;
 
 
 /* ########## FUNCTIONS ######### */
@@ -36,7 +36,7 @@ let dateLastCheck: number | null = null;
  * 
  * ./ts-node frm-cli.ts --node-monitor-start
  */
-export function monitorStart(config: t.Config): void {
+export function monitorStart(config: t.DaemonConfigAll): void {
     if (monitorIntervalId) {
         return;
     }
@@ -62,7 +62,7 @@ export function monitorStop(): void {
 }
 
 
-export function monitorStatus(): boolean {
+export function monitorGetStatus(): boolean {
     return monitorIntervalId !== null;
 }
 
@@ -72,7 +72,7 @@ export function monitorStatus(): boolean {
  * Check node active processes
  * 
  */
-export async function monitorCheckNode(config: t.Config): Promise<void> {
+export async function monitorCheckNode(config: t.DaemonConfigAll): Promise<void> {
     // check all services
 
     let procId: string;
@@ -84,22 +84,22 @@ export async function monitorCheckNode(config: t.Config): Promise<void> {
             const fullnodeCommands = fullnodesCommands[proc.name];
             viewedFullnodes.push(proc.name);
 
-            let fullnodeInfos: any;
+            let fullnodeStats: t.FullnodeStats;
             try {
-                fullnodeInfos = await fullnodeCommands.getInfos(config, {});
-                fullnodeInfos.dataDate = Date.now();
-                fullnodesInfos[proc.name] = fullnodeInfos;
+                fullnodeStats = await fullnodeCommands.getInfos(config, {});
+                fullnodeStats.dataDate = Date.now();
+                fullnodesStats[proc.name] = fullnodeStats;
 
             } catch (err: any) {
                 //throw { message: err.message };
-                delete fullnodesInfos[proc.name];
+                delete fullnodesStats[proc.name];
             }
         }
     }
 
-    for (const fullnodeName in fullnodesInfos) {
+    for (const fullnodeName in fullnodesStats) {
         if (! viewedFullnodes.includes(fullnodeName)) {
-            delete fullnodesInfos[fullnodeName];
+            delete fullnodesStats[fullnodeName];
         }
     }
 
@@ -108,16 +108,16 @@ export async function monitorCheckNode(config: t.Config): Promise<void> {
 
 
 
-export async function getInstalledFullnodes(config: t.Config, params?: t.MapString<any>): Promise<string[]> {
+export async function getInstalledFullnodes(config: t.DaemonConfigAll): Promise<string[]> {
     const fullnodesDir = `${config?.appDir}${SEP}node${SEP}fullnodes`
     const fullnodesNames = await getDirFiles(fullnodesDir);
     return fullnodesNames;
 }
 
 
-export function getRunningFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
+export function getRunningFullnodes(config: t.DaemonConfigAll): string[] {
     //const nodeInfos = getNodeInfos();
-    //const runningFullnodes = Object.keys(nodeInfos.fullnodesInfos);
+    //const runningFullnodes = Object.keys(nodeInfos.fullnodesStats);
 
     let procName: string;
     let nodeProcesses = getProcesses();
@@ -133,7 +133,7 @@ export function getRunningFullnodes(config: t.Config, params?: t.MapString<any>)
 }
 
 
-export function getInstallableFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
+export function getInstallableFullnodes(config: t.DaemonConfigAll): string[] {
     return Object.entries(fullnodesInstalls).map(entry => {
         const [fullnodeName, fullnodeInstall] = entry;
         if (fullnodeInstall.version === 'edit-me') return '';
@@ -142,7 +142,7 @@ export function getInstallableFullnodes(config: t.Config, params?: t.MapString<a
 }
 
 
-export function getRunnableFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
+export function getRunnableFullnodes(config: t.DaemonConfigAll): string[] {
     return Object.entries(fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
         if (fullnodeCommand.command === 'edit-me' && fullnodeCommand.p2pPort === -1) return '';
@@ -151,7 +151,7 @@ export function getRunnableFullnodes(config: t.Config, params?: t.MapString<any>
 }
 
 
-export function getManagedFullnodes(config: t.Config, params?: t.MapString<any>): string[] {
+export function getManagedFullnodes(config: t.DaemonConfigAll): string[] {
     return Object.entries(fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
         if (fullnodeCommand.rpcPort === -1) return '';
@@ -160,7 +160,7 @@ export function getManagedFullnodes(config: t.Config, params?: t.MapString<any>)
 }
 
 
-export async function fullnodeInstallStart(config: t.Config, params: t.MapString<any>): Promise<void> {
+export async function fullnodeInstallStart(config: t.DaemonConfigAll, params: t.fullnodeInstallStartParams): Promise<void> {
     if ((params.fullnode + '/install') in processes) {
         throw { message: `Fullnode ${params.fullnode} install is already running` };
     }
@@ -174,7 +174,7 @@ export async function fullnodeInstallStart(config: t.Config, params: t.MapString
 }
 
 
-export async function fullnodeRunStart(config: t.Config, params: t.MapString<any>): Promise<t.Process> {
+export async function fullnodeRunStart(config: t.DaemonConfigAll, params: t.fullnodeRunStartParams): Promise<t.Process> {
     if (! params.fullnode) {
         throw { message: `Missing fullnode parameter` };
     }
@@ -269,7 +269,7 @@ export async function fullnodeRunStart(config: t.Config, params: t.MapString<any
 }
 
 
-export function fullnodeRunStop(config: t.Config, params: t.MapString<any>, forceKill: boolean=false): void {
+export function fullnodeRunStop(config: t.DaemonConfigAll, params: t.fullnodeRunStopParams, forceKill: boolean=false): void {
     if (! (`fullnode-run-${params.fullnode}` in processes)) {
         throw { message: `Fullnode ${params.fullnode} is not running` };
     }
@@ -286,7 +286,7 @@ export function fullnodeRunStop(config: t.Config, params: t.MapString<any>, forc
 
 
 
-export function fullnodeRunStatus(config: t.Config, params: t.MapString<any>): boolean {
+export function fullnodeRunGetStatus(config: t.DaemonConfigAll, params: t.fullnodeRunStatusParams): boolean {
     if (! (`fullnode-run-${params.fullnode}` in processes)) {
         return false;
     }
@@ -300,7 +300,7 @@ export function fullnodeRunStatus(config: t.Config, params: t.MapString<any>): b
 }
 
 
-export async function fullnodeRunLog(config: t.Config, params: t.MapString<any>): Promise<string> {
+export async function fullnodeRunLog(config: t.DaemonConfigAll, params: t.fullnodeRunLogParams): Promise<string> {
     const logFile = `${config.logDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}.run.log`;
     if (! fs.existsSync(logFile)) {
         return '';
@@ -313,7 +313,7 @@ export async function fullnodeRunLog(config: t.Config, params: t.MapString<any>)
 }
 
 
-export async function fullnodeRunInfos(config: t.Config, params: t.MapString<any>): Promise<t.FullnodeInfos> {
+export async function fullnodeRunGetInfos(config: t.DaemonConfigAll, params: t.fullnodeRunInfosParams): Promise<t.FullnodeStats> {
     if (! (`fullnode-run-${params.fullnode}` in processes)) {
         throw { message: `Fullnode ${params.fullnode} is not running` };
     }
@@ -324,19 +324,19 @@ export async function fullnodeRunInfos(config: t.Config, params: t.MapString<any
 
     const fullnode = fullnodesCommands[params.fullnode];
 
-    let fullnodeInfos: any;
+    let fullnodeStats: t.FullnodeStats;
     try {
-        fullnodeInfos = await fullnode.getInfos(config, params);
+        fullnodeStats = await fullnode.getInfos(config, params);
 
     } catch (err: any) {
         throw { message: err.message };
     }
 
-    return fullnodeInfos;
+    return fullnodeStats;
 }
 
 
-export function getProcesses(): t.MapString<t.Process> {
+export function getProcesses(): { [processName: string]: t.Process } {
     return processes;
 }
 
@@ -369,6 +369,10 @@ export function getNodeInfos(): t.NodeInfos {
     const loadAvg = os.loadavg()[0];
     const memoryUsed = os.totalmem() - os.freemem();
     const memoryTotal = os.totalmem();
+    const freeminingVersion = ''; // TODO
+    const monitorStatus = false; // TODO
+    const runningFullnodes: string[] = []; // TODO
+    const installedFullnodes: string[] = []; // TODO
 
     const nodeInfos: t.NodeInfos = {
         node: {
@@ -376,9 +380,10 @@ export function getNodeInfos(): t.NodeInfos {
             hostname,
             ip,
             os: nodeOs,
-            uptime,
+            freeminingVersion,
         },
         usage: {
+            uptime,
             loadAvg,
             memory: {
                 used: memoryUsed,
@@ -388,7 +393,12 @@ export function getNodeInfos(): t.NodeInfos {
         devices: {
             cpus,
         },
-        fullnodesInfos,
+        status: {
+            monitorStatus,
+            runningFullnodes,
+            installedFullnodes,
+            fullnodesStats,
+        },
         dataDate: dateLastCheck,
     }
 
@@ -396,7 +406,7 @@ export function getNodeInfos(): t.NodeInfos {
 }
 
 
-export async function getAllFullnodes(config: t.Config): Promise<any> {
+export async function getAllFullnodes(config: t.DaemonConfigAll): Promise<t.AllFullnodes> {
     const installedFullnodes = await getInstalledFullnodes(config);
     const runningFullnodes = getRunningFullnodes(config);
     const installableFullnodes = getInstallableFullnodes(config); // TODO: mettre en cache
@@ -413,7 +423,7 @@ export async function getAllFullnodes(config: t.Config): Promise<any> {
         ])
     );
 
-    const fullnodes: any = Object.fromEntries(
+    const fullnodes: t.AllFullnodes = Object.fromEntries(
         fullnodesNames.map(fullnodeName => {
             return [
                 fullnodeName,

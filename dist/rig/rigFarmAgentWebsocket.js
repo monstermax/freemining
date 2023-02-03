@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendStatusToFarm = exports.status = exports.stop = exports.start = void 0;
+exports.sendRigStatusToFarm = exports.status = exports.stop = exports.start = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
 const ws_1 = tslib_1.__importDefault(require("ws"));
@@ -48,26 +48,33 @@ function status() {
     return active;
 }
 exports.status = status;
-function sendStatusToFarm() {
+function sendRigStatusToFarm() {
     if (websocket) {
-        sendStatusAuto(websocket);
+        sendRigStatusAuto(websocket);
     }
 }
-exports.sendStatusToFarm = sendStatusToFarm;
-function sendStatusAuto(ws) {
+exports.sendRigStatusToFarm = sendRigStatusToFarm;
+function sendRigStatusAuto(ws) {
     if (sendStatusTimeout) {
         clearTimeout(sendStatusTimeout);
         sendStatusTimeout = null;
     }
     const rigInfos = Rig.getRigInfos();
-    sendStatus(ws, rigInfos);
-    sendStatusTimeout = setTimeout(sendStatusAuto, sendStatusInterval, ws);
+    try {
+        if (!ws || !ws.OPEN)
+            throw new Error(`Websocket not opened`);
+        sendRigStatus(ws, rigInfos);
+    }
+    catch (err) {
+        console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message}`);
+    }
+    sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws);
 }
-function sendStatus(ws, rigInfos) {
-    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent`);
+function sendRigStatus(ws, rigInfos) {
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent...`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
     const req = {
-        method: "farmRigStatus",
+        method: "farmRigUpdateStatus",
         params: rigInfos,
     };
     ws.send(JSON.stringify(req));
@@ -89,7 +96,7 @@ function websocketConnect(config) {
         websocket = new ws_1.default(`ws://${wsServerHost}:${wsServerPort}/`);
     }
     catch (err) {
-        console.log(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] cannot connect to websocket server [conn ${connectionId}]`);
+        console.warn(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] cannot connect to websocket server [conn ${connectionId}]`);
         if (newConnectionTimeout === null && active) {
             websocket = null;
             newConnectionTimeout = setTimeout(websocketConnect, serverNewConnDelay, config);
@@ -97,12 +104,11 @@ function websocketConnect(config) {
         return;
     }
     websocket.on('error', function (err) {
-        console.log(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
+        console.warn(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [RIG] connection error with websocket server => ${err.message} [conn ${connectionId}]`);
         this.terminate();
     });
     websocket.on('open', function open() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const rigInfos = Rig.getRigInfos();
             // Send auth
             const reqId = ++requestsCount;
             const req = (0, utils_1.buildRpcRequest)(reqId, "farmAuth", {
@@ -115,18 +121,19 @@ function websocketConnect(config) {
             // Send rig config
             //console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`)
             //this.send( `rigConfig ${JSON.stringify(configRig)}`);
+            // TODO: envoyer la liste des miners installés
+            // Send rig status
+            const rigInfos = Rig.getRigInfos();
             if (!rigInfos) {
-                console.log(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [conn ${connectionId}]`);
+                console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [conn ${connectionId}]`);
                 this.close();
                 websocket = null;
                 return;
             }
-            // Send rig status
-            sendStatus(this, rigInfos);
-            // TODO: envoyer la liste des miners installés ( process.env.INSTALLED_MINERS )
+            sendRigStatus(this, rigInfos);
             // send rig status every 10 seconds
             if (sendStatusTimeout === null) {
-                sendStatusTimeout = setTimeout(sendStatusAuto, sendStatusInterval, this);
+                sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, this);
             }
             // Prepare connection heartbeat
             heartbeat.call(this);

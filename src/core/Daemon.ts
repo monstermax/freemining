@@ -7,7 +7,7 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 const ejs = require('ejs');
 
-import { loadConfig } from './Config';
+import { loadDaemonConfig } from './Config';
 import { now, sleep, hasOpt, buildRpcRequest, buildRpcResponse, buildRpcError } from '../common/utils';
 import { getSystemInfos } from '../common/sysinfos';
 
@@ -34,7 +34,7 @@ import type *  as t from '../common/types';
 /* ########## MAIN ######### */
 
 
-let config: t.Config;
+let config: t.DaemonConfigAll;
 let quitRunning = false;
 const SEP = path.sep;
 let sysInfos: any = null;
@@ -51,15 +51,19 @@ function usage(exitCode: number | null=null) {
 Usage:
 
 frmd <params>
+
      --help                                  # display this this message
      --user-dir                              # default %HOME%/.freemining-beta OR %HOME%/AppData/Local/freemining-beta
-     --listen-address                        # default 127.0.0.1
-     --listen-port                           # default 1234
-     --wss-conn-timeout                      # default 10 seconds
+
+     --listen-address                        # daemon listen address. default 127.0.0.1
+     --listen-port                           # daemon listen port. default 1234
+     --wss-conn-timeout                      # clients connection timeout (if no ping). default 10 seconds
 
      -r | --rig-monitor-start                # start rig monitor at freemining start
+     -a | --rig-farm-agent-start             # start rig farm agent at freemining start
      -n | --node-monitor-start               # start node monitor at freemining start
      -f | --farm-server-start                # start farm rigs server at freemining start
+     -p | --pool-monitor-start                # start pool monitor at freemining start
 
      --rig-monitor-poll-delay                # delay between 2 checks of the rig status
      --node-monitor-poll-delay               # delay between 2 checks of the node status
@@ -74,14 +78,14 @@ frmd <params>
 }
 
 
-export function run(args: (t.DaemonParams & t.CommonParams & string)[] = []): void {
+export function run(args: (t.DaemonParamsAll)[] = []): void {
     if (hasOpt('--help', args)) {
         usage(0);
     }
 
     catchSignals();
 
-    config = loadConfig(args);
+    config = loadDaemonConfig(args);
 
     console.log( `${now()} [DEBUG] [DAEMON] Daemon start...` );
 
@@ -110,14 +114,19 @@ export function run(args: (t.DaemonParams & t.CommonParams & string)[] = []): vo
     if (hasOpt('-n', args) || hasOpt('--node-monitor-start', args)) {
         Node.monitorStart(config);
     }
+
     if (hasOpt('-f', args) || hasOpt('--farm-server-start', args)) {
         Farm.rigsServerStart(config);
+    }
+
+    if (hasOpt('-a', args) || hasOpt('--rig-farm-agent-start', args)) {
+        Rig.farmAgentStart(config);
     }
 }
 
 
 
-function registerHttpRoutes(config: t.Config, app: express.Express): void {
+function registerHttpRoutes(config: t.DaemonConfigAll, app: express.Express): void {
     // Log http request
     app.use(function (req: express.Request, res: express.Response, next: Function) {
         console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] ${req.method.toLocaleUpperCase()} ${req.url}`);
@@ -147,7 +156,7 @@ function registerHttpRoutes(config: t.Config, app: express.Express): void {
 
 
 
-function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
+function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): void {
 
     wss.on('connection', function connection(ws: WebSocket, req: express.Request) {
 
@@ -205,8 +214,10 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
             } else if ('method' in message && 'params' in message) {
                 //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
-                console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) (${messageJson.length} chars.)`);
+                //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) (${messageJson.length} chars.)`);
                 const req: t.RpcRequest = JSON.parse(messageJson);
+
+                console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) (${req.method})`);
 
                 switch (req.method) {
 
@@ -219,7 +230,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         break;
 
                     /* RIG */
-                    case 'rigStatus':
+                    case 'rigGetInfos':
                         {
                             const rigInfos = Rig.getRigInfos();
                             rpcSendResponse(ws, req.id, rigInfos);
@@ -240,10 +251,31 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'rigMonitorStatus':
+                    case 'rigMonitorGetStatus':
                         {
-                            const rigMonitorStatus = Rig.monitorStatus();
+                            const rigMonitorStatus = Rig.monitorGetStatus();
                             rpcSendResponse(ws, req.id, rigMonitorStatus);
+                        }
+                        break;
+
+                    case 'rigFarmAgentStart':
+                        {
+                            Rig.farmAgentStart(config);
+                            rpcSendResponse(ws, req.id, 'OK');
+                        }
+                        break;
+
+                    case 'rigFarmAgentStop':
+                        {
+                            Rig.farmAgentStop();
+                            rpcSendResponse(ws, req.id, 'OK');
+                        }
+                        break;
+
+                    case 'rigFarmAgentGetStatus':
+                        {
+                            const rigFarmAgentStatus = Rig.farmAgentGetStatus();
+                            rpcSendResponse(ws, req.id, rigFarmAgentStatus);
                         }
                         break;
 
@@ -280,7 +312,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'rigMinerRunStatus':
+                    case 'rigMinerRunGetStatus':
                         try {
                             const minerStatus = Rig.minerRunStatus(config, req.params);
                             rpcSendResponse(ws, req.id, minerStatus);
@@ -302,9 +334,9 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'rigMinerRunInfos':
+                    case 'rigMinerRunGetInfos':
                         try {
-                            const minerInfos = await Rig.minerRunInfos(config, req.params);
+                            const minerInfos = await Rig.minerRunGetInfos(config, req.params);
                             rpcSendResponse(ws, req.id, minerInfos);
 
                         } catch (err: any) {
@@ -315,7 +347,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
 
                     /* NODE */
-                    case 'nodeStatus':
+                    case 'nodeGetStatus':
                         {
                             const nodeInfos = Node.getNodeInfos();
                             rpcSendResponse(ws, req.id, nodeInfos);
@@ -336,9 +368,9 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'nodeMonitorStatus':
+                    case 'nodeMonitorGetStatus':
                         {
-                            const nodeMonitorStatus = Node.monitorStatus();
+                            const nodeMonitorStatus = Node.monitorGetStatus();
                             rpcSendResponse(ws, req.id, nodeMonitorStatus);
                         }
                         break;
@@ -376,9 +408,9 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'nodeFullnodeRunStatus':
+                    case 'nodeFullnodeRunGetStatus':
                         try {
-                            const fullnodeStatus = Node.fullnodeRunStatus(config, req.params);
+                            const fullnodeStatus = Node.fullnodeRunGetStatus(config, req.params);
                             rpcSendResponse(ws, req.id, fullnodeStatus);
 
                         } catch (err: any) {
@@ -387,9 +419,9 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'nodeFullnodeRunInfos':
+                    case 'nodeFullnodeRunGetInfos':
                         try {
-                            const fullnodeInfos = await Node.fullnodeRunInfos(config, req.params);
+                            const fullnodeInfos = await Node.fullnodeRunGetInfos(config, req.params);
                             rpcSendResponse(ws, req.id, fullnodeInfos);
 
                         } catch (err: any) {
@@ -400,7 +432,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
 
                     /* FARM */
-                    case 'farmStatus':
+                    case 'farmGetStatus':
                         {
                             const farmInfos = Farm.getFarmInfos();
                             rpcSendResponse(ws, req.id, farmInfos);
@@ -428,7 +460,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
                         }
                         break;
 
-                    case 'farmRigStatus': // requires auth
+                    case 'farmRigUpdateStatus': // requires auth
                         {
                             if (! (ws as any).auth) {
                                 rpcSendError(ws, req.id, { code: -1, message: `Auth required` } );
@@ -444,7 +476,7 @@ function registerWssRoutes(config: t.Config, wss: WebSocket.Server): void {
 
 
                     /* POOL */
-                    case 'poolStatus':
+                    case 'poolGetStatus':
                         {
                             const poolInfos = Pool.getPoolInfos();
                             rpcSendResponse(ws, req.id, poolInfos);
@@ -627,7 +659,7 @@ function catchSignals(): void {
 }
 
 
-export function getConfig(): t.Config {
+export function getConfig(): t.DaemonConfigAll {
     return config;
 }
 

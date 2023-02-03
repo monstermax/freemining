@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConfig = void 0;
+exports.loadDaemonConfig = exports.loadCliConfig = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
 const fs_1 = tslib_1.__importDefault(require("fs"));
@@ -9,9 +9,9 @@ const utils_1 = require("../common/utils");
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 // daemon options
-const defaultWssConnTimeout = 10000;
 const defaultListenAddress = '0.0.0.0';
 const defaultListenPort = 1234;
+const defaultWssConnTimeout = 10000; // disconnect clients who dont pong after x seconds
 const defaultHttpStaticDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
 const userHomeDir = os_1.default.userInfo().homedir.replaceAll(path_1.default.sep, SEP);
@@ -19,23 +19,58 @@ const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 // cli options
-const defaultCliWssConnTimeout = 5000;
-const defaultCliWssServerAddress = '127.0.0.1';
+const defaultCliWsServerHost = '127.0.0.1';
+const defaultCliWsServerPort = defaultListenPort;
+const defaultCliWsConnTimeout = 2000; // maximum delay to wait for server response
 const hostname = os_1.default.hostname();
 const defaultRigName = `${hostname}-rig-01`;
 const defaultFarmName = `${hostname}-farm-01`;
 const defaultNodeName = `${hostname}-node-01`;
 const defaultPoolName = `${hostname}-pool-01`;
 /* ########## FUNCTIONS ######### */
-function loadConfig(args) {
-    let wssConnTimeout = defaultWssConnTimeout;
+function loadCliConfig(args) {
+    let wsServerHost = defaultCliWsServerHost;
+    let wsServerPort = defaultCliWsServerPort;
+    let wsConnTimeout = defaultCliWsConnTimeout;
+    // set wsServerHost
+    if ((0, utils_1.hasOpt)('--ws-server-host', args)) {
+        wsServerHost = (0, utils_1.getOpt)('--ws-server-host', args) || '';
+    }
+    if (wsServerHost === '') {
+        console.error(`${(0, utils_1.now)()} [ERROR] invalid ws-server-host`);
+        process.exit(1);
+    }
+    // set wsServerPort
+    if ((0, utils_1.hasOpt)('--ws-server-port', args)) {
+        wsServerPort = Number((0, utils_1.getOpt)('--ws-server-port', args)) || 0;
+    }
+    if (wsServerPort === 0) {
+        console.error(`${(0, utils_1.now)()} [ERROR] invalid ws-server-port`);
+        process.exit(1);
+    }
+    // set wsConnTimeout
+    if ((0, utils_1.hasOpt)('--ws-conn-timeout', args)) {
+        wsConnTimeout = Number((0, utils_1.getOpt)('--ws-conn-timeout', args) || '');
+    }
+    if (wsConnTimeout === 0 || Number.isNaN(wsConnTimeout)) {
+        console.error(`${(0, utils_1.now)()} [ERROR] invalid ws-conn-timeout`);
+        process.exit(1);
+    }
+    return {
+        wsServerHost,
+        wsServerPort,
+        wsConnTimeout,
+        _args: args,
+    };
+}
+exports.loadCliConfig = loadCliConfig;
+function loadDaemonConfig(args) {
     let listenAddress = defaultListenAddress;
     let listenPort = defaultListenPort;
+    let wssConnTimeout = defaultWssConnTimeout;
     let httpStaticDir = defaultHttpStaticDir;
     let httpTemplatesDir = defaultHttpTemplatesDir;
     let userFrmDir = defaultUserFrmDir;
-    let cliWssConnTimeout = defaultCliWssConnTimeout;
-    let cliWssServerAddress = defaultCliWssServerAddress;
     // set userFrmDir
     if ((0, utils_1.hasOpt)('--user-dir', args)) {
         userFrmDir = (0, utils_1.getOpt)('--user-dir', args) || '';
@@ -173,22 +208,6 @@ function loadConfig(args) {
         console.error(`${(0, utils_1.now)()} [ERROR] invalid wss-conn-timeout`);
         process.exit(1);
     }
-    // set cliWssConnTimeout
-    if ((0, utils_1.hasOpt)('--cli-wss-conn-timeout', args)) {
-        cliWssConnTimeout = Number((0, utils_1.getOpt)('--cli-wss-conn-timeout', args) || '');
-    }
-    if (cliWssConnTimeout === 0 || Number.isNaN(cliWssConnTimeout)) {
-        console.error(`${(0, utils_1.now)()} [ERROR] invalid cli-wss-conn-timeout`);
-        process.exit(1);
-    }
-    // set cliWssServerAddress
-    if ((0, utils_1.hasOpt)('--cli-wss-server-address', args)) {
-        cliWssServerAddress = (0, utils_1.getOpt)('--cli-wss-server-address', args) || '';
-    }
-    if (cliWssServerAddress === '') {
-        console.error(`${(0, utils_1.now)()} [ERROR] invalid cli-wss-server-address`);
-        process.exit(1);
-    }
     // set rigName
     let rigName = defaultRigName;
     let farmName = defaultFarmName;
@@ -206,8 +225,6 @@ function loadConfig(args) {
         httpTemplatesDir,
         httpStaticDir,
         wssConnTimeout,
-        cliWssConnTimeout,
-        cliWssServerAddress,
         rigName,
         farmName,
         nodeName,
@@ -215,4 +232,4 @@ function loadConfig(args) {
         _args: args,
     };
 }
-exports.loadConfig = loadConfig;
+exports.loadDaemonConfig = loadDaemonConfig;

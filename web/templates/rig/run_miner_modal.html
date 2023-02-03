@@ -61,7 +61,7 @@
 
                             <%- installedMiners.map(miner => {
                                 if (! runnableMiners.includes(miner)) return;
-                                if (miner in rigInfos.minersInfos) {
+                                if (miner in rigInfos.status.minersStats) {
                                     return '<option value="' + miner + '" disabled>' + miner + '</option>';
 
                                 } else {

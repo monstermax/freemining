@@ -6,7 +6,7 @@ import type *  as t from '../common/types';
 let active = false;
 
 
-export function start(config?: t.Config) {
+export function start(config?: t.DaemonConfigAll) {
     if (active) return;
 
     active = true;

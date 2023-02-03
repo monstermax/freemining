@@ -41,15 +41,19 @@ function usage(exitCode = null) {
 Usage:
 
 frmd <params>
+
      --help                                  # display this this message
      --user-dir                              # default %HOME%/.freemining-beta OR %HOME%/AppData/Local/freemining-beta
-     --listen-address                        # default 127.0.0.1
-     --listen-port                           # default 1234
-     --wss-conn-timeout                      # default 10 seconds
+
+     --listen-address                        # daemon listen address. default 127.0.0.1
+     --listen-port                           # daemon listen port. default 1234
+     --wss-conn-timeout                      # clients connection timeout (if no ping). default 10 seconds
 
      -r | --rig-monitor-start                # start rig monitor at freemining start
+     -a | --rig-farm-agent-start             # start rig farm agent at freemining start
      -n | --node-monitor-start               # start node monitor at freemining start
      -f | --farm-server-start                # start farm rigs server at freemining start
+     -p | --pool-monitor-start                # start pool monitor at freemining start
 
      --rig-monitor-poll-delay                # delay between 2 checks of the rig status
      --node-monitor-poll-delay               # delay between 2 checks of the node status
@@ -65,7 +69,7 @@ function run(args = []) {
         usage(0);
     }
     catchSignals();
-    config = (0, Config_1.loadConfig)(args);
+    config = (0, Config_1.loadDaemonConfig)(args);
     console.log(`${(0, utils_1.now)()} [DEBUG] [DAEMON] Daemon start...`);
     const app = (0, express_1.default)(); // express app
     const server = http.createServer(app); // express server
@@ -87,6 +91,9 @@ function run(args = []) {
     }
     if ((0, utils_1.hasOpt)('-f', args) || (0, utils_1.hasOpt)('--farm-server-start', args)) {
         Farm.rigsServerStart(config);
+    }
+    if ((0, utils_1.hasOpt)('-a', args) || (0, utils_1.hasOpt)('--rig-farm-agent-start', args)) {
+        Rig.farmAgentStart(config);
     }
 }
 exports.run = run;
@@ -159,8 +166,9 @@ function registerWssRoutes(config, wss) {
                 }
                 else if ('method' in message && 'params' in message) {
                     //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
-                    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) (${messageJson.length} chars.)`);
+                    //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] received request from client ${colors.cyan(clientName)} (${clientIP}) (${messageJson.length} chars.)`);
                     const req = JSON.parse(messageJson);
+                    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] received request from client ${safe_1.default.cyan(clientName)} (${clientIP}) (${req.method})`);
                     switch (req.method) {
                         /* CORE */
                         case 'sysInfos':
@@ -170,7 +178,7 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         /* RIG */
-                        case 'rigStatus':
+                        case 'rigGetInfos':
                             {
                                 const rigInfos = Rig.getRigInfos();
                                 rpcSendResponse(ws, req.id, rigInfos);
@@ -188,10 +196,28 @@ function registerWssRoutes(config, wss) {
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             break;
-                        case 'rigMonitorStatus':
+                        case 'rigMonitorGetStatus':
                             {
-                                const rigMonitorStatus = Rig.monitorStatus();
+                                const rigMonitorStatus = Rig.monitorGetStatus();
                                 rpcSendResponse(ws, req.id, rigMonitorStatus);
+                            }
+                            break;
+                        case 'rigFarmAgentStart':
+                            {
+                                Rig.farmAgentStart(config);
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
+                            break;
+                        case 'rigFarmAgentStop':
+                            {
+                                Rig.farmAgentStop();
+                                rpcSendResponse(ws, req.id, 'OK');
+                            }
+                            break;
+                        case 'rigFarmAgentGetStatus':
+                            {
+                                const rigFarmAgentStatus = Rig.farmAgentGetStatus();
+                                rpcSendResponse(ws, req.id, rigFarmAgentStatus);
                             }
                             break;
                         case 'rigMinerInstallStart':
@@ -224,7 +250,7 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
-                        case 'rigMinerRunStatus':
+                        case 'rigMinerRunGetStatus':
                             try {
                                 const minerStatus = Rig.minerRunStatus(config, req.params);
                                 rpcSendResponse(ws, req.id, minerStatus);
@@ -244,9 +270,9 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
-                        case 'rigMinerRunInfos':
+                        case 'rigMinerRunGetInfos':
                             try {
-                                const minerInfos = yield Rig.minerRunInfos(config, req.params);
+                                const minerInfos = yield Rig.minerRunGetInfos(config, req.params);
                                 rpcSendResponse(ws, req.id, minerInfos);
                             }
                             catch (err) {
@@ -255,7 +281,7 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         /* NODE */
-                        case 'nodeStatus':
+                        case 'nodeGetStatus':
                             {
                                 const nodeInfos = Node.getNodeInfos();
                                 rpcSendResponse(ws, req.id, nodeInfos);
@@ -273,9 +299,9 @@ function registerWssRoutes(config, wss) {
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             break;
-                        case 'nodeMonitorStatus':
+                        case 'nodeMonitorGetStatus':
                             {
-                                const nodeMonitorStatus = Node.monitorStatus();
+                                const nodeMonitorStatus = Node.monitorGetStatus();
                                 rpcSendResponse(ws, req.id, nodeMonitorStatus);
                             }
                             break;
@@ -309,9 +335,9 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
-                        case 'nodeFullnodeRunStatus':
+                        case 'nodeFullnodeRunGetStatus':
                             try {
-                                const fullnodeStatus = Node.fullnodeRunStatus(config, req.params);
+                                const fullnodeStatus = Node.fullnodeRunGetStatus(config, req.params);
                                 rpcSendResponse(ws, req.id, fullnodeStatus);
                             }
                             catch (err) {
@@ -319,9 +345,9 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
-                        case 'nodeFullnodeRunInfos':
+                        case 'nodeFullnodeRunGetInfos':
                             try {
-                                const fullnodeInfos = yield Node.fullnodeRunInfos(config, req.params);
+                                const fullnodeInfos = yield Node.fullnodeRunGetInfos(config, req.params);
                                 rpcSendResponse(ws, req.id, fullnodeInfos);
                             }
                             catch (err) {
@@ -330,7 +356,7 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         /* FARM */
-                        case 'farmStatus':
+                        case 'farmGetStatus':
                             {
                                 const farmInfos = Farm.getFarmInfos();
                                 rpcSendResponse(ws, req.id, farmInfos);
@@ -356,7 +382,7 @@ function registerWssRoutes(config, wss) {
                                 ws.close();
                             }
                             break;
-                        case 'farmRigStatus': // requires auth
+                        case 'farmRigUpdateStatus': // requires auth
                             {
                                 if (!ws.auth) {
                                     rpcSendError(ws, req.id, { code: -1, message: `Auth required` });
@@ -370,7 +396,7 @@ function registerWssRoutes(config, wss) {
                             }
                             break;
                         /* POOL */
-                        case 'poolStatus':
+                        case 'poolGetStatus':
                             {
                                 const poolInfos = Pool.getPoolInfos();
                                 rpcSendResponse(ws, req.id, poolInfos);

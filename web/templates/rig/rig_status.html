@@ -15,7 +15,7 @@
         <%- dataAge > 40 ? 
             `<span class="badge bg-danger">Offline</span>`
             : (
-                Object.keys(rigInfos.minersInfos).length == 0 || dataAge > 20 ?
+                Object.keys(rigInfos.status.minersStats).length == 0 || dataAge > 20 ?
                     `<span class="badge bg-warning">IDLE</span>`
                 :
                     `<span class="badge bg-success">UP</span>`
@@ -85,7 +85,7 @@
 
 <h2>Mining services</h2>
 
-<% if (! rigStatus) { %>
+<% if (! monitorStatus) { %>
     <div class="alert alert-warning">Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-run">start monitor</a></div>
 <% } %>
 
@@ -94,10 +94,10 @@
     const minerFullName = `${miner}-${alias}`;
     const minerFullTitle = (miner === alias || ! alias) ? miner : `${alias} (${miner})`;
 
-    if (minerFullName in rigInfos.minersInfos) {
+    if (minerFullName in rigInfos.status.minersStats) {
         // service API is UP
 
-        const service = rigInfos.minersInfos[minerFullName];
+        const service = rigInfos.status.minersStats[minerFullName];
         let devicesHtml = '';
 
         if (service.devices.cpus.length > 0) {

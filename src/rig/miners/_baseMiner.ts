@@ -59,7 +59,7 @@ export const minerInstall: t.minerInstallInfos = {
     },
 
 
-    getInstallOptions(config: t.Config, params: t.MapString<any>, version: string) {
+    getInstallOptions(config: t.DaemonConfigAll, params: t.MapString<any>, version: string) {
         const minerAlias: string = params.alias || `${this.minerName}-${version}`;
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.miner-install-${this.minerName}-${minerAlias}-`), {});
         const minerDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${this.minerName}`
@@ -160,7 +160,7 @@ export const minerCommands: t.minerCommandInfos = {
         const worker = '';
         const hashRate = 0;
 
-        let infos: t.MinerInfos = {
+        let infos: t.MinerStats = {
             miner: {
                 name: '',
                 worker,

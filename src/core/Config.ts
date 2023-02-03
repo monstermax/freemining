@@ -14,9 +14,9 @@ const SEP = path.sep;
 
 
 // daemon options
-const defaultWssConnTimeout: number = 10_000;
 const defaultListenAddress: string = '0.0.0.0';
 const defaultListenPort: number = 1234;
+const defaultWssConnTimeout: number = 10_000; // disconnect clients who dont pong after x seconds
 
 const defaultHttpStaticDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
@@ -27,8 +27,9 @@ const defaultUserFrmDirWin: string = `${userHomeDir}${SEP}AppData${SEP}Local${SE
 const defaultUserFrmDir = (os.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 
 // cli options
-const defaultCliWssConnTimeout: number = 5_000;
-const defaultCliWssServerAddress: string = '127.0.0.1';
+const defaultCliWsServerHost: string = '127.0.0.1';
+const defaultCliWsServerPort: number = defaultListenPort;
+const defaultCliWsConnTimeout: number = 2_000; // maximum delay to wait for server response
 
 const hostname = os.hostname();
 const defaultRigName = `${hostname}-rig-01`;
@@ -40,17 +41,55 @@ const defaultPoolName = `${hostname}-pool-01`;
 /* ########## FUNCTIONS ######### */
 
 
-export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams & string)[]): t.Config {
-    let wssConnTimeout = defaultWssConnTimeout;
+export function loadCliConfig(args: t.CliParamsAll[]): t.CliConfigAll {
+    let wsServerHost = defaultCliWsServerHost;
+    let wsServerPort = defaultCliWsServerPort;
+    let wsConnTimeout = defaultCliWsConnTimeout;
+
+    // set wsServerHost
+    if (hasOpt('--ws-server-host', args)) {
+        wsServerHost = getOpt('--ws-server-host', args) || '';
+    }
+    if (wsServerHost === '') {
+        console.error(`${now()} [ERROR] invalid ws-server-host`);
+        process.exit(1);
+    }
+
+    // set wsServerPort
+    if (hasOpt('--ws-server-port', args)) {
+        wsServerPort = Number(getOpt('--ws-server-port', args)) || 0;
+    }
+    if (wsServerPort === 0) {
+        console.error(`${now()} [ERROR] invalid ws-server-port`);
+        process.exit(1);
+    }
+
+    // set wsConnTimeout
+    if (hasOpt('--ws-conn-timeout', args)) {
+        wsConnTimeout = Number(getOpt('--ws-conn-timeout', args) || '');
+    }
+    if (wsConnTimeout === 0 || Number.isNaN(wsConnTimeout)) {
+        console.error(`${now()} [ERROR] invalid ws-conn-timeout`);
+        process.exit(1);
+    }
+
+    return {
+        wsServerHost,
+        wsServerPort,
+        wsConnTimeout,
+        _args: args,
+    } as t.CliConfigAll;
+}
+
+
+export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll {
     let listenAddress = defaultListenAddress;
     let listenPort = defaultListenPort;
+    let wssConnTimeout = defaultWssConnTimeout;
 
     let httpStaticDir = defaultHttpStaticDir;
     let httpTemplatesDir = defaultHttpTemplatesDir;
     let userFrmDir =  defaultUserFrmDir;
-
-    let cliWssConnTimeout = defaultCliWssConnTimeout;
-    let cliWssServerAddress = defaultCliWssServerAddress;
 
     // set userFrmDir
     if (hasOpt('--user-dir', args)) {
@@ -196,7 +235,6 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
         process.exit(1);
     }
 
-
     // set wssConnTimeout
     if (hasOpt('--wss-conn-timeout', args)) {
         wssConnTimeout = Number(getOpt('--wss-conn-timeout', args) || '');
@@ -206,23 +244,6 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
         process.exit(1);
     }
 
-    // set cliWssConnTimeout
-    if (hasOpt('--cli-wss-conn-timeout', args)) {
-        cliWssConnTimeout = Number(getOpt('--cli-wss-conn-timeout', args) || '');
-    }
-    if (cliWssConnTimeout === 0 || Number.isNaN(cliWssConnTimeout)) {
-        console.error(`${now()} [ERROR] invalid cli-wss-conn-timeout`);
-        process.exit(1);
-    }
-
-    // set cliWssServerAddress
-    if (hasOpt('--cli-wss-server-address', args)) {
-        cliWssServerAddress = getOpt('--cli-wss-server-address', args) || '';
-    }
-    if (cliWssServerAddress === '') {
-        console.error(`${now()} [ERROR] invalid cli-wss-server-address`);
-        process.exit(1);
-    }
 
     // set rigName
     let rigName = defaultRigName;
@@ -245,13 +266,11 @@ export function loadConfig(args: (t.DaemonParams & t.CliParams & t.CommonParams 
         httpTemplatesDir,
         httpStaticDir,
         wssConnTimeout,
-        cliWssConnTimeout,
-        cliWssServerAddress,
         rigName,
         farmName,
         nodeName,
         poolName,
         _args: args,
-    } as t.Config;
+    } as t.DaemonConfigAll
 }
 

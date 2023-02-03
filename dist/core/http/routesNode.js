@@ -17,7 +17,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
     // NODE homepage => /node/
     app.get(`${urlPrefix}/`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         const config = Daemon.getConfig();
-        const monitorStatus = Node.monitorStatus();
+        const monitorStatus = Node.monitorGetStatus();
         const allFullnodes = yield Node.getAllFullnodes(config);
         const nodeInfos = Node.getNodeInfos();
         // variables à ne plus utiliser... (utiliser allFullnodes à la place)
@@ -41,7 +41,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // NODE status => /node/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const nodeStatus = Node.monitorStatus();
+        const nodeStatus = Node.monitorGetStatus();
         const nodeInfos = Node.getNodeInfos();
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Node Manager - Node Status`,
@@ -60,7 +60,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
     // GET Node monitor run => /node/monitor-run
     app.get(`${urlPrefix}/monitor-run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         //const config = Daemon.getConfig();
-        const nodeStatus = Node.monitorStatus();
+        const nodeStatus = Node.monitorGetStatus();
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Node Manager - Monitor run`,
                 noIndex: false,
@@ -72,7 +72,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         var _a;
         const config = Daemon.getConfig();
         const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
-        const nodeStatus = Node.monitorStatus();
+        const nodeStatus = Node.monitorGetStatus();
         if (action === 'start') {
             if (nodeStatus) {
                 res.send('OK: Node monitor is running');
@@ -97,12 +97,13 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // GET Fullnode install page => /node/fullnodes/{fullnodeName}/install
     app.get(`${urlPrefix}/fullnodes/:fullnodeName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        var _b;
         const fullnodeName = req.params.fullnodeName;
         //const action = req.query.action?.toString() || '';
         const config = Daemon.getConfig();
         const nodeInfos = Node.getNodeInfos();
-        const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
-        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+        const fullnodeInfos = (_b = nodeInfos.status) === null || _b === void 0 ? void 0 : _b.fullnodesStats[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         const allFullnodes = yield Node.getAllFullnodes(config);
         const installStatus = false;
         const uninstallStatus = false;
@@ -118,13 +119,13 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // POST Fullnode install page => /node/fullnodes/{fullnodeName}/install
     app.post(`${urlPrefix}/fullnodes/:fullnodeName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _b;
+        var _c;
         const fullnodeName = req.params.fullnodeName;
-        const action = ((_b = req.body.action) === null || _b === void 0 ? void 0 : _b.toString()) || '';
+        const action = ((_c = req.body.action) === null || _c === void 0 ? void 0 : _c.toString()) || '';
         const config = Daemon.getConfig();
         //const nodeInfos = Node.getNodeInfos();
-        //const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
-        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+        //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         if (action === 'start') {
             if (!fullnodeName) {
                 res.send(`Error: missing 'fullnode' parameter`);
@@ -150,14 +151,14 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // GET Fullnode run page => /node/fullnodes/{fullnodeName}/run
     app.get(`${urlPrefix}/fullnodes/:fullnodeName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _c;
+        var _d, _e;
         const fullnodeName = req.params.fullnodeName;
-        const action = ((_c = req.query.action) === null || _c === void 0 ? void 0 : _c.toString()) || '';
+        const action = ((_d = req.query.action) === null || _d === void 0 ? void 0 : _d.toString()) || '';
         const config = Daemon.getConfig();
-        const nodeStatus = Node.monitorStatus();
+        const nodeStatus = Node.monitorGetStatus();
         const nodeInfos = Node.getNodeInfos();
-        const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
-        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+        const fullnodeInfos = (_e = nodeInfos.status) === null || _e === void 0 ? void 0 : _e.fullnodesStats[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         const allFullnodes = yield Node.getAllFullnodes(config);
         if (action === 'log') {
             //res.send( `not yet available` );
@@ -210,13 +211,13 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // POST Fullnode run page => /node/fullnodes/{fullnodeName}/run
     app.post(`${urlPrefix}/fullnodes/:fullnodeName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _d;
+        var _f;
         const fullnodeName = req.params.fullnodeName;
-        const action = ((_d = req.body.action) === null || _d === void 0 ? void 0 : _d.toString()) || '';
+        const action = ((_f = req.body.action) === null || _f === void 0 ? void 0 : _f.toString()) || '';
         const config = Daemon.getConfig();
         //const nodeInfos = Node.getNodeInfos();
-        //const fullnodeInfos = nodeInfos.fullnodesInfos[fullnodeName];
-        const fullnodeStatus = Node.fullnodeRunStatus(config, { fullnode: fullnodeName });
+        //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
+        const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         if (action === 'start') {
             if (!fullnodeName) {
                 res.send(`Error: missing parameters`);

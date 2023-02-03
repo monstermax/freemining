@@ -22,8 +22,8 @@ const sysinfos_1 = require("../common/sysinfos");
 # Stop rig monitor
 ./frm-cli-ts --rig-monitor-stop
 
-# Get rig status
-./frm-cli-ts --rig-status
+# Get rig infos
+./frm-cli-ts --rig-infos
 
 
 # Start trex on JJPool for ERGO coin
@@ -53,36 +53,65 @@ Usage:
 
 frm-cli <params>
 
-        --help                                      # display this this message
-        --sysinfos                                  # display server system informations
-        --sysinfos --local                          # display cli system informations
-        --cli-wss-server-address                    # default 127.0.0.1
-        --cli-wss-conn-timeout                      # default 5 seconds
+        --help                                                 # display this message
+        --sysinfos                                             # display server system informations
+        --sysinfos [--local]                                   # display cli system informations
 
-        --rig-status                                # display rig status
-        --rig-monitor-start                         # start rig monitor
-        --rig-monitor-stop                          # stop rig monitor
-        --rig-monitor-status                        # display rig monitor status
+        --ws-server-host                                       # daemon host. default 127.0.0.1
+        --ws-server-port                                       # daemon port. default 1234
+        --ws-conn-timeout                                      # daemon connection timeout. default 2 seconds
 
-        --miner-start                               # start a miner
-        --miner-stop                                # stop a miner
-        --miner-status                              # display a miner status
-        --miner-log                                 # display a miner logs
-        --miner-infos                               # display a miner infos
-        --miner-install [--alias xx] [--version vv] # install a miner
+    + Rig Manager
+        --rig-infos                                            # display rig infos
+        --rig-monitor-start                                    # start rig monitor
+        --rig-monitor-stop                                     # stop rig monitor
+        --rig-monitor-status                                   # display rig monitor status
 
-        --node-status                               # display node status
-        --node-monitor-start                        # start node monitor
-        --node-monitor-stop                         # stop node monitor
-        --node-monitor-status                       # display node monitor status
+        --rig-farm-agent-start                                 # start rig farm agent
+        --rig-farm-agent-stop                                  # stop rig farm agent
+        --rig-farm-agent-status                                # display rig farm agent status
 
-        --fullnode-start                            # start a fullnode
-        --fullnode-stop                             # stop a fullnode
-        --fullnode-status                           # display a fullnode status
-        --fullnode-log                              # display a fullnode logs
-        --fullnode-infos                            # display a fullnode infos
-        --fullnode-install                          # install a fullnode
+        --rig-miner-start                                      # start a miner
+        --rig-miner-stop                                       # stop a miner
+        --rig-miner-status                                     # display a miner status
+        --rig-miner-log                                        # display a miner logs
+        --rig-miner-infos                                      # display a miner infos
+        --rig-miner-install [--alias xx] [--version vv]        # install a miner
+        --rig-miner-uninstall                                  # uninstall a miner
 
+    + Farm Manager
+        --farm-infos                                           # display farm status
+        --farm-server-start                                    # start farm server
+        --farm-server-stop                                     # stop farm server
+        --farm-server-status                                   # display farm server status
+
+    + Node Manager
+        --node-infos                                           # display node status
+        --node-monitor-start                                   # start node monitor
+        --node-monitor-stop                                    # stop node monitor
+        --node-monitor-status                                  # display node monitor status
+
+        --node-fullnode-start                                  # start a fullnode
+        --node-fullnode-stop                                   # stop a fullnode
+        --node-fullnode-status                                 # display a fullnode status
+        --node-fullnode-log                                    # display a fullnode logs
+        --node-fullnode-infos                                  # display a fullnode infos
+        --node-fullnode-install [--alias xx] [--version vv]    # install a fullnode
+        --node-fullnode-uninstall                              # uninstall a fullnode
+
+    + Pool Manager
+        --pool-infos                                           # display pool status
+        --pool-monitor-start                                   # start pool monitor
+        --pool-monitor-stop                                    # stop pool monitor
+        --pool-monitor-status                                  # display pool monitor status
+
+        --pool-engine-start                                    # start a pool engine
+        --pool-engine-stop                                     # stop a pool engine
+        --pool-engine-status                                   # display a pool engine status
+        --pool-engine-log                                      # display an engine logs
+        --pool-engine-infos                                    # display an engine infos
+        --pool-engine-install [--alias xx] [--version vv]      # install an engine
+        --pool-engine-uninstall                                # uninstall an engine
 `;
     console.log(_usage);
     if (exitCode !== null) {
@@ -97,7 +126,7 @@ function run(args = []) {
         usage(0);
     }
     catchSignals();
-    let config = (0, Config_1.loadConfig)(args);
+    let config = (0, Config_1.loadCliConfig)(args);
     let func = null;
     if ((0, utils_1.hasOpt)('--sysinfos')) {
         if ((0, utils_1.hasOpt)('--local')) {
@@ -105,116 +134,157 @@ function run(args = []) {
             return;
         }
         func = function () {
-            return sysInfos(this, args, config);
+            return sysInfos(this, args);
         };
     }
     /* RIG */
     if (func) {
         // func already set
     }
-    else if ((0, utils_1.hasOpt)('--rig-status')) {
+    else if ((0, utils_1.hasOpt)('--rig-infos')) {
         func = function () {
-            return rigStatus(this, args, config);
+            return rigGetInfos(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--rig-monitor-start')) {
         func = function () {
-            return rigMonitorStart(this, args, config);
+            return rigMonitorStart(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--rig-monitor-stop')) {
         func = function () {
-            return rigMonitorStop(this, args, config);
+            return rigMonitorStop(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--rig-monitor-status')) {
         func = function () {
-            return rigMonitorStatus(this, args, config);
+            return rigMonitorGetStatus(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--miner-stop')) {
+    else if ((0, utils_1.hasOpt)('--rig-farm-agent-start')) {
         func = function () {
-            return rigMinerRunStop(this, args, config);
+            return rigFarmAgentStart(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--miner-start')) {
+    else if ((0, utils_1.hasOpt)('--rig-farm-agent-stop')) {
         func = function () {
-            return rigMinerRunStart(this, args, config);
+            return rigFarmAgentStop(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--miner-status')) {
+    else if ((0, utils_1.hasOpt)('--rig-farm-agent-status')) {
         func = function () {
-            return rigMinerRunStatus(this, args, config);
+            return rigFarmAgentGetStatus(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--miner-log')) {
+    else if ((0, utils_1.hasOpt)('--rig-miner-stop')) {
         func = function () {
-            return rigMinerRunLog(this, args, config);
+            return rigMinerRunStop(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--miner-infos')) {
+    else if ((0, utils_1.hasOpt)('--rig-miner-start')) {
         func = function () {
-            return rigMinerRunInfos(this, args, config);
+            return rigMinerRunStart(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--miner-install')) {
+    else if ((0, utils_1.hasOpt)('--rig-miner-status')) {
         func = function () {
-            return rigMinerInstallStart(this, args, config);
+            return rigMinerRunGetStatus(this, args);
         };
+    }
+    else if ((0, utils_1.hasOpt)('--rig-miner-log')) {
+        func = function () {
+            return rigMinerRunLog(this, args);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--rig-miner-infos')) {
+        func = function () {
+            return rigMinerRunInfos(this, args);
+        };
+    }
+    else if ((0, utils_1.hasOpt)('--rig-miner-install')) {
+        func = function () {
+            return rigMinerInstallStart(this, args);
+        };
+    }
+    /* FARM */
+    if (func) {
+        // func already set
+    }
+    else if ((0, utils_1.hasOpt)('--farm-infos')) {
+        // TODO
+    }
+    else if ((0, utils_1.hasOpt)('--farm-server-start')) {
+        // TODO
+    }
+    else if ((0, utils_1.hasOpt)('--farm-server-stop')) {
+        // TODO
     }
     /* NODE */
     if (func) {
         // func already set
     }
-    else if ((0, utils_1.hasOpt)('--node-status')) {
+    else if ((0, utils_1.hasOpt)('--node-infos')) {
         func = function () {
-            return nodeStatus(this, args, config);
+            return nodeGetStatus(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--node-monitor-start')) {
         func = function () {
-            return nodeMonitorStart(this, args, config);
+            return nodeMonitorStart(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--node-monitor-stop')) {
         func = function () {
-            return nodeMonitorStop(this, args, config);
+            return nodeMonitorStop(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--node-monitor-status')) {
         func = function () {
-            return nodeMonitorStatus(this, args, config);
+            return nodeMonitorGetStatus(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--fullnode-stop')) {
+    else if ((0, utils_1.hasOpt)('--node-fullnode-stop')) {
         func = function () {
-            return nodeFullnodeRunStop(this, args, config);
+            return nodeFullnodeRunStop(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--fullnode-start')) {
+    else if ((0, utils_1.hasOpt)('--node-fullnode-start')) {
         func = function () {
-            return nodeFullnodeRunStart(this, args, config);
+            return nodeFullnodeRunStart(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--fullnode-status')) {
+    else if ((0, utils_1.hasOpt)('--node-fullnode-status')) {
         func = function () {
-            return nodeFullnodeRunStatus(this, args, config);
+            return nodeFullnodeRunGetStatus(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--fullnode-log')) {
+    else if ((0, utils_1.hasOpt)('--node-fullnode-log')) {
         func = function () {
-            return nodeFullnodeRunLog(this, args, config);
+            return nodeFullnodeRunLog(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--fullnode-infos')) {
+    else if ((0, utils_1.hasOpt)('--node-fullnode-infos')) {
         func = function () {
-            return nodeFullnodeRunInfos(this, args, config);
+            return nodeFullnodeRunInfos(this, args);
         };
     }
-    else if ((0, utils_1.hasOpt)('--fullnode-install')) {
+    else if ((0, utils_1.hasOpt)('--node-fullnode-install')) {
         func = function () {
-            return nodeFullnodeInstallStart(this, args, config);
+            return nodeFullnodeInstallStart(this, args);
         };
+    }
+    /* POOL */
+    if (func) {
+        // func already set
+    }
+    else if ((0, utils_1.hasOpt)('--pool-infos')) {
+        // TODO
+    }
+    else if ((0, utils_1.hasOpt)('--pool-monitor-start')) {
+        // TODO
+    }
+    else if ((0, utils_1.hasOpt)('--pool-monitor-stop')) {
+        // TODO
     }
     if (func === null) {
         usage(0);
@@ -222,7 +292,7 @@ function run(args = []) {
     }
     let ws;
     try {
-        ws = new ws_1.default(`ws://${config.cliWssServerAddress}:${config.listenPort}/`);
+        ws = new ws_1.default(`ws://${config.wsServerHost}:${config.wsServerPort}/`);
     }
     catch (err) {
         console.log(`${(0, utils_1.now)()} [${safe_1.default.red('ERROR')}] [CLI] cannot connect to websocket server`);
@@ -283,7 +353,7 @@ function run(args = []) {
     const readTimeout = setTimeout(() => {
         //console.log(`${now()} [${colors.blue('INFO')}] [CLI] terminate connection with the server`);
         ws.terminate();
-    }, config.cliWssConnTimeout);
+    }, config.wsConnTimeout);
 }
 exports.run = run;
 function rpcSendRequest(ws, id, method, params) {
@@ -305,28 +375,40 @@ function rpcSendError(ws, id, result) {
     ws.send(errStr);
 }
 /* #### CORE #### */
-function sysInfos(ws, args = [], config = {}) {
+function sysInfos(ws, args = []) {
     const method = 'sysInfos';
     rpcSendRequest(ws, 1, method, {});
 }
 /* #### RIG #### */
-function rigStatus(ws, args = [], config = {}) {
-    const method = 'rigStatus';
+function rigGetInfos(ws, args = []) {
+    const method = 'rigGetInfos';
     rpcSendRequest(ws, 1, method, {});
 }
-function rigMonitorStart(ws, args = [], config = {}) {
+function rigMonitorStart(ws, args = []) {
     const method = 'rigMonitorStart';
     rpcSendRequest(ws, 1, method, {});
 }
-function rigMonitorStop(ws, args = [], config = {}) {
+function rigMonitorStop(ws, args = []) {
     const method = 'rigMonitorStop';
     rpcSendRequest(ws, 1, method, {});
 }
-function rigMonitorStatus(ws, args = [], config = {}) {
-    const method = 'rigMonitorStatus';
+function rigMonitorGetStatus(ws, args = []) {
+    const method = 'rigMonitorGetStatus';
     rpcSendRequest(ws, 1, method, {});
 }
-function rigMinerInstallStart(ws, args = [], config = {}) {
+function rigFarmAgentStart(ws, args = []) {
+    const method = 'rigFarmAgentStart';
+    rpcSendRequest(ws, 1, method, {});
+}
+function rigFarmAgentStop(ws, args = []) {
+    const method = 'rigFarmAgentStop';
+    rpcSendRequest(ws, 1, method, {});
+}
+function rigFarmAgentGetStatus(ws, args = []) {
+    const method = 'rigFarmAgentGetStatus';
+    rpcSendRequest(ws, 1, method, {});
+}
+function rigMinerInstallStart(ws, args = []) {
     const minerNameS = (0, utils_1.getOpts)('--miner-install', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerInstallStart';
@@ -338,7 +420,7 @@ function rigMinerInstallStart(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function rigMinerRunStart(ws, args = [], config = {}) {
+function rigMinerRunStart(ws, args = []) {
     const minerNameS = (0, utils_1.getOpts)('--miner-start', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const extraArgs = (0, utils_1.getOpts)('--', -1, args);
@@ -352,7 +434,7 @@ function rigMinerRunStart(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function rigMinerRunStop(ws, args = [], config = {}) {
+function rigMinerRunStop(ws, args = []) {
     const minerNameS = (0, utils_1.getOpts)('--miner-stop', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerRunStop';
@@ -361,16 +443,16 @@ function rigMinerRunStop(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function rigMinerRunStatus(ws, args = [], config = {}) {
+function rigMinerRunGetStatus(ws, args = []) {
     const minerNameS = (0, utils_1.getOpts)('--miner-status', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
-    const method = 'rigMinerRunStatus';
+    const method = 'rigMinerRunGetStatus';
     const params = {
         miner: minerName,
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function rigMinerRunLog(ws, args = [], config = {}) {
+function rigMinerRunLog(ws, args = []) {
     const minerNameS = (0, utils_1.getOpts)('--miner-log', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerRunLog';
@@ -379,33 +461,33 @@ function rigMinerRunLog(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function rigMinerRunInfos(ws, args = [], config = {}) {
+function rigMinerRunInfos(ws, args = []) {
     const minerNameS = (0, utils_1.getOpts)('--miner-infos', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
-    const method = 'rigMinerRunInfos';
+    const method = 'rigMinerRunGetInfos';
     const params = {
         miner: minerName,
     };
     rpcSendRequest(ws, 1, method, params);
 }
 /* #### NODE #### */
-function nodeStatus(ws, args = [], config = {}) {
-    const method = 'nodeStatus';
+function nodeGetStatus(ws, args = []) {
+    const method = 'nodeGetStatus';
     rpcSendRequest(ws, 1, method, {});
 }
-function nodeMonitorStart(ws, args = [], config = {}) {
+function nodeMonitorStart(ws, args = []) {
     const method = 'nodeMonitorStart';
     rpcSendRequest(ws, 1, method, {});
 }
-function nodeMonitorStop(ws, args = [], config = {}) {
+function nodeMonitorStop(ws, args = []) {
     const method = 'nodeMonitorStop';
     rpcSendRequest(ws, 1, method, {});
 }
-function nodeMonitorStatus(ws, args = [], config = {}) {
-    const method = 'nodeMonitorStatus';
+function nodeMonitorGetStatus(ws, args = []) {
+    const method = 'nodeMonitorGetStatus';
     rpcSendRequest(ws, 1, method, {});
 }
-function nodeFullnodeInstallStart(ws, args = [], config = {}) {
+function nodeFullnodeInstallStart(ws, args = []) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-install', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
     const method = 'nodeFullnodeInstallStart';
@@ -417,7 +499,7 @@ function nodeFullnodeInstallStart(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function nodeFullnodeRunStart(ws, args = [], config = {}) {
+function nodeFullnodeRunStart(ws, args = []) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-start', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
     const extraArgs = (0, utils_1.getOpts)('--', -1, args);
@@ -428,7 +510,7 @@ function nodeFullnodeRunStart(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function nodeFullnodeRunStop(ws, args = [], config = {}) {
+function nodeFullnodeRunStop(ws, args = []) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-stop', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
     const method = 'nodeFullnodeRunStop';
@@ -437,16 +519,16 @@ function nodeFullnodeRunStop(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function nodeFullnodeRunStatus(ws, args = [], config = {}) {
+function nodeFullnodeRunGetStatus(ws, args = []) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-status', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
-    const method = 'nodeFullnodeRunStatus';
+    const method = 'nodeFullnodeRunGetStatus';
     const params = {
         fullnode: fullnodeName,
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function nodeFullnodeRunLog(ws, args = [], config = {}) {
+function nodeFullnodeRunLog(ws, args = []) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-log', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
     const method = 'nodeFullnodeRunLog';
@@ -455,10 +537,10 @@ function nodeFullnodeRunLog(ws, args = [], config = {}) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function nodeFullnodeRunInfos(ws, args = [], config = {}) {
+function nodeFullnodeRunInfos(ws, args = []) {
     const fullnodeNameS = (0, utils_1.getOpts)('--fullnode-infos', 1, args);
     const fullnodeName = Array.isArray(fullnodeNameS) ? fullnodeNameS[0] : '';
-    const method = 'nodeFullnodeRunInfos';
+    const method = 'nodeFullnodeRunGetInfos';
     const params = {
         fullnode: fullnodeName,
     };

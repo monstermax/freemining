@@ -1,7 +1,10 @@
 {
-    "name": "my first rig",
-    "farm": {
-        "host": null,
-        "post": 1234
+    "rig": {
+        "name": "my-first-rig"
+    },
+    "farmAgent": {
+        "host": "127.0.0.1",
+        "post": 1234,
+        "pass": "xxx"
     }
 }

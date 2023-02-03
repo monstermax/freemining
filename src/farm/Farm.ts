@@ -10,17 +10,26 @@ import type *  as t from '../common/types';
 
 /* ########## MAIN ######### */
 
-const rigsInfos: t.MapString<t.RigInfos> = {};
+const rigsInfos: { [rigName: string]: t.RigInfos } = {};
 
 /*
 TODO: a transformer en :
 {
+    rig: {
+        name: string,
+        hostname: string,
+        ip: string,
+        os: string,
+        uptime: number,
+    }
+    usage
+    devices
     freeminingVersion: string,
     installableMiners: string[],
     installedMiners: string[], // + aliases ?
     runningMiners: string[], // + aliases ?
-    monitorStatus; boolean,
-    minerStats: t.RigInfos (renommer RigInfos en MinersStats)
+    monitorStatus: boolean,
+    minersStats: t.RigInfos (renommer RigInfos en MinersStats)
 }
 */
 
@@ -32,7 +41,7 @@ let farmMainInfos: any | null = null;
 
 /* ########## FUNCTIONS ######### */
 
-export function rigsServerStart(config: t.Config) {
+export function rigsServerStart(config: t.DaemonConfigAll) {
     farmRigsServerWebsocket.start(config);
 }
 
@@ -41,14 +50,14 @@ export function rigsServerStop() {
     farmRigsServerWebsocket.stop();
 }
 
-export function rigsServerStatus(): boolean {
+export function rigsServerGetStatus(): boolean {
     return farmRigsServerWebsocket.status();
 }
 
 
 
 
-export function farmAgentStart(config: t.Config): void {
+export function farmAgentStart(config: t.DaemonConfigAll): void {
     farmRigsServerWebsocket.start(config);
     console.log(`${now()} [INFO] [FARM] Rigs server started`);
 }
@@ -59,14 +68,14 @@ export function farmAgentStop(): void {
     console.log(`${now()} [INFO] [FARM] Rigs server stopped`);
 }
 
-export function farmAgentStatus(): boolean {
+export function farmAgentGetStatus(): boolean {
     // TODO
     return false;
 }
 
 
 
-export function rigAuthRequest(config: t.Config, params: t.MapString<any>) {
+export function rigAuthRequest(config: t.DaemonConfigAll, params: t.MapString<any>) {
     if (! farmRigsServerWebsocket.status()) return;
 
     const rig = params.user;
@@ -88,7 +97,7 @@ export function rigAuthRequest(config: t.Config, params: t.MapString<any>) {
 }
 
 
-export function setRigStatus(rigName: string, rigInfos: any): void {
+export function setRigStatus(rigName: string, rigInfos: t.RigInfos): void {
     if (! farmRigsServerWebsocket.status()) return;
 
     rigsInfos[rigName] = rigInfos;

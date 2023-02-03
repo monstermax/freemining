@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMiners = exports.getRigInfos = exports.getRigPs = exports.getProcesses = exports.minerRunInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllMiners = exports.getRigInfos = exports.getProcesses = exports.minerRunGetInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStop = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -18,9 +18,9 @@ const processes = {};
 //const installs: t.MapString<any> = {}; // TODO: insert l'install en cours, puis delete à la fin de l'install
 let monitorIntervalId = null;
 const defaultPollDelay = 10000; // 10 seconds
-const minersInfos = {};
+const minersStats = {};
 let rigMainInfos = null;
-let dateLastCheck = null;
+let dateLastCheck;
 /* ########## FUNCTIONS ######### */
 /**
  * Start rig monitor (poll running processes API every x seconds)
@@ -47,10 +47,10 @@ function monitorStop() {
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Rig monitor stopped`);
 }
 exports.monitorStop = monitorStop;
-function monitorStatus() {
+function monitorGetStatus() {
     return monitorIntervalId !== null;
 }
-exports.monitorStatus = monitorStatus;
+exports.monitorGetStatus = monitorGetStatus;
 function farmAgentStart(config) {
     rigFarmAgentWebsocket.start(config);
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Farm agent started`);
@@ -61,10 +61,10 @@ function farmAgentStop() {
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Farm agent stopped`);
 }
 exports.farmAgentStop = farmAgentStop;
-function farmAgentStatus() {
+function farmAgentGetStatus() {
     return rigFarmAgentWebsocket.status();
 }
-exports.farmAgentStatus = farmAgentStatus;
+exports.farmAgentGetStatus = farmAgentGetStatus;
 function monitorAutoCheckRig(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const pollDelay = Number((0, utils_1.getOpt)('--rig-monitor-poll-delay')) || defaultPollDelay;
@@ -72,8 +72,8 @@ function monitorAutoCheckRig(config) {
             clearTimeout(monitorIntervalId);
         }
         yield monitorCheckRig(config);
-        if (farmAgentStatus()) {
-            rigFarmAgentWebsocket.sendStatusToFarm();
+        if (farmAgentGetStatus()) {
+            rigFarmAgentWebsocket.sendRigStatusToFarm();
         }
         monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
     });
@@ -95,31 +95,31 @@ function monitorCheckRig(config) {
                 const minerFullName = `${minerName}-${minerAlias}`;
                 const minerCommands = minersConfigs_1.minersCommands[minerName];
                 viewedMiners.push(minerFullName);
-                let minerInfos;
+                let minerStats;
                 try {
-                    minerInfos = yield minerCommands.getInfos(config, {});
-                    minerInfos.dataDate = Date.now();
-                    minerInfos.miner = minerInfos.miner || {};
-                    minerInfos.miner.minerName = minerName;
-                    minerInfos.miner.minerAlias = minerAlias;
-                    minersInfos[minerFullName] = minerInfos;
+                    minerStats = yield minerCommands.getInfos(config, {});
+                    minerStats.dataDate = Date.now();
+                    minerStats.miner = minerStats.miner || {};
+                    minerStats.miner.minerName = minerName;
+                    minerStats.miner.minerAlias = minerAlias;
+                    minersStats[minerFullName] = minerStats;
                 }
                 catch (err) {
                     //throw { message: err.message };
-                    delete minersInfos[minerFullName];
+                    delete minersStats[minerFullName];
                 }
             }
         }
-        for (const minerFullName in minersInfos) {
+        for (const minerFullName in minersStats) {
             if (!viewedMiners.includes(minerFullName)) {
-                delete minersInfos[minerFullName];
+                delete minersStats[minerFullName];
             }
         }
         dateLastCheck = Date.now();
     });
 }
 exports.monitorCheckRig = monitorCheckRig;
-function getInstalledMiners(config, params) {
+function getInstalledMiners(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minersDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners`;
         const minersNames = yield (0, utils_1.getDirFiles)(minersDir);
@@ -127,7 +127,7 @@ function getInstalledMiners(config, params) {
     });
 }
 exports.getInstalledMiners = getInstalledMiners;
-function getRunningMinersAliases(config, params) {
+function getRunningMinersAliases(config) {
     let procName;
     let rigProcesses = getProcesses();
     const runningMiners = [];
@@ -144,7 +144,7 @@ function getRunningMinersAliases(config, params) {
     return runningMiners;
 }
 exports.getRunningMinersAliases = getRunningMinersAliases;
-function getInstallableMiners(config, params) {
+function getInstallableMiners(config) {
     return Object.entries(minersConfigs_1.minersInstalls).map(entry => {
         const [minerName, minerInstall] = entry;
         if (!minerInstall.version || minerInstall.version === 'edit-me')
@@ -153,7 +153,7 @@ function getInstallableMiners(config, params) {
     }).filter(minerName => minerName !== '');
 }
 exports.getInstallableMiners = getInstallableMiners;
-function getRunnableMiners(config, params) {
+function getRunnableMiners(config) {
     return Object.entries(minersConfigs_1.minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (!minerCommand.command || minerCommand.command === 'edit-me')
@@ -162,7 +162,7 @@ function getRunnableMiners(config, params) {
     }).filter(minerName => minerName !== '');
 }
 exports.getRunnableMiners = getRunnableMiners;
-function getManagedMiners(config, params) {
+function getManagedMiners(config) {
     return Object.entries(minersConfigs_1.minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (minerCommand.apiPort <= 0)
@@ -188,10 +188,26 @@ function minerInstallStart(config, params) {
     });
 }
 exports.minerInstallStart = minerInstallStart;
+function minerInstallStop(config, params) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = params.miner;
+        if (!minerName) {
+            throw new Error(`Missing miner parameter`);
+        }
+        // TODO
+    });
+}
+exports.minerInstallStop = minerInstallStop;
 function getInstalledMinerConfiguration(config, minerName) {
     const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
     const configFile = `${minerDir}/freemining.json`;
-    let minerConfig = {};
+    let minerConfig = {
+        name: minerName,
+        title: minerName,
+        lastVersion: "",
+        defaultAlias: "",
+        versions: {},
+    };
     if (fs_1.default.existsSync(configFile)) {
         const minerConfigJson = fs_1.default.readFileSync(configFile).toString();
         try {
@@ -226,7 +242,7 @@ function minerRunStart(config, params) {
         const opts = {
             rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
         };
-        params.poolUser = (0, utils_1.stringTemplate)(params.poolUser, opts, false, false, false);
+        params.poolUser = (0, utils_1.stringTemplate)(params.poolUser, opts, false, false, false) || '';
         const minerCommands = minersConfigs_1.minersCommands[minerName];
         const cmdFile = minerCommands.getCommandFile(config, params);
         const args = minerCommands.getCommandArgs(config, params);
@@ -365,7 +381,7 @@ function minerRunLog(config, params) {
     });
 }
 exports.minerRunLog = minerRunLog;
-function minerRunInfos(config, params) {
+function minerRunGetInfos(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
         const minerConfig = getInstalledMinerConfiguration(config, minerName);
@@ -384,22 +400,23 @@ function minerRunInfos(config, params) {
             throw { message: `Unknown miner ${minerName}` };
         }
         const miner = minersConfigs_1.minersCommands[minerName];
-        let minerInfos;
+        let minerStats;
         try {
-            minerInfos = yield miner.getInfos(config, params);
+            minerStats = yield miner.getInfos(config, params);
         }
         catch (err) {
             throw { message: err.message };
         }
-        return minerInfos;
+        return minerStats;
     });
 }
-exports.minerRunInfos = minerRunInfos;
+exports.minerRunGetInfos = minerRunGetInfos;
 function getProcesses() {
     return processes;
 }
 exports.getProcesses = getProcesses;
-function getRigPs() {
+/*
+export function getRigPs(): string {
     let cmd = '';
     cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining-beta\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
     //cmd = `tasklist /v /fo csv`;
@@ -408,7 +425,19 @@ function getRigPs() {
     //cmd = `wmic process where "ProcessId=<pid>" get ProcessId,PercentProcessorTime`;
     //cmd = `wmic process where "ParentProcessId=<pid>" get ProcessId,Name`;
 }
-exports.getRigPs = getRigPs;
+*/
+function getRigUsage() {
+    const uptime = os_1.default.uptime();
+    const loadAvg = os_1.default.loadavg()[0];
+    const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
+    const memoryTotal = os_1.default.totalmem();
+    return {
+        uptime,
+        loadAvg,
+        memoryUsed,
+        memoryTotal,
+    };
+}
 function getRigInfos() {
     if (rigMainInfos === null) {
         const _cpus = os_1.default.cpus();
@@ -493,30 +522,43 @@ function getRigInfos() {
         };
     }
     const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
-    const uptime = os_1.default.uptime();
-    const loadAvg = os_1.default.loadavg()[0];
-    const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
-    const memoryTotal = os_1.default.totalmem();
+    const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
+    const freeminingVersion = '0.0.0'; // TODO
+    const installedMiners = []; // TODO
+    const runningMiners = []; // TODO
+    const monitorStatus = monitorGetStatus();
+    const pools = {};
+    const wallets = {};
     const rigInfos = {
         rig: {
             name,
             hostname,
             ip,
             os: rigOs,
-            uptime,
+            freeminingVersion,
+        },
+        devices: {
+            cpus,
+            gpus,
         },
         usage: {
+            uptime,
             loadAvg,
             memory: {
                 used: memoryUsed,
                 total: memoryTotal,
             },
         },
-        devices: {
-            cpus,
-            gpus,
+        config: {
+            pools,
+            wallets,
         },
-        minersInfos,
+        status: {
+            minersStats: minersStats,
+            monitorStatus,
+            installedMiners,
+            runningMiners,
+        },
         dataDate: dateLastCheck,
     };
     return rigInfos;

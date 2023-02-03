@@ -193,8 +193,8 @@ export const minerCommands: t.minerCommandInfos = {
         const minerBackendsRes = await fetch(`${apiUrl}/2/backends`, {headers});
         const minerBackends: any = await minerBackendsRes.json();
 
-        const cpus: any[] = [];
-        const gpus: any[] = [];
+        const cpus: t.MinerCpuInfos[] = [];
+        const gpus: t.MinerGpuInfos[] = [];
 
         let backend: any;
         for (backend of minerBackends) {
@@ -245,7 +245,7 @@ export const minerCommands: t.minerCommandInfos = {
         const worker = minerSummary.worker_id as string;
         const hashRate = (minerSummary.hashrate.total || [])[0] || 0 as number;
 
-        let infos: t.MinerInfos = {
+        let infos: t.MinerStats = {
             miner: {
                 name: minerTitle,
                 worker,
