@@ -6,6 +6,9 @@ import type *  as t from '../common/types';
 let active = false;
 
 
+// TODO: A DEPLACER DANS Farm.ts
+
+
 export function start(config?: t.DaemonConfigAll) {
     if (active) return;
 

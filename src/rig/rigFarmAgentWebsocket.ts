@@ -12,8 +12,8 @@ import type * as t from '../common/types';
 
 
 let websocket: WebSocket | null;
-const wsServerHost = '127.0.0.1.'; // TODO: lire config
-const wsServerPort = 1234; // TODO: lire config
+let wsServerHost = '';
+let wsServerPort = 0;
 
 const serverConnTimeout = 10_000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10_000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
@@ -108,6 +108,13 @@ function websocketConnect(config: t.DaemonConfigAll) {
     let newConnectionTimeout: any = null;
     const rigName = config.rig.name || os.hostname();
     const websocketPassword = 'xxx'; // password to access farm websocket server
+
+    wsServerHost = config.rig.farmAgent?.host || '';
+    wsServerPort = Number(config.rig.farmAgent?.port) || 0;
+
+    if (! wsServerHost || ! wsServerPort) {
+        return;
+    }
 
 
     if (! active) return;
