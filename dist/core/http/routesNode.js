@@ -19,7 +19,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         const config = Daemon.getConfig();
         const monitorStatus = Node.monitorGetStatus();
         const allFullnodes = yield Node.getAllFullnodes(config);
-        const nodeInfos = Node.getNodeInfos();
+        const nodeInfos = Node.getNodeInfos(config);
         // variables à ne plus utiliser... (utiliser allFullnodes à la place)
         const runningFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].running).map(entry => entry[0]);
         const installedFullnodes = Object.entries(allFullnodes).filter((entry) => entry[1].installed).map(entry => entry[0]);
@@ -41,8 +41,9 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // NODE status => /node/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
         const nodeStatus = Node.monitorGetStatus();
-        const nodeInfos = Node.getNodeInfos();
+        const nodeInfos = Node.getNodeInfos(config);
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Node Manager - Node Status`,
                 noIndex: false,
@@ -52,7 +53,8 @@ function registerNodeRoutes(app, urlPrefix = '') {
     }));
     // NODE status JSON => /node/status.json
     app.get(`${urlPrefix}/status.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const nodeInfos = Node.getNodeInfos();
+        const config = Daemon.getConfig();
+        const nodeInfos = Node.getNodeInfos(config);
         let content = JSON.stringify(nodeInfos, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
@@ -101,7 +103,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         const fullnodeName = req.params.fullnodeName;
         //const action = req.query.action?.toString() || '';
         const config = Daemon.getConfig();
-        const nodeInfos = Node.getNodeInfos();
+        const nodeInfos = Node.getNodeInfos(config);
         const fullnodeInfos = (_b = nodeInfos.status) === null || _b === void 0 ? void 0 : _b.fullnodesStats[fullnodeName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         const allFullnodes = yield Node.getAllFullnodes(config);
@@ -123,7 +125,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         const fullnodeName = req.params.fullnodeName;
         const action = ((_c = req.body.action) === null || _c === void 0 ? void 0 : _c.toString()) || '';
         const config = Daemon.getConfig();
-        //const nodeInfos = Node.getNodeInfos();
+        //const nodeInfos = Node.getNodeInfos(config);
         //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         if (action === 'start') {
@@ -156,7 +158,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         const action = ((_d = req.query.action) === null || _d === void 0 ? void 0 : _d.toString()) || '';
         const config = Daemon.getConfig();
         const nodeStatus = Node.monitorGetStatus();
-        const nodeInfos = Node.getNodeInfos();
+        const nodeInfos = Node.getNodeInfos(config);
         const fullnodeInfos = (_e = nodeInfos.status) === null || _e === void 0 ? void 0 : _e.fullnodesStats[fullnodeName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         const allFullnodes = yield Node.getAllFullnodes(config);
@@ -215,7 +217,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
         const fullnodeName = req.params.fullnodeName;
         const action = ((_f = req.body.action) === null || _f === void 0 ? void 0 : _f.toString()) || '';
         const config = Daemon.getConfig();
-        //const nodeInfos = Node.getNodeInfos();
+        //const nodeInfos = Node.getNodeInfos(config);
         //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         if (action === 'start') {

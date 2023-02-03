@@ -4,9 +4,12 @@ import path from 'path';
 //import colors from 'colors/safe';
 import type express from 'express';
 
-import { now } from '../../common/utils';
+import { now, formatNumber } from '../../common/utils';
 import * as Daemon from '../../core/Daemon';
 import * as Farm from '../../farm/Farm';
+import * as routesRig from './routesRig';
+
+import * as t from '../../common/types';
 
 
 /* ########## MAIN ######### */
@@ -14,6 +17,7 @@ import * as Farm from '../../farm/Farm';
 const SEP = path.sep;
 const utilFuncs = {
     now,
+    formatNumber,
 };
 
 
@@ -40,7 +44,8 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
 
     // GET Farm status JSON => /farm/status.json
     app.get(`${urlPrefix}/status.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const farmInfos = Farm.getFarmInfos();
+        const config = Daemon.getConfig();
+        const farmInfos = Farm.getFarmInfos(config);
         let content = JSON.stringify(farmInfos, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
@@ -49,7 +54,7 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
 
     app.get(`${urlPrefix}/rigs/`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        const farmInfos = Farm.getFarmInfos();
+        const farmInfos = Farm.getFarmInfos(config);
         const rigsInfos = farmInfos.rigsInfos;
 
         const data = {
@@ -65,4 +70,61 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 
+
+    app.get(`${urlPrefix}/rigs/:rigName/`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        //const config = Daemon.getConfig();
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+
+        if (! rigData || ! rigData.rigInfos) {
+            res.send(`Error: invalid rig`);
+            return;
+        }
+
+        routesRig.rigHomepage(rigData, req, res, next);
+    });
+
+
+
+    app.get(`${urlPrefix}/rigs/:rigName/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        //const config = Daemon.getConfig();
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+
+        if (! rigData?.rigInfos) {
+            res.send(`Error: invalid rig`);
+            return;
+        }
+
+        routesRig.rigStatus(rigData, req, res, next);
+    });
+}
+
+
+
+function getRigData(rigName: string): t.RigData | null {
+    const config = Daemon.getConfig();
+    const farmInfos = Farm.getFarmInfos(config);
+    const rigInfos = farmInfos.rigsInfos[rigName];
+
+    const allMiners: t.AllMiners = {}; // TODO
+
+    if (! rigInfos) {
+        return null;
+    }
+
+    const rigData: t.RigData = {
+        config,
+        rigInfos,
+        monitorStatus: rigInfos.status?.monitorStatus || false,
+        allMiners,
+        //rigConfig: { // TODO
+        //    farmAgent: {
+        //        host: '0.0.0.0',
+        //        port: 0,
+        //    },
+        //},
+    };
+
+    return rigData;
 }

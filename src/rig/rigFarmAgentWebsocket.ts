@@ -64,19 +64,19 @@ export function status() {
 
 
 
-export function sendRigStatusToFarm() {
+export function sendRigStatusToFarm(config: t.DaemonConfigAll) {
     if (websocket && websocket.readyState === websocket.OPEN) {
-        sendRigStatusAuto(websocket);
+        sendRigStatusAuto(websocket, config);
     }
 }
 
 
-function sendRigStatusAuto(ws: WebSocket) {
+async function sendRigStatusAuto(ws: WebSocket, config: t.DaemonConfigAll) {
     if (sendStatusTimeout) {
         clearTimeout(sendStatusTimeout);
         sendStatusTimeout = null;
     }
-    const rigInfos = Rig.getRigInfos();
+    const rigInfos = await Rig.getRigInfos(config);
 
     try {
         if (! ws || ws.readyState !== ws.OPEN) throw new Error(`Websocket not opened`);
@@ -87,7 +87,7 @@ function sendRigStatusAuto(ws: WebSocket) {
         console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${(ws as any)._connId}]`);
     }
 
-    //sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws);
+    //sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws, config);
 }
 
 
@@ -106,7 +106,7 @@ function sendRigStatus(ws: WebSocket, rigInfos: t.RigInfos): void {
 // WEBSOCKET
 function websocketConnect(config: t.DaemonConfigAll) {
     let newConnectionTimeout: any = null;
-    const rigName = config.rigName || os.hostname();
+    const rigName = config.rig.name || os.hostname();
     const websocketPassword = 'xxx'; // password to access farm websocket server
 
 
@@ -145,38 +145,60 @@ function websocketConnect(config: t.DaemonConfigAll) {
     websocket.on('open', async function open() {
 
         // Send auth
-        const reqId = ++requestsCount;
-        const req = buildRpcRequest(reqId, "farmAuth", {
+        let reqId = ++requestsCount;
+        let req = buildRpcRequest(reqId, "farmAuth", {
             user: rigName,
             pass: websocketPassword,
         });
         console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending auth to server (open) [connId ${connectionId}]`)
         this.send( JSON.stringify(req) );
 
-        //await waitForRequestResponse(reqId, serverConnTimeout, () => {}, () => { thow new Error(`Auth failed with timeout`) });
 
+        /*
         // Send rig config
-        //console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`)
-        //this.send( `rigConfig ${JSON.stringify(configRig)}`);
-        // TODO: envoyer la liste des miners installés
+        reqId = ++requestsCount;
+        req = buildRpcRequest(reqId, "farmRigUpdateConfig", {
+            config,
+        });
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`)
+        this.send( JSON.stringify(req) );
+
+        // Send installed miners
+        const installedMiners = await Rig.getInstalledMiners(config);
+        const installedMinersAliases: any = {}; // TODO
+        reqId = ++requestsCount;
+        req = buildRpcRequest(reqId, "farmRigUpdateInstalledMiners", {
+            installedMiners,
+        });
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending installedMiners to server (open) [conn ${connectionId}]`)
+        this.send( JSON.stringify(req) );
+
+
+        // Send running miners
+        const runningMinersAliases = Rig.getRunningMinersAliases(config);
+        reqId = ++requestsCount;
+        req = buildRpcRequest(reqId, "farmRigUpdateRunningMinersAliases", {
+            runningMinersAliases,
+        });
+        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending runningMinersAliases to server (open) [conn ${connectionId}]`)
+        this.send( JSON.stringify(req) );
+        */
 
 
         // Send rig status
-        const rigInfos = Rig.getRigInfos();
+        const rigInfos = await Rig.getRigInfos(config);
         if (! rigInfos) {
             console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send rigInfos to server (open) [connId ${connectionId}]`)
             this.close();
             websocket = null;
             return;
         }
-
         sendRigStatus(this, rigInfos);
-
 
 
         // send rig status every 10 seconds
         if (sendStatusTimeout === null) {
-            sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, this);
+            sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, this, config);
         }
 
         // Prepare connection heartbeat

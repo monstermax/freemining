@@ -116,7 +116,7 @@ export async function getInstalledFullnodes(config: t.DaemonConfigAll): Promise<
 
 
 export function getRunningFullnodes(config: t.DaemonConfigAll): string[] {
-    //const nodeInfos = getNodeInfos();
+    //const nodeInfos = getNodeInfos(config);
     //const runningFullnodes = Object.keys(nodeInfos.fullnodesStats);
 
     let procName: string;
@@ -342,7 +342,7 @@ export function getProcesses(): { [processName: string]: t.Process } {
 
 
 
-export function getNodeInfos(): t.NodeInfos {
+export function getNodeInfos(config: t.DaemonConfigAll): t.NodeInfos {
 
     if (nodeMainInfos === null) {
 
@@ -356,7 +356,7 @@ export function getNodeInfos(): t.NodeInfos {
 
 
         nodeMainInfos = {
-            name: getOpt('--node-name') || os.hostname(),
+            name: config.node.name || os.hostname(),
             hostname: os.hostname(),
             ip: (getLocalIpAddresses() || [])[0] || 'no-ip',
             nodeOs: os.version(),
@@ -372,7 +372,9 @@ export function getNodeInfos(): t.NodeInfos {
     const freeminingVersion = ''; // TODO
     const monitorStatus = false; // TODO
     const runningFullnodes: string[] = []; // TODO
+    const runningFullnodesAliases: string[] = []; // TODO
     const installedFullnodes: string[] = []; // TODO
+    const installedFullnodesAliases: string[] = []; // TODO
 
     const nodeInfos: t.NodeInfos = {
         node: {
@@ -393,10 +395,15 @@ export function getNodeInfos(): t.NodeInfos {
         devices: {
             cpus,
         },
+        config: {
+
+        },
         status: {
             monitorStatus,
             runningFullnodes,
+            runningFullnodesAliases,
             installedFullnodes,
+            installedFullnodesAliases,
             fullnodesStats,
         },
         dataDate: dateLastCheck,

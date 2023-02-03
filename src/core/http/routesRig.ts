@@ -24,77 +24,108 @@ const utilFuncs = {
 
 /* ########## FUNCTIONS ######### */
 
+
+async function getRigData(): Promise<t.RigData> {
+    const config = Daemon.getConfig();
+
+    const rigData: t.RigData = {
+        config,
+        rigInfos: await Rig.getRigInfos(config),
+        monitorStatus: Rig.monitorGetStatus(),
+        allMiners: await Rig.getAllMiners(config),
+        //farmAgentStatus: Rig.farmAgentGetStatus(),
+        //farmAgentHostPort: `*hardcoded*`, // TODO: `${wsServerHost}:${wsServerPort}`
+        //runningMinersAliases: Rig.getRunningMinersAliases(config),
+        //rigConfig: { // TODO
+        //    farmAgent: {
+        //        host: '0.0.0.0',
+        //        port: 0,
+        //    },
+        //},
+    };
+    return rigData;
+}
+
+
+
+/* ############################# */
+
+
+export async function rigHomepage(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    //const config = Daemon.getConfig();
+    const {monitorStatus, allMiners, rigInfos} = rigData;
+    const runningMinersAliases = rigInfos.status?.runningMinersAliases;
+
+    // variables à ne plus utiliser... (utiliser allMiners à la place)
+    const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
+    const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
+    const installableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installable).map(entry => entry[0]);
+    const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
+    const managedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].managed).map(entry => entry[0]);
+
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}rig.html`,
+        ...rigData,
+        installedMiners, // a supprimer
+        runningMiners, // a supprimer
+        installableMiners, // a supprimer
+        runnableMiners, // a supprimer
+        managedMiners, // a supprimer
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigStatus(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const {monitorStatus, allMiners, rigInfos} = rigData;
+    const runningMinersAliases = rigInfos.status?.runningMinersAliases;
+
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager - Rig Status`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
+        monitorStatus,
+        rigInfos,
+        runningMinersAliases,
+        //allMiners,
+        //installedMiners,
+        //runningMiners,
+        //installableMiners,
+        //runnableMiners,
+        //managedMiners,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+};
+
+
 export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
     // GET Rig homepage => /rig/
-    app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function) => {
+    app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        const monitorStatus = Rig.monitorGetStatus();
-        const allMiners = await Rig.getAllMiners(config);
-        const rigInfos = Rig.getRigInfos();
-        const farmAgentStatus = Rig.farmAgentGetStatus();
-        const farmAgentHostPort = `*hardcoded*`; // TODO: `${wsServerHost}:${wsServerPort}`
-
-        // variables à ne plus utiliser... (utiliser allMiners à la place)
-        const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
-        const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
-        const installableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installable).map(entry => entry[0]);
-        const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
-        const managedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].managed).map(entry => entry[0]);
-
-        const data = {
-            ...utilFuncs,
-            meta: {
-                title: `Freemining - Rig Manager`,
-                noIndex: false,
-            },
-            contentTemplate: `..${SEP}rig${SEP}rig.html`,
-            rigInfos,
-            monitorStatus,
-            farmAgentStatus,
-            farmAgentHostPort,
-            allMiners,
-            installedMiners,
-            runningMiners,
-            installableMiners,
-            runnableMiners,
-            managedMiners,
-        };
-        res.render(`.${SEP}core${SEP}layout.html`, data);
+        rigHomepage(await getRigData(), req, res, next);
     });
 
 
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        const monitorStatus = Rig.monitorGetStatus();
-        const rigInfos = Rig.getRigInfos();
-        //const allMiners = await Rig.getAllMiners(config);
-        const runningMinersAliases = Rig.getRunningMinersAliases(config);
-
-        const data = {
-            ...utilFuncs,
-            meta: {
-                title: `Freemining - Rig Manager - Rig Status`,
-                noIndex: false,
-            },
-            contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
-            monitorStatus,
-            rigInfos,
-            runningMinersAliases,
-            //allMiners,
-            //installedMiners,
-            //runningMiners,
-            //installableMiners,
-            //runnableMiners,
-            //managedMiners,
-        };
-        res.render(`.${SEP}core${SEP}layout.html`, data);
+        rigStatus(await getRigData(), req, res, next);
     });
+
 
     // GET Rig status JSON => /rig/status.json
     app.get(`${urlPrefix}/status.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const rigInfos = Rig.getRigInfos();
+        const config = Daemon.getConfig();
+        const rigInfos = await Rig.getRigInfos(config);
         let content = JSON.stringify(rigInfos, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
@@ -209,7 +240,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
         const minerFullName = `${minerName}-${minerAlias}`;
 
-        const rigInfos = Rig.getRigInfos();
+        const rigInfos = await Rig.getRigInfos(config);
         const minerInfos = rigInfos.status?.minersStats[minerFullName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
@@ -291,7 +322,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const minerFullName = `${minerName}-${minerAlias}`;
 
         const monitorStatus = Rig.monitorGetStatus();
-        const rigInfos = Rig.getRigInfos();
+        const rigInfos = await Rig.getRigInfos(config);
         const minerInfos = rigInfos.status?.minersStats[minerFullName];
         const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
@@ -424,7 +455,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
         const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
 
-        const rigInfos = Rig.getRigInfos();
+        const rigInfos = await Rig.getRigInfos(config);
         const allMiners = await Rig.getAllMiners(config);
         const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
         const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
@@ -444,7 +475,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
         const data = {
             ...utilFuncs,
-            rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
+            rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
             rigInfos,
             miners: allMiners,
             runnableMiners,

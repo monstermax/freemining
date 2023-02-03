@@ -88,10 +88,10 @@ function getRigStatus(rigName) {
     return rigsInfos[rigName];
 }
 exports.getRigStatus = getRigStatus;
-function getFarmInfos() {
+function getFarmInfos(config) {
     if (farmMainInfos === null) {
         farmMainInfos = {
-            name: (0, utils_1.getOpt)('--rig-name') || os_1.default.hostname(),
+            name: config.farm.name || os_1.default.hostname(),
             hostname: os_1.default.hostname(),
             ip: ((0, utils_1.getLocalIpAddresses)() || [])[0] || 'no-ip',
             farmOs: os_1.default.version(),

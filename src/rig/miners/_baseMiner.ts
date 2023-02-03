@@ -102,7 +102,7 @@ export const minerInstall: t.minerInstallInfos = {
             installDate: new Date,
             installUrl: dlUrl,
         };
-        fs.writeFileSync(`${aliasDir}/freemining.json`, JSON.stringify(aliasReport, null, 4));
+        fs.writeFileSync(`${aliasDir}/freeminingMinerAlias.json`, JSON.stringify(aliasReport, null, 4));
 
 
         // Miner report
@@ -112,8 +112,8 @@ export const minerInstall: t.minerInstallInfos = {
             lastVersion: version,
             defaultAlias: minerAlias,
         };
-        if (fs.existsSync(`${minerDir}/freemining.json`)) {
-            const reportJson = fs.readFileSync(`${minerDir}/freemining.json`).toString();
+        if (fs.existsSync(`${minerDir}/freeminingMiner.json`)) {
+            const reportJson = fs.readFileSync(`${minerDir}/freeminingMiner.json`).toString();
             minerReport = JSON.parse(reportJson);
         }
         if (! minerReport.versions) {
@@ -126,7 +126,7 @@ export const minerInstall: t.minerInstallInfos = {
             minerReport.defaultAlias = minerAlias;
         }
         minerReport.versions[minerAlias] = aliasReport;
-        fs.writeFileSync(`${minerDir}/freemining.json`, JSON.stringify(minerReport, null, 4));
+        fs.writeFileSync(`${minerDir}/freeminingMiner.json`, JSON.stringify(minerReport, null, 4));
     }
 };
 

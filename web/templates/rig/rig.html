@@ -30,7 +30,7 @@
 
 <% if (farmAgentStatus) { %>
     Farm connection is active.
-    Server: <%=farmAgentHostPort%>
+    Server: <%=rigConfig.farmAgentHost%>:<%=rigConfig.farmAgentPort%>
     <a href="farm-agent/run">Stop connection</a>
 
 <% } else { %>

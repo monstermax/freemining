@@ -29,11 +29,13 @@
     </tr>
 </thead>
 <tbody>
-    <% Object.entries(rigsInfos).map(entry => {
+    <%- Object.entries(rigsInfos).map(entry => {
         const [rigName, rigInfos] = entry;
-        const dataAge = rigInfos.dataAge || Date.now()/1000 - (rigInfos.dataDate || rigInfos.rig.dateRig);
-        //const dataAge = Date.now()/1000 - rigInfos.dataDate;
-        const isSuccess = (dataAge < 40) && (Object.keys(rigInfos.services).length > 0);
+
+        //if (! rigInfos) return `<tr><td colspan="10">Warning: The rig ${rigName} has no infos</td></tr>`;
+
+        const dataAge = Date.now()/1000 - rigInfos.dataDate / 1000;
+        const isSuccess = (dataAge < 40) && rigInfos.status.minersStats && (Object.keys(rigInfos.status.minersStats).length > 0);
         const isError = (dataAge > 40);
         const isWarning = (! isSuccess && ! isError);
         const colorClass = isSuccess ? 'bg-success' : (isError ? 'bg-danger' : 'bg-warning');
@@ -41,25 +43,25 @@
 
         return `<tr class="bg-light" style="font-size:.9em; font-weight:bold;">
             <td rowspan="2" class="${colorClass} text-center" style="vertical-align:middle;">
-                <a class="text-light" href="./rig?rig=${rigName}">${rigName}</a>
+                <a class="text-light" href="${rigName}/">${rigName}</a>
             </td>
-            <td>${(rigInfos.infos || rigInfos.rig).hostname}</td>
-            <td>${(rigInfos.infos || rigInfos.rig).ip}</td>
-            <td>${(rigInfos.infos || rigInfos.rig).os}</td>
-            <td class="text-end">${formatNumber((rigInfos.infos || rigInfos.rig).uptime, 'seconds')}</td>
-            <td class="text-end">${(rigInfos.usage || rigInfos.rig).loadAvg}</td>
-            <td class="text-end">${formatNumber((rigInfos.usage || rigInfos.rig).memory.used)}/${formatNumber((rigInfos.usage || rigInfos.rig).memory.total)} MB</td>
-            <td class="text-end">${Object.keys(rigInfos.services).length}</td>
+            <td>${rigInfos.rig.hostname}</td>
+            <td>${rigInfos.rig.ip}</td>
+            <td>${rigInfos.rig.os}</td>
+            <td class="text-end">${formatNumber(rigInfos.usage.uptime, 'seconds')}</td>
+            <td class="text-end">${rigInfos.usage.loadAvg}</td>
+            <td class="text-end">${formatNumber(rigInfos.usage.memory.used, 'size')}/${formatNumber(rigInfos.usage.memory.total, 'size')} MB</td>
+            <td class="text-end">${Object.keys(rigInfos.status.minersStats).length}</td>
             <td class="text-end"><span class="dataAge">${formatNumber(dataAge, 'seconds')}</span></td>
         </tr>
         <tr class="bg-light">
             <td colspan="8" class="">
-                ${Object.entries(rigInfos.services).map(entry => {
+                ${Object.entries(rigInfos.status.minersStats).map(entry => {
                     const [minerName, service] = entry;
 
                     let html = '';
 
-                    html += service.cpu.map(cpu => {
+                    html += service.devices.cpus.map(cpu => {
                         let cpuHtml = '';
                         cpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
                         //cpuHtml += '    <div class="col-12 text-start">';
@@ -68,13 +70,13 @@
                         cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
                         cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
                         cpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
-                        cpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
-                        cpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.worker.uptime, 'seconds') + '</span></div>';
+                        cpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.miner.algo + '</span></div>';
+                        cpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.miner.uptime, 'seconds') + '</span></div>';
                         //cpuHtml += '    </div>';
                         cpuHtml += '</div>';
                         return cpuHtml;
                     }).join('');
-                    html += service.gpu.map(gpu => {
+                    html += service.devices.gpus.map(gpu => {
                         const gpuSuffix = (service.gpu.length > 1) ? ('.' + gpu.id) : '';
                         let gpuHtml = '';
                         gpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
@@ -84,8 +86,8 @@
                         gpuHtml += '        <div class="badge col-1 text-start"><b>temp.</b>: <span class="text-info">' + gpu.temperature + '°</span></div>';
                         gpuHtml += '        <div class="badge col-1 text-start"><b>fan</b>: <span class="text-info">' + gpu.fanSpeed + '%</span></div>';
                         gpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
-                        gpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.worker.algo + '</span></div>';
-                        gpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.worker.uptime, 'seconds') + '</span></div>';
+                        gpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.miner.algo + '</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.miner.uptime, 'seconds') + '</span></div>';
                         //gpuHtml += '    </div>';
                         gpuHtml += '</div>';
                         return gpuHtml;

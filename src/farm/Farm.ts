@@ -113,11 +113,11 @@ export function getRigStatus(rigName: string): t.RigInfos | null {
 
 
 
-export function getFarmInfos(): t.FarmInfos {
+export function getFarmInfos(config: t.DaemonConfigAll): t.FarmInfos {
 
     if (farmMainInfos === null) {
         farmMainInfos = {
-            name: getOpt('--rig-name') || os.hostname(),
+            name: config.farm.name || os.hostname(),
             hostname: os.hostname(),
             ip: (getLocalIpAddresses() || [])[0] || 'no-ip',
             farmOs: os.version(),

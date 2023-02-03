@@ -53,10 +53,14 @@ frmd <params>
      -a | --rig-farm-agent-start             # start rig farm agent at freemining start
      -n | --node-monitor-start               # start node monitor at freemining start
      -f | --farm-server-start                # start farm rigs server at freemining start
-     -p | --pool-monitor-start                # start pool monitor at freemining start
+     -p | --pool-monitor-start               # start pool monitor at freemining start
 
      --rig-monitor-poll-delay                # delay between 2 checks of the rig status
      --node-monitor-poll-delay               # delay between 2 checks of the node status
+
+     --rig-farm-server-host
+     --rig-farm-server-port
+     --rig-farm-server-pass
 
 `;
     console.log(_usage);
@@ -182,7 +186,7 @@ function registerWssRoutes(config, wss) {
                         /* RIG */
                         case 'rigGetInfos':
                             {
-                                const rigInfos = Rig.getRigInfos();
+                                const rigInfos = Rig.getRigInfos(config);
                                 rpcSendResponse(ws, req.id, rigInfos);
                             }
                             break;
@@ -285,7 +289,7 @@ function registerWssRoutes(config, wss) {
                         /* NODE */
                         case 'nodeGetStatus':
                             {
-                                const nodeInfos = Node.getNodeInfos();
+                                const nodeInfos = Node.getNodeInfos(config);
                                 rpcSendResponse(ws, req.id, nodeInfos);
                             }
                             break;
@@ -360,7 +364,7 @@ function registerWssRoutes(config, wss) {
                         /* FARM */
                         case 'farmGetStatus':
                             {
-                                const farmInfos = Farm.getFarmInfos();
+                                const farmInfos = Farm.getFarmInfos(config);
                                 rpcSendResponse(ws, req.id, farmInfos);
                             }
                             break;
@@ -397,10 +401,20 @@ function registerWssRoutes(config, wss) {
                                 var debugme = 1;
                             }
                             break;
+                        /*
+                        case 'farmRigUpdateConfig':
+                            break;
+    
+                        case 'farmRigUpdateInstalledMiners':
+                            break;
+    
+                        case 'farmRigUpdateRunningMinersAliases':
+                            break;
+                        */
                         /* POOL */
                         case 'poolGetStatus':
                             {
-                                const poolInfos = Pool.getPoolInfos();
+                                const poolInfos = Pool.getPoolInfos(config);
                                 rpcSendResponse(ws, req.id, poolInfos);
                             }
                             break;

@@ -94,7 +94,7 @@ async function monitorAutoCheckRig(config: t.DaemonConfigAll) {
     await monitorCheckRig(config);
 
     if (farmAgentGetStatus()) {
-        rigFarmAgentWebsocket.sendRigStatusToFarm();
+        rigFarmAgentWebsocket.sendRigStatusToFarm(config);
     }
 
     monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
@@ -234,7 +234,7 @@ export async function minerInstallStop(config: t.DaemonConfigAll, params: t.mine
 
 export function getInstalledMinerConfiguration(config: t.DaemonConfigAll, minerName: string): t.InstalledMinerConfig {
     const minerDir = `${config.appDir }${SEP}rig${SEP}miners${SEP}${minerName}`;
-    const configFile = `${minerDir}/freemining.json`;
+    const configFile = `${minerDir}/freeminingMiner.json`;
 
     let minerConfig: t.InstalledMinerConfig = {
         name: minerName,
@@ -281,9 +281,9 @@ export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRu
     }
 
 
-    const rigInfos = getRigInfos();
+    const rigInfos = await getRigInfos(config);
     const opts = {
-        rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
+        rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
     };
     params.poolUser = stringTemplate(params.poolUser, opts, false, false, false) || '';
 
@@ -525,7 +525,7 @@ function getRigUsage() {
 }
 
 
-export function getRigInfos(): t.RigInfos {
+export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos> {
 
     if (rigMainInfos === null) {
 
@@ -610,7 +610,7 @@ export function getRigInfos(): t.RigInfos {
 
 
         rigMainInfos = {
-            name: getOpt('--rig-name') || os.hostname(),
+            name: config.rig.name || os.hostname(),
             hostname: os.hostname(),
             ip: (getLocalIpAddresses() || [])[0] || 'no-ip',
             rigOs: os.version(),
@@ -622,12 +622,19 @@ export function getRigInfos(): t.RigInfos {
     const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
     const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
 
-    const freeminingVersion = '0.0.0'; // TODO
-    const installedMiners: string[] = []; // TODO
-    const runningMiners: string[] = []; // TODO
+    const freeminingVersion = config.version;
+    const installedMiners = await getInstalledMiners(config);
+    const installedMinersAliases: any[] = []; // TODO
+    const runningMinersAliases = getRunningMinersAliases(config);
+    const runningMiners = Array.from(new Set(runningMinersAliases.map(runningMiner => runningMiner.miner)));
     const monitorStatus = monitorGetStatus();
     const pools: t.UserPoolsCoinsPoolsConfig = {};
     const wallets: t.UserWalletsCoinsWalletsConfig = {};
+
+    const farmAgentStatus = farmAgentGetStatus();
+    const farmAgentHost = config.rig.farmAgent?.host || '';
+    const farmAgentPort = config.rig.farmAgent?.port || 0;
+    const farmAgentPass = config.rig.farmAgent?.pass || '';
 
     const rigInfos: t.RigInfos = {
         rig: {
@@ -652,12 +659,20 @@ export function getRigInfos(): t.RigInfos {
         config: {
             pools,
             wallets,
+            farmAgent: {
+                host: farmAgentHost,
+                port: farmAgentPort,
+                pass: farmAgentPass,
+            },
         },
         status: {
             minersStats: minersStats,
             monitorStatus,
             installedMiners,
+            installedMinersAliases,
             runningMiners,
+            runningMinersAliases,
+            farmAgentStatus,
         },
         dataDate: dateLastCheck,
     }
@@ -673,6 +688,7 @@ export async function getAllMiners(config: t.DaemonConfigAll): Promise<t.AllMine
     const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
     const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
     const managedMiners = getManagedMiners(config); // TODO: mettre en cache
+    const installedMinersAliases: any = {}; // TODO: recuperer tous les freeminingMiner.conf et les regrouper en une variable
 
     const minersNames = Array.from(
         new Set( [
@@ -690,10 +706,12 @@ export async function getAllMiners(config: t.DaemonConfigAll): Promise<t.AllMine
                 minerName,
                 {
                     installed: installedMiners.includes(minerName),
+                    installedAliases: installedMinersAliases,
                     running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
                     installable: installableMiners.includes(minerName),
                     runnable: runnableMiners.includes(minerName),
                     managed: managedMiners.includes(minerName),
+                    runningAlias: runningMinersAliases,
                 }
             ]
         })

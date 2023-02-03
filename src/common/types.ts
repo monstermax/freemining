@@ -84,6 +84,10 @@ export type DaemonParams = (
     "--rig-monitor-poll-delay" |
     "--node-monitor-poll-delay" |
 
+    "--rig-farm-server-host" |
+    "--rig-farm-server-port" |
+    "--rig-farm-server-pass" |
+
     "-r" | // == "--rig-monitor-start"
     "-a" | // == "--rig-farm-agent-start"
     "-n" | // == "--node-monitor-start"
@@ -128,20 +132,21 @@ export type CommonConfig = {
 }
 
 export type DaemonConfig = {
+    version: string,
+    listenAddress: string,
+    listenPort: number,
+    wssConnTimeout: number,
     appDir: string,
     confDir: string,
     dataDir: string,
     logDir: string,
     pidDir: string,
-    listenAddress: string,
-    listenPort: number,
-    wssConnTimeout: number,
     httpTemplatesDir: string,
     httpStaticDir: string,
-    rigName: string,
-    farmName: string,
-    nodeName: string,
-    poolName: string,
+    rig: rigConfig,
+    farm: farmConfig,
+    node: nodeConfig,
+    pool: poolConfig,
     _args: string[],
 }
 
@@ -190,6 +195,15 @@ export type GPU = {
 
 /* RIG */
 
+export type rigConfig = {
+    name?: string,
+    farmAgent?: {
+        host: string,
+        port: number,
+        pass?: string,
+    },
+};
+
 export type RigInfos = {
     rig: {
         name: string,
@@ -214,12 +228,20 @@ export type RigInfos = {
         pools: any,
         wallets: any,
         //overclockings: any,
+        farmAgent: {
+            host: string,
+            port: number,
+            pass: string,
+        },
     }
     status?: {
         monitorStatus: boolean,
-        runningMiners: string[], // + aliases ?
-        installedMiners: string[], // + aliases ?
+        installedMiners: string[],
+        installedMinersAliases: any[];
+        runningMiners: string[],
+        runningMinersAliases: any[];
         minersStats: { [minerName: string]: MinerStats },
+        farmAgentStatus: boolean,
     },
     //dataSizes?: {
     //    appDir: number,
@@ -230,6 +252,12 @@ export type RigInfos = {
     dataDate?: number,
 }
 
+export type RigData = {
+    config: DaemonConfigAll,
+    rigInfos: RigInfos,
+    monitorStatus: boolean,
+    allMiners: AllMiners,
+}
 
 
 export type minerInstallInfos = {
@@ -294,6 +322,8 @@ export type MinerGpuInfos = GPU & {
     power: number | null,
 };
 
+
+export type installedMiner = any; // TODO
 
 export type runningMiner = {
     miner: string,
@@ -361,16 +391,23 @@ export type getMinerInfosParams = {
 export type AllMiners = {
     [minerName: string]: {
         installed: boolean,
+        installedAliases: installedMiner[], // TODO
         running: boolean,
         installable: boolean,
         runnable: boolean,
         managed: boolean,
+        runningAlias: runningMiner[],
     }
 };
 
 
 
 /* NODE */
+
+
+export type nodeConfig = {
+    name?: string,
+};
 
 export type NodeInfos = {
     node: {
@@ -395,8 +432,10 @@ export type NodeInfos = {
     }
     status?: {
         monitorStatus: boolean,
-        runningFullnodes: string[], // + aliases ?
-        installedFullnodes: string[], // + aliases ?
+        runningFullnodes: string[],
+        runningFullnodesAliases: any[], // TODO
+        installedFullnodes: string[],
+        installedFullnodesAliases: any[], // TODO
         fullnodesStats: { [minerName: string]: FullnodeStats },
     },
     //dataSizes?: {
@@ -541,6 +580,10 @@ export type getFullnodeInfosParams = {
 
 /* FARM */
 
+export type farmConfig = {
+    name?: string,
+};
+
 export type FarmInfos = {
     farm: {
         name: string,
@@ -563,9 +606,12 @@ export type FarmInfos = {
 
 /* POOL */
 
+export type poolConfig = {
+    name?: string,
+};
 
 export type PoolInfos = {
-    node: {
+    pool: {
         name: string,
         hostname: string,
         ip: string,
@@ -587,8 +633,10 @@ export type PoolInfos = {
     }
     status?: {
         //monitorStatus: boolean,
-        //runningEngines: string[], // + aliases ?
-        //installedEngines: string[], // + aliases ?
+        //runningEngines: string[],
+        //runningEnginesAliases: any[],
+        //installedEngines: string[],
+        //installedEnginesAliases: any[],
         //enginesStats: EnginesStats
         //poolsStats: PoolsStats
     },
@@ -598,7 +646,7 @@ export type PoolInfos = {
     //    confDir: number,
     //    logDir: number,
     //},
-    dataDate?: number,
+    dataDate?: number | null,
 };
 
 

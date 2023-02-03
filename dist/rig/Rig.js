@@ -73,7 +73,7 @@ function monitorAutoCheckRig(config) {
         }
         yield monitorCheckRig(config);
         if (farmAgentGetStatus()) {
-            rigFarmAgentWebsocket.sendRigStatusToFarm();
+            rigFarmAgentWebsocket.sendRigStatusToFarm(config);
         }
         monitorIntervalId = setTimeout(monitorAutoCheckRig, pollDelay, config);
     });
@@ -200,7 +200,7 @@ function minerInstallStop(config, params) {
 exports.minerInstallStop = minerInstallStop;
 function getInstalledMinerConfiguration(config, minerName) {
     const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
-    const configFile = `${minerDir}/freemining.json`;
+    const configFile = `${minerDir}/freeminingMiner.json`;
     let minerConfig = {
         name: minerName,
         title: minerName,
@@ -238,9 +238,9 @@ function minerRunStart(config, params) {
         if (`miner-run-${minerAlias}` in processes) {
             throw { message: `Miner ${minerFullTitle} run is already running` };
         }
-        const rigInfos = getRigInfos();
+        const rigInfos = yield getRigInfos(config);
         const opts = {
-            rigName: config.rigName || rigInfos.rig.name || 'anonymous-rig',
+            rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
         };
         params.poolUser = (0, utils_1.stringTemplate)(params.poolUser, opts, false, false, false) || '';
         const minerCommands = minersConfigs_1.minersCommands[minerName];
@@ -438,130 +438,147 @@ function getRigUsage() {
         memoryTotal,
     };
 }
-function getRigInfos() {
-    if (rigMainInfos === null) {
-        const _cpus = os_1.default.cpus();
-        const cpus = [
-            {
-                name: _cpus[0].model.trim(),
-                threads: _cpus.length,
+function getRigInfos(config) {
+    var _a, _b, _c;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        if (rigMainInfos === null) {
+            const _cpus = os_1.default.cpus();
+            const cpus = [
+                {
+                    name: _cpus[0].model.trim(),
+                    threads: _cpus.length,
+                }
+            ];
+            let gpuList;
+            if (os_1.default.platform() === 'linux') {
+                gpuList = (0, child_process_1.execSync)(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim();
+                /*
+                04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
+                07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
+                */
+                // detailed output: 
+                // lspci -nnkd ::300
+                // temperatures & fanSpeeed [NVIDIA]
+                // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
             }
-        ];
-        let gpuList;
-        if (os_1.default.platform() === 'linux') {
-            gpuList = (0, child_process_1.execSync)(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim();
-            /*
-            04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
-            07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
-            */
-            // detailed output: 
-            // lspci -nnkd ::300
-            // temperatures & fanSpeeed [NVIDIA]
-            // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
-        }
-        else if (os_1.default.platform() === 'win32') {
-            // detailed output: 
-            // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
-            gpuList = (0, child_process_1.execSync)('wmic path win32_VideoController get Name').toString().trim();
-            let tmpArr = gpuList.split(os_1.default.EOL);
-            tmpArr.shift();
-            tmpArr = tmpArr.map(item => item.trim());
-            gpuList = tmpArr.join(os_1.default.EOL);
-            /*
-            Name
-            Intel(R) HD Graphics 630
-                NVIDIA GeForce GTX 1070
-            */
-            /*
-            // temperatures & fanSpeeed
-            const MSI_Afterburner = require('msi-afterburner-api');
-            const afterburner = new MSI_Afterburner();
-            afterburner.init()
-                .then(() => {
-                    afterburner.getSystemInfo()
-                        .then((systemInfo) => {
-                            console.log(`Number of GPUs: ${systemInfo.adapters.length}`);
-                            systemInfo.adapters.forEach((adapter) => {
-                                console.log(`GPU ${adapter.index}:`);
-                                console.log(`  Temperature: ${adapter.temperature}°C`);
-                                console.log(`  Fan Speed: ${adapter.fanSpeed}%`);
-                            });
-                        })
-                        .catch((err) => console.error(err));
-                })
-                .catch((err) => console.error(err));
-            */
-        }
-        else if (os_1.default.platform() === 'darwin') {
-            gpuList = (0, child_process_1.execSync)(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
-            /*
-            Chipset Model: AMD Radeon Pro 555X
-            Chipset Model: AMD Radeon Pro 560X
-            */
-            // temperatures & fanSpeeed
-            // iStats gpu --temp
-            // requires iStats => gem install iStats
-        }
-        else {
-            gpuList = '';
-        }
-        const gpus = gpuList.split(os_1.default.EOL).map((gpuName, idx) => {
-            return {
-                id: idx,
-                name: gpuName,
-                driver: '', // TODO
+            else if (os_1.default.platform() === 'win32') {
+                // detailed output: 
+                // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
+                gpuList = (0, child_process_1.execSync)('wmic path win32_VideoController get Name').toString().trim();
+                let tmpArr = gpuList.split(os_1.default.EOL);
+                tmpArr.shift();
+                tmpArr = tmpArr.map(item => item.trim());
+                gpuList = tmpArr.join(os_1.default.EOL);
+                /*
+                Name
+                Intel(R) HD Graphics 630
+                    NVIDIA GeForce GTX 1070
+                */
+                /*
+                // temperatures & fanSpeeed
+                const MSI_Afterburner = require('msi-afterburner-api');
+                const afterburner = new MSI_Afterburner();
+                afterburner.init()
+                    .then(() => {
+                        afterburner.getSystemInfo()
+                            .then((systemInfo) => {
+                                console.log(`Number of GPUs: ${systemInfo.adapters.length}`);
+                                systemInfo.adapters.forEach((adapter) => {
+                                    console.log(`GPU ${adapter.index}:`);
+                                    console.log(`  Temperature: ${adapter.temperature}°C`);
+                                    console.log(`  Fan Speed: ${adapter.fanSpeed}%`);
+                                });
+                            })
+                            .catch((err) => console.error(err));
+                    })
+                    .catch((err) => console.error(err));
+                */
+            }
+            else if (os_1.default.platform() === 'darwin') {
+                gpuList = (0, child_process_1.execSync)(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
+                /*
+                Chipset Model: AMD Radeon Pro 555X
+                Chipset Model: AMD Radeon Pro 560X
+                */
+                // temperatures & fanSpeeed
+                // iStats gpu --temp
+                // requires iStats => gem install iStats
+            }
+            else {
+                gpuList = '';
+            }
+            const gpus = gpuList.split(os_1.default.EOL).map((gpuName, idx) => {
+                return {
+                    id: idx,
+                    name: gpuName,
+                    driver: '', // TODO
+                };
+            });
+            rigMainInfos = {
+                name: config.rig.name || os_1.default.hostname(),
+                hostname: os_1.default.hostname(),
+                ip: ((0, utils_1.getLocalIpAddresses)() || [])[0] || 'no-ip',
+                rigOs: os_1.default.version(),
+                cpus,
+                gpus,
             };
-        });
-        rigMainInfos = {
-            name: (0, utils_1.getOpt)('--rig-name') || os_1.default.hostname(),
-            hostname: os_1.default.hostname(),
-            ip: ((0, utils_1.getLocalIpAddresses)() || [])[0] || 'no-ip',
-            rigOs: os_1.default.version(),
-            cpus,
-            gpus,
-        };
-    }
-    const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
-    const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
-    const freeminingVersion = '0.0.0'; // TODO
-    const installedMiners = []; // TODO
-    const runningMiners = []; // TODO
-    const monitorStatus = monitorGetStatus();
-    const pools = {};
-    const wallets = {};
-    const rigInfos = {
-        rig: {
-            name,
-            hostname,
-            ip,
-            os: rigOs,
-            freeminingVersion,
-        },
-        devices: {
-            cpus,
-            gpus,
-        },
-        usage: {
-            uptime,
-            loadAvg,
-            memory: {
-                used: memoryUsed,
-                total: memoryTotal,
+        }
+        const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
+        const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
+        const freeminingVersion = config.version;
+        const installedMiners = yield getInstalledMiners(config);
+        const installedMinersAliases = []; // TODO
+        const runningMinersAliases = getRunningMinersAliases(config);
+        const runningMiners = Array.from(new Set(runningMinersAliases.map(runningMiner => runningMiner.miner)));
+        const monitorStatus = monitorGetStatus();
+        const pools = {};
+        const wallets = {};
+        const farmAgentStatus = farmAgentGetStatus();
+        const farmAgentHost = ((_a = config.rig.farmAgent) === null || _a === void 0 ? void 0 : _a.host) || '';
+        const farmAgentPort = ((_b = config.rig.farmAgent) === null || _b === void 0 ? void 0 : _b.port) || 0;
+        const farmAgentPass = ((_c = config.rig.farmAgent) === null || _c === void 0 ? void 0 : _c.pass) || '';
+        const rigInfos = {
+            rig: {
+                name,
+                hostname,
+                ip,
+                os: rigOs,
+                freeminingVersion,
             },
-        },
-        config: {
-            pools,
-            wallets,
-        },
-        status: {
-            minersStats: minersStats,
-            monitorStatus,
-            installedMiners,
-            runningMiners,
-        },
-        dataDate: dateLastCheck,
-    };
-    return rigInfos;
+            devices: {
+                cpus,
+                gpus,
+            },
+            usage: {
+                uptime,
+                loadAvg,
+                memory: {
+                    used: memoryUsed,
+                    total: memoryTotal,
+                },
+            },
+            config: {
+                pools,
+                wallets,
+                farmAgent: {
+                    host: farmAgentHost,
+                    port: farmAgentPort,
+                    pass: farmAgentPass,
+                },
+            },
+            status: {
+                minersStats: minersStats,
+                monitorStatus,
+                installedMiners,
+                installedMinersAliases,
+                runningMiners,
+                runningMinersAliases,
+                farmAgentStatus,
+            },
+            dataDate: dateLastCheck,
+        };
+        return rigInfos;
+    });
 }
 exports.getRigInfos = getRigInfos;
 function getAllMiners(config) {
@@ -571,6 +588,7 @@ function getAllMiners(config) {
         const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
         const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
         const managedMiners = getManagedMiners(config); // TODO: mettre en cache
+        const installedMinersAliases = {}; // TODO: recuperer tous les freeminingMiner.conf et les regrouper en une variable
         const minersNames = Array.from(new Set([
             ...installedMiners,
             ...runningMinersAliases.map(runningMiner => runningMiner.miner),
@@ -583,10 +601,12 @@ function getAllMiners(config) {
                 minerName,
                 {
                     installed: installedMiners.includes(minerName),
+                    installedAliases: installedMinersAliases,
                     running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
                     installable: installableMiners.includes(minerName),
                     runnable: runnableMiners.includes(minerName),
                     managed: managedMiners.includes(minerName),
+                    runningAlias: runningMinersAliases,
                 }
             ];
         }));
