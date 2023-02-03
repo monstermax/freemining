@@ -248,7 +248,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         try {
             const rigConfig = JSON.parse(rigConfigJson);
 
-            rigName = rigConfig.rigName || defaultRigName;
+            rigName = rigConfig.name || defaultRigName;
             farmAgentHost = rigConfig.farmAgent?.Host || farmAgentHost;
             farmAgentPort = rigConfig.farmAgent?.Port || farmAgentPort;
             farmAgentPass = rigConfig.farmAgent?.Pass || farmAgentPass;
@@ -283,7 +283,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         try {
             const farmConfig = JSON.parse(farmConfigJson);
 
-            farmName = farmConfig.farmName || defaultFarmName;
+            farmName = farmConfig.name || defaultFarmName;
 
         } catch (err: any) {
             console.warn(`${now()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
@@ -310,7 +310,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         try {
             const nodeConfig = JSON.parse(nodeConfigJson);
 
-            nodeName = nodeConfig.nodeName || defaultNodeName;
+            nodeName = nodeConfig.name || defaultNodeName;
 
         } catch (err: any) {
             console.warn(`${now()} [WARNING] [CONFIG] cannot read node config: ${err.message}`);
@@ -337,7 +337,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         try {
             const poolConfig = JSON.parse(poolConfigJson);
 
-            poolName = poolConfig.poolName || defaultPoolName;
+            poolName = poolConfig.name || defaultPoolName;
 
         } catch (err: any) {
             console.warn(`${now()} [WARNING] [CONFIG] cannot read pool config: ${err.message}`);
