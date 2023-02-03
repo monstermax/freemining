@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.status = exports.stop = exports.start = void 0;
 let active = false;
+// TODO: A DEPLACER DANS Farm.ts
 function start(config) {
     if (active)
         return;

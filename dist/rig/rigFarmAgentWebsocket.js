@@ -9,8 +9,8 @@ const utils_1 = require("../common/utils");
 const Rig = tslib_1.__importStar(require("./Rig"));
 const Daemon = tslib_1.__importStar(require("../core/Daemon"));
 let websocket;
-const wsServerHost = '127.0.0.1.'; // TODO: lire config
-const wsServerPort = 1234; // TODO: lire config
+let wsServerHost = '';
+let wsServerPort = 0;
 const serverConnTimeout = 10000; // si pas de réponse d'un client au bout de x millisecondes on le déconnecte
 const serverNewConnDelay = 10000; // attend x millisecondes avant de se reconnecter (en cas de déconnexion)
 const sendStatusInterval = 10000; // envoie le (dernier) statut du rig au farmServer toutes les x millisecondes
@@ -83,9 +83,15 @@ function sendRigStatus(ws, rigInfos) {
 }
 // WEBSOCKET
 function websocketConnect(config) {
+    var _a, _b;
     let newConnectionTimeout = null;
     const rigName = config.rig.name || os_1.default.hostname();
     const websocketPassword = 'xxx'; // password to access farm websocket server
+    wsServerHost = ((_a = config.rig.farmAgent) === null || _a === void 0 ? void 0 : _a.host) || '';
+    wsServerPort = Number((_b = config.rig.farmAgent) === null || _b === void 0 ? void 0 : _b.port) || 0;
+    if (!wsServerHost || !wsServerPort) {
+        return;
+    }
     if (!active)
         return;
     if (websocket) {
