@@ -77,7 +77,7 @@
                         return cpuHtml;
                     }).join('');
                     html += service.devices.gpus.map(gpu => {
-                        const gpuSuffix = (service.gpu.length > 1) ? ('.' + gpu.id) : '';
+                        const gpuSuffix = (service.devices.gpus.length > 1) ? ('.' + gpu.id) : '';
                         let gpuHtml = '';
                         gpuHtml += '<div class="rounded bg-primary p-1 m-1 text-start row">';
                         //gpuHtml += '    <div class="col-12 text-start">';

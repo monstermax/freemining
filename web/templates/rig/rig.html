@@ -42,6 +42,24 @@
 
 <hr />
 
+<h2>CPU:</h2>
+<% rigInfos.devices?.cpus.forEach(cpu => { %>
+    <li>
+        <%- cpu.id %> <%- cpu.name %> [x<%- cpu.threads %> threads]
+    </li>
+<% }) %>
+
+<hr />
+
+<h2>GPUS:</h2>
+<% rigInfos.devices?.gpus.forEach(gpu => { %>
+    <li>
+        [<%- gpu.id %>] <%- gpu.name %>
+    </li>
+<% }) %>
+
+<hr />
+
 <h2>Running miners:</h2>
 <% runningMiners.forEach(minerName => { %>
     <li>
