@@ -205,10 +205,10 @@ function loadDaemonConfig(args) {
         const rigConfigJson = fs_1.default.readFileSync(rigConfigFile).toString();
         try {
             const rigConfig = JSON.parse(rigConfigJson);
-            rigName = rigConfig.rigName || defaultRigName;
-            farmAgentHost = ((_a = rigConfig.farmAgent) === null || _a === void 0 ? void 0 : _a.Host) || farmAgentHost;
-            farmAgentPort = ((_b = rigConfig.farmAgent) === null || _b === void 0 ? void 0 : _b.Port) || farmAgentPort;
-            farmAgentPass = ((_c = rigConfig.farmAgent) === null || _c === void 0 ? void 0 : _c.Pass) || farmAgentPass;
+            rigName = rigConfig.name || defaultRigName;
+            farmAgentHost = ((_a = rigConfig.farmAgent) === null || _a === void 0 ? void 0 : _a.host) || farmAgentHost;
+            farmAgentPort = ((_b = rigConfig.farmAgent) === null || _b === void 0 ? void 0 : _b.port) || farmAgentPort;
+            farmAgentPass = ((_c = rigConfig.farmAgent) === null || _c === void 0 ? void 0 : _c.pass) || farmAgentPass;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
@@ -235,7 +235,7 @@ function loadDaemonConfig(args) {
         const farmConfigJson = fs_1.default.readFileSync(farmConfigFile).toString();
         try {
             const farmConfig = JSON.parse(farmConfigJson);
-            farmName = farmConfig.farmName || defaultFarmName;
+            farmName = farmConfig.name || defaultFarmName;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
@@ -257,7 +257,7 @@ function loadDaemonConfig(args) {
         const nodeConfigJson = fs_1.default.readFileSync(nodeConfigFile).toString();
         try {
             const nodeConfig = JSON.parse(nodeConfigJson);
-            nodeName = nodeConfig.nodeName || defaultNodeName;
+            nodeName = nodeConfig.name || defaultNodeName;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read node config: ${err.message}`);
@@ -279,7 +279,7 @@ function loadDaemonConfig(args) {
         const poolConfigJson = fs_1.default.readFileSync(poolConfigFile).toString();
         try {
             const poolConfig = JSON.parse(poolConfigJson);
-            poolName = poolConfig.poolName || defaultPoolName;
+            poolName = poolConfig.name || defaultPoolName;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read pool config: ${err.message}`);

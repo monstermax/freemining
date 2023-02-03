@@ -62,7 +62,7 @@ export async function rigHomepage(rigData: t.RigData, req: express.Request, res:
     const installableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installable).map(entry => entry[0]);
     const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
     const managedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].managed).map(entry => entry[0]);
-
+    
     const data = {
         ...utilFuncs,
         meta: {

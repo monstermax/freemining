@@ -249,9 +249,9 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
             const rigConfig = JSON.parse(rigConfigJson);
 
             rigName = rigConfig.name || defaultRigName;
-            farmAgentHost = rigConfig.farmAgent?.Host || farmAgentHost;
-            farmAgentPort = rigConfig.farmAgent?.Port || farmAgentPort;
-            farmAgentPass = rigConfig.farmAgent?.Pass || farmAgentPass;
+            farmAgentHost = rigConfig.farmAgent?.host || farmAgentHost;
+            farmAgentPort = rigConfig.farmAgent?.port || farmAgentPort;
+            farmAgentPass = rigConfig.farmAgent?.pass || farmAgentPass;
 
         } catch (err: any) {
             console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);

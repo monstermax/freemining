@@ -37,11 +37,10 @@ function getRigData() {
 }
 /* ############################# */
 function rigHomepage(rigData, req, res, next) {
-    var _a;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         //const config = Daemon.getConfig();
         const { monitorStatus, allMiners, rigInfos } = rigData;
-        const runningMinersAliases = (_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.runningMinersAliases;
+        //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
         // variables à ne plus utiliser... (utiliser allMiners à la place)
         const runningMiners = Object.entries(allMiners).filter((entry) => entry[1].running).map(entry => entry[0]);
         const installedMiners = Object.entries(allMiners).filter((entry) => entry[1].installed).map(entry => entry[0]);
