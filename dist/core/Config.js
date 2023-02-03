@@ -72,7 +72,7 @@ function loadDaemonConfig(args) {
     let httpStaticDir = defaultHttpStaticDir;
     let httpTemplatesDir = defaultHttpTemplatesDir;
     let userFrmDir = defaultUserFrmDir;
-    let freeminingVersion = require(`${__dirname}/../../package.json`).version;
+    let freeminingVersion = require(`${__dirname}${SEP}..${SEP}..${SEP}package.json`).version;
     // set userFrmDir
     if ((0, utils_1.hasOpt)('--user-dir', args)) {
         userFrmDir = (0, utils_1.getOpt)('--user-dir', args) || '';
@@ -139,7 +139,7 @@ function loadDaemonConfig(args) {
         }
     }
     // Read core config
-    const coreConfigFile = `${confDir}/freemining.json`;
+    const coreConfigFile = `${confDir}${SEP}freemining.json`;
     if (fs_1.default.existsSync(coreConfigFile)) {
         const coreConfigJson = fs_1.default.readFileSync(coreConfigFile).toString();
         try {
@@ -199,8 +199,8 @@ function loadDaemonConfig(args) {
     let farmAgentHost = '';
     let farmAgentPort = 0;
     let farmAgentPass = '';
-    const rigConfigFile = `${confDir}/rig/rig.json`;
-    (0, fs_1.mkdirSync)(`${confDir}/rig/`, { recursive: true });
+    const rigConfigFile = `${confDir}${SEP}rig${SEP}rig.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(rigConfigFile)) {
         const rigConfigJson = fs_1.default.readFileSync(rigConfigFile).toString();
         try {
@@ -229,8 +229,8 @@ function loadDaemonConfig(args) {
     fs_1.default.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
     // Read farm config
     let farmName = defaultFarmName;
-    const farmConfigFile = `${confDir}/farm/farm.json`;
-    (0, fs_1.mkdirSync)(`${confDir}/farm/`, { recursive: true });
+    const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}farm${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(farmConfigFile)) {
         const farmConfigJson = fs_1.default.readFileSync(farmConfigFile).toString();
         try {
@@ -251,8 +251,8 @@ function loadDaemonConfig(args) {
     fs_1.default.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));
     // Read node config
     let nodeName = defaultNodeName;
-    const nodeConfigFile = `${confDir}/node/node.json`;
-    (0, fs_1.mkdirSync)(`${confDir}/node/`, { recursive: true });
+    const nodeConfigFile = `${confDir}${SEP}node${SEP}node.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}node${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(nodeConfigFile)) {
         const nodeConfigJson = fs_1.default.readFileSync(nodeConfigFile).toString();
         try {
@@ -273,8 +273,8 @@ function loadDaemonConfig(args) {
     fs_1.default.writeFileSync(nodeConfigFile, JSON.stringify(nodeConfig, null, 4));
     // Read pool config
     let poolName = defaultPoolName;
-    const poolConfigFile = `${confDir}/pool/pool.json`;
-    (0, fs_1.mkdirSync)(`${confDir}/pool/`, { recursive: true });
+    const poolConfigFile = `${confDir}${SEP}pool${SEP}pool.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}pool${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(poolConfigFile)) {
         const poolConfigJson = fs_1.default.readFileSync(poolConfigFile).toString();
         try {
