@@ -40,7 +40,7 @@ const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].manag
 <hr />
 
 <h3>Status</h3>
-<% if (! rigStatus) { %>
+<% if (! rigInfos.status?.monitorStatus) { %>
     <div class="alert alert-warning">Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-run">start monitor</a></div>
 
 <% } else if ( ! managedMiners.includes(miner) ) { %>

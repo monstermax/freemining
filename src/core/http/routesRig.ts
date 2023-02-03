@@ -54,7 +54,7 @@ async function getRigData(): Promise<t.RigData> {
 export async function rigHomepage(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
     //const config = Daemon.getConfig();
     const {monitorStatus, allMiners, rigInfos} = rigData;
-    const runningMinersAliases = rigInfos.status?.runningMinersAliases;
+    //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
 
     // variables à ne plus utiliser... (utiliser allMiners à la place)
     const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);

@@ -28,9 +28,9 @@
 <br />
 <br />
 
-<% if (farmAgentStatus) { %>
+<% if (rigInfos.status?.farmAgentStatus) { %>
     Farm connection is active.
-    Server: <%=rigConfig.farmAgentHost%>:<%=rigConfig.farmAgentPort%>
+    Server: <%=rigInfos.config?.farmAgent.host%>:<%=rigInfos.config?.port%>
     <a href="farm-agent/run">Stop connection</a>
 
 <% } else { %>
