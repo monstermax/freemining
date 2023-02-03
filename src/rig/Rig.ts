@@ -177,7 +177,7 @@ export function getRunningMinersAliases(config: t.DaemonConfigAll): t.runningMin
 export function getInstallableMiners(config: t.DaemonConfigAll): string[] {
     return Object.entries(minersInstalls).map(entry => {
         const [minerName, minerInstall] = entry;
-        if (! minerInstall.version || minerInstall.version === 'edit-me') return '';
+        if (! minerInstall.lastVersion || minerInstall.lastVersion === 'edit-me') return '';
         return minerName;
     }).filter(minerName => minerName !== '');
 }

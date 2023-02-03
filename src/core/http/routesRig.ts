@@ -10,6 +10,7 @@ import * as Rig from '../../rig/Rig';
 import * as Daemon from '../../core/Daemon';
 
 import type * as t from '../../common/types';
+import { config } from 'process';
 
 
 
@@ -53,7 +54,7 @@ async function getRigData(): Promise<t.RigData> {
 
 export async function rigHomepage(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
     //const config = Daemon.getConfig();
-    const {monitorStatus, allMiners, rigInfos} = rigData;
+    const { config, monitorStatus, allMiners, rigInfos } = rigData;
     //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
 
     // variables à ne plus utiliser... (utiliser allMiners à la place)
@@ -62,7 +63,9 @@ export async function rigHomepage(rigData: t.RigData, req: express.Request, res:
     const installableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installable).map(entry => entry[0]);
     const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
     const managedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].managed).map(entry => entry[0]);
-    
+
+    // installableMiners = rigInfos.
+
     const data = {
         ...utilFuncs,
         meta: {

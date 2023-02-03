@@ -27,7 +27,7 @@ TODO: a transformer en :
     minersStats: t.RigInfos (renommer RigInfos en MinersStats)
 }
 */
-const websocketPassword = 'xxx'; // password to access farm websocket server
+//const websocketPassword = 'xxx'; // password to access farm websocket server
 let farmMainInfos = null;
 /* ########## FUNCTIONS ######### */
 function rigsServerStart(config) {
@@ -65,6 +65,7 @@ function rigAuthRequest(config, params) {
     if (!rig) {
         return false;
     }
+    const websocketPassword = config.farm.wsPass || '';
     //if (! pass) {
     //    return false;
     //}

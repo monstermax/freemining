@@ -34,7 +34,7 @@ TODO: a transformer en :
 */
 
 
-const websocketPassword = 'xxx'; // password to access farm websocket server
+//const websocketPassword = 'xxx'; // password to access farm websocket server
 
 let farmMainInfos: any | null = null;
 
@@ -84,6 +84,8 @@ export function rigAuthRequest(config: t.DaemonConfigAll, params: t.MapString<an
     if (! rig) {
         return false;
     }
+
+    const websocketPassword = config.farm.wsPass || '';
 
     //if (! pass) {
     //    return false;

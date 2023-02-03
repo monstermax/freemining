@@ -147,7 +147,7 @@ exports.getRunningMinersAliases = getRunningMinersAliases;
 function getInstallableMiners(config) {
     return Object.entries(minersConfigs_1.minersInstalls).map(entry => {
         const [minerName, minerInstall] = entry;
-        if (!minerInstall.version || minerInstall.version === 'edit-me')
+        if (!minerInstall.lastVersion || minerInstall.lastVersion === 'edit-me')
             return '';
         return minerName;
     }).filter(minerName => minerName !== '');

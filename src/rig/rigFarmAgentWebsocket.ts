@@ -107,7 +107,7 @@ function sendRigStatus(ws: WebSocket, rigInfos: t.RigInfos): void {
 function websocketConnect(config: t.DaemonConfigAll) {
     let newConnectionTimeout: any = null;
     const rigName = config.rig.name || os.hostname();
-    const websocketPassword = 'xxx'; // password to access farm websocket server
+    const websocketPassword = config.rig.farmAgent?.pass || '';
 
     wsServerHost = config.rig.farmAgent?.host || '';
     wsServerPort = Number(config.rig.farmAgent?.port) || 0;

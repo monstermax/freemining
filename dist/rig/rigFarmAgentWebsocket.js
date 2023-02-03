@@ -83,12 +83,12 @@ function sendRigStatus(ws, rigInfos) {
 }
 // WEBSOCKET
 function websocketConnect(config) {
-    var _a, _b;
+    var _a, _b, _c;
     let newConnectionTimeout = null;
     const rigName = config.rig.name || os_1.default.hostname();
-    const websocketPassword = 'xxx'; // password to access farm websocket server
-    wsServerHost = ((_a = config.rig.farmAgent) === null || _a === void 0 ? void 0 : _a.host) || '';
-    wsServerPort = Number((_b = config.rig.farmAgent) === null || _b === void 0 ? void 0 : _b.port) || 0;
+    const websocketPassword = ((_a = config.rig.farmAgent) === null || _a === void 0 ? void 0 : _a.pass) || '';
+    wsServerHost = ((_b = config.rig.farmAgent) === null || _b === void 0 ? void 0 : _b.host) || '';
+    wsServerPort = Number((_c = config.rig.farmAgent) === null || _c === void 0 ? void 0 : _c.port) || 0;
     if (!wsServerHost || !wsServerPort) {
         return;
     }

@@ -79,12 +79,12 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             ]);
         }
         if (params.algo) {
-            args.push('-pers');
-            args.push(params.algo);
+            //args.push('-pers');
+            //args.push(params.algo);
         }
         if (params.poolUrl && params.poolUser) {
             args.push('-uri');
-            args.push(`stratum://${params.poolUser}@${params.poolUrl}`);
+            args.push(`${params.algo}://${params.poolUser}@${params.poolUrl}`);
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);

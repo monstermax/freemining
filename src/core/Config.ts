@@ -275,6 +275,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
 
     // Read farm config
     let farmName = defaultFarmName;
+    let farmWsPassword = '';
 
     const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
     mkdirSync(`${confDir}${SEP}farm${SEP}`, { recursive: true });
@@ -283,7 +284,8 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         try {
             const farmConfig = JSON.parse(farmConfigJson);
 
-            farmName = farmConfig.name || defaultFarmName;
+            farmName = farmConfig.name || farmName;
+            farmWsPassword = farmConfig.wsPass || farmWsPassword;
 
         } catch (err: any) {
             console.warn(`${now()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
@@ -296,6 +298,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
     // Rewrite farm config file
     const farmConfig: t.farmConfig = {
         name: farmName,
+        wsPass: farmWsPassword,
     };
     fs.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));
 

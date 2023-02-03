@@ -39,7 +39,7 @@ function getRigData() {
 function rigHomepage(rigData, req, res, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         //const config = Daemon.getConfig();
-        const { monitorStatus, allMiners, rigInfos } = rigData;
+        const { config, monitorStatus, allMiners, rigInfos } = rigData;
         //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
         // variables à ne plus utiliser... (utiliser allMiners à la place)
         const runningMiners = Object.entries(allMiners).filter((entry) => entry[1].running).map(entry => entry[0]);
@@ -47,6 +47,7 @@ function rigHomepage(rigData, req, res, next) {
         const installableMiners = Object.entries(allMiners).filter((entry) => entry[1].installable).map(entry => entry[0]);
         const runnableMiners = Object.entries(allMiners).filter((entry) => entry[1].runnable).map(entry => entry[0]);
         const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].managed).map(entry => entry[0]);
+        // installableMiners = rigInfos.
         const data = Object.assign(Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager`,
                 noIndex: false,

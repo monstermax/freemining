@@ -582,6 +582,7 @@ export type getFullnodeInfosParams = {
 
 export type farmConfig = {
     name?: string,
+    wsPass?: string,
 };
 
 export type FarmInfos = {

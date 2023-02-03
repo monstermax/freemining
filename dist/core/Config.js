@@ -229,13 +229,15 @@ function loadDaemonConfig(args) {
     fs_1.default.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
     // Read farm config
     let farmName = defaultFarmName;
+    let farmWsPassword = '';
     const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
     (0, fs_1.mkdirSync)(`${confDir}${SEP}farm${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(farmConfigFile)) {
         const farmConfigJson = fs_1.default.readFileSync(farmConfigFile).toString();
         try {
             const farmConfig = JSON.parse(farmConfigJson);
-            farmName = farmConfig.name || defaultFarmName;
+            farmName = farmConfig.name || farmName;
+            farmWsPassword = farmConfig.wsPass || farmWsPassword;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
@@ -247,6 +249,7 @@ function loadDaemonConfig(args) {
     // Rewrite farm config file
     const farmConfig = {
         name: farmName,
+        wsPass: farmWsPassword,
     };
     fs_1.default.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));
     // Read node config
