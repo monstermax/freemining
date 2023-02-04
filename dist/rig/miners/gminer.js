@@ -111,8 +111,8 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const uptime = minerSummary.uptime;
             const algo = minerSummary.algorithm;
             let workerHashRate = 0;
-            const poolUrl = minerSummary.server;
-            const poolUser = minerSummary.user;
+            const poolUrl = minerSummary.server || '';
+            const poolUser = minerSummary.user || '';
             const workerName = poolUser.split('.').pop() || '';
             const cpus = [];
             const gpus = minerSummary.devices.map((gpu) => {

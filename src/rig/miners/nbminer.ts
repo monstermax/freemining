@@ -161,8 +161,8 @@ export const minerCommands: t.minerCommandInfos = {
         // EDIT THESE VALUES - START //
         const start_time = minerSummary.start_time;
         const uptime = (Date.now() / 1000) - start_time;
-        const algo = minerSummary.algorithm;
-        const workerHashRate = minerSummary.miner.total_hashrate
+        const algo = minerSummary.stratum.algorithm;
+        const workerHashRate = minerSummary.miner.total_hashrate_raw;
 
         const poolUrl = minerSummary.stratum.url;
         const poolUser = minerSummary.stratum.user;
@@ -176,7 +176,7 @@ export const minerCommands: t.minerCommandInfos = {
                 name: gpu.info,
                 temperature: gpu.temperature,
                 fanSpeed: gpu.fan,
-                hashRate: gpu.hashrate,
+                hashRate: gpu.hashrate_raw,
                 power: gpu.power,
             };
         });

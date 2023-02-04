@@ -153,8 +153,8 @@ export const minerCommands: t.minerCommandInfos = {
         const algo = minerSummary.algorithm
         let workerHashRate = 0;
 
-        const poolUrl = minerSummary.server;
-        const poolUser = minerSummary.user;
+        const poolUrl = minerSummary.server || '';
+        const poolUser = minerSummary.user || '';
         const workerName = poolUser.split('.').pop() as string || '';
 
         const cpus: t.MinerCpuInfos[] = [];

@@ -74,6 +74,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
     getCommandArgs(config, params) {
         const args = [
             '--nocolour',
+            // --log --extra
         ];
         if (this.apiPort > 0) {
             args.push(...[

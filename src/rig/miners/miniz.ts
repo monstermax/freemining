@@ -101,6 +101,7 @@ export const minerCommands: t.minerCommandInfos = {
     getCommandArgs(config, params) {
         const args: string[] = [
             '--nocolour',
+            // --log --extra
         ];
 
         if (this.apiPort > 0) {

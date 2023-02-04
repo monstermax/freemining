@@ -155,7 +155,7 @@ export const minerCommands: t.minerCommandInfos = {
 
         const uptime = minerSummary.Session.Uptime
         const algo = _algo.Algorithm;
-        const workerHashRate = algo.Total_Performance * (multipliers[_algo.Performance_Unit] || 1);
+        const workerHashRate = _algo.Total_Performance * (multipliers[_algo.Performance_Unit] || 1);
 
         const poolUrl = _algo.Pool;
         const poolUser = _algo.User;

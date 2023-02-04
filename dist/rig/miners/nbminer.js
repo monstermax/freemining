@@ -120,8 +120,8 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             // EDIT THESE VALUES - START //
             const start_time = minerSummary.start_time;
             const uptime = (Date.now() / 1000) - start_time;
-            const algo = minerSummary.algorithm;
-            const workerHashRate = minerSummary.miner.total_hashrate;
+            const algo = minerSummary.stratum.algorithm;
+            const workerHashRate = minerSummary.miner.total_hashrate_raw;
             const poolUrl = minerSummary.stratum.url;
             const poolUser = minerSummary.stratum.user;
             const workerName = poolUser.split('.').pop() || '';
@@ -132,7 +132,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
                     name: gpu.info,
                     temperature: gpu.temperature,
                     fanSpeed: gpu.fan,
-                    hashRate: gpu.hashrate,
+                    hashRate: gpu.hashrate_raw,
                     power: gpu.power,
                 };
             });
