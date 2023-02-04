@@ -492,14 +492,6 @@ function getRigInfos(config) {
                 dhcp: sysinfos.netIface.dhcp,
             };
             const systemInfos = {
-                board: {
-                    manufacturer: sysinfos.board.manufacturer,
-                    model: sysinfos.board.model,
-                },
-                cpu: sysinfos.cpu,
-                gpus: sysinfos.gpus,
-                disks,
-                //fs: sysinfos.fs,
                 os: {
                     arch: sysinfos.os.arch,
                     codename: sysinfos.os.codename,
@@ -508,10 +500,18 @@ function getRigInfos(config) {
                     kernel: sysinfos.os.kernel,
                     platform: sysinfos.os.platform,
                 },
+                cpu: sysinfos.cpu,
+                board: {
+                    manufacturer: sysinfos.board.manufacturer,
+                    model: sysinfos.board.model,
+                },
+                gpus: sysinfos.gpus,
+                //fs: sysinfos.fs,
                 net: {
                     gateway: sysinfos.netGateway,
                     interface: netIface,
-                }
+                },
+                disks,
             };
             const runnableMiners = getRunnableMiners(config);
             const installableMiners = getInstallableMiners(config);
