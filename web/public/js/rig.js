@@ -38,7 +38,7 @@ async function startMinerModal(minerName='', minerAlias='', onStart=null, onSucc
 
 
 function resetStartMinerModalForm() {
-    jQuery('#newMiner_preset').val('');
+    //jQuery('#newMiner_preset').val('');
     jQuery('#newMiner_miner').val('');
     jQuery('#newMiner_alias').val('');
     jQuery('#newMiner_algo').val('');
@@ -48,6 +48,7 @@ function resetStartMinerModalForm() {
 }
 
 
+/*
 function loadStartMinerConfig(selectedPreset) {
     const $presetsContainer = jQuery('#startMinerPresets');
     const presetsContent = $presetsContainer.html();
@@ -74,7 +75,7 @@ function loadStartMinerConfig(selectedPreset) {
     jQuery('#newMiner_pool_user').val(config.poolUser || '');
     jQuery('#newMiner_optional_params').val(config.extraArgs || '');
 }
-
+*/
 
 
 function startMinerFromModal(modalOnStart=null, modalOnSuccess=null, modalOnFail=null) {

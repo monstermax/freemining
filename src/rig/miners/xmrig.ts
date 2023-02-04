@@ -110,8 +110,8 @@ export const minerCommands: t.minerCommandInfos = {
     getCommandArgs(config, params) {
         const args: string[] = [
             '-k',
-            '--cpu-max-threads-hint', '75',
-            '--cpu-priority', '3',
+            //'--cpu-max-threads-hint', '75',
+            //'--cpu-priority', '3',
             '--randomx-no-rdmsr',
             '--no-color',
             //`--log-file=${SEP}tmp${SEP}debug_xmrig.log`,

@@ -82,8 +82,8 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
 exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52003, command: 'xmrig', getCommandArgs(config, params) {
         const args = [
             '-k',
-            '--cpu-max-threads-hint', '75',
-            '--cpu-priority', '3',
+            //'--cpu-max-threads-hint', '75',
+            //'--cpu-priority', '3',
             '--randomx-no-rdmsr',
             '--no-color',
             //`--log-file=${SEP}tmp${SEP}debug_xmrig.log`,
