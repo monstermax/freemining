@@ -587,14 +587,6 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
         };
 
         const systemInfos: any = {
-            board: {
-                manufacturer: sysinfos.board.manufacturer,
-                model: sysinfos.board.model,
-            },
-            cpu: sysinfos.cpu,
-            gpus: sysinfos.gpus,
-            disks,
-            //fs: sysinfos.fs,
             os: {
                 arch: sysinfos.os.arch,
                 codename: sysinfos.os.codename,
@@ -603,10 +595,18 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
                 kernel: sysinfos.os.kernel,
                 platform: sysinfos.os.platform,
             },
+            cpu: sysinfos.cpu,
+            board: {
+                manufacturer: sysinfos.board.manufacturer,
+                model: sysinfos.board.model,
+            },
+            gpus: sysinfos.gpus,
+            //fs: sysinfos.fs,
             net: {
                 gateway: sysinfos.netGateway,
                 interface: netIface,
-            }
+            },
+            disks,
         }
 
         const runnableMiners = getRunnableMiners(config);
