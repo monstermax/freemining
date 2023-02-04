@@ -156,7 +156,6 @@ export const minerCommands: t.minerCommandInfos = {
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const minerName = 'edit-me';
         const uptime = -1; // edit-me
         const algo = 'edit-me';
         const workerHashRate = -1; // edit-me
@@ -165,13 +164,14 @@ export const minerCommands: t.minerCommandInfos = {
         const poolUser = ''; // edit-me
         const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
-        const cpus: any[] = []; // edit-me
-        const gpus: any[] = []; // edit-me
+        const cpus: t.MinerCpuInfos[] = []; // edit-me
+
+        const gpus: t.MinerGpuInfos[] = []; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerStats = {
             miner: {
-                name: minerName,
+                name: minerTitle,
                 worker: workerName,
                 uptime,
                 algo,

@@ -139,30 +139,45 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async EDIT_ME_getInfos(config, params) {
+    async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-        const headers: any = {}; // edit-me if needed
+        const headers: any = {};
 
-        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers});
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const minerName = 'edit-me';
-        const uptime = -1; // edit-me
-        const algo = 'edit-me';
-        const workerHashRate = -1; // edit-me
+        const _algo: any = minerSummary.Algorithms[0];
+        const multipliers: any = {
+            "Mh/s": 1000 * 1000,
+            "Hh/s": 1000,
+        };
 
-        const poolUrl = ''; // edit-me
-        const poolUser = ''; // edit-me
-        const workerName = poolUser.split('.').pop() as string || ''; // edit-me
+        const uptime = minerSummary.Session.Uptime
+        const algo = _algo.Algorithm;
+        const workerHashRate = algo.Total_Performance * (multipliers[_algo.Performance_Unit] || 1);
 
-        const cpus: any[] = []; // edit-me
-        const gpus: any[] = []; // edit-me
+        const poolUrl = _algo.Pool;
+        const poolUser = _algo.User;
+        const workerName = poolUser.split('.').pop() as string || '';
+
+        const cpus: t.MinerCpuInfos[] = [];
+
+        const gpus: t.MinerGpuInfos[] = minerSummary.Workers.map((worker: any) => {
+            return {
+                id: worker.Index,
+                name: worker.Name,
+                temperature: worker.Core_Temp,
+                fanSpeed: worker.Fan_Speed,
+                hashRate: _algo.Worker_Performance[worker.Index] * (multipliers[_algo.Performance_Unit] || 1),
+                power: minerSummary.Workers[worker.Index].Power,
+            };
+        });
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerStats = {
             miner: {
-                name: minerName,
+                name: minerTitle,
                 worker: workerName,
                 uptime,
                 algo,

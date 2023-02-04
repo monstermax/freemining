@@ -164,9 +164,9 @@ export const minerCommands: t.minerCommandInfos = {
         const poolUser = poolInfos.wallet as string;
         const workerName = poolInfos.username as string;
 
-        const cpus: any[] = [];
+        const cpus: t.MinerCpuInfos[] = [];
 
-        const gpus: any[] = minerSummary.devices.map((gpu:any, idx:number) => {
+        const gpus: t.MinerGpuInfos[] = minerSummary.devices.map((gpu:any, idx:number) => {
             return {
                 id: idx,
                 name: gpu.name as string,

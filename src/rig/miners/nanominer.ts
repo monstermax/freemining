@@ -163,9 +163,9 @@ export const minerCommands: t.minerCommandInfos = {
         const poolUser = ''; // edit-me
         const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
-        const cpus: any[] = [];
+        const cpus: t.MinerCpuInfos[] = [];
 
-        const gpus: any[] = Object.values(minerSummary.Devices[0]).map((gpu: any, idx: number) => {
+        const gpus: t.MinerGpuInfos[] = Object.values(minerSummary.Devices[0]).map((gpu: any, idx: number) => {
             return {
                 id: idx,
                 name: gpu.Name,

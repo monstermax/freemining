@@ -156,8 +156,9 @@ export const minerCommands: t.minerCommandInfos = {
         const poolUser = ''; // edit-me
         const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
-        const cpus: any[] = []; // edit-me
-        const gpus: any[] = []; // edit-me
+        const cpus: t.MinerCpuInfos[] = []; // edit-me
+
+        const gpus: t.MinerGpuInfos[] = []; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerStats = {

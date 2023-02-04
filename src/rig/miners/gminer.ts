@@ -141,30 +141,41 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async EDIT_ME_getInfos(config, params) {
+    async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-        const headers: any = {}; // edit-me if needed
+        const headers: any = {};
 
-        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        const minerSummaryRes = await fetch(`${apiUrl}/stat`, {headers});
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const minerName = 'edit-me';
-        const uptime = -1; // edit-me
-        const algo = 'edit-me';
-        const workerHashRate = -1; // edit-me
+        const uptime = minerSummary.uptime;
+        const algo = minerSummary.algorithm
+        let workerHashRate = 0;
 
-        const poolUrl = ''; // edit-me
-        const poolUser = ''; // edit-me
-        const workerName = poolUser.split('.').pop() as string || ''; // edit-me
+        const poolUrl = minerSummary.server;
+        const poolUser = minerSummary.user;
+        const workerName = poolUser.split('.').pop() as string || '';
 
-        const cpus: any[] = []; // edit-me
-        const gpus: any[] = []; // edit-me
+        const cpus: t.MinerCpuInfos[] = [];
+
+        const gpus: t.MinerGpuInfos[] = minerSummary.devices.map((gpu: any) => {
+            workerHashRate += gpu.speed;
+
+            return {
+                id: gpu.gpu_id,
+                name: gpu.name,
+                temperature: gpu.temperature,
+                fanSpeed: gpu.fan,
+                hashRate: gpu.speed,
+                power: gpu.power_usage,
+            };
+        });
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerStats = {
             miner: {
-                name: minerName,
+                name: minerTitle,
                 worker: workerName,
                 uptime,
                 algo,

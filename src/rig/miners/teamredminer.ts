@@ -179,9 +179,9 @@ export const minerCommands: t.minerCommandInfos = {
         const poolUser = pools[0].User as string;
         const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
-        const cpus: any[] = [];
+        const cpus: t.MinerCpuInfos[] = [];
 
-        const gpus: any[] = await Promise.all(
+        const gpus: t.MinerGpuInfos[] = await Promise.all(
             minerDev.map(async (gpu: any, idx: number) => {
                 return {
                     id: gpu.GPU as number, //  minerDevDetails[idx]['ID'] OR minerGpu[idx]['GPU']

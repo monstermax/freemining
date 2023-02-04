@@ -160,10 +160,10 @@ export const minerCommands: t.minerCommandInfos = {
         const poolUser = minerSummary.active_pool?.user as string || '';
         const workerName = poolUser.split('.').pop() as string || '';
 
-        const cpus: any[] = [];
+        const cpus: t.MinerCpuInfos[] = [];
 
         let workerHashRate = 0;
-        const gpus = minerSummary.gpus.map((gpu: any) => {
+        const gpus: t.MinerGpuInfos[] = minerSummary.gpus.map((gpu: any) => {
             workerHashRate += gpu.hashrate;
             return {
                 id: gpu.gpu_id as number,
