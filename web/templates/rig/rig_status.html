@@ -59,7 +59,7 @@
         </div>
         <div class="col-12">
             <div class="border border-dark rounded bg-light m-1 p-1">
-                <%= rigInfos.devices.cpus[0].threads %> X <%= rigInfos.devices.cpus[0].name %>
+                <%= rigInfos.systemInfos.cpu.manufacturer %> <%= rigInfos.systemInfos.cpu.brand %> (<%= rigInfos.systemInfos.cpu.physicalCores %> cores, <%= rigInfos.systemInfos.cpu.cores %> threads)
             </div>
         </div>
     </div>
@@ -68,11 +68,11 @@
         <div class="col-12">
             <b>GPU</b>
         </div>
-        <%- rigInfos.devices.gpus.map(gpu => {
+        <%- rigInfos.systemInfos.gpus.map(gpu => {
             return `
                 <div class="col-12 col-lg-6">
                     <div class="border border-primary rounded bg-light m-1 p-1">
-                        #${gpu.id} : ${gpu.name} [driver=${gpu.driver}]
+                        #${gpu.idx} : ${gpu.name} (${gpu.vendor})
                     </div>
                 </div>
             `;

@@ -262,7 +262,7 @@ export type RigInfos = {
         cpu: any,
         gpus: any[],
         disks: any[],
-        //fs: any[],
+        fs: any[],
         os: {
             arch: string,
             codename: string,
@@ -272,8 +272,8 @@ export type RigInfos = {
             platform: string,
         },
         net: {
-            gateway: string,
             interface: any,
+            gateway: string,
         }
     },
     config?: RigConfig,

@@ -506,10 +506,10 @@ function getRigInfos(config) {
                     model: sysinfos.board.model,
                 },
                 gpus: sysinfos.gpus,
-                //fs: sysinfos.fs,
+                fs: sysinfos.fs,
                 net: {
-                    gateway: sysinfos.netGateway,
                     interface: netIface,
+                    gateway: sysinfos.netGateway,
                 },
                 disks,
             };
