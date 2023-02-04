@@ -112,6 +112,9 @@
                             <%- installedMiners.map(miner => {
                                 if (! runnableMiners.includes(miner)) return;
 
+                                const managedMiners = rigInfos.status.managedMiners;
+                                if (! managedMiners.includes(miner)) return;
+
                                 if (miner in rigInfos.status.minersStats) {
                                     return '<option value="' + miner + '" disabled>' + miner + '</option>';
 

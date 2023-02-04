@@ -44,7 +44,7 @@ function resetStartMinerModalForm() {
     jQuery('#newMiner_algo').val('');
     jQuery('#newMiner_pool_url').val('');
     jQuery('#newMiner_pool_user').val('');
-    jQuery('#newMiner_optional_params').val('');
+    jQuery('#newMiner_extraArgs').val('');
 }
 
 
@@ -61,7 +61,7 @@ function loadStartMinerConfig(selectedPreset) {
         jQuery('#newMiner_algo').val('');
         jQuery('#newMiner_pool_url').val('');
         jQuery('#newMiner_pool_user').val('');
-        jQuery('#newMiner_optional_params').val('');
+        jQuery('#newMiner_extraArgs').val('');
         return;
     }
     const [part1, part2] = parts;
@@ -73,7 +73,7 @@ function loadStartMinerConfig(selectedPreset) {
     jQuery('#newMiner_algo').val(config.algo || '');
     jQuery('#newMiner_pool_url').val(config.poolUrl || '');
     jQuery('#newMiner_pool_user').val(config.poolUser || '');
-    jQuery('#newMiner_optional_params').val(config.extraArgs || '');
+    jQuery('#newMiner_extraArgs').val(config.extraArgs || '');
 }
 */
 
@@ -94,7 +94,7 @@ function startMinerFromModal(modalOnStart=null, modalOnSuccess=null, modalOnFail
     const algo = jQuery('#newMiner_algo').val();
     const poolUrl = jQuery('#newMiner_pool_url').val();
     const poolUser = jQuery('#newMiner_pool_user').val();
-    const extraArgs = jQuery('#newMiner_optional_params').val();
+    const extraArgs = jQuery('#newMiner_extraArgs').val();
 
     const onStart = (minerName, minerAlias) => {
         $btn.prop('disabled', true);
