@@ -143,10 +143,10 @@ export type DaemonConfig = {
     pidDir: string,
     httpTemplatesDir: string,
     httpStaticDir: string,
-    rig: rigConfig,
-    farm: farmConfig,
-    node: nodeConfig,
-    pool: poolConfig,
+    rig: RigConfig,
+    farm: FarmConfig,
+    node: NodeConfig,
+    pool: PoolConfig,
     _args: string[],
 }
 
@@ -195,13 +195,47 @@ export type GPU = {
 
 /* RIG */
 
-export type rigConfig = {
+export type RigConfig = {
     name?: string,
     farmAgent?: {
         host: string,
         port: number,
         pass?: string,
     },
+    coinsUserconf?: rigCoinsUserconfConfig,
+    coinsMiners?: rigCoinsMinersConfig,
+    miners?: rigMinersConfig,
+};
+
+
+
+export type rigCoinsUserconfConfig = {
+    [coinSymbol: string]: {
+        wallets: {
+            [walletName: string]: string, // wallet address
+        },
+        pools: {
+            [poolName: string]: {
+                [serverName: string]: string, // url => example.com:8888
+            }
+        },
+    }
+};
+
+export type rigCoinsMinersConfig = {
+    [coinSymbol: string]: {
+        [minerName: string]: {
+            algo?: string,
+            extraArgs?: string,
+        }
+    }
+};
+
+export type rigMinersConfig = {
+    [minerName: string]: {
+        apiPort?: string,
+        extraArgs?: string,
+    }
 };
 
 export type RigInfos = {
@@ -220,26 +254,38 @@ export type RigInfos = {
             total: number,
         },
     },
-    devices?: {
-        cpus: CPU[],
-        gpus: (GPU & {driver: string})[],
-    },
-    config?: {
-        pools: any,
-        wallets: any,
-        //overclockings: any,
-        farmAgent: {
-            host: string,
-            port: number,
-            pass: string,
+    systemInfos: {
+        board: {
+            manufacturer: string,
+            model: string,
         },
-    }
+        cpu: any,
+        gpus: any[],
+        disks: any[],
+        //fs: any[],
+        os: {
+            arch: string,
+            codename: string,
+            distro: string,
+            hostname: string,
+            kernel: string,
+            platform: string,
+        },
+        net: {
+            gateway: string,
+            interface: any,
+        }
+    },
+    config?: RigConfig,
     status?: {
         monitorStatus: boolean,
+        installableMiners: string[],
         installedMiners: string[],
-        installedMinersAliases: any[];
+        installedMinersAliases: InstalledMiner[];
+        runnableMiners: string[],
         runningMiners: string[],
-        runningMinersAliases: any[];
+        runningMinersAliases: RunningMiner[];
+        managedMiners: string[],
         minersStats: { [minerName: string]: MinerStats },
         farmAgentStatus: boolean,
     },
@@ -277,7 +323,8 @@ export type minerCommandInfos = {
     command: string,
     getCommandFile(config: DaemonConfig, params: getMinerCommandFileParams): string,
     getCommandArgs(config: DaemonConfig, params: getMinerCommandArgsParams): string[],
-    getInfos(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
+    getInfos?(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
+    EDIT_ME_getInfos?(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
 } & MapString<any>;
 
 
@@ -323,12 +370,15 @@ export type MinerGpuInfos = GPU & {
 };
 
 
-export type installedMiner = any; // TODO
+export type InstalledMiner = InstalledMinerConfig;
 
-export type runningMiner = {
+export type RunningMiner = RunningMinerProcess;
+
+export type RunningMinerProcess = {
     miner: string,
     alias: string,
     pid: number,
+    dateStart: number,
 };
 
 
@@ -391,12 +441,12 @@ export type getMinerInfosParams = {
 export type AllMiners = {
     [minerName: string]: {
         installed: boolean,
-        installedAliases: installedMiner[], // TODO
+        installedAliases: InstalledMiner[], // TODO
         running: boolean,
         installable: boolean,
         runnable: boolean,
         managed: boolean,
-        runningAlias: runningMiner[],
+        runningAlias: RunningMiner[],
     }
 };
 
@@ -405,7 +455,7 @@ export type AllMiners = {
 /* NODE */
 
 
-export type nodeConfig = {
+export type NodeConfig = {
     name?: string,
 };
 
@@ -433,7 +483,7 @@ export type NodeInfos = {
     status?: {
         monitorStatus: boolean,
         runningFullnodes: string[],
-        runningFullnodesAliases: any[], // TODO
+        runningFullnodesAliases: RunningFullnode[],
         installedFullnodes: string[],
         installedFullnodesAliases: any[], // TODO
         fullnodesStats: { [minerName: string]: FullnodeStats },
@@ -464,7 +514,8 @@ export type fullnodeCommandInfos = {
     command: string,
     getCommandFile(config: DaemonConfig, params: getFullnodeCommandFileParams): string,
     getCommandArgs(config: DaemonConfig, params: getFullnodeCommandArgsParams): string[],
-    getInfos(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
+    getInfos?(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
+    EDIT_ME_getInfos?(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
 } & MapString<any>;
 
 
@@ -491,7 +542,7 @@ export type FullnodeStats = {
 };
 
 
-export type runningFullnode = {
+export type RunningFullnode = {
     fullnode: string,
     alias: string,
     pid: number,
@@ -580,7 +631,7 @@ export type getFullnodeInfosParams = {
 
 /* FARM */
 
-export type farmConfig = {
+export type FarmConfig = {
     name?: string,
     wsPass?: string,
 };
@@ -607,7 +658,7 @@ export type FarmInfos = {
 
 /* POOL */
 
-export type poolConfig = {
+export type PoolConfig = {
     name?: string,
 };
 
@@ -657,10 +708,4 @@ export type PoolInfos = {
 
 /* MISC */
 
-export type UserWalletsCoinsWalletsConfig = { [coin: string]: UserWalletsCoinConfig }; // see coins_wallets.sample.json
-export type UserWalletsCoinConfig = { [walletName: string]: string };
 
-
-export type UserPoolsCoinsPoolsConfig = { [coin: string]: UserPoolsCoinConfig }; // see coins_pools.sample.json
-export type UserPoolsCoinConfig = { [poolName: string]: UserPoolsCoinPoolConfig };
-export type UserPoolsCoinPoolConfig = { [serverName: string]: string };

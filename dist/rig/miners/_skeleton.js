@@ -103,7 +103,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         }
         return args;
     },
-    getInfos(config, params) {
+    EDIT_ME_getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
             const headers = {}; // edit-me if needed

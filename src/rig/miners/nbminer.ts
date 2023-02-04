@@ -151,7 +151,7 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async getInfos(config, params) {
+    async EDIT_ME_getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
         const headers: any = {}; // edit-me if needed
 

@@ -8,6 +8,7 @@ import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate
 import { exec } from '../common/exec';
 import { minersInstalls, minersCommands } from './minersConfigs';
 import * as rigFarmAgentWebsocket from './rigFarmAgentWebsocket';
+import * as Daemon from '../core/Daemon';
 
 import type *  as t from '../common/types';
 //import type childProcess from 'child_process';
@@ -121,18 +122,20 @@ export async function monitorCheckRig(config: t.DaemonConfigAll): Promise<void> 
             const minerCommands = minersCommands[minerName];
             viewedMiners.push(minerFullName);
 
-            let minerStats: t.MinerStats;
-            try {
-                minerStats = await minerCommands.getInfos(config, {});
-                minerStats.dataDate = Date.now();
-                minerStats.miner = minerStats.miner || {};
-                minerStats.miner.minerName = minerName;
-                minerStats.miner.minerAlias = minerAlias;
-                minersStats[minerFullName] = minerStats;
+            if (typeof minerCommands.getInfos === 'function') {
+                let minerStats: t.MinerStats;
+                try {
+                    minerStats = await minerCommands.getInfos(config, {});
+                    minerStats.dataDate = Date.now();
+                    minerStats.miner = minerStats.miner || {};
+                    minerStats.miner.minerName = minerName;
+                    minerStats.miner.minerAlias = minerAlias;
+                    minersStats[minerFullName] = minerStats;
 
-            } catch (err: any) {
-                //throw { message: err.message };
-                delete minersStats[minerFullName];
+                } catch (err: any) {
+                    //throw { message: err.message };
+                    delete minersStats[minerFullName];
+                }
             }
         }
     }
@@ -149,16 +152,37 @@ export async function monitorCheckRig(config: t.DaemonConfigAll): Promise<void> 
 
 
 export async function getInstalledMiners(config: t.DaemonConfigAll): Promise<string[]> {
-    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`
+    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`;
     const minersNames = await getDirFiles(minersDir);
     return minersNames;
 }
 
 
-export function getRunningMinersAliases(config: t.DaemonConfigAll): t.runningMiner[] {
+export async function getInstalledMinersAliases(config: t.DaemonConfigAll): Promise<t.InstalledMiner[]> {
+    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`;
+    const minersNames = await getDirFiles(minersDir);
+
+    const installedMinersAliases: t.InstalledMiner[] = minersNames.map(minerName => {
+        const minerConfigFile = `${minersDir}${SEP}${minerName}${SEP}freeminingMiner.json`;
+
+        if (fs.existsSync(minerConfigFile)) {
+            const minerConfigFileJson = fs.readFileSync(minerConfigFile).toString();
+            const minerConfig = JSON.parse(minerConfigFileJson);
+            return minerConfig;
+        }
+
+        return null;
+
+    }).filter(conf => !!conf);
+
+    return installedMinersAliases;
+}
+
+
+export function getRunningMinersAliases(config: t.DaemonConfigAll): t.RunningMiner[] {
     let procName: string;
     let rigProcesses = getProcesses();
-    const runningMiners: t.runningMiner[] = [];
+    const runningMiners: t.RunningMiner[] = [];
 
     for (procName in rigProcesses) {
         const proc = rigProcesses[procName];
@@ -167,6 +191,7 @@ export function getRunningMinersAliases(config: t.DaemonConfigAll): t.runningMin
             miner: proc.miner || '',
             alias: proc.name,
             pid: proc.pid || 0,
+            dateStart: Date.now(),
         });
     }
 
@@ -196,6 +221,7 @@ export function getManagedMiners(config: t.DaemonConfigAll): string[] {
     return Object.entries(minersCommands).map(entry => {
         const [minerName, minerCommand] = entry;
         if (minerCommand.apiPort <= 0) return '';
+        if (typeof minerCommand.getInfos !== 'function') return '';
         return minerName;
     }).filter(minerName => minerName !== '');
 }
@@ -480,6 +506,10 @@ export async function minerRunGetInfos(config: t.DaemonConfigAll, params: t.mine
 
     const miner = minersCommands[minerName];
 
+    if (typeof miner.getInfos !== 'function') {
+        throw { message: `Miner not managed` };
+    }
+
     let minerStats: t.MinerStats;
     try {
         minerStats = await miner.getInfos(config, params);
@@ -528,113 +558,86 @@ function getRigUsage() {
 export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos> {
 
     if (rigMainInfos === null) {
+        const sysinfos = await Daemon.getSysInfos();
 
-        const _cpus = os.cpus()
-        const cpus: any[] = [
-            {
-                name: _cpus[0].model.trim(),
-                threads: _cpus.length,
+        const disks = sysinfos.disks.map((disk: any) => ({
+            device:disk.device,
+            interfaceType:disk.interfaceType,
+            name:disk.name,
+            size:disk.size,
+            type:disk.type,
+            vendor:disk.vendor,
+        }));
+
+        const netIface = sysinfos.netIface.map((iface: any) => ({
+            iface: iface.iface,
+            ifaceName: iface.ifaceName,
+            default: iface.default,
+            ip4: iface.ip4,
+            ip4subnet: iface.ip4subnet,
+            ip6: iface.ip6,
+            ip6subnet: iface.ip6subnet,
+            mac: iface.mac,
+            virtual: iface.virtual,
+            type: iface.type,
+            duplex: iface.duplex,
+            mtu: iface.mtu,
+            speed: iface.speed,
+            dhcp: iface.dhcp,
+        }));
+
+        const systemInfos: any = {
+            board: {
+                manufacturer: sysinfos.board.manufacturer,
+                model: sysinfos.board.model,
+            },
+            cpu: sysinfos.cpu,
+            gpus: sysinfos.gpus,
+            disks,
+            //fs: sysinfos.fs,
+            os: {
+                arch: sysinfos.os.arch,
+                codename: sysinfos.os.codename,
+                distro: sysinfos.os.distro,
+                hostname: sysinfos.os.hostname,
+                kernel: sysinfos.os.kernel,
+                platform: sysinfos.os.platform,
+            },
+            net: {
+                gateway: sysinfos.netGateway,
+                interface: netIface,
             }
-        ];
-
-        let gpuList: string;
-        if (os.platform() === 'linux') {
-            gpuList = execSync(`lspci | grep VGA |cut -d' ' -f5-`).toString().trim();
-            /*
-            04:00.0 VGA compatible controller: Intel Corporation UHD Graphics 630 (Mobile)
-            07:00.0 VGA compatible controller: NVIDIA Corporation GP104M [GeForce GTX 1070 Mobile] (rev a1)
-            */
-
-            // detailed output: 
-            // lspci -nnkd ::300
-
-            // temperatures & fanSpeeed [NVIDIA]
-            // nvidia-smi --query-gpu=temperature.gpu,fan.speed --format=csv,noheader,nounits
-
-
-        } else if (os.platform() === 'win32') {
-            // detailed output: 
-            // dxdiag /t dxdiag.txt && find "Display Devices" -A 5 dxdiag.txt && del dxdiag.txt
-
-            gpuList = execSync('wmic path win32_VideoController get Name').toString().trim();
-            let tmpArr = gpuList.split(os.EOL);
-            tmpArr.shift();
-            tmpArr = tmpArr.map(item => item.trim());
-            gpuList = tmpArr.join(os.EOL);
-            /*
-            Name
-            Intel(R) HD Graphics 630
-                NVIDIA GeForce GTX 1070
-            */
-
-            /*
-            // temperatures & fanSpeeed
-            const MSI_Afterburner = require('msi-afterburner-api');
-            const afterburner = new MSI_Afterburner();
-            afterburner.init()
-                .then(() => {
-                    afterburner.getSystemInfo()
-                        .then((systemInfo) => {
-                            console.log(`Number of GPUs: ${systemInfo.adapters.length}`);
-                            systemInfo.adapters.forEach((adapter) => {
-                                console.log(`GPU ${adapter.index}:`);
-                                console.log(`  Temperature: ${adapter.temperature}°C`);
-                                console.log(`  Fan Speed: ${adapter.fanSpeed}%`);
-                            });
-                        })
-                        .catch((err) => console.error(err));
-                })
-                .catch((err) => console.error(err));
-            */
-
-        } else if (os.platform() === 'darwin') {
-            gpuList = execSync(`system_profiler SPDisplaysDataType | grep "Chipset Model" | cut -d" " -f3-`).toString().trim();
-            /*
-            Chipset Model: AMD Radeon Pro 555X
-            Chipset Model: AMD Radeon Pro 560X
-            */
-
-            // temperatures & fanSpeeed
-            // iStats gpu --temp
-            // requires iStats => gem install iStats
-        } else {
-            gpuList = '';
         }
-        const gpus: any[] = gpuList.split(os.EOL).map((gpuName: string, idx: number) => {
-            return {
-                id: idx,
-                name: gpuName,
-                driver: '', // TODO
-            };
-        });
 
+        const runnableMiners = getRunnableMiners(config);
+        const installableMiners = getInstallableMiners(config);
+        const managedMiners = getManagedMiners(config);
+        const freeminingVersion = config.version;
 
         rigMainInfos = {
             name: config.rig.name || os.hostname(),
             hostname: os.hostname(),
             ip: (getLocalIpAddresses() || [])[0] || 'no-ip',
             rigOs: os.version(),
-            cpus,
-            gpus,
+            systemInfos,
+            runnableMiners,
+            installableMiners,
+            managedMiners,
+            freeminingVersion,
         };
     }
 
-    const { name, hostname, ip, rigOs, cpus, gpus } = rigMainInfos;
+    const { name, hostname, ip, rigOs, systemInfos, runnableMiners, installableMiners, managedMiners, freeminingVersion } = rigMainInfos;
     const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
 
-    const freeminingVersion = config.version;
     const installedMiners = await getInstalledMiners(config);
-    const installedMinersAliases: any[] = []; // TODO
+    const installedMinersAliases = await getInstalledMinersAliases(config);
+
     const runningMinersAliases = getRunningMinersAliases(config);
     const runningMiners = Array.from(new Set(runningMinersAliases.map(runningMiner => runningMiner.miner)));
-    const monitorStatus = monitorGetStatus();
-    const pools: t.UserPoolsCoinsPoolsConfig = {};
-    const wallets: t.UserWalletsCoinsWalletsConfig = {};
 
+    const monitorStatus = monitorGetStatus();
     const farmAgentStatus = farmAgentGetStatus();
-    const farmAgentHost = config.rig.farmAgent?.host || '';
-    const farmAgentPort = config.rig.farmAgent?.port || 0;
-    const farmAgentPass = config.rig.farmAgent?.pass || '';
 
     const rigInfos: t.RigInfos = {
         rig: {
@@ -644,10 +647,7 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
             os: rigOs,
             freeminingVersion,
         },
-        devices: {
-            cpus,
-            gpus,
-        },
+        systemInfos,
         usage: {
             uptime,
             loadAvg,
@@ -656,22 +656,17 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
                 total: memoryTotal,
             },
         },
-        config: {
-            pools,
-            wallets,
-            farmAgent: {
-                host: farmAgentHost,
-                port: farmAgentPort,
-                pass: farmAgentPass,
-            },
-        },
+        config: config.rig,
         status: {
             minersStats: minersStats,
             monitorStatus,
+            installableMiners,
             installedMiners,
             installedMinersAliases,
+            runnableMiners,
             runningMiners,
             runningMinersAliases,
+            managedMiners,
             farmAgentStatus,
         },
         dataDate: dateLastCheck,
@@ -688,7 +683,7 @@ export async function getAllMiners(config: t.DaemonConfigAll): Promise<t.AllMine
     const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
     const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
     const managedMiners = getManagedMiners(config); // TODO: mettre en cache
-    const installedMinersAliases: any = {}; // TODO: recuperer tous les freeminingMiner.conf et les regrouper en une variable
+    const installedMinersAliases = await getInstalledMinersAliases(config);
 
     const minersNames = Array.from(
         new Set( [

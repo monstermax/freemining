@@ -1,0 +1,46 @@
+{
+    "bminer": {
+        "apiPort": 42001
+    },
+    "bzminer": {
+        "apiPort": 42002
+    },
+    "firominer": {
+        "apiPort": 42003
+    },
+    "gminer": {
+        "apiPort": 42004,
+        "extraArgs": "-d 0"
+    },
+    "lolminer": {
+        "apiPort": 42005,
+        "extraArgs": "--devices 0"
+    },
+    "miniz": {
+        "apiPort": 42006
+    },
+    "nanominer": {
+        "apiPort": 42007
+    },
+    "nbminer": {
+        "apiPort": 42008
+    },
+    "rigel": {
+        "apiPort": 42009
+    },
+    "srbminer": {
+        "apiPort": 42010
+    },
+    "teamredminer": {
+        "apiPort": 42011
+    },
+    "trex": {
+        "apiPort": 42012
+    },
+    "xmrig": {
+        "apiPort": 42013
+    },
+    "wildrig": {
+        "apiPort": 42014
+    }
+}

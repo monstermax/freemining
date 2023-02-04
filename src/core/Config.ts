@@ -91,6 +91,8 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
     let httpTemplatesDir = defaultHttpTemplatesDir;
     let userFrmDir =  defaultUserFrmDir;
 
+    console.log(`${now()} [INFO] [DAEMON] Loading config...`);
+
     let freeminingVersion = require(`${__dirname}${SEP}..${SEP}..${SEP}package.json`).version;
 
     // set userFrmDir
@@ -234,133 +236,10 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         process.exit(1);
     }
 
-
-    // Read rig config
-    let rigName = defaultRigName;
-    let farmAgentHost = '';
-    let farmAgentPort = 0;
-    let farmAgentPass = '';
-
-    const rigConfigFile = `${confDir}${SEP}rig${SEP}rig.json`;
-    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
-    if (fs.existsSync(rigConfigFile)) {
-        const rigConfigJson = fs.readFileSync(rigConfigFile).toString();
-        try {
-            const rigConfig = JSON.parse(rigConfigJson);
-
-            rigName = rigConfig.name || defaultRigName;
-            farmAgentHost = rigConfig.farmAgent?.host || farmAgentHost;
-            farmAgentPort = rigConfig.farmAgent?.port || farmAgentPort;
-            farmAgentPass = rigConfig.farmAgent?.pass || farmAgentPass;
-
-        } catch (err: any) {
-            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
-        }
-
-    } else {
-        console.log(`${now()} [INFO] [CONFIG] creating rig config file ${rigConfigFile}`);
-    }
-
-    // Rewrite rig config file
-    const rigConfig: t.rigConfig = {
-        name: rigName,
-        farmAgent: {
-            host: farmAgentHost,
-            port: farmAgentPort,
-            pass: farmAgentPass,
-        },
-    };
-    fs.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
-
-
-    // Read farm config
-    let farmName = defaultFarmName;
-    let farmWsPassword = '';
-
-    const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
-    mkdirSync(`${confDir}${SEP}farm${SEP}`, { recursive: true });
-    if (fs.existsSync(farmConfigFile)) {
-        const farmConfigJson = fs.readFileSync(farmConfigFile).toString();
-        try {
-            const farmConfig = JSON.parse(farmConfigJson);
-
-            farmName = farmConfig.name || farmName;
-            farmWsPassword = farmConfig.wsPass || farmWsPassword;
-
-        } catch (err: any) {
-            console.warn(`${now()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
-        }
-
-    } else {
-        console.log(`${now()} [INFO] [CONFIG] creating farm config file ${farmConfigFile}`);
-    }
-
-    // Rewrite farm config file
-    const farmConfig: t.farmConfig = {
-        name: farmName,
-        wsPass: farmWsPassword,
-    };
-    fs.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));
-
-
-    // Read node config
-    let nodeName = defaultNodeName;
-
-    const nodeConfigFile = `${confDir}${SEP}node${SEP}node.json`;
-    mkdirSync(`${confDir}${SEP}node${SEP}`, { recursive: true });
-    if (fs.existsSync(nodeConfigFile)) {
-        const nodeConfigJson = fs.readFileSync(nodeConfigFile).toString();
-        try {
-            const nodeConfig = JSON.parse(nodeConfigJson);
-
-            nodeName = nodeConfig.name || defaultNodeName;
-
-        } catch (err: any) {
-            console.warn(`${now()} [WARNING] [CONFIG] cannot read node config: ${err.message}`);
-        }
-
-    } else {
-        console.log(`${now()} [INFO] [CONFIG] creating node config file ${nodeConfigFile}`);
-    }
-
-    // Rewrite node config file
-    const nodeConfig: t.nodeConfig = {
-        name: nodeName,
-    };
-    fs.writeFileSync(nodeConfigFile, JSON.stringify(nodeConfig, null, 4));
-
-
-    // Read pool config
-    let poolName = defaultPoolName;
-
-    const poolConfigFile = `${confDir}${SEP}pool${SEP}pool.json`;
-    mkdirSync(`${confDir}${SEP}pool${SEP}`, { recursive: true });
-    if (fs.existsSync(poolConfigFile)) {
-        const poolConfigJson = fs.readFileSync(poolConfigFile).toString();
-        try {
-            const poolConfig = JSON.parse(poolConfigJson);
-
-            poolName = poolConfig.name || defaultPoolName;
-
-        } catch (err: any) {
-            console.warn(`${now()} [WARNING] [CONFIG] cannot read pool config: ${err.message}`);
-        }
-
-    } else {
-        console.log(`${now()} [INFO] [CONFIG] creating pool config file ${poolConfigFile}`);
-    }
-
-    // Rewrite pool config file
-    const poolConfig: t.poolConfig = {
-        name: poolName,
-    };
-    fs.writeFileSync(poolConfigFile, JSON.stringify(poolConfig, null, 4));
-
-
-
-
-    // TODO: load json config file (cli & daemon. separated cases ?)
-
+    const rigConfig = loadDaemonRigConfig(confDir);
+    const farmConfig = loadDaemonFarmConfig(confDir);
+    const nodeConfig = loadDaemonNodeConfig(confDir);
+    const poolConfig = loadDaemonPoolConfig(confDir);
 
     return {
         ...coreConfig,
@@ -381,21 +260,244 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
 
 
 
-export function loadDaemonRigConfig() {
+export function loadDaemonRigConfig(confDir: string): t.RigConfig {
+    // Read rig config
+    let rigName = defaultRigName;
+    let farmAgentHost = '';
+    let farmAgentPort = 0;
+    let farmAgentPass = '';
 
+    const rigConfigFile = `${confDir}${SEP}rig${SEP}rig.json`;
+    if (fs.existsSync(rigConfigFile)) {
+        const rigConfigJson = fs.readFileSync(rigConfigFile).toString();
+        try {
+            const rigConfig = JSON.parse(rigConfigJson);
+
+            rigName = rigConfig.name || defaultRigName;
+            farmAgentHost = rigConfig.farmAgent?.host || farmAgentHost;
+            farmAgentPort = rigConfig.farmAgent?.port || farmAgentPort;
+            farmAgentPass = rigConfig.farmAgent?.pass || farmAgentPass;
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+
+    } else {
+        console.log(`${now()} [INFO] [CONFIG] creating rig config file ${rigConfigFile}`);
+    }
+
+    // Rewrite rig config file
+    const rigConfig: t.RigConfig = {
+        name: rigName,
+        farmAgent: {
+            host: farmAgentHost,
+            port: farmAgentPort,
+            pass: farmAgentPass,
+        },
+    };
+    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
+
+
+    const coinsUserconf = loadDaemonRigCoinsUserconfConfig(confDir);
+    const coinsMiners = loadDaemonRigCoinsMinersConfig(confDir);
+    const miners = loadDaemonRigMinersConfig(confDir);
+
+    return {
+        ...rigConfig,
+        coinsMiners,
+        coinsUserconf,
+        miners,
+    };
 }
 
 
-export function loadDaemonFarmConfig() {
+function loadDaemonRigCoinsUserconfConfig(confDir: string): t.rigCoinsUserconfConfig {
+    const userconfConfigFile = `${confDir}${SEP}rig${SEP}coins_userconf.json`;
+    const userconfConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_userconf.sample.json`;
+    let userconfConfig: t.rigCoinsUserconfConfig = {};
+    let _configFile = userconfConfigFile;
 
+    if (! fs.existsSync(userconfConfigFile)) {
+        _configFile = userconfConfigDemoFile;
+    }
+
+    if (fs.existsSync(_configFile)) {
+        const userconfConfigJson = fs.readFileSync(_configFile).toString();
+        try {
+            userconfConfig = JSON.parse(userconfConfigJson);
+
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+
+    const coinsUserconf: t.rigCoinsUserconfConfig = {
+        ...userconfConfig,
+    };
+    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs.writeFileSync(userconfConfigFile, JSON.stringify(coinsUserconf, null, 4));
+
+    return coinsUserconf;
 }
 
 
-export function loadDaemonNodeConfig() {
+function loadDaemonRigCoinsMinersConfig(confDir: string): t.rigCoinsMinersConfig {
+    const minersConfigFile = `${confDir}${SEP}rig${SEP}coins_miners.json`;
+    const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_miners.sample.json`;
+    let minersConfig: t.rigCoinsMinersConfig = {};
+    let _configFile = minersConfigFile;
 
+    if (! fs.existsSync(minersConfigFile)) {
+        _configFile = minersConfigDemoFile;
+    }
+
+    if (fs.existsSync(_configFile)) {
+        const minersConfigJson = fs.readFileSync(_configFile).toString();
+        try {
+            minersConfig = JSON.parse(minersConfigJson);
+
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+
+    const coinsMiners: t.rigCoinsMinersConfig = {
+        ...minersConfig,
+    };
+    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs.writeFileSync(minersConfigFile, JSON.stringify(coinsMiners, null, 4));
+
+    return coinsMiners;
 }
 
 
-export function loadDaemonPoolConfig() {
+function loadDaemonRigMinersConfig(confDir: string): t.rigCoinsMinersConfig {
+    const minersConfigFile = `${confDir}${SEP}rig${SEP}miners.json`;
+    const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}miners.sample.json`;
+    let minersConfig: t.rigCoinsMinersConfig = {};
+    let _configFile = minersConfigFile;
 
+    if (! fs.existsSync(minersConfigFile)) {
+        _configFile = minersConfigDemoFile;
+    }
+
+    if (fs.existsSync(_configFile)) {
+        const minersConfigJson = fs.readFileSync(_configFile).toString();
+        try {
+            minersConfig = JSON.parse(minersConfigJson);
+
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+
+    const miners: t.rigCoinsMinersConfig = {
+        ...minersConfig,
+    };
+    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs.writeFileSync(minersConfigFile, JSON.stringify(miners, null, 4));
+
+    return miners;
+}
+
+
+
+export function loadDaemonFarmConfig(confDir: string): t.FarmConfig {
+    // Read farm config
+    let farmName = defaultFarmName;
+    let farmWsPassword = '';
+
+    const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
+    if (fs.existsSync(farmConfigFile)) {
+        const farmConfigJson = fs.readFileSync(farmConfigFile).toString();
+        try {
+            const farmConfig = JSON.parse(farmConfigJson);
+
+            farmName = farmConfig.name || farmName;
+            farmWsPassword = farmConfig.wsPass || farmWsPassword;
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
+        }
+
+    } else {
+        console.log(`${now()} [INFO] [CONFIG] creating farm config file ${farmConfigFile}`);
+    }
+
+    // Rewrite farm config file
+    const farmConfig: t.FarmConfig = {
+        name: farmName,
+        wsPass: farmWsPassword,
+    };
+    mkdirSync(`${confDir}${SEP}farm${SEP}`, { recursive: true });
+    fs.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));
+
+    return farmConfig;
+}
+
+
+export function loadDaemonNodeConfig(confDir: string): t.NodeConfig {
+    // Read node config
+    let nodeName = defaultNodeName;
+
+    const nodeConfigFile = `${confDir}${SEP}node${SEP}node.json`;
+    if (fs.existsSync(nodeConfigFile)) {
+        const nodeConfigJson = fs.readFileSync(nodeConfigFile).toString();
+        try {
+            const nodeConfig = JSON.parse(nodeConfigJson);
+
+            nodeName = nodeConfig.name || defaultNodeName;
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read node config: ${err.message}`);
+        }
+
+    } else {
+        console.log(`${now()} [INFO] [CONFIG] creating node config file ${nodeConfigFile}`);
+    }
+
+    // Rewrite node config file
+    const nodeConfig: t.NodeConfig = {
+        name: nodeName,
+    };
+    mkdirSync(`${confDir}${SEP}node${SEP}`, { recursive: true });
+    fs.writeFileSync(nodeConfigFile, JSON.stringify(nodeConfig, null, 4));
+
+    return nodeConfig;
+}
+
+
+export function loadDaemonPoolConfig(confDir: string): t.PoolConfig {
+
+    // Read pool config
+    let poolName = defaultPoolName;
+
+    const poolConfigFile = `${confDir}${SEP}pool${SEP}pool.json`;
+    if (fs.existsSync(poolConfigFile)) {
+        const poolConfigJson = fs.readFileSync(poolConfigFile).toString();
+        try {
+            const poolConfig = JSON.parse(poolConfigJson);
+
+            poolName = poolConfig.name || defaultPoolName;
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read pool config: ${err.message}`);
+        }
+
+    } else {
+        console.log(`${now()} [INFO] [CONFIG] creating pool config file ${poolConfigFile}`);
+    }
+
+    // Rewrite pool config file
+    const poolConfig: t.PoolConfig = {
+        name: poolName,
+    };
+    mkdirSync(`${confDir}${SEP}pool${SEP}`, { recursive: true });
+    fs.writeFileSync(poolConfigFile, JSON.stringify(poolConfig, null, 4));
+
+    return poolConfig;
 }

@@ -148,8 +148,8 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async getInfos(config, params) {
-        // EXTENDS ME
+    async EDIT_ME_getInfos(config, params) {
+        // EXTENDS ME (as "getInfos")
 
         const cpus: any[] = [];
         const gpus: any[] = [];

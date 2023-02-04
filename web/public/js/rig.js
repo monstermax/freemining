@@ -1,4 +1,7 @@
 
+const isFarm = (window.location.pathname.startsWith('/farm/'));
+const urlPrefix = isFarm ? window.location.pathname.split('/').slice(0, 4).join('/') : '';
+
 
 // MINER RUN START-MODAL
 async function startMinerModal(minerName='', minerAlias='', onStart=null, onSuccess=null, onFail=null) {
@@ -7,7 +10,7 @@ async function startMinerModal(minerName='', minerAlias='', onStart=null, onSucc
     let startMinerModalObj;
 
     if (! window.startMinerModalObj) {
-        const modalContent = await jQuery.get('/rig/miners-run-modal?miner=' + minerName);
+        const modalContent = await jQuery.get(urlPrefix + '/rig/miners-run-modal?miner=' + minerName);
         const $modalContainer = jQuery('<div id="modalMinerRun"></div>')
         $modalContainer.append(modalContent);
         jQuery(document.body).append($modalContainer);
@@ -191,7 +194,7 @@ function startMinerAjax(minerName, minerAlias='', algo='', poolUrl='', poolUser=
         onStart(minerName, minerAlias);
     }
 
-    jQuery.post(url, data).then((response) => {
+    jQuery.post(urlPrefix + url, data).then((response) => {
         if (response.startsWith('OK:')) {
             if (typeof onSuccess === 'function') {
                 onSuccess(minerName, minerAlias, response);
@@ -238,7 +241,7 @@ function stopMinerAjax(minerName, minerAlias='', onStart=null, onSuccess=null, o
                 action: 'stop',
                 miner: minerName,
             };
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, minerAlias, response);
@@ -291,7 +294,7 @@ function startMinerInstallAjax(minerName, minerAlias='', onStart=null, onSuccess
                 miner: minerName,
             };
 
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, minerAlias, response);
@@ -342,7 +345,7 @@ function stopMinerInstallAjax(minerName, minerAlias='', onStart=null, onSuccess=
                 action: 'stop',
                 miner: minerName,
             };
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, minerAlias, response);
@@ -394,7 +397,7 @@ function startMinerUninstallAjax(minerName, minerAlias='', onStart=null, onSucce
                 miner: minerName,
             };
 
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, minerAlias, response);
@@ -445,7 +448,7 @@ function stopMinerUninstallAjax(minerName, minerAlias='', onStart=null, onSucces
                 action: 'stop',
                 miner: minerName,
             };
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(minerName, minerAlias, response);
@@ -487,7 +490,7 @@ function startRigMonitorAjax(onStart=null, onSuccess=null, onFail=null) {
                 action: 'start',
             };
 
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(response);
@@ -529,7 +532,7 @@ function stopRigMonitorAjax(onStart=null, onSuccess=null, onFail=null) {
                 action: 'stop',
             };
 
-            jQuery.post(url, data).then((response) => {
+            jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
                         onSuccess(response);

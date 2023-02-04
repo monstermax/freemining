@@ -85,8 +85,8 @@ export async function rigHomepage(rigData: t.RigData, req: express.Request, res:
 
 
 export async function rigStatus(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
-    const {monitorStatus, allMiners, rigInfos} = rigData;
-    const runningMinersAliases = rigInfos.status?.runningMinersAliases;
+    const { config, monitorStatus, allMiners, rigInfos } = rigData;
+    //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
 
     const data = {
         ...utilFuncs,
@@ -95,9 +95,9 @@ export async function rigStatus(rigData: t.RigData, req: express.Request, res: e
             noIndex: false,
         },
         contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
-        monitorStatus,
         rigInfos,
-        runningMinersAliases,
+        //monitorStatus,
+        //runningMinersAliases,
         //allMiners,
         //installedMiners,
         //runningMiners,

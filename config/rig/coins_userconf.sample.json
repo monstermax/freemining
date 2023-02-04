@@ -1,0 +1,95 @@
+{
+    "ETC": {
+        "wallets": {
+            "wallet1": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w"
+        },
+        "pools": {
+            "jjpool": {
+                "europe": "eu.jjpool.fr:3333"
+            }
+        }
+    },
+    "ERG": {
+        "wallets": {
+            "wallet1": "9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb"
+        },
+        "pools": {
+            "jjpool": {
+                "default": "eu.jjpool.fr:3056"
+            }
+        }
+    },
+    "FIRO": {
+        "wallets": {
+            "wallet1": "a35tt2uCFQUkU5gsnERjUpbGgdCqGsLYS2"
+        },
+        "pools": {
+            "2miners": {
+                "default": "firo.2miners.com:8181"
+            }
+        }
+    },
+    "FLUX": {
+        "wallets": {
+            "wallet1": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w"
+        },
+        "pools": {
+            "minerpool": {
+                "default": "flux-eu.minerpool.pro:2032"
+            }
+        }
+    },
+    "MEWC": {
+        "wallets": {
+            "wallet1": "MJxPvVq1Gbd71XMuXvprQnTmHiAH3KXi89"
+        },
+        "pools": {
+            "minerpool": {
+                "default": "mewc-eu.minerpool.pro:7034"
+            }
+        }
+    },
+    "RTM": {
+        "wallets": {
+            "wallet1": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR"
+        },
+        "pools": {
+            "jjpool": {
+                "default": "jjpool.eu:7070"
+            }
+        }
+    },
+    "RXD": {
+        "wallets": {
+            "wallet1": "1Ba8y4fhWUYyJs4e5SSe5BAVRJRDddfFLZ"
+        },
+        "pools": {
+            "jjpool": {
+                "default": "eu.jjpool.fr:5550"
+            }
+        }
+    },
+    "RVN": {
+        "wallets": {
+            "wallet1": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w"
+        },
+        "pools": {
+            "minerpool": {
+                "default": "rvn-eu.minerpool.pro:16059"
+            },
+            "2miners": {
+                "default": "rvn.2miners.com:6060"
+            }
+        }
+    },
+    "XMR": {
+        "wallets": {
+            "wallet1": "46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH"
+        },
+        "pools": {
+            "xmrpool": {
+                "default": "xmrpool.eu:5555"
+            }
+        }
+    }
+}

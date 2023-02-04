@@ -62,15 +62,17 @@ function monitorCheckNode(config) {
             if (proc.type === 'fullnode-run') {
                 const fullnodeCommands = fullnodesConfigs_1.fullnodesCommands[proc.name];
                 viewedFullnodes.push(proc.name);
-                let fullnodeStats;
-                try {
-                    fullnodeStats = yield fullnodeCommands.getInfos(config, {});
-                    fullnodeStats.dataDate = Date.now();
-                    fullnodesStats[proc.name] = fullnodeStats;
-                }
-                catch (err) {
-                    //throw { message: err.message };
-                    delete fullnodesStats[proc.name];
+                if (typeof fullnodeCommands.getInfos === 'function') {
+                    let fullnodeStats;
+                    try {
+                        fullnodeStats = yield fullnodeCommands.getInfos(config, {});
+                        fullnodeStats.dataDate = Date.now();
+                        fullnodesStats[proc.name] = fullnodeStats;
+                    }
+                    catch (err) {
+                        //throw { message: err.message };
+                        delete fullnodesStats[proc.name];
+                    }
                 }
             }
         }
@@ -127,7 +129,9 @@ exports.getRunnableFullnodes = getRunnableFullnodes;
 function getManagedFullnodes(config) {
     return Object.entries(fullnodesConfigs_1.fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
-        if (fullnodeCommand.rpcPort === -1)
+        if (fullnodeCommand.rpcPort <= 0)
+            return '';
+        if (typeof fullnodeCommand.getInfos !== 'function')
             return '';
         return fullnodeName;
     }).filter(fullnodeName => fullnodeName !== '');
@@ -269,6 +273,9 @@ function fullnodeRunGetInfos(config, params) {
             throw { message: `Unknown fullnode ${params.fullnode}` };
         }
         const fullnode = fullnodesConfigs_1.fullnodesCommands[params.fullnode];
+        if (typeof fullnode.getInfos !== 'function') {
+            throw { message: `Fullnode not managed` };
+        }
         let fullnodeStats;
         try {
             fullnodeStats = yield fullnode.getInfos(config, params);

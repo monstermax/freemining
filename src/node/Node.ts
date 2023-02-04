@@ -84,16 +84,19 @@ export async function monitorCheckNode(config: t.DaemonConfigAll): Promise<void>
             const fullnodeCommands = fullnodesCommands[proc.name];
             viewedFullnodes.push(proc.name);
 
-            let fullnodeStats: t.FullnodeStats;
-            try {
-                fullnodeStats = await fullnodeCommands.getInfos(config, {});
-                fullnodeStats.dataDate = Date.now();
-                fullnodesStats[proc.name] = fullnodeStats;
+            if (typeof fullnodeCommands.getInfos === 'function') {
+                let fullnodeStats: t.FullnodeStats;
+                try {
+                    fullnodeStats = await fullnodeCommands.getInfos(config, {});
+                    fullnodeStats.dataDate = Date.now();
+                    fullnodesStats[proc.name] = fullnodeStats;
 
-            } catch (err: any) {
-                //throw { message: err.message };
-                delete fullnodesStats[proc.name];
+                } catch (err: any) {
+                    //throw { message: err.message };
+                    delete fullnodesStats[proc.name];
+                }
             }
+
         }
     }
 
@@ -154,7 +157,8 @@ export function getRunnableFullnodes(config: t.DaemonConfigAll): string[] {
 export function getManagedFullnodes(config: t.DaemonConfigAll): string[] {
     return Object.entries(fullnodesCommands).map(entry => {
         const [fullnodeName, fullnodeCommand] = entry;
-        if (fullnodeCommand.rpcPort === -1) return '';
+        if (fullnodeCommand.rpcPort <= 0) return '';
+        if (typeof fullnodeCommand.getInfos !== 'function') return '';
         return fullnodeName;
     }).filter(fullnodeName => fullnodeName !== '');
 }
@@ -324,6 +328,10 @@ export async function fullnodeRunGetInfos(config: t.DaemonConfigAll, params: t.f
 
     const fullnode = fullnodesCommands[params.fullnode];
 
+    if (typeof fullnode.getInfos !== 'function') {
+        throw { message: `Fullnode not managed` };
+    }
+
     let fullnodeStats: t.FullnodeStats;
     try {
         fullnodeStats = await fullnode.getInfos(config, params);
@@ -372,7 +380,7 @@ export function getNodeInfos(config: t.DaemonConfigAll): t.NodeInfos {
     const freeminingVersion = ''; // TODO
     const monitorStatus = false; // TODO
     const runningFullnodes: string[] = []; // TODO
-    const runningFullnodesAliases: string[] = []; // TODO
+    const runningFullnodesAliases: t.RunningFullnode[] = []; // TODO
     const installedFullnodes: string[] = []; // TODO
     const installedFullnodesAliases: string[] = []; // TODO
 

@@ -57,7 +57,7 @@
         <tr class="bg-light">
             <td colspan="8" class="">
                 ${Object.entries(rigInfos.status.minersStats).map(entry => {
-                    const [minerName, service] = entry;
+                    const [minerFullName, service] = entry;
 
                     let html = '';
 
@@ -69,7 +69,7 @@
                         cpuHtml += '        <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning">' + formatNumber(cpu.hashRate, 'size') + 'H/s</span></div>';
                         cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
                         cpuHtml += '        <div class="badge col-1">&nbsp;</div>';
-                        cpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
+                        cpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + service.miner.minerName + '</span></div>';
                         cpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.miner.algo + '</span></div>';
                         cpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.miner.uptime, 'seconds') + '</span></div>';
                         //cpuHtml += '    </div>';
@@ -85,7 +85,7 @@
                         gpuHtml += '        <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning">' + formatNumber(gpu.hashRate, 'size') + 'H/s</span></div>';
                         gpuHtml += '        <div class="badge col-1 text-start"><b>temp.</b>: <span class="text-info">' + gpu.temperature + '°</span></div>';
                         gpuHtml += '        <div class="badge col-1 text-start"><b>fan</b>: <span class="text-info">' + gpu.fanSpeed + '%</span></div>';
-                        gpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + minerName + '</span></div>';
+                        gpuHtml += '        <div class="badge col-2 text-start"><b>miner</b>: <span class="text-info">' + service.miner.minerName + '</span></div>';
                         gpuHtml += '        <div class="badge col-1 text-start"><b>algo</b>: <span class="text-info">' + service.miner.algo + '</span></div>';
                         gpuHtml += '        <div class="badge col-2 text-end"><b>uptime</b>: <span class="text-info">' + formatNumber(service.miner.uptime, 'seconds') + '</span></div>';
                         //gpuHtml += '    </div>';

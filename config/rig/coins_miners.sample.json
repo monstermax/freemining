@@ -13,6 +13,12 @@
             "algo": "AUTOLYKOS2"
         }
     },
+    "ETC": {
+        "lolminer": {
+            "algo": "ETCHASH",
+            "extraArgs": ""
+        }
+    },
     "FIRO": {
         "lolminer": {
             "algo": "ZEL"
@@ -27,17 +33,15 @@
     "FLUX": {
         "gminer": {
             "algo": "125_4",
-            "extraArgs": "-d 0"
+            "extraArgs": ""
         },
         "lolminer": {
-            "algo": "ZEL",
-            "extraArgs": "--devices 0"
+            "algo": "ZEL"
         }
     },
     "MEWC": {
         "gminer": {
-            "algo": "kawpow",
-            "extraArgs": "-d 0"
+            "algo": "kawpow"
         }
     },
     "RTM": {
@@ -59,5 +63,5 @@
         "xmrig": {
             "algo": "rx/0"
         }
-    },
+    }
 }

@@ -85,11 +85,11 @@
 
 <h2>Mining services</h2>
 
-<% if (! monitorStatus) { %>
+<% if (! rigInfos.status.monitorStatus) { %>
     <div class="alert alert-warning">Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-run">start monitor</a></div>
 <% } %>
 
-<%- runningMinersAliases.map(runningMiner => {
+<%- rigInfos.status.runningMinersAliases.map(runningMiner => {
     const { miner, alias, pid } = runningMiner;
     const minerFullName = `${miner}-${alias}`;
     const minerFullTitle = (miner === alias || ! alias) ? miner : `${alias} (${miner})`;

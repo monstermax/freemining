@@ -61,16 +61,13 @@ function rigHomepage(rigData, req, res, next) {
 }
 exports.rigHomepage = rigHomepage;
 function rigStatus(rigData, req, res, next) {
-    var _a;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const { monitorStatus, allMiners, rigInfos } = rigData;
-        const runningMinersAliases = (_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.runningMinersAliases;
+        const { config, monitorStatus, allMiners, rigInfos } = rigData;
+        //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager - Rig Status`,
                 noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}rig_status.html`, monitorStatus,
-            rigInfos,
-            runningMinersAliases });
+            }, contentTemplate: `..${SEP}rig${SEP}rig_status.html`, rigInfos });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 }

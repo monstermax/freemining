@@ -65,13 +65,13 @@ function loadCliConfig(args) {
 }
 exports.loadCliConfig = loadCliConfig;
 function loadDaemonConfig(args) {
-    var _a, _b, _c;
     let listenAddress = defaultListenAddress;
     let listenPort = defaultListenPort;
     let wssConnTimeout = defaultWssConnTimeout;
     let httpStaticDir = defaultHttpStaticDir;
     let httpTemplatesDir = defaultHttpTemplatesDir;
     let userFrmDir = defaultUserFrmDir;
+    console.log(`${(0, utils_1.now)()} [INFO] [DAEMON] Loading config...`);
     let freeminingVersion = require(`${__dirname}${SEP}..${SEP}..${SEP}package.json`).version;
     // set userFrmDir
     if ((0, utils_1.hasOpt)('--user-dir', args)) {
@@ -194,13 +194,27 @@ function loadDaemonConfig(args) {
         console.error(`${(0, utils_1.now)()} [ERROR] [CONFIG] invalid wss-conn-timeout`);
         process.exit(1);
     }
+    const rigConfig = loadDaemonRigConfig(confDir);
+    const farmConfig = loadDaemonFarmConfig(confDir);
+    const nodeConfig = loadDaemonNodeConfig(confDir);
+    const poolConfig = loadDaemonPoolConfig(confDir);
+    return Object.assign(Object.assign({}, coreConfig), { appDir,
+        confDir,
+        dataDir,
+        logDir,
+        pidDir,
+        httpTemplatesDir,
+        httpStaticDir, rig: rigConfig, farm: farmConfig, node: nodeConfig, pool: poolConfig, _args: args });
+}
+exports.loadDaemonConfig = loadDaemonConfig;
+function loadDaemonRigConfig(confDir) {
+    var _a, _b, _c;
     // Read rig config
     let rigName = defaultRigName;
     let farmAgentHost = '';
     let farmAgentPort = 0;
     let farmAgentPass = '';
     const rigConfigFile = `${confDir}${SEP}rig${SEP}rig.json`;
-    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(rigConfigFile)) {
         const rigConfigJson = fs_1.default.readFileSync(rigConfigFile).toString();
         try {
@@ -226,12 +240,87 @@ function loadDaemonConfig(args) {
             pass: farmAgentPass,
         },
     };
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
+    const coinsUserconf = loadDaemonRigCoinsUserconfConfig(confDir);
+    const coinsMiners = loadDaemonRigCoinsMinersConfig(confDir);
+    const miners = loadDaemonRigMinersConfig(confDir);
+    return Object.assign(Object.assign({}, rigConfig), { coinsMiners,
+        coinsUserconf,
+        miners });
+}
+exports.loadDaemonRigConfig = loadDaemonRigConfig;
+function loadDaemonRigCoinsUserconfConfig(confDir) {
+    const userconfConfigFile = `${confDir}${SEP}rig${SEP}coins_userconf.json`;
+    const userconfConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_userconf.sample.json`;
+    let userconfConfig = {};
+    let _configFile = userconfConfigFile;
+    if (!fs_1.default.existsSync(userconfConfigFile)) {
+        _configFile = userconfConfigDemoFile;
+    }
+    if (fs_1.default.existsSync(_configFile)) {
+        const userconfConfigJson = fs_1.default.readFileSync(_configFile).toString();
+        try {
+            userconfConfig = JSON.parse(userconfConfigJson);
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+    const coinsUserconf = Object.assign({}, userconfConfig);
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(userconfConfigFile, JSON.stringify(coinsUserconf, null, 4));
+    return coinsUserconf;
+}
+function loadDaemonRigCoinsMinersConfig(confDir) {
+    const minersConfigFile = `${confDir}${SEP}rig${SEP}coins_miners.json`;
+    const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_miners.sample.json`;
+    let minersConfig = {};
+    let _configFile = minersConfigFile;
+    if (!fs_1.default.existsSync(minersConfigFile)) {
+        _configFile = minersConfigDemoFile;
+    }
+    if (fs_1.default.existsSync(_configFile)) {
+        const minersConfigJson = fs_1.default.readFileSync(_configFile).toString();
+        try {
+            minersConfig = JSON.parse(minersConfigJson);
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+    const coinsMiners = Object.assign({}, minersConfig);
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(coinsMiners, null, 4));
+    return coinsMiners;
+}
+function loadDaemonRigMinersConfig(confDir) {
+    const minersConfigFile = `${confDir}${SEP}rig${SEP}miners.json`;
+    const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}miners.sample.json`;
+    let minersConfig = {};
+    let _configFile = minersConfigFile;
+    if (!fs_1.default.existsSync(minersConfigFile)) {
+        _configFile = minersConfigDemoFile;
+    }
+    if (fs_1.default.existsSync(_configFile)) {
+        const minersConfigJson = fs_1.default.readFileSync(_configFile).toString();
+        try {
+            minersConfig = JSON.parse(minersConfigJson);
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+    const miners = Object.assign({}, minersConfig);
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(miners, null, 4));
+    return miners;
+}
+function loadDaemonFarmConfig(confDir) {
     // Read farm config
     let farmName = defaultFarmName;
     let farmWsPassword = '';
     const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
-    (0, fs_1.mkdirSync)(`${confDir}${SEP}farm${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(farmConfigFile)) {
         const farmConfigJson = fs_1.default.readFileSync(farmConfigFile).toString();
         try {
@@ -251,11 +340,15 @@ function loadDaemonConfig(args) {
         name: farmName,
         wsPass: farmWsPassword,
     };
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}farm${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));
+    return farmConfig;
+}
+exports.loadDaemonFarmConfig = loadDaemonFarmConfig;
+function loadDaemonNodeConfig(confDir) {
     // Read node config
     let nodeName = defaultNodeName;
     const nodeConfigFile = `${confDir}${SEP}node${SEP}node.json`;
-    (0, fs_1.mkdirSync)(`${confDir}${SEP}node${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(nodeConfigFile)) {
         const nodeConfigJson = fs_1.default.readFileSync(nodeConfigFile).toString();
         try {
@@ -273,11 +366,15 @@ function loadDaemonConfig(args) {
     const nodeConfig = {
         name: nodeName,
     };
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}node${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(nodeConfigFile, JSON.stringify(nodeConfig, null, 4));
+    return nodeConfig;
+}
+exports.loadDaemonNodeConfig = loadDaemonNodeConfig;
+function loadDaemonPoolConfig(confDir) {
     // Read pool config
     let poolName = defaultPoolName;
     const poolConfigFile = `${confDir}${SEP}pool${SEP}pool.json`;
-    (0, fs_1.mkdirSync)(`${confDir}${SEP}pool${SEP}`, { recursive: true });
     if (fs_1.default.existsSync(poolConfigFile)) {
         const poolConfigJson = fs_1.default.readFileSync(poolConfigFile).toString();
         try {
@@ -295,26 +392,8 @@ function loadDaemonConfig(args) {
     const poolConfig = {
         name: poolName,
     };
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}pool${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(poolConfigFile, JSON.stringify(poolConfig, null, 4));
-    // TODO: load json config file (cli & daemon. separated cases ?)
-    return Object.assign(Object.assign({}, coreConfig), { appDir,
-        confDir,
-        dataDir,
-        logDir,
-        pidDir,
-        httpTemplatesDir,
-        httpStaticDir, rig: rigConfig, farm: farmConfig, node: nodeConfig, pool: poolConfig, _args: args });
-}
-exports.loadDaemonConfig = loadDaemonConfig;
-function loadDaemonRigConfig() {
-}
-exports.loadDaemonRigConfig = loadDaemonRigConfig;
-function loadDaemonFarmConfig() {
-}
-exports.loadDaemonFarmConfig = loadDaemonFarmConfig;
-function loadDaemonNodeConfig() {
-}
-exports.loadDaemonNodeConfig = loadDaemonNodeConfig;
-function loadDaemonPoolConfig() {
+    return poolConfig;
 }
 exports.loadDaemonPoolConfig = loadDaemonPoolConfig;

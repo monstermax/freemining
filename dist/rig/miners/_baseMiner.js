@@ -121,9 +121,9 @@ exports.minerCommands = {
         // EXTENDS ME
         return [];
     },
-    getInfos(config, params) {
+    EDIT_ME_getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // EXTENDS ME
+            // EXTENDS ME (as "getInfos")
             const cpus = [];
             const gpus = [];
             const uptime = 0;
