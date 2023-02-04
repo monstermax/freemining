@@ -127,7 +127,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const minerName = 'TeamRedMiner';
             const uptime = minerSummary[0].Elapsed;
             const algo = pools[0].Algorithm;
-            const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) / 1000;
+            const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) * 1000;
             const poolUrl = pools[0].URL;
             const poolUser = pools[0].User;
             const workerName = poolUser.split('.').pop() || ''; // edit-me
@@ -136,7 +136,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
                 return {
                     id: gpu.GPU,
                     name: minerDevDetails[idx]['Model'],
-                    hashRate: (gpu['KHS 30s'] || 0) / 1000,
+                    hashRate: (gpu['KHS 30s'] || 0) * 1000,
                     temperature: gpu['Temperature'],
                     fanSpeed: gpu['Fan Percent'],
                     power: gpu['GPU Power'], // minerGpu[idx]['GPU Power']

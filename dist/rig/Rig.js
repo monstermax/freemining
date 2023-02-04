@@ -506,12 +506,12 @@ function getRigInfos(config) {
                     model: sysinfos.board.model,
                 },
                 gpus: sysinfos.gpus,
-                fs: sysinfos.fs,
                 net: {
                     interface: netIface,
                     gateway: sysinfos.netGateway,
                 },
                 disks,
+                fs: sysinfos.fs,
             };
             const runnableMiners = getRunnableMiners(config);
             const installableMiners = getInstallableMiners(config);

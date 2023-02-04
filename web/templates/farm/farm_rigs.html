@@ -47,7 +47,7 @@
             </td>
             <td>${rigInfos.rig.hostname}</td>
             <td>${rigInfos.rig.ip}</td>
-            <td>${rigInfos.rig.os}</td>
+            <td>${rigInfos.systemInfos.os.distro}${(rigInfos.systemInfos.os.codename ? ` (${rigInfos.systemInfos.os.codename})` : '')}</td>
             <td class="text-end">${formatNumber(rigInfos.usage.uptime, 'seconds')}</td>
             <td class="text-end">${rigInfos.usage.loadAvg}</td>
             <td class="text-end">${formatNumber(rigInfos.usage.memory.used, 'size')}/${formatNumber(rigInfos.usage.memory.total, 'size')} MB</td>

@@ -173,7 +173,7 @@ export const minerCommands: t.minerCommandInfos = {
         const minerName = 'TeamRedMiner';
         const uptime = minerSummary[0].Elapsed as number;
         const algo = pools[0].Algorithm as string;
-        const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) / 1000;
+        const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) * 1000;
 
         const poolUrl = pools[0].URL as string;
         const poolUser = pools[0].User as string;
@@ -186,7 +186,7 @@ export const minerCommands: t.minerCommandInfos = {
                 return {
                     id: gpu.GPU as number, //  minerDevDetails[idx]['ID'] OR minerGpu[idx]['GPU']
                     name: minerDevDetails[idx]['Model'] as string,
-                    hashRate: (gpu['KHS 30s'] as number || 0) / 1000,
+                    hashRate: (gpu['KHS 30s'] as number || 0) * 1000,
                     temperature: gpu['Temperature'] as number, // minerGpu[idx]['Temperature']
                     fanSpeed: gpu['Fan Percent'] as number, // minerGpu[idx]['Fan Percent']
                     power: gpu['GPU Power'] as number, // minerGpu[idx]['GPU Power']

@@ -255,14 +255,6 @@ export type RigInfos = {
         },
     },
     systemInfos: {
-        board: {
-            manufacturer: string,
-            model: string,
-        },
-        cpu: any,
-        gpus: any[],
-        disks: any[],
-        fs: any[],
         os: {
             arch: string,
             codename: string,
@@ -271,10 +263,18 @@ export type RigInfos = {
             kernel: string,
             platform: string,
         },
+        cpu: any,
+        board: {
+            manufacturer: string,
+            model: string,
+        },
+        gpus: any[],
         net: {
             interface: any,
             gateway: string,
-        }
+        },
+        disks: any[],
+        fs: any[],
     },
     config?: RigConfig,
     status?: {
