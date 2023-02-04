@@ -587,7 +587,7 @@ function rpcSendError(ws: WebSocket, id: number, error: any): void {
 }
 
 
-async function safeQuit(returnCode: number=1): Promise<void> {
+export async function safeQuit(returnCode: number=1): Promise<void> {
     if (quitRunning) {
         process.exit();
     }

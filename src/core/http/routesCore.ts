@@ -6,7 +6,7 @@ import type express from 'express';
 
 import { now } from '../../common/utils';
 import { getSystemInfos } from '../../common/sysinfos';
-//import * as Daemon from '../../core/Daemon';
+import * as Daemon from '../../core/Daemon';
 
 import type *  as t from '../../common/types';
 
@@ -44,6 +44,18 @@ export function registerCoreRoutes(app: express.Express, urlPrefix: string='') {
         const sysInfos = await getSystemInfos();
         let content = JSON.stringify(sysInfos, null, 4);
         res.header('Content-Type', 'application/json');
+        res.send(content);
+    });
+
+
+    app.get(`${urlPrefix}/quit`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const action = req.query.action as string || '';
+
+        if (action === 'quit') {
+            Daemon.safeQuit(0);
+        }
+
+        const content = `quitting...`;
         res.send(content);
     });
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSysInfos = exports.getConfig = exports.run = void 0;
+exports.getSysInfos = exports.getConfig = exports.safeQuit = exports.run = void 0;
 const tslib_1 = require("tslib");
 const express_1 = tslib_1.__importDefault(require("express"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
@@ -528,6 +528,7 @@ function safeQuit(returnCode = 1) {
         setTimeout(process.exit, 500, returnCode);
     });
 }
+exports.safeQuit = safeQuit;
 function catchSignals() {
     process.on('SIGINT', () => tslib_1.__awaiter(this, void 0, void 0, function* () {
         console.log(`${(0, utils_1.now)()} [INFO] [DAEMON] CTRL+C detected`);
