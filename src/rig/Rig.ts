@@ -569,22 +569,22 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
             vendor:disk.vendor,
         }));
 
-        const netIface = sysinfos.netIface.map((iface: any) => ({
-            iface: iface.iface,
-            ifaceName: iface.ifaceName,
-            default: iface.default,
-            ip4: iface.ip4,
-            ip4subnet: iface.ip4subnet,
-            ip6: iface.ip6,
-            ip6subnet: iface.ip6subnet,
-            mac: iface.mac,
-            virtual: iface.virtual,
-            type: iface.type,
-            duplex: iface.duplex,
-            mtu: iface.mtu,
-            speed: iface.speed,
-            dhcp: iface.dhcp,
-        }));
+        const netIface = {
+            iface: sysinfos.netIface.iface,
+            ifaceName: sysinfos.netIface.ifaceName,
+            default: sysinfos.netIface.default,
+            ip4: sysinfos.netIface.ip4,
+            ip4subnet: sysinfos.netIface.ip4subnet,
+            ip6: sysinfos.netIface.ip6,
+            ip6subnet: sysinfos.netIface.ip6subnet,
+            mac: sysinfos.netIface.mac,
+            virtual: sysinfos.netIface.virtual,
+            type: sysinfos.netIface.type,
+            duplex: sysinfos.netIface.duplex,
+            mtu: sysinfos.netIface.mtu,
+            speed: sysinfos.netIface.speed,
+            dhcp: sysinfos.netIface.dhcp,
+        };
 
         const systemInfos: any = {
             board: {
