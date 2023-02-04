@@ -146,3 +146,16 @@ export async function getSystemInfos() {
 }
 
 
+export async function getCurrentLoad(): Promise<any> {
+    let currentLoad = {};
+
+    await si.currentLoad().then((data: any) => {
+        currentLoad = data;
+
+    }).catch((err: any) => {
+        console.warn(`[getSystemInfos] getCurrentLoad Error: ${err.message}`)
+    });
+
+    return currentLoad;
+}
+

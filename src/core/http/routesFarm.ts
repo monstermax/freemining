@@ -98,6 +98,21 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
 
         routesRig.rigStatus(rigData, req, res, next);
     });
+
+
+    app.get(`${urlPrefix}/rigs/:rigName/status.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+
+        if (! rigData?.rigInfos) {
+            res.send(`Error: invalid rig`);
+            return;
+        }
+
+        let content = JSON.stringify(rigData.rigInfos, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    });
 }
 
 
@@ -107,6 +122,9 @@ function getRigData(rigName: string): t.RigData | null {
     const farmInfos = Farm.getFarmInfos(config);
     const rigInfos = farmInfos.rigsInfos[rigName];
 
+    //const rigConfig = rigInfos.config;
+    //const rigStatus = rigInfos.status;
+
     const allMiners: t.AllMiners = {}; // TODO
 
     if (! rigInfos) {
@@ -115,6 +133,7 @@ function getRigData(rigName: string): t.RigData | null {
 
     const rigData: t.RigData = {
         config,
+        //config: rigConfig,
         rigInfos,
         monitorStatus: rigInfos.status?.monitorStatus || false,
         allMiners,

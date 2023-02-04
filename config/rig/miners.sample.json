@@ -9,12 +9,10 @@
         "apiPort": 42003
     },
     "gminer": {
-        "apiPort": 42004,
-        "extraArgs": "-d 0"
+        "apiPort": 42004
     },
     "lolminer": {
-        "apiPort": 42005,
-        "extraArgs": "--devices 0"
+        "apiPort": 42005
     },
     "miniz": {
         "apiPort": 42006
@@ -37,10 +35,11 @@
     "trex": {
         "apiPort": 42012
     },
-    "xmrig": {
-        "apiPort": 42013
-    },
     "wildrig": {
         "apiPort": 42014
+    },
+    "xmrig": {
+        "apiPort": 42013,
+        "extraArgs": "--cpu-priority 3 --cpu-max-threads-hint 75"
     }
 }

@@ -42,7 +42,7 @@
         <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> <%= rigInfos.rig.hostname %></div>
         <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> <%= rigInfos.rig.ip %></div>
         <div class="mb-2 col-12 col-lg"><b>OS</b> <br /> <%=rigInfos.systemInfos.os.distro%><%=(rigInfos.systemInfos.os.codename ? ` (${rigInfos.systemInfos.os.codename})` : '')%></div>
-        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> <%= rigInfos.usage.loadAvg %></div>
+        <div class="mb-2 col-4 col-lg-1"><b>Load avg</b> <br /> <%=formatNumber(rigInfos.usage.cpuLoad)%>%</div>
         <div class="mb-2 col-4 col-lg-2"><b>Uptime</b> <br /> <%= formatNumber(rigInfos.usage.uptime, 'seconds') %></div>
         <div class="mb-2 col-4 col-lg-2"><b>Memory usage</b> <br /> <%= formatNumber(rigInfos.usage.memory.used, 'size') %>B / <%= formatNumber(rigInfos.usage.memory.total, 'size') %>B</div>
     </div>

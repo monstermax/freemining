@@ -64,6 +64,17 @@ function registerFarmRoutes(app, urlPrefix = '') {
         }
         routesRig.rigStatus(rigData, req, res, next);
     }));
+    app.get(`${urlPrefix}/rigs/:rigName/status.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        if (!(rigData === null || rigData === void 0 ? void 0 : rigData.rigInfos)) {
+            res.send(`Error: invalid rig`);
+            return;
+        }
+        let content = JSON.stringify(rigData.rigInfos, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    }));
 }
 exports.registerFarmRoutes = registerFarmRoutes;
 function getRigData(rigName) {
@@ -71,12 +82,15 @@ function getRigData(rigName) {
     const config = Daemon.getConfig();
     const farmInfos = Farm.getFarmInfos(config);
     const rigInfos = farmInfos.rigsInfos[rigName];
+    //const rigConfig = rigInfos.config;
+    //const rigStatus = rigInfos.status;
     const allMiners = {}; // TODO
     if (!rigInfos) {
         return null;
     }
     const rigData = {
         config,
+        //config: rigConfig,
         rigInfos,
         monitorStatus: ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.monitorStatus) || false,
         allMiners,

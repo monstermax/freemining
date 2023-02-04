@@ -7,6 +7,7 @@ const os_1 = tslib_1.__importDefault(require("os"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
+const sysinfos_1 = require("../common/sysinfos");
 const minersConfigs_1 = require("./minersConfigs");
 const rigFarmAgentWebsocket = tslib_1.__importStar(require("./rigFarmAgentWebsocket"));
 const Daemon = tslib_1.__importStar(require("../core/Daemon"));
@@ -529,6 +530,7 @@ function getRigInfos(config) {
                 freeminingVersion,
             };
         }
+        const currentLoad = yield (0, sysinfos_1.getCurrentLoad)();
         const { name, hostname, ip, rigOs, systemInfos, runnableMiners, installableMiners, managedMiners, freeminingVersion } = rigMainInfos;
         const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
         const installedMiners = yield getInstalledMiners(config);
@@ -549,6 +551,7 @@ function getRigInfos(config) {
             usage: {
                 uptime,
                 loadAvg,
+                cpuLoad: currentLoad.currentLoad || -1,
                 memory: {
                     used: memoryUsed,
                     total: memoryTotal,

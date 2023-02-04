@@ -49,8 +49,8 @@
             <td>${rigInfos.rig.ip}</td>
             <td>${rigInfos.systemInfos.os.distro}${(rigInfos.systemInfos.os.codename ? ` (${rigInfos.systemInfos.os.codename})` : '')}</td>
             <td class="text-end">${formatNumber(rigInfos.usage.uptime, 'seconds')}</td>
-            <td class="text-end">${rigInfos.usage.loadAvg}</td>
-            <td class="text-end">${formatNumber(rigInfos.usage.memory.used, 'size')}/${formatNumber(rigInfos.usage.memory.total, 'size')} MB</td>
+            <td class="text-end">${formatNumber(rigInfos.usage.cpuLoad)}%</td>
+            <td class="text-end">${formatNumber(rigInfos.usage.memory.used, 'size')}B / ${formatNumber(rigInfos.usage.memory.total, 'size')}B</td>
             <td class="text-end">${Object.keys(rigInfos.status.minersStats).length}</td>
             <td class="text-end"><span class="dataAge">${formatNumber(dataAge, 'seconds')}</span></td>
         </tr>

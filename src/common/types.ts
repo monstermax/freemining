@@ -249,6 +249,7 @@ export type RigInfos = {
     usage?: {
         uptime: number,
         loadAvg: number,
+        cpuLoad: number,
         memory: {
             used: number,
             total: number,

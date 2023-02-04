@@ -9,6 +9,7 @@ import { decompressFile } from '../../common/decompress_archive';
 import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';
+import { nbminer } from '.';
 
 
 /* ########## DESCRIPTION ######### */

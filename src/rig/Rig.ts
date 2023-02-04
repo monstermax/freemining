@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 
 import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate } from '../common/utils';
 import { exec } from '../common/exec';
+import { getCurrentLoad } from '../common/sysinfos';
 import { minersInstalls, minersCommands } from './minersConfigs';
 import * as rigFarmAgentWebsocket from './rigFarmAgentWebsocket';
 import * as Daemon from '../core/Daemon';
@@ -627,6 +628,8 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
         };
     }
 
+    const currentLoad = await getCurrentLoad();
+
     const { name, hostname, ip, rigOs, systemInfos, runnableMiners, installableMiners, managedMiners, freeminingVersion } = rigMainInfos;
     const { uptime, loadAvg, memoryUsed, memoryTotal } = getRigUsage();
 
@@ -651,6 +654,7 @@ export async function getRigInfos(config: t.DaemonConfigAll): Promise<t.RigInfos
         usage: {
             uptime,
             loadAvg,
+            cpuLoad: currentLoad.currentLoad || -1,
             memory: {
                 used: memoryUsed,
                 total: memoryTotal,

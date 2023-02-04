@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSystemInfos = exports.getProcessesInfos = void 0;
+exports.getCurrentLoad = exports.getSystemInfos = exports.getProcessesInfos = void 0;
 const tslib_1 = require("tslib");
 const systeminformation_1 = tslib_1.__importDefault(require("systeminformation"));
 // https://systeminformation.io/
@@ -126,3 +126,15 @@ function getSystemInfos() {
     });
 }
 exports.getSystemInfos = getSystemInfos;
+function getCurrentLoad() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        let currentLoad = {};
+        yield systeminformation_1.default.currentLoad().then((data) => {
+            currentLoad = data;
+        }).catch((err) => {
+            console.warn(`[getSystemInfos] getCurrentLoad Error: ${err.message}`);
+        });
+        return currentLoad;
+    });
+}
+exports.getCurrentLoad = getCurrentLoad;
