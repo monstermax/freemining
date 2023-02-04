@@ -100,26 +100,39 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         }
         return args;
     },
-    EDIT_ME_getInfos(config, params) {
+    getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {}; // edit-me if needed
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
+            const headers = {};
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers });
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const minerName = 'edit-me';
-            const uptime = -1; // edit-me
-            const algo = 'edit-me';
-            const workerHashRate = -1; // edit-me
-            const poolUrl = ''; // edit-me
-            const poolUser = ''; // edit-me
-            const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = []; // edit-me
-            const gpus = []; // edit-me
+            const _algo = minerSummary.Algorithms[0];
+            const multipliers = {
+                "Mh/s": 1000 * 1000,
+                "Hh/s": 1000,
+            };
+            const uptime = minerSummary.Session.Uptime;
+            const algo = _algo.Algorithm;
+            const workerHashRate = algo.Total_Performance * (multipliers[_algo.Performance_Unit] || 1);
+            const poolUrl = _algo.Pool;
+            const poolUser = _algo.User;
+            const workerName = poolUser.split('.').pop() || '';
+            const cpus = [];
+            const gpus = minerSummary.Workers.map((worker) => {
+                return {
+                    id: worker.Index,
+                    name: worker.Name,
+                    temperature: worker.Core_Temp,
+                    fanSpeed: worker.Fan_Speed,
+                    hashRate: _algo.Worker_Performance[worker.Index] * (multipliers[_algo.Performance_Unit] || 1),
+                    power: minerSummary.Workers[worker.Index].Power,
+                };
+            });
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {
-                    name: minerName,
+                    name: minerTitle,
                     worker: workerName,
                     uptime,
                     algo,

@@ -110,7 +110,6 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const minerName = 'edit-me';
             const uptime = -1; // edit-me
             const algo = 'edit-me';
             const workerHashRate = -1; // edit-me
@@ -122,7 +121,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {
-                    name: minerName,
+                    name: minerTitle,
                     worker: workerName,
                     uptime,
                     algo,

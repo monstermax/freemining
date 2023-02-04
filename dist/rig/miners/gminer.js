@@ -101,26 +101,35 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         }
         return args;
     },
-    EDIT_ME_getInfos(config, params) {
+    getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {}; // edit-me if needed
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
+            const headers = {};
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/stat`, { headers });
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const minerName = 'edit-me';
-            const uptime = -1; // edit-me
-            const algo = 'edit-me';
-            const workerHashRate = -1; // edit-me
-            const poolUrl = ''; // edit-me
-            const poolUser = ''; // edit-me
-            const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = []; // edit-me
-            const gpus = []; // edit-me
+            const uptime = minerSummary.uptime;
+            const algo = minerSummary.algorithm;
+            let workerHashRate = 0;
+            const poolUrl = minerSummary.server;
+            const poolUser = minerSummary.user;
+            const workerName = poolUser.split('.').pop() || '';
+            const cpus = [];
+            const gpus = minerSummary.devices.map((gpu) => {
+                workerHashRate += gpu.speed;
+                return {
+                    id: gpu.gpu_id,
+                    name: gpu.name,
+                    temperature: gpu.temperature,
+                    fanSpeed: gpu.fan,
+                    hashRate: gpu.speed,
+                    power: gpu.power_usage,
+                };
+            });
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {
-                    name: minerName,
+                    name: minerTitle,
                     worker: workerName,
                     uptime,
                     algo,

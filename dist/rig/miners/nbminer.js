@@ -111,26 +111,35 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         }
         return args;
     },
-    EDIT_ME_getInfos(config, params) {
+    getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {}; // edit-me if needed
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
+            const headers = {};
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/api/v1/status`, { headers });
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const minerName = 'edit-me';
-            const uptime = -1; // edit-me
-            const algo = 'edit-me';
-            const workerHashRate = -1; // edit-me
-            const poolUrl = ''; // edit-me
-            const poolUser = ''; // edit-me
-            const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = []; // edit-me
-            const gpus = []; // edit-me
+            const start_time = minerSummary.start_time;
+            const uptime = (Date.now() / 1000) - start_time;
+            const algo = minerSummary.algorithm;
+            const workerHashRate = minerSummary.miner.total_hashrate;
+            const poolUrl = minerSummary.stratum.url;
+            const poolUser = minerSummary.stratum.user;
+            const workerName = poolUser.split('.').pop() || '';
+            const cpus = [];
+            const gpus = minerSummary.miner.devices.map((gpu) => {
+                return {
+                    id: gpu.id,
+                    name: gpu.info,
+                    temperature: gpu.temperature,
+                    fanSpeed: gpu.fan,
+                    hashRate: gpu.hashrate,
+                    power: gpu.power,
+                };
+            });
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {
-                    name: minerName,
+                    name: minerTitle,
                     worker: workerName,
                     uptime,
                     algo,
