@@ -39,6 +39,16 @@
             }
         }
     },
+    "FNNC": {
+        "wallets": {
+            "wallet1": "FbQDVcGjtiq5ucfBrhauKuC1t6KSkjbUN9"
+        },
+        "pools": {
+            "minerpool": {
+                "default": "connect.fennecblockchain.com:8200"
+            }
+        }
+    },
     "MEWC": {
         "wallets": {
             "wallet1": "MJxPvVq1Gbd71XMuXvprQnTmHiAH3KXi89"
