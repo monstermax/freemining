@@ -101,7 +101,6 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            //const apiUrl = `http://127.0.0.1:${this.apiPort}`;
             const apiHost = '127.0.0.1';
             const headers = {}; // edit-me if needed
             //const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
@@ -116,7 +115,6 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             //const minerGpuRes = await sendSocketMessage(`{"command":"gpu","parameter":""}`, apiHost, this.apiPort) as any;
             //const minerGpu: any = JSON.parse(minerGpuRes).GPU;
             // EDIT THESE VALUES - START //
-            const minerName = 'TeamRedMiner';
             const uptime = minerSummary[0].Elapsed;
             const algo = pools[0].Algorithm;
             const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) * 1000;
@@ -131,13 +129,13 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
                     hashRate: (gpu['KHS 30s'] || 0) * 1000,
                     temperature: gpu['Temperature'],
                     fanSpeed: gpu['Fan Percent'],
-                    power: gpu['GPU Power'], // minerGpu[idx]['GPU Power']
+                    power: gpu['GPU Power'],
                 };
             })));
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {
-                    name: minerName,
+                    name: minerTitle,
                     worker: workerName,
                     uptime,
                     algo,

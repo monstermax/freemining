@@ -5,6 +5,10 @@
     "bzminer": {
         "apiPort": 42002
     },
+    "cpuminer": {
+        "apiPort": 42016,
+        "extraArgs": "--cpu-priority 3 --threads=12"
+    },
     "firominer": {
         "apiPort": 42003
     },

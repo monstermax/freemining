@@ -5,6 +5,7 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const path_1 = tslib_1.__importDefault(require("path"));
+//import { execSync } from 'child_process';
 const utils_1 = require("../common/utils");
 const exec_1 = require("../common/exec");
 const sysinfos_1 = require("../common/sysinfos");
@@ -208,7 +209,9 @@ function minerInstallStart(config, params) {
             throw { message: `Unknown miner ${minerName}` };
         }
         const minerInstall = minersConfigs_1.minersInstalls[minerName];
-        /* await */ minerInstall.install(config, params);
+        /* await */ minerInstall.install(config, params).catch((err) => {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot start miner ${minerName} : ${err.message}`);
+        });
     });
 }
 exports.minerInstallStart = minerInstallStart;

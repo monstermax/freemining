@@ -167,14 +167,20 @@ function getManagedFullnodes(config) {
 exports.getManagedFullnodes = getManagedFullnodes;
 function fullnodeInstallStart(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        if ((params.fullnode + '/install') in processes) {
-            throw { message: `Fullnode ${params.fullnode} install is already running` };
+        const fullnodeName = params.fullnode;
+        if (!fullnodeName) {
+            throw new Error(`Missing fullnode parameter`);
         }
-        if (!(params.fullnode in fullnodesConfigs_1.fullnodesCommands)) {
-            throw { message: `Unknown fullnode ${params.fullnode}` };
+        //if ((fullnodeName + '/install') in processes) {
+        //    throw { message: `Fullnode ${fullnodeName} install is already running` };
+        //}
+        if (!(fullnodeName in fullnodesConfigs_1.fullnodesCommands)) {
+            throw { message: `Unknown fullnode ${fullnodeName}` };
         }
-        const fullnodeInstall = fullnodesConfigs_1.fullnodesInstalls[params.fullnode];
-        /* await */ fullnodeInstall.install(config, params);
+        const fullnodeInstall = fullnodesConfigs_1.fullnodesInstalls[fullnodeName];
+        /* await */ fullnodeInstall.install(config, params).catch((err) => {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] Cannot start fullnode ${fullnodeName} : ${err.message}`);
+        });
     });
 }
 exports.fullnodeInstallStart = fullnodeInstallStart;

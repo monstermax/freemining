@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.xmrig = exports.wildrig = exports.trex = exports.teamredminer = exports.teamblackminer = exports.srbminer = exports.rigel = exports.nbminer = exports.nanominer = exports.miniz = exports.lolminer = exports.kawpowminer = exports.gminer = exports.firominer = exports.ethminer = exports.claymore = exports.ccminer = exports.bzminer = exports.bminer = void 0;
+exports.xmrig = exports.wildrig = exports.trex = exports.teamredminer = exports.teamblackminer = exports.srbminer = exports.rigel = exports.nbminer = exports.nanominer = exports.miniz = exports.lolminer = exports.kawpowminer = exports.gminer = exports.firominer = exports.ethminer = exports.cpuminer = exports.claymore = exports.ccminer = exports.bzminer = exports.bminer = void 0;
 const tslib_1 = require("tslib");
 exports.bminer = tslib_1.__importStar(require("./bminer"));
 exports.bzminer = tslib_1.__importStar(require("./bzminer"));
 exports.ccminer = tslib_1.__importStar(require("./ccminer"));
 exports.claymore = tslib_1.__importStar(require("./claymore"));
+exports.cpuminer = tslib_1.__importStar(require("./cpuminer"));
 exports.ethminer = tslib_1.__importStar(require("./ethminer"));
 exports.firominer = tslib_1.__importStar(require("./firominer"));
 exports.gminer = tslib_1.__importStar(require("./gminer"));

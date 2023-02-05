@@ -145,7 +145,6 @@ export const minerCommands: t.minerCommandInfos = {
 
 
     async getInfos(config, params) {
-        //const apiUrl = `http://127.0.0.1:${this.apiPort}`;
         const apiHost = '127.0.0.1';
         const headers: any = {}; // edit-me if needed
 
@@ -166,7 +165,6 @@ export const minerCommands: t.minerCommandInfos = {
         //const minerGpu: any = JSON.parse(minerGpuRes).GPU;
 
         // EDIT THESE VALUES - START //
-        const minerName = 'TeamRedMiner';
         const uptime = minerSummary[0].Elapsed as number;
         const algo = pools[0].Algorithm as string;
         const workerHashRate = (minerSummary[0]['KHS 30s'] || 0) * 1000;
@@ -181,11 +179,11 @@ export const minerCommands: t.minerCommandInfos = {
             minerDev.map(async (gpu: any, idx: number) => {
                 return {
                     id: gpu.GPU as number, //  minerDevDetails[idx]['ID'] OR minerGpu[idx]['GPU']
-                    name: minerDevDetails[idx]['Model'] as string,
-                    hashRate: (gpu['KHS 30s'] as number || 0) * 1000,
-                    temperature: gpu['Temperature'] as number, // minerGpu[idx]['Temperature']
-                    fanSpeed: gpu['Fan Percent'] as number, // minerGpu[idx]['Fan Percent']
-                    power: gpu['GPU Power'] as number, // minerGpu[idx]['GPU Power']
+                    name: minerDevDetails[idx]['Model'],
+                    hashRate: (gpu['KHS 30s'] || 0) * 1000,
+                    temperature: gpu['Temperature'],
+                    fanSpeed: gpu['Fan Percent'],
+                    power: gpu['GPU Power'],
                 }
             })
         );
@@ -193,7 +191,7 @@ export const minerCommands: t.minerCommandInfos = {
 
         let infos: t.MinerStats = {
             miner: {
-                name: minerName,
+                name: minerTitle,
                 worker: workerName,
                 uptime,
                 algo,

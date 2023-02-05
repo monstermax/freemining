@@ -200,16 +200,24 @@ export function getManagedFullnodes(config: t.DaemonConfigAll): string[] {
 
 
 export async function fullnodeInstallStart(config: t.DaemonConfigAll, params: t.fullnodeInstallStartParams): Promise<void> {
-    if ((params.fullnode + '/install') in processes) {
-        throw { message: `Fullnode ${params.fullnode} install is already running` };
+    const fullnodeName = params.fullnode;
+
+    if (! fullnodeName) {
+        throw new Error(`Missing fullnode parameter`);
     }
 
-    if (! (params.fullnode in fullnodesCommands)) {
-        throw { message: `Unknown fullnode ${params.fullnode}` };
+    //if ((fullnodeName + '/install') in processes) {
+    //    throw { message: `Fullnode ${fullnodeName} install is already running` };
+    //}
+
+    if (! (fullnodeName in fullnodesCommands)) {
+        throw { message: `Unknown fullnode ${fullnodeName}` };
     }
 
-    const fullnodeInstall = fullnodesInstalls[params.fullnode];
-    /* await */ fullnodeInstall.install(config, params);
+    const fullnodeInstall = fullnodesInstalls[fullnodeName];
+    /* await */ fullnodeInstall.install(config, params).catch((err: any) => {
+        console.warn(`${now()} [WARNING] [NODE] Cannot start fullnode ${fullnodeName} : ${err.message}`);
+    });
 }
 
 

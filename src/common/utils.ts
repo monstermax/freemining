@@ -387,13 +387,16 @@ export async function tailFile(file: string, numLines: number): Promise<any> {
 export function sendSocketMessage(message: string, host: string, port: number): Promise<string> {
     return new Promise((resolve, reject) => {
         const client = new net.Socket();
+
         client.connect(port, host, () => {
             client.write(message);
         });
+
         client.on('data', (data) => {
             resolve(data.toString());
             client.destroy();
         });
+
         client.on('error', (error) => {
             reject(error);
             client.destroy();

@@ -198,9 +198,9 @@ export const minerCommands: t.minerCommandInfos = {
             if (backend.type === 'cpu') {
                 const cpu = {
                     id: 0,
-                    name: minerSummary.cpu.brand as string,
-                    hashRate: (backend.hashrate || [])[0] as number || 0,
-                    threads: backend.threads.length as number,
+                    name: minerSummary.cpu.brand,
+                    hashRate: (backend.hashrate || [])[0] || 0,
+                    threads: backend.threads.length,
                     //totalThreads: minerSummary.cpu.cores * 2 as number,
                 };
                 cpus.push(cpu);

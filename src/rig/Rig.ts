@@ -2,7 +2,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { execSync } from 'child_process';
+//import { execSync } from 'child_process';
 
 import { now, getOpt, getLocalIpAddresses, getDirFiles, tailFile, stringTemplate } from '../common/utils';
 import { exec } from '../common/exec';
@@ -246,7 +246,10 @@ export async function minerInstallStart(config: t.DaemonConfigAll, params: t.min
     }
 
     const minerInstall = minersInstalls[minerName];
-    /* await */ minerInstall.install(config, params);
+
+    /* await */ minerInstall.install(config, params).catch((err: any) => {
+        console.warn(`${now()} [WARNING] [RIG] Cannot start miner ${minerName} : ${err.message}`);
+    });
 }
 
 

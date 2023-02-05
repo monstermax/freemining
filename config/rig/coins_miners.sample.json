@@ -1,19 +1,35 @@
 {
+    "ALPH": {
+        "bzminer": {
+            "algo": "alph"
+        }
+    },
     "ERG": {
-        "trex": {
-            "algo": "autolykos2"
-        },
-        "teamredminer": {
-            "algo": "ergo"
-        },
-        "nbminer": {
+        "bzminer": {
             "algo": "ergo"
         },
         "lolminer": {
             "algo": "AUTOLYKOS2"
+        },
+        "nbminer": {
+            "algo": "ergo"
+        },
+        "teamredminer": {
+            "algo": "ergo"
+        },
+        "trex": {
+            "algo": "autolykos2"
+        }
+    },
+    "ETHW": {
+        "cpuminer": {
+            "algo": "ethw"
         }
     },
     "ETC": {
+        "cpuminer": {
+            "algo": "etchash"
+        },
         "lolminer": {
             "algo": "ETCHASH",
             "extraArgs": ""
@@ -40,13 +56,34 @@
         }
     },
     "FNNC": {
+        "cpuminer": {
+            "algo": "YESCRYPTR16"
+        },
         "srbminer": {
             "algo": "yescryptr16"
         }
     },
+    "KASPA": {
+        "bzminer": {
+            "algo": "kaspa"
+        }
+    },
     "MEWC": {
+        "bzminer": {
+            "algo": "meowcoin"
+        },
         "gminer": {
             "algo": "kawpow"
+        }
+    },
+    "NEOX": {
+        "bzminer": {
+            "algo": "neox"
+        }
+    },
+    "NEXA": {
+        "bzminer": {
+            "algo": "nexa"
         }
     },
     "RTM": {
@@ -55,6 +92,9 @@
         }
     },
     "RVN": {
+        "bzminer": {
+            "algo": "rvn"
+        },
         "gminer": {
             "algo": "kawpow"
         }
