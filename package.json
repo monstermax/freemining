@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@open-rpc/client-js": "^1.8.1",
     "7zip-bin": "^5.2.0",
     "adm-zip": "^0.5.10",
     "colors": "^1.4.0",
@@ -18,7 +19,6 @@
     "express": "^4.18.2",
     "node-7z": "^3.0.0",
     "node-fetch": "^2.6.8",
-    "rpc-client": "^1.0.1",
     "systeminformation": "^5.17.8",
     "tar": "^6.1.13",
     "ts-node": "^10.9.1",

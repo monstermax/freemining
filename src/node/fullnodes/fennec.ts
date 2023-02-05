@@ -2,7 +2,6 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-const RpcClient = require("rpc-client");
 
 
 import { now, getOpt, downloadFile } from '../../common/utils';

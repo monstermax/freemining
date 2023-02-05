@@ -119,8 +119,8 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
             // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
             const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
             const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
-            const getwalletinfo = yield this.rpcRequest(fullnodeName, 'getwalletinfo', []);
-            const getaddressesbylabel = yield this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
+            const getwalletinfo = null; //await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+            const getaddressesbylabel = null; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
             // EDIT THESE VALUES - START //
             const coin = 'BTC';
             const blocks = getblockchaininfo.blocks || -1;

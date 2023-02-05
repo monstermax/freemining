@@ -97,7 +97,7 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
             const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
             const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
             const getwalletinfo = yield this.rpcRequest(fullnodeName, 'getwalletinfo', []);
-            const getaddressesbylabel = yield this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
+            const getaddressesbylabel = null; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
             // EDIT THESE VALUES - START //
             const coin = 'DOGE';
             const blocks = getblockchaininfo.blocks || -1;

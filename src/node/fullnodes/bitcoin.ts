@@ -169,8 +169,8 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
         const getblockchaininfo: any = await this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
         const getnetworkinfo: any = await this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
-        const getwalletinfo: any = await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
-        const getaddressesbylabel: any = await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
+        const getwalletinfo: any = null; //await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+        const getaddressesbylabel: any = null; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
 
         // EDIT THESE VALUES - START //
         const coin = 'BTC';

@@ -6,7 +6,7 @@ const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
-const RpcClient = require("rpc-client");
+const client_js_1 = require("@open-rpc/client-js");
 const utils_1 = require("../../common/utils");
 const decompress_archive_1 = require("../../common/decompress_archive");
 /* ########## MAIN ######### */
@@ -149,23 +149,21 @@ exports.fullnodeCommands = {
     },
     rpcRequest(fullnodeName, method, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            /*
             const rpcClient = new RpcClient({
                 host: "127.0.0.1",
                 port: this.rpcPort,
                 protocol: "http",
             });
             rpcClient.setBasicAuth("user", "pass");
-            return new Promise((resolve, reject) => {
-                rpcClient.call(method, params, function (err, result) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(result);
-                });
-            }).catch((err) => {
+            */
+            const transport = new client_js_1.HTTPTransport(`http://user:pass@127.0.0.1:${this.rpcPort}`);
+            const rpcClient = new client_js_1.Client(new client_js_1.RequestManager([transport]));
+            const result = yield rpcClient.request({ method, params })
+                .catch((err) => {
                 console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] Cannot get ${method} ${fullnodeName} : ${err.message}`);
             });
+            return result;
         });
     }
 };

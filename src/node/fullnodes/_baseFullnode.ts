@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import fetch from 'node-fetch';
-const RpcClient = require("rpc-client");
+import { RequestManager, HTTPTransport, Client } from "@open-rpc/client-js";
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
@@ -173,25 +173,24 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
 
     async rpcRequest(fullnodeName: string, method: string, params: any) {
+        /*
         const rpcClient = new RpcClient({
             host: "127.0.0.1",
             port: this.rpcPort,
             protocol: "http",
         });
         rpcClient.setBasicAuth("user", "pass");
+        */
 
-        return new Promise((resolve, reject) => {
-            rpcClient.call(method, params, function(err: any, result: any){
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(result);
-            });
+        const transport = new HTTPTransport( `http://user:pass@127.0.0.1:${this.rpcPort}` );
+        const rpcClient = new Client(new RequestManager([transport]));
 
-        }).catch((err: any) => {
+        const result = await rpcClient.request( {method, params} )
+        .catch((err: any) => {
             console.warn(`${now()} [WARNING] [NODE] Cannot get ${method} ${fullnodeName} : ${err.message}`);
         });
+
+        return result;
     }
 };
 

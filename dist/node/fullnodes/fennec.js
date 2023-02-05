@@ -5,7 +5,6 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
-const RpcClient = require("rpc-client");
 const utils_1 = require("../../common/utils");
 const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
