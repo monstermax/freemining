@@ -32,7 +32,7 @@
     <li>
         <%- fullnodeName %>
         &nbsp;&nbsp;
-        [<a href="fullnodes/<%- fullnodeName %>/run">Manage...</a>]
+        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run">Manage...</a>
         <% if (managedFullnodes.includes(fullnodeName)) { %>
             <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run?action=status">JSON Status</a>
         <% } %>

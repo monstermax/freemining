@@ -7,7 +7,6 @@ const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const utils_1 = require("../../common/utils");
-const decompress_archive_1 = require("../../common/decompress_archive");
 const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /* ########## DESCRIPTION ######### */
 /*
@@ -32,9 +31,9 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
+            const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
             let subDir = `${SEP}xmrig-${version}`;
-            const setAsDefaultAlias = params.default || false;
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-linux-x64.tar.gz`,
@@ -59,19 +58,13 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-            console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] Downloading file ${dlUrl}`);
-            yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
-            console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] Download complete`);
+            yield this.downloadFile(dlUrl, dlFilePath);
             // Extracting
-            fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
-            console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] Extracting file ${dlFilePath}`);
-            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
-            console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] Extract complete`);
+            yield this.extractFile(tempDir, dlFilePath);
             // Install to target dir
             fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
             fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
-            this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
             // Write report files
             this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
             // Cleaning
@@ -79,7 +72,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52003, command: 'xmrig', getCommandArgs(config, params) {
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52003, command: 'xmrig', managed: true, getCommandArgs(config, params) {
         const args = [
             '-k',
             //'--cpu-max-threads-hint', '75',

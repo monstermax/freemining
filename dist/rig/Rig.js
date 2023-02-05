@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMiners = exports.getRigInfos = exports.getProcesses = exports.minerRunGetInfos = exports.minerRunLog = exports.minerRunStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStop = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllMiners = exports.getRigInfos = exports.getProcesses = exports.minerRunGetInfos = exports.minerRunGetLog = exports.minerRunGetStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStop = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -160,6 +160,7 @@ function getRunningMinersAliases(config) {
             alias: proc.name,
             pid: proc.pid || 0,
             dateStart: Date.now(),
+            //apiPort: proc.apiPort, // TODO
         });
     }
     return runningMiners;
@@ -188,7 +189,7 @@ function getManagedMiners(config) {
         const [minerName, minerCommand] = entry;
         if (minerCommand.apiPort <= 0)
             return '';
-        if (typeof minerCommand.getInfos !== 'function')
+        if (!minerCommand.managed)
             return '';
         return minerName;
     }).filter(minerName => minerName !== '');
@@ -361,10 +362,13 @@ function minerRunStop(config, params, forceKill = false) {
     proc.process.kill(signal);
 }
 exports.minerRunStop = minerRunStop;
-function minerRunStatus(config, params) {
+function minerRunGetStatus(config, params) {
     const minerName = params.miner;
-    const minerConfig = getInstalledMinerConfiguration(config, minerName);
-    const minerAlias = params.alias || minerConfig.defaultAlias;
+    let minerAlias = params.alias;
+    if (!minerAlias) {
+        const minerConfig = getInstalledMinerConfiguration(config, minerName);
+        minerAlias = minerConfig.defaultAlias;
+    }
     if (!minerName) {
         throw new Error(`Missing miner parameter`);
         return false;
@@ -382,8 +386,8 @@ function minerRunStatus(config, params) {
     }
     return proc.process.exitCode === null;
 }
-exports.minerRunStatus = minerRunStatus;
-function minerRunLog(config, params) {
+exports.minerRunGetStatus = minerRunGetStatus;
+function minerRunGetLog(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
         const minerConfig = getInstalledMinerConfiguration(config, minerName);
@@ -396,14 +400,14 @@ function minerRunLog(config, params) {
         }
         const logFile = `${config.logDir}${SEP}rig${SEP}miners${SEP}${minerName}${SEP}${minerAlias}.run.log`;
         if (!fs_1.default.existsSync(logFile)) {
-            return '';
+            return Promise.resolve('');
         }
         let text = yield (0, utils_1.tailFile)(logFile, params.lines || 50);
         text = text.replace(/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]/g, ''); // remove shell colors
         return text;
     });
 }
-exports.minerRunLog = minerRunLog;
+exports.minerRunGetLog = minerRunGetLog;
 function minerRunGetInfos(config, params) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = params.miner;
@@ -559,7 +563,6 @@ function getRigInfos(config) {
             },
             config: config.rig,
             status: {
-                minersStats: minersStats,
                 monitorStatus,
                 installableMiners,
                 installedMiners,
@@ -568,6 +571,7 @@ function getRigInfos(config) {
                 runningMiners,
                 runningMinersAliases,
                 managedMiners,
+                minersStats: minersStats,
                 farmAgentStatus,
             },
             dataDate: dateLastCheck,
@@ -595,13 +599,13 @@ function getAllMiners(config) {
             return [
                 minerName,
                 {
+                    installable: installableMiners.includes(minerName),
                     installed: installedMiners.includes(minerName),
                     installedAliases: installedMinersAliases,
-                    running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
-                    installable: installableMiners.includes(minerName),
                     runnable: runnableMiners.includes(minerName),
-                    managed: managedMiners.includes(minerName),
+                    running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
                     runningAlias: runningMinersAliases,
+                    managed: managedMiners.includes(minerName),
                 }
             ];
         }));

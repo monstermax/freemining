@@ -29,6 +29,9 @@
     "srbminer": {
         "apiPort": 42010
     },
+    "teamblackminer": {
+        "apiPort": 42015
+    },
     "teamredminer": {
         "apiPort": 42011
     },

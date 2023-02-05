@@ -285,7 +285,7 @@ export type RigInfos = {
         installedMinersAliases: InstalledMiner[];
         runnableMiners: string[],
         runningMiners: string[],
-        runningMinersAliases: RunningMiner[];
+        runningMinersAliases: RunningMinerProcess[];
         managedMiners: string[],
         minersStats: { [minerName: string]: MinerStats },
         farmAgentStatus: boolean,
@@ -313,8 +313,10 @@ export type minerInstallInfos = {
     lastVersion: string,
     github: string,
     install(config: DaemonConfig, params: minerInstallStartParams): Promise<void>,
-    getLastVersion?(github?: string): Promise<string>,
-    getAllVersions?(github?: string): Promise<string[]>,
+    getLastVersion(): Promise<string>,
+    getAllVersions(): Promise<string[]>,
+    downloadFile(dlUrl: string, dlFilePath: string): Promise<void>,
+    extractFile(tempDir: string, dlFilePath: string): Promise<void>,
 } & MapString<any>;
 
 
@@ -324,8 +326,7 @@ export type minerCommandInfos = {
     command: string,
     getCommandFile(config: DaemonConfig, params: getMinerCommandFileParams): string,
     getCommandArgs(config: DaemonConfig, params: getMinerCommandArgsParams): string[],
-    getInfos?(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
-    EDIT_ME_getInfos?(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
+    getInfos(config: DaemonConfig, params: getMinerInfosParams): Promise<MinerStats>,
 } & MapString<any>;
 
 
@@ -373,13 +374,29 @@ export type MinerGpuInfos = GPU & {
 
 export type InstalledMiner = InstalledMinerConfig;
 
-export type RunningMiner = RunningMinerProcess;
+export type InstalledMinerConfig = {
+    name: string,
+    title: string,
+    lastVersion: string,
+    defaultAlias: string,
+    versions: { [minerAlias: string]: InstalledMinerAliasConfig },
+}
+
+export type InstalledMinerAliasConfig = {
+    name: string,
+    alias: string,
+    version: string,
+    installDate: string,
+    installUrl: string,
+}
+
 
 export type RunningMinerProcess = {
     miner: string,
     alias: string,
     pid: number,
     dateStart: number,
+    //apiPort: number, // TODO
 };
 
 
@@ -447,9 +464,38 @@ export type AllMiners = {
         installable: boolean,
         runnable: boolean,
         managed: boolean,
-        runningAlias: RunningMiner[],
+        runningAlias: RunningMinerProcess[],
     }
 };
+
+
+
+
+/* FARM */
+
+export type FarmConfig = {
+    name?: string,
+    wsPass?: string,
+};
+
+export type FarmInfos = {
+    farm: {
+        name: string,
+        hostname: string,
+        ip: string,
+        os: string,
+        uptime: number,
+    },
+    usage: {
+        loadAvg: number,
+        memory: {
+            used: number,
+            total: number,
+        },
+    },
+    rigsInfos: { [rigName: string]: RigInfos },
+    dataDate?: number | null,
+}
 
 
 
@@ -483,11 +529,14 @@ export type NodeInfos = {
     }
     status?: {
         monitorStatus: boolean,
-        runningFullnodes: string[],
-        runningFullnodesAliases: RunningFullnode[],
+        installableFullnodes: string[],
         installedFullnodes: string[],
-        installedFullnodesAliases: any[], // TODO
-        fullnodesStats: { [minerName: string]: FullnodeStats },
+        installedFullnodesAliases: InstalledFullnode[],
+        runnableFullnodes: string[],
+        runningFullnodes: string[],
+        runningFullnodesAliases: RunningFullnodeProcess[],
+        managedFullnodes: string[],
+        fullnodesStats: { [fullnodeName: string]: FullnodeStats },
     },
     //dataSizes?: {
     //    appDir: number,
@@ -500,11 +549,15 @@ export type NodeInfos = {
 
 
 export type fullnodeInstallInfos = {
-    version: string,
-    github?: string,
+    fullnodeName: string,
+    fullnodeTitle: string,
+    lastVersion: string,
+    github: string,
     install(config: DaemonConfig, params: fullnodeInstallStartParams): Promise<void>,
-    getLastVersion?(): Promise<string>,
-    getAllVersions?(): Promise<string[]>,
+    getLastVersion(): Promise<string>,
+    getAllVersions(): Promise<string[]>,
+    downloadFile(dlUrl: string, dlFilePath: string): Promise<void>,
+    extractFile(tempDir: string, dlFilePath: string): Promise<void>,
 } & MapString<any>;
 
 
@@ -515,8 +568,7 @@ export type fullnodeCommandInfos = {
     command: string,
     getCommandFile(config: DaemonConfig, params: getFullnodeCommandFileParams): string,
     getCommandArgs(config: DaemonConfig, params: getFullnodeCommandArgsParams): string[],
-    getInfos?(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
-    EDIT_ME_getInfos?(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
+    getInfos(config: DaemonConfig, params: getFullnodeInfosParams): Promise<FullnodeStats>,
 } & MapString<any>;
 
 
@@ -538,15 +590,44 @@ export type FullnodeStats = {
     blockchain?: {
         blocks: number,
         headers?: number,
+        bestBlockHash?: string,
+        bestBlockTime?: number,
+        sizeOnDisk?: number,
+        peers: number,
+        walletAddress?: string,
     },
     dataDate?: number,
 };
 
 
-export type RunningFullnode = {
+export type InstalledFullnode = InstalledFullnodeConfig;
+
+export type InstalledFullnodeConfig = {
+    name: string,
+    title: string,
+    lastVersion: string,
+    defaultAlias: string,
+    versions: { [fullnodeAlias: string]: InstalledFullnodeAliasConfig },
+};
+
+
+export type InstalledFullnodeAliasConfig = {
+    name: string,
+    alias: string,
+    version: string,
+    installDate: string,
+    installUrl: string,
+}
+
+
+
+export type RunningFullnodeProcess = {
     fullnode: string,
     alias: string,
     pid: number,
+    dateStart: number,
+    //apiPort: number, // TODO
+    //p2pPort: number, // TODO
 };
 
 
@@ -589,22 +670,6 @@ export type fullnodeRunInfosParams = {
     alias?: string,
 }
 
-export type InstalledMinerConfig = {
-    name: string,
-    title: string,
-    lastVersion: string,
-    defaultAlias: string,
-    versions: { [minerAlias: string]: InstalledMinerAliasConfig },
-}
-
-export type InstalledMinerAliasConfig = {
-    name: string,
-    alias: string,
-    version: string,
-    installDate: string,
-    installUrl: string,
-}
-
 export type AllFullnodes = {
     [fullnodeName: string]: {
         installed: boolean,
@@ -627,34 +692,6 @@ export type getFullnodeCommandFileParams = {
 export type getFullnodeInfosParams = {
 }
 
-
-
-
-/* FARM */
-
-export type FarmConfig = {
-    name?: string,
-    wsPass?: string,
-};
-
-export type FarmInfos = {
-    farm: {
-        name: string,
-        hostname: string,
-        ip: string,
-        os: string,
-        uptime: number,
-    },
-    usage: {
-        loadAvg: number,
-        memory: {
-            used: number,
-            total: number,
-        },
-    },
-    rigsInfos: { [rigName: string]: RigInfos },
-    dataDate?: number | null,
-}
 
 
 /* POOL */

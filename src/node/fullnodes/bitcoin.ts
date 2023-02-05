@@ -2,12 +2,12 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
-import * as baseFullnode from './_baseFullnode';
-
-import admZip from 'adm-zip'; //
+const RpcClient = require("rpc-client");
 
 import { now, hasOpt, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
+import * as baseFullnode from './_baseFullnode';
+
 
 import type *  as t from '../../common/types';
 
@@ -20,17 +20,15 @@ Github  : https://github.com/bitcoin/bitcoin
 Download: https://bitcoincore.org/en/download/
 Download: https://bitcoin.org/en/download
 
-Alternative: btcd
-=================
-Github  : https://github.com/btcsuite/btcd/
-Download: https://github.com/btcsuite/btcd/releases
-version : 0.23.3
-- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-linux-amd64-v${version}.tar.gz
-- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-windows-amd64-v${version}.zip
-- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-darwin-amd64-v${version}.tar.gz
-- https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-freebsd-amd64-v${version}.tar.gz
-
 */
+/* ########## CONFIG ######### */
+
+const fullnodeName      = 'bitcoin';
+const fullnodeTitle     = 'Bitcoin';
+const github            = ''; // bitcoin/bitcoin
+const lastVersion       = '24.0.1'; // for bitcoincore.org
+const versionBitcoinOrg = '22.0';   // for bitcoin.org
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -40,101 +38,79 @@ const SEP = path.sep;
 
 export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
+    fullnodeName,
+    fullnodeTitle,
+    lastVersion,
+    github,
 
-    version: '24.0.1',
-    versionBitcoinOrg: '22.0',
 
     async install(config, params) {
         // install bitcoincore from bitcoincore.org OR bitcoin.org
-        const targetAlias: string = params.alias || params.fullnode;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`
-        let version = params.version || this.version;
+        const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
+        const setAsDefaultAlias = params.default || false;
 
-        if (hasOpt('--bitcoin.org')) {
-            version = params.version || this.versionBitcoinOrg;
-        }
-
+        let version = params.version || this.lastVersion;
         let subDir = `${SEP}bitcoin-${version}`;
 
-        const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
-
-        if (platform === 'linux') {
-            if (hasOpt('--bitcoin.org')) {
-                dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`;
-
-            } else {
-                dlUrl = `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`;
-            }
-
-        } else if (platform === 'win32') {
-            if (hasOpt('--bitcoin.org')) {
-                dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`;
-
-            } else {
-                dlUrl = `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`;
-            }
-
-        } else if (platform === 'darwin') {
-            if (hasOpt('--bitcoin.org')) {
-                dlUrl = `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-osx64.tar.gz`;
-
-            } else {
-                dlUrl = `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-apple-darwin.tar.gz`;
-            }
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
+        // Download url selection
+        let dlUrls: any = {
+            'linux':   `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`,
+            'win32':   `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`,
+            'darwin':  `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-apple-darwin.tar.gz`,
+            'freebsd': ``,
         }
 
+        if (hasOpt('--bitcoin.org')) {
+            version = params.version || versionBitcoinOrg;
+
+            dlUrls = {
+                'linux':   `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`,
+                'win32':   `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-win64.zip`,
+                'darwin':  `https://bitcoin.org/bin/bitcoin-core-${version}/bitcoin-${version}-osx64.tar.gz`,
+                'freebsd': ``,
+            }
+        }
+
+        let dlUrl = dlUrls[platform] || '';
+
         if (dlUrl === 'edit-me') throw { message: `No installation script available for the platform ${platform}` };
+
+        // Some common install options
+        const {  fullnodeAlias, tempDir, fullnodeDir, aliasDir } = this.getInstallOptions(config, params, version);
+
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
         const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-        console.log(`${now()} [INFO] [NODE] Downloading file ${dlUrl}`);
-        await downloadFile(dlUrl, dlFilePath);
-        console.log(`${now()} [INFO] [NODE] Download complete`);
+        await this.downloadFile(dlUrl, dlFilePath);
 
         // Extracting
-        fs.mkdirSync(`${tempDir}${SEP}unzipped`);
-        console.log(`${now()} [INFO] [NODE] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
-        console.log(`${now()} [INFO] [NODE] Extract complete`);
+        await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [NODE] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+
+        // Write report files
+        this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
+
+        console.log(`${now()} [INFO] [NODE] Install complete into ${aliasDir}`);
+    },
+
+
+    async getLastVersion(): Promise<string> {
+        if (hasOpt('--bitcoin.org')) {
+            return baseFullnode.fullnodeInstall.getLastVersion();
+        }
+
+        // no script available for bitcoincore.org => TODO
+        return '';
     }
+
 };
 
 
@@ -144,24 +120,24 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
     ...baseFullnode.fullnodeCommands,
 
     p2pPort: 8333, // default = 8333
-    rpcPort: -1, // default = 8332
-
+    rpcPort: 8332, // default = 8332
     command: 'bin/bitcoind', // the filename of the executable (without .exe extension)
+    managed: true, // set true when the getInfos() script is ready
 
-    getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
-    },
 
     getCommandArgs(config, params) {
         const args: string[] = [
             `-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
-            `-server`,
-            `-port=${this.p2pPort.toString()}`,
             `-printtoconsole`,
             `-maxmempool=100`,
             `-zmqpubrawblock=tcp://127.0.0.1:28332`,
             `-zmqpubrawtx=tcp://127.0.0.1:28333`,
         ];
+
+        if (this.p2pPort > 0) {
+            args.push( `-server` );
+            args.push( `-port=${this.p2pPort.toString()}` );
+        }
 
         if (this.rpcPort !== -1) {
             args.push( `-rpcport=${this.rpcPort.toString()}` );
@@ -180,31 +156,61 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
 
     async getInfos(config, params) {
-        const apiUrl = `http://127.0.0.1:${this.rpcPort}`;
-        const headers: any = {};
+        // RPC REQUEST
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
 
-        // TODO: RPC REQUEST
+        const rpcClient = new RpcClient( { host:"127.0.0.1", port:this.rpcPort, protocol:"http" } );
+        rpcClient.setBasicAuth("user", "pass");
 
-        //const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
-        //const fullnodeSummary: any = await fullnodeSummaryRes.json();
+        const getblockchaininfo: any = await new Promise((resolve, reject) => {
+            rpcClient.call("getblockchaininfo", [], function(err: any, result: any){
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+            });
+
+        }).catch((err: any) => {
+            console.warn(`${now()} [WARNING] [NODE] Cannot get getblockchaininfo ${fullnodeName} : ${err.message}`);
+        });
+
+        const getnetworkinfo: any = await new Promise((resolve, reject) => {
+            rpcClient.call("getnetworkinfo", [], function(err: any, result: any){
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+            });
+
+        }).catch((err: any) => {
+            console.warn(`${now()} [WARNING] [NODE] Cannot get getnetworkinfo ${fullnodeName} : ${err.message}`);
+        });
 
         // EDIT THESE VALUES - START //
-        const fullnodeName = 'edit-me';
-        const coin = 'edit-me';
-        const blocks = -1; // edit-me
-        const blockHeaders = -1; // edit-me
-
-        const cpus: any[] = [];
+        const coin = 'BTC';
+        const blocks = getblockchaininfo.blocks || -1;
+        const blockHeaders = getblockchaininfo.headers || -1;
+        const bestBlockHash = getblockchaininfo.bestblockhash || '';
+        const bestBlockTime = getblockchaininfo.time || -1;
+        const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
+        const peers = getnetworkinfo.connections || -1;
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
             fullnode: {
-                name: fullnodeName,
+                name: fullnodeTitle,
                 coin,
             },
             blockchain: {
                 blocks,
                 headers: blockHeaders,
+                bestBlockHash,
+                bestBlockTime,
+                sizeOnDisk,
+                peers,
             },
         };
 

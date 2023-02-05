@@ -28,7 +28,6 @@ const lastVersion = ''; // edit-me
 
 /* ########## MAIN ######### */
 
-
 const SEP = path.sep;
 
 
@@ -38,15 +37,15 @@ export const minerInstall: t.minerInstallInfos = {
     ...baseMiner.minerInstall,
     minerName,
     minerTitle,
-    lastVersion,
+    //lastVersion,   // uncomment me when install script is ready
     github,
 
-    version: 'edit-me',
 
     async install(config, params) {
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         const setAsDefaultAlias = params.default || false;
-        let version = params.version || this.version;
+
+        let version = params.version || this.lastVersion;
         let subDir = ``; // edit-me
 
         // Download url selection
@@ -69,21 +68,15 @@ export const minerInstall: t.minerInstallInfos = {
         // Downloading
         const dlFileName = path.basename(dlUrl);
         const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-        console.log(`${now()} [INFO] [RIG] Downloading file ${dlUrl}`);
-        await downloadFile(dlUrl, dlFilePath);
-        console.log(`${now()} [INFO] [RIG] Download complete`);
+        await this.downloadFile(dlUrl, dlFilePath);
 
         // Extracting
-        fs.mkdirSync(`${tempDir}${SEP}unzipped`);
-        console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
-        console.log(`${now()} [INFO] [RIG] Extract complete`);
+        await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
         fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
-        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
 
         // Write report files
         this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
@@ -101,11 +94,9 @@ export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
     apiPort: -1, // edit-me
-    command: 'edit-me', // the filename of the executable (without .exe extension)
+    command: '', // edit-me // the filename of the executable (without .exe extension)
+    managed: false, // set true when the getInfos() script is ready
 
-    getCommandFile(config, params) {
-        return this.command + (os.platform() === 'win32' ? '.exe' : '');
-    },
 
     getCommandArgs(config, params) {
         const args: string[] = [
@@ -148,7 +139,7 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async EDIT_ME_getInfos(config, params) {
+    async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
         const headers: any = {}; // edit-me if needed
 

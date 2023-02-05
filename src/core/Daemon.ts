@@ -320,7 +320,7 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
 
                     case 'rigMinerRunGetStatus':
                         try {
-                            const minerStatus = Rig.minerRunStatus(config, req.params);
+                            const minerStatus = Rig.minerRunGetStatus(config, req.params);
                             rpcSendResponse(ws, req.id, minerStatus);
 
                         } catch (err: any) {
@@ -329,9 +329,9 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
                         }
                         break;
 
-                    case 'rigMinerRunLog':
+                    case 'rigMinerRunGetLog':
                         try {
-                            const minerLog = Rig.minerRunLog(config, req.params);
+                            const minerLog = await Rig.minerRunGetLog(config, req.params);
                             rpcSendResponse(ws, req.id, minerLog);
 
                         } catch (err: any) {
@@ -421,6 +421,17 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
 
                         } catch (err: any) {
                             console.warn(`${now()} [${colors.blue('WARN')}] [DAEMON] cannot get fullnode run status. ${err.message}`);
+                            rpcSendError(ws, req.id, { code: -1, message: err.message });
+                        }
+                        break;
+
+                    case 'rigFullnodeRunGetLog':
+                        try {
+                            const fullnodeLog = await Node.fullnodeRunGetLog(config, req.params);
+                            rpcSendResponse(ws, req.id, fullnodeLog);
+
+                        } catch (err: any) {
+                            console.warn(`${now()} [${colors.blue('WARN')}] [DAEMON] cannot get fullnode run log. ${err.message}`);
                             rpcSendError(ws, req.id, { code: -1, message: err.message });
                         }
                         break;

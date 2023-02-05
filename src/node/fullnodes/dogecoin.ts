@@ -2,11 +2,11 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
-import fetch from 'node-fetch';
-import admZip from 'adm-zip';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
+import * as baseFullnode from './_baseFullnode';
+
 
 import type *  as t from '../../common/types';
 
@@ -19,6 +19,13 @@ Github  : https://github.com/dogecoin/dogecoin
 Download: https://github.com/dogecoin/dogecoin/releases
 
 */
+/* ########## CONFIG ######### */
+
+const fullnodeName  = 'dogecoin';
+const fullnodeTitle = 'Dogecoin';
+const github        = 'dogecoin/dogecoin';
+const lastVersion   = '1.14.6';
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
@@ -27,78 +34,54 @@ const SEP = path.sep;
 /* ########## FUNCTIONS ######### */
 
 export const fullnodeInstall: t.fullnodeInstallInfos = {
-    version: '1.14.6',
+    ...baseFullnode.fullnodeInstall,
+    fullnodeName,
+    fullnodeTitle,
+    lastVersion,
+    github,
 
     async install(config, params) {
-        const targetAlias: string = params.alias || params.fullnode;
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
-        const targetDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`
-        let version = params.version || this.version;
+        const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
+        const setAsDefaultAlias = params.default || false;
+
+        let version = params.version || this.lastVersion;
         let subDir = `${SEP}dogecoin-${version}`;
 
-        const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-        let dlUrl: string;
-
-        if (platform === 'linux') {
-            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-x86_64-linux-gnu.tar.gz`;
-
-        } else if (platform === 'win32') {
-            dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-win64.zip`;
-
-        } else if (platform === 'darwin') {
-            //dlUrl = `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-osx-signed.dmg`;
-            dlUrl = `edit-me`;
-
-        } else {
-            throw { message: `No installation script available for the platform ${platform}` };
+        // Download url selection
+        const dlUrls: any = {
+            'linux':   `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-x86_64-linux-gnu.tar.gz`,
+            'win32':   `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-win64.zip`,
+            'darwin':  ``, // https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-osx-signed.dmg
+            'freebsd': ``,
         }
+        let dlUrl = dlUrls[platform] || '';
 
         if (dlUrl === 'edit-me') throw { message: `No installation script available for the platform ${platform}` };
+
+        // Some common install options
+        const {  fullnodeAlias, tempDir, fullnodeDir, aliasDir } = this.getInstallOptions(config, params, version);
+
 
         // Downloading
         const dlFileName = path.basename(dlUrl);
         const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-        console.log(`${now()} [INFO] [NODE] Downloading file ${dlUrl}`);
-        await downloadFile(dlUrl, dlFilePath);
-        console.log(`${now()} [INFO] [NODE] Download complete`);
+        await this.downloadFile(dlUrl, dlFilePath);
 
         // Extracting
-        fs.mkdirSync(`${tempDir}${SEP}unzipped`);
-        console.log(`${now()} [INFO] [NODE] Extracting file ${dlFilePath}`);
-        if (path.extname(dlFilePath) === '.gz') {
-            await tar.extract(
-                {
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }
-            ).catch((err: any) => {
-                throw { message: err.message };
-            });
-
-        } else {
-            const zipFile = new admZip(dlFilePath);
-            await new Promise((resolve, reject) => {
-                zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(null);
-                });
-            }).catch((err:any) => {
-                throw { message: err.message };
-            });
-        }
-        console.log(`${now()} [INFO] [NODE] Extract complete`);
+        await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
-        fs.mkdirSync(targetDir, {recursive: true});
-        fs.rmSync(targetDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, targetDir);
-        console.log(`${now()} [INFO] [NODE] Install complete into ${targetDir}`);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+
+        // Write report files
+        this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
 
         // Cleaning
         fs.rmSync(tempDir, { recursive: true, force: true });
+
+        console.log(`${now()} [INFO] [NODE] Install complete into ${aliasDir}`);
     }
 };
 
@@ -106,22 +89,24 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
 
 export const fullnodeCommands: t.fullnodeCommandInfos = {
+    ...baseFullnode.fullnodeCommands,
+
     p2pPort: 22556, // default = 22556
-    rpcPort: -1, // default = 22555
-
+    rpcPort: 22555, // default = 22555
     command: 'bin/dogecoind', // the filename of the executable (without .exe extension)
+    managed: false, // set true when the getInfos() script is ready
 
-    getCommandFile(config, params) {
-        return this.command + (os.platform() === 'linux' ? '' : '.exe');
-    },
 
     getCommandArgs(config, params) {
         const args: string[] = [
             `-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
-            `-server`,
-            `-port=${this.p2pPort.toString()}`,
             `-printtoconsole`,
         ];
+
+        if (this.p2pPort > 0) {
+            args.push( `-server` );
+            args.push( `-port=${this.p2pPort.toString()}` );
+        }
 
         if (this.rpcPort !== -1) {
             args.push( `-rpcport=${this.rpcPort.toString()}` );
@@ -153,6 +138,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         const coin = 'edit-me';
         const blocks = -1; // edit-me
         const blockHeaders = -1; // edit-me
+        const peers = -1; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
@@ -163,6 +149,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             blockchain: {
                 blocks,
                 headers: blockHeaders,
+                peers, // number
             },
         };
 

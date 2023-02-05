@@ -186,7 +186,7 @@ function registerRigRoutes(app, urlPrefix = '') {
         const minerFullName = `${minerName}-${minerAlias}`;
         const rigInfos = yield Rig.getRigInfos(config);
         const minerInfos = (_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.minersStats[minerFullName];
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
         const allMiners = yield Rig.getAllMiners(config);
         const installStatus = false;
         const uninstallStatus = false;
@@ -210,7 +210,7 @@ function registerRigRoutes(app, urlPrefix = '') {
         const minerDefault = ((_h = req.body.default) === null || _h === void 0 ? void 0 : _h.toString()) || '';
         const version = ((_j = req.body.version) === null || _j === void 0 ? void 0 : _j.toString()) || '';
         const config = Daemon.getConfig();
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
         if (action === 'start') {
             if (!minerName) {
                 res.send(`Error: missing 'miner' parameter`);
@@ -249,12 +249,12 @@ function registerRigRoutes(app, urlPrefix = '') {
         const monitorStatus = Rig.monitorGetStatus();
         const rigInfos = yield Rig.getRigInfos(config);
         const minerInfos = (_m = rigInfos.status) === null || _m === void 0 ? void 0 : _m.minersStats[minerFullName];
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
         const allMiners = yield Rig.getAllMiners(config);
         if (action === 'log') {
             //res.send( `not yet available` );
             res.header('Content-Type', 'text/plain');
-            const log = yield Rig.minerRunLog(config, { miner: minerName, lines: 50 });
+            const log = yield Rig.minerRunGetLog(config, { miner: minerName, lines: 50 });
             res.send(log);
             return;
         }
@@ -303,7 +303,7 @@ function registerRigRoutes(app, urlPrefix = '') {
         const minerName = req.params.minerName;
         const action = ((_o = req.body.action) === null || _o === void 0 ? void 0 : _o.toString()) || '';
         const config = Daemon.getConfig();
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
         const algo = ((_p = req.body.algo) === null || _p === void 0 ? void 0 : _p.toString()) || '';
         const poolUrl = ((_q = req.body.poolUrl) === null || _q === void 0 ? void 0 : _q.toString()) || '';
         const poolUser = ((_r = req.body.poolUser) === null || _r === void 0 ? void 0 : _r.toString()) || '';

@@ -5,98 +5,72 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
-const tar_1 = tslib_1.__importDefault(require("tar"));
-const adm_zip_1 = tslib_1.__importDefault(require("adm-zip"));
 const utils_1 = require("../../common/utils");
+const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website:
-Github :
+Website   :
+Github    :
+Downnload :
 
 */
+/* ########## CONFIG ######### */
+const fullnodeName = ''; // edit-me
+const fullnodeTitle = ''; // edit-me
+const github = ''; // edit-me
+const lastVersion = ''; // edit-me
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
-exports.fullnodeInstall = {
-    version: 'edit-me',
+exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
+    fullnodeTitle,
+    //lastVersion,   // uncomment me when install script is ready
+    github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const targetAlias = params.alias || params.fullnode;
-            const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.fullnode-install-${params.fullnode}-${targetAlias}-`), {});
-            const targetDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}node${SEP}fullnodes${SEP}${targetAlias}`;
-            let version = params.version || this.version;
-            throw { message: `edit-me then delete this line` };
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
-            let dlUrl;
-            if (platform === 'linux') {
-                dlUrl = `edit-me`;
-            }
-            else if (platform === 'win32') {
-                dlUrl = `edit-me`;
-            }
-            else if (platform === 'darwin') {
-                dlUrl = `edit-me`;
-            }
-            else {
+            const setAsDefaultAlias = params.default || false;
+            let version = params.version || this.lastVersion;
+            let subDir = ``; // edit-me
+            // Download url selection
+            const dlUrls = {
+                'linux': ``,
+                'win32': ``,
+                'darwin': ``,
+                'freebsd': ``, // edit-me
+            };
+            let dlUrl = dlUrls[platform] || '';
+            throw { message: `edit-me then delete this line` };
+            if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
-            }
-            if (dlUrl === 'edit-me')
-                throw { message: `No installation script available for the platform ${platform}` };
+            // Some common install options
+            const { fullnodeAlias, tempDir, fullnodeDir, aliasDir } = this.getInstallOptions(config, params, version);
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Downloading file ${dlUrl}`);
-            yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Download complete`);
+            yield this.downloadFile(dlUrl, dlFilePath);
             // Extracting
-            fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extracting file ${dlFilePath}`);
-            if (path_1.default.extname(dlFilePath) === '.gz') {
-                yield tar_1.default.extract({
-                    file: dlFilePath,
-                    cwd: `${tempDir}${SEP}unzipped`,
-                }).catch((err) => {
-                    throw { message: err.message };
-                });
-            }
-            else {
-                const zipFile = new adm_zip_1.default(dlFilePath);
-                yield new Promise((resolve, reject) => {
-                    zipFile.extractAllToAsync(`${tempDir}${SEP}unzipped`, true, true, (err) => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        resolve(null);
-                    });
-                }).catch((err) => {
-                    throw { message: err.message };
-                });
-            }
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extract complete`);
+            yield this.extractFile(tempDir, dlFilePath);
             // Install to target dir
-            fs_1.default.mkdirSync(targetDir, { recursive: true });
-            fs_1.default.rmSync(targetDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${SEP}edit-me${SEP}`, targetDir);
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${targetDir}`);
+            fs_1.default.mkdirSync(aliasDir, { recursive: true });
+            fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
+            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            // Write report files
+            this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
             // Cleaning
             fs_1.default.rmSync(tempDir, { recursive: true, force: true });
+            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
-    }
-};
-exports.fullnodeCommands = {
-    p2pPort: -1,
-    rpcPort: -1,
-    command: 'edit-me',
-    getCommandFile(config, params) {
-        return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
-    },
+    } });
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
         ];
-        if (this.rpcPort !== -1) {
+        if (this.p2pPort > 0) {
+        }
+        if (this.rpcPort > 0) {
             args.push(`-edit-me-rpcport=${this.rpcPort.toString()}`);
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
@@ -106,17 +80,13 @@ exports.fullnodeCommands = {
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const apiUrl = `http://127.0.0.1:${this.rpcPort}`;
-            const headers = {}; // edit-me if needed
             // TODO: RPC REQUEST
-            //const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
-            //const fullnodeSummary: any = await fullnodeSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const fullnodeName = 'edit-me';
-            const coin = 'edit-me';
+            const fullnodeName = ''; // edit-me
+            const coin = ''; // edit-me
             const blocks = -1; // edit-me
             const blockHeaders = -1; // edit-me
-            const cpus = []; // edit-me
+            const peers = -1; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
@@ -126,9 +96,9 @@ exports.fullnodeCommands = {
                 blockchain: {
                     blocks,
                     headers: blockHeaders,
+                    peers,
                 },
             };
             return infos;
         });
-    }
-};
+    } });

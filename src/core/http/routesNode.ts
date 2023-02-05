@@ -27,7 +27,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         const config = Daemon.getConfig();
         const monitorStatus = Node.monitorGetStatus();
         const allFullnodes = await Node.getAllFullnodes(config);
-        const nodeInfos = Node.getNodeInfos(config);
+        const nodeInfos = await Node.getNodeInfos(config);
 
         // variables à ne plus utiliser... (utiliser allFullnodes à la place)
         const runningFullnodes = Object.entries(allFullnodes).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
@@ -59,8 +59,8 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     // NODE status => /node/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        const nodeStatus = Node.monitorGetStatus();
-        const nodeInfos = Node.getNodeInfos(config);
+        const monitorStatus = Node.monitorGetStatus();
+        const nodeInfos = await Node.getNodeInfos(config);
 
         const data = {
             ...utilFuncs,
@@ -69,7 +69,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}node${SEP}node_status.html`,
-            nodeStatus,
+            monitorStatus,
             nodeInfos,
             //monitorStatus,
             //installedFullnodes,
@@ -84,7 +84,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     // NODE status JSON => /node/status.json
     app.get(`${urlPrefix}/status.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
-        const nodeInfos = Node.getNodeInfos(config);
+        const nodeInfos = await Node.getNodeInfos(config);
         let content = JSON.stringify(nodeInfos, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
@@ -95,7 +95,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     // GET Node monitor run => /node/monitor-run
     app.get(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         //const config = Daemon.getConfig();
-        const nodeStatus = Node.monitorGetStatus();
+        const monitorStatus = Node.monitorGetStatus();
 
         const data = {
             ...utilFuncs,
@@ -104,7 +104,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}node${SEP}monitor_run.html`,
-            nodeStatus,
+            monitorStatus,
         };
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
@@ -113,10 +113,10 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     app.post(`${urlPrefix}/monitor-run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const config = Daemon.getConfig();
         const action = req.body.action?.toString() || '';
-        const nodeStatus = Node.monitorGetStatus();
+        const monitorStatus = Node.monitorGetStatus();
 
         if (action === 'start') {
-            if (nodeStatus) {
+            if (monitorStatus) {
                 res.send('OK: Node monitor is running');
 
             } else {
@@ -126,7 +126,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
             return;
 
         } else if (action === 'stop') {
-            if (nodeStatus) {
+            if (monitorStatus) {
                 Node.monitorStop();
                 res.send('OK: Node monitor stopped');
 
@@ -147,8 +147,12 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         //const action = req.query.action?.toString() || '';
 
         const config = Daemon.getConfig();
-        const nodeInfos = Node.getNodeInfos(config);
-        const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
+        const fullnodeConfig = Node.getInstalledFullnodeConfiguration(config, fullnodeName);
+        const fullnodeAlias = req.query.alias?.toString() || fullnodeConfig.defaultAlias;
+        const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+
+        const nodeInfos = await Node.getNodeInfos(config);
+        const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeFullName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         const allFullnodes = await Node.getAllFullnodes(config);
 
@@ -177,10 +181,14 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
     app.post(`${urlPrefix}/fullnodes/:fullnodeName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const fullnodeName = req.params.fullnodeName;
         const action = req.body.action?.toString() || '';
-
+        
         const config = Daemon.getConfig();
-        //const nodeInfos = Node.getNodeInfos(config);
-        //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
+        const fullnodeConfig = Node.getInstalledFullnodeConfiguration(config, fullnodeName);
+        const fullnodeAlias = req.query.alias?.toString() || fullnodeConfig.defaultAlias;
+        const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+
+        //const nodeInfos = await Node.getNodeInfos(config);
+        //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeFullName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
 
         if (action === 'start') {
@@ -218,21 +226,25 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         const action = req.query.action?.toString() || '';
 
         const config = Daemon.getConfig();
-        const nodeStatus = Node.monitorGetStatus();
-        const nodeInfos = Node.getNodeInfos(config);
-        const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
+        const fullnodeConfig = Node.getInstalledFullnodeConfiguration(config, fullnodeName);
+        const fullnodeAlias = req.query.alias?.toString() || fullnodeConfig.defaultAlias;
+        const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+
+        const monitorStatus = Node.monitorGetStatus();
+        const nodeInfos = await Node.getNodeInfos(config);
+        const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeFullName];
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
         const allFullnodes = await Node.getAllFullnodes(config);
 
         if (action === 'log') {
             //res.send( `not yet available` );
             res.header('Content-Type', 'text/plain');
-            const log = await Node.fullnodeRunLog(config, { fullnode: fullnodeName, lines: 50 });
+            const log = await Node.fullnodeRunGetLog(config, { fullnode: fullnodeName, lines: 50 });
             res.send(log);
             return;
 
         } else if (action === 'status') {
-            if (! nodeStatus) {
+            if (! monitorStatus) {
                 res.send( `Warning: JSON status requires node monitor to be started. Click here to <a href="/node/monitor-start">start monitor</a>` );
                 return;
             }
@@ -274,9 +286,10 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
                 noIndex: false,
             },
             contentTemplate: `..${SEP}node${SEP}fullnode_run.html`,
-            nodeStatus,
+            monitorStatus,
             nodeInfos,
             fullnode: fullnodeName,
+            fullnodeAlias,
             fullnodeStatus,
             fullnodeInfos,
             allFullnodes,
@@ -290,8 +303,10 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
         const action = req.body.action?.toString() || '';
 
         const config = Daemon.getConfig();
-        //const nodeInfos = Node.getNodeInfos(config);
-        //const fullnodeInfos = nodeInfos.status?.fullnodesStats[fullnodeName];
+        const fullnodeConfig = Node.getInstalledFullnodeConfiguration(config, fullnodeName);
+        const fullnodeAlias = req.query.alias?.toString() || fullnodeConfig.defaultAlias;
+        const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+
         const fullnodeStatus = Node.fullnodeRunGetStatus(config, { fullnode: fullnodeName });
 
         if (action === 'start') {

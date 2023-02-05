@@ -258,7 +258,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'rigMinerRunGetStatus':
                             try {
-                                const minerStatus = Rig.minerRunStatus(config, req.params);
+                                const minerStatus = Rig.minerRunGetStatus(config, req.params);
                                 rpcSendResponse(ws, req.id, minerStatus);
                             }
                             catch (err) {
@@ -266,9 +266,9 @@ function registerWssRoutes(config, wss) {
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;
-                        case 'rigMinerRunLog':
+                        case 'rigMinerRunGetLog':
                             try {
-                                const minerLog = Rig.minerRunLog(config, req.params);
+                                const minerLog = yield Rig.minerRunGetLog(config, req.params);
                                 rpcSendResponse(ws, req.id, minerLog);
                             }
                             catch (err) {
@@ -348,6 +348,16 @@ function registerWssRoutes(config, wss) {
                             }
                             catch (err) {
                                 console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get fullnode run status. ${err.message}`);
+                                rpcSendError(ws, req.id, { code: -1, message: err.message });
+                            }
+                            break;
+                        case 'rigFullnodeRunGetLog':
+                            try {
+                                const fullnodeLog = yield Node.fullnodeRunGetLog(config, req.params);
+                                rpcSendResponse(ws, req.id, fullnodeLog);
+                            }
+                            catch (err) {
+                                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARN')}] [DAEMON] cannot get fullnode run log. ${err.message}`);
                                 rpcSendError(ws, req.id, { code: -1, message: err.message });
                             }
                             break;

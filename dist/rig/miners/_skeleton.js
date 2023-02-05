@@ -7,7 +7,6 @@ const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const utils_1 = require("../../common/utils");
-const decompress_archive_1 = require("../../common/decompress_archive");
 const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /* ########## DESCRIPTION ######### */
 /*
@@ -27,12 +26,13 @@ const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), { minerName,
     minerTitle,
-    lastVersion,
-    github, version: 'edit-me', install(config, params) {
+    //lastVersion,   // uncomment me when install script is ready
+    github,
+    install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
-            let version = params.version || this.version;
+            let version = params.version || this.lastVersion;
             let subDir = ``; // edit-me
             // Download url selection
             const dlUrls = {
@@ -50,19 +50,13 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             // Downloading
             const dlFileName = path_1.default.basename(dlUrl);
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Downloading file ${dlUrl}`);
-            yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
-            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Download complete`);
+            yield this.downloadFile(dlUrl, dlFilePath);
             // Extracting
-            fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
-            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extracting file ${dlFilePath}`);
-            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
-            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
+            yield this.extractFile(tempDir, dlFilePath);
             // Install to target dir
             fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
             fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
-            this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
             // Write report files
             this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
             // Cleaning
@@ -70,10 +64,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: 'edit-me', // the filename of the executable (without .exe extension)
-    getCommandFile(config, params) {
-        return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
-    },
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {
@@ -103,7 +94,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         }
         return args;
     },
-    EDIT_ME_getInfos(config, params) {
+    getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
             const headers = {}; // edit-me if needed

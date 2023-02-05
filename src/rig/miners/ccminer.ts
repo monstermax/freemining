@@ -46,6 +46,7 @@ export const minerInstall: t.minerInstallInfos = {
     async install(config, params) {
         const platform = getOpt('--platform', config._args) || os.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
         const setAsDefaultAlias = params.default || false;
+
         let version = params.version || this.lastVersion;
         let subDir = ``;
         let installFileName = 'ccminer';
@@ -76,16 +77,13 @@ export const minerInstall: t.minerInstallInfos = {
         // Downloading
         const dlFileName = path.basename(dlUrl);
         const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
-        console.log(`${now()} [INFO] [RIG] Downloading file ${dlUrl}`);
-        await downloadFile(dlUrl, dlFilePath);
-        console.log(`${now()} [INFO] [RIG] Download complete`);
+        await this.downloadFile(dlUrl, dlFilePath);
 
         // Install to target dir
         fs.rmSync(aliasDir, { recursive: true, force: true });
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.renameSync( `${tempDir}${SEP}${dlFileName}`, `${aliasDir}/${installFileName}`);
         fs.chmodSync(`${aliasDir}/${installFileName}`, 0o755);
-        this.setDefault(minerDir, aliasDir, setAsDefaultAlias);
 
         // Write report files
         this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
@@ -104,6 +102,7 @@ export const minerCommands: t.minerCommandInfos = {
 
     apiPort: -1, // edit-me
     command: 'ccminer', // the filename of the executable (without .exe extension)
+    managed: false, // set true when the getInfos() script is ready
 
     getCommandArgs(config, params) {
         const args: string[] = [
@@ -143,7 +142,7 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async EDIT_ME_getInfos(config, params) {
+    async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
         const headers: any = {}; // edit-me if needed
 

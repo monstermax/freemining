@@ -245,7 +245,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
         const rigInfos = await Rig.getRigInfos(config);
         const minerInfos = rigInfos.status?.minersStats[minerFullName];
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
 
         const installStatus = false;
@@ -280,7 +280,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const version = req.body.version?.toString() || '';
 
         const config = Daemon.getConfig();
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
 
         if (action === 'start') {
             if (! minerName) {
@@ -327,13 +327,13 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const monitorStatus = Rig.monitorGetStatus();
         const rigInfos = await Rig.getRigInfos(config);
         const minerInfos = rigInfos.status?.minersStats[minerFullName];
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
         const allMiners = await Rig.getAllMiners(config);
 
         if (action === 'log') {
             //res.send( `not yet available` );
             res.header('Content-Type', 'text/plain');
-            const log = await Rig.minerRunLog(config, { miner: minerName, lines: 50 });
+            const log = await Rig.minerRunGetLog(config, { miner: minerName, lines: 50 });
             res.send(log);
             return;
 
@@ -392,7 +392,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const action = req.body.action?.toString() || '';
 
         const config = Daemon.getConfig();
-        const minerStatus = Rig.minerRunStatus(config, { miner: minerName });
+        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
 
         const algo = req.body.algo?.toString() || '';
         const poolUrl = req.body.poolUrl?.toString() || '';

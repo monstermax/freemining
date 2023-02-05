@@ -2,14 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fullnodeCommands = exports.fullnodeInstall = void 0;
 const tslib_1 = require("tslib");
+const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
+const utils_1 = require("../../common/utils");
+const decompress_archive_1 = require("../../common/decompress_archive");
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = {
-    version: '',
+    fullnodeName: '',
+    fullnodeTitle: '',
+    lastVersion: '',
     github: '',
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -45,12 +50,73 @@ exports.fullnodeInstall = {
                 return version;
             });
         });
+    },
+    getInstallOptions(config, params, version) {
+        const fullnodeAlias = params.alias || `${this.fullnodeName}-${version}`;
+        const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.fullnode-install-${this.fullnodeName}-${fullnodeAlias}-`), {});
+        const fullnodeDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}node${SEP}fullnodes${SEP}${this.fullnodeName}`;
+        const aliasDir = `${fullnodeDir}${SEP}${fullnodeAlias}`;
+        return {
+            fullnodeAlias,
+            tempDir,
+            fullnodeDir,
+            aliasDir,
+        };
+    },
+    writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias = false) {
+        // Alias report
+        const aliasReport = {
+            name: this.fullnodeName,
+            alias: fullnodeAlias,
+            version: version,
+            installDate: new Date,
+            installUrl: dlUrl,
+        };
+        fs_1.default.writeFileSync(`${aliasDir}/freeminingFullnodeAlias.json`, JSON.stringify(aliasReport, null, 4));
+        // Fullnode report
+        let fullnodeReport = {
+            name: this.fullnodeName,
+            title: this.fullnodeTitle,
+            lastVersion: version,
+            defaultAlias: fullnodeAlias,
+        };
+        if (fs_1.default.existsSync(`${fullnodeDir}/freeminingFullnode.json`)) {
+            const reportJson = fs_1.default.readFileSync(`${fullnodeDir}/freeminingFullnode.json`).toString();
+            fullnodeReport = JSON.parse(reportJson);
+        }
+        if (!fullnodeReport.versions) {
+            fullnodeReport.versions = {};
+        }
+        if (version > fullnodeReport.lastVersion) {
+            fullnodeReport.lastVersion = version;
+        }
+        if (setAsDefaultAlias) {
+            fullnodeReport.defaultAlias = fullnodeAlias;
+        }
+        fullnodeReport.versions[fullnodeAlias] = aliasReport;
+        fs_1.default.writeFileSync(`${fullnodeDir}/freeminingFullnode.json`, JSON.stringify(fullnodeReport, null, 4));
+    },
+    downloadFile(dlUrl, dlFilePath) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Downloading file ${dlUrl}`);
+            yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
+            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Download complete`);
+        });
+    },
+    extractFile(tempDir, dlFilePath) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
+            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extracting file ${dlFilePath}`);
+            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
+            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extract complete`);
+        });
     }
 };
 exports.fullnodeCommands = {
     p2pPort: -1,
     rpcPort: -1,
     command: '',
+    managed: false,
     getCommandFile(config, params) {
         return this.command + (os_1.default.platform() === 'linux' ? '' : '.exe');
     },
@@ -61,10 +127,11 @@ exports.fullnodeCommands = {
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // EXTENDS ME
-            const fullnodeName = 'edit-me';
-            const coin = 'edit-me';
-            const blocks = -1; // edit-me
-            const blockHeaders = -1; // edit-me
+            const fullnodeName = '';
+            const coin = '';
+            const blocks = -1;
+            const blockHeaders = -1;
+            const peers = -1;
             let infos = {
                 fullnode: {
                     name: fullnodeName,
@@ -73,6 +140,7 @@ exports.fullnodeCommands = {
                 blockchain: {
                     blocks,
                     headers: blockHeaders,
+                    peers,
                 },
             };
             return infos;

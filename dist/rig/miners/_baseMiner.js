@@ -6,6 +6,8 @@ const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
+const utils_1 = require("../../common/utils");
+const decompress_archive_1 = require("../../common/decompress_archive");
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -54,28 +56,12 @@ exports.minerInstall = {
         const tempDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), `frm-tmp.miner-install-${this.minerName}-${minerAlias}-`), {});
         const minerDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners${SEP}${this.minerName}`;
         const aliasDir = `${minerDir}${SEP}${minerAlias}`;
-        //if (minerAlias === 'default') {
-        //    throw { message: `invalid alias. 'default' is a reserved word` };
-        //}
         return {
             minerAlias,
             tempDir,
             minerDir,
             aliasDir,
         };
-    },
-    setDefault(minerDir, aliasDir, setAsDefaultAlias) {
-        // Disabled because symlinks do not work properly on Windows
-        //const symlinkExists = fs.existsSync(`${minerDir}/default`);
-        //if (! symlinkExists || setAsDefaultAlias) {
-        //    if (symlinkExists) {
-        //        fs.unlinkSync(`${minerDir}/default`);
-        //    }
-        //    //fs.symlinkSync(aliasDir, `${minerDir}/default`);
-        //    process.chdir(minerDir);
-        //    const minerAlias = path.basename(aliasDir);
-        //    fs.symlinkSync(minerAlias, `default`);
-        //}
     },
     writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias = false) {
         // Alias report
@@ -109,11 +95,27 @@ exports.minerInstall = {
         }
         minerReport.versions[minerAlias] = aliasReport;
         fs_1.default.writeFileSync(`${minerDir}/freeminingMiner.json`, JSON.stringify(minerReport, null, 4));
+    },
+    downloadFile(dlUrl, dlFilePath) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Downloading file ${dlUrl}`);
+            yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
+            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Download complete`);
+        });
+    },
+    extractFile(tempDir, dlFilePath) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
+            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extracting file ${dlFilePath}`);
+            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
+            console.log(`${(0, utils_1.now)()} [INFO] [RIG] Extract complete`);
+        });
     }
 };
 exports.minerCommands = {
     apiPort: -1,
     command: '',
+    managed: false,
     getCommandFile(config, params) {
         return this.command + (os_1.default.platform() === 'win32' ? '.exe' : '');
     },
@@ -121,17 +123,17 @@ exports.minerCommands = {
         // EXTENDS ME
         return [];
     },
-    EDIT_ME_getInfos(config, params) {
+    getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // EXTENDS ME (as "getInfos")
-            const cpus = [];
-            const gpus = [];
+            // EXTENDS ME
             const uptime = 0;
             const algo = '';
             const poolUrl = '';
             const poolUser = '';
             const worker = '';
             const hashRate = 0;
+            const cpus = [];
+            const gpus = [];
             let infos = {
                 miner: {
                     name: '',

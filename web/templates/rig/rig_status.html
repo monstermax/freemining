@@ -236,7 +236,9 @@ function modalStartMinerChangeCoin() {
 
     if (! coin) {
         // no coin selected
-        $miners.children().attr('disabled', true);
+
+        //$miners.children().attr('disabled', true); // disable all miners
+        $miners.children().attr('disabled', false); // re-enable all miners
 
     } else {
         // coin selected
@@ -325,20 +327,22 @@ function modalStartMinerChangeMiner() {
     const coin = $coins.val();
     const miner = $miner.val();
 
-    const coinMinerConf = coinsMiners[coin][miner];
-    const minerConf = miners[miner];
+    if (coin && miner) {
+        const coinMinerConf = coinsMiners[coin] ? coinsMiners[coin][miner] : null;
+        const minerConf = miners[miner];
+        $algo.val(coinMinerConf ? coinMinerConf.algo : '');
 
-    $algo.val(coinMinerConf ? coinMinerConf.algo : '');
+        let extraArgsArr = [];
+        if (minerConf && minerConf.extraArgs && minerConf.extraArgs.trim()) {
+            extraArgsArr.push(minerConf.extraArgs.trim());
+        }
+        if (coinMinerConf && coinMinerConf.extraArgs && coinMinerConf.extraArgs.trim()) {
+            extraArgsArr.push(coinMinerConf.extraArgs.trim());
+        }
+        const extraArgs = extraArgsArr.join(' ');
+        $extraArgs.val(extraArgs);
+    }
 
-    let extraArgsArr = [];
-    if (minerConf && minerConf.extraArgs && minerConf.extraArgs.trim()) {
-        extraArgsArr.push(minerConf.extraArgs.trim());
-    }
-    if (coinMinerConf && coinMinerConf.extraArgs && coinMinerConf.extraArgs.trim()) {
-        extraArgsArr.push(coinMinerConf.extraArgs.trim());
-    }
-    const extraArgs = extraArgsArr.join(' ');
-    $extraArgs.val(extraArgs);
 }
 </script>
 

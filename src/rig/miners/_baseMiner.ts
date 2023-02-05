@@ -5,6 +5,7 @@ import os from 'os';
 import fetch from 'node-fetch';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
+import { decompressFile } from '../../common/decompress_archive';
 
 import type *  as t from '../../common/types';
 
@@ -21,6 +22,7 @@ export const minerInstall: t.minerInstallInfos = {
     minerTitle: '',
     lastVersion: '',
     github: '',
+
 
     async install(config, params) {
         // EXTENDS ME
@@ -65,31 +67,12 @@ export const minerInstall: t.minerInstallInfos = {
         const minerDir = `${config?.appDir}${SEP}rig${SEP}miners${SEP}${this.minerName}`
         const aliasDir = `${minerDir}${SEP}${minerAlias}`;
 
-        //if (minerAlias === 'default') {
-        //    throw { message: `invalid alias. 'default' is a reserved word` };
-        //}
-
         return {
             minerAlias,
             tempDir,
             minerDir,
             aliasDir,
         };
-    },
-
-
-    setDefault(minerDir: string, aliasDir: string, setAsDefaultAlias:boolean) {
-        // Disabled because symlinks do not work properly on Windows
-        //const symlinkExists = fs.existsSync(`${minerDir}/default`);
-        //if (! symlinkExists || setAsDefaultAlias) {
-        //    if (symlinkExists) {
-        //        fs.unlinkSync(`${minerDir}/default`);
-        //    }
-        //    //fs.symlinkSync(aliasDir, `${minerDir}/default`);
-        //    process.chdir(minerDir);
-        //    const minerAlias = path.basename(aliasDir);
-        //    fs.symlinkSync(minerAlias, `default`);
-        //}
     },
 
 
@@ -127,6 +110,22 @@ export const minerInstall: t.minerInstallInfos = {
         }
         minerReport.versions[minerAlias] = aliasReport;
         fs.writeFileSync(`${minerDir}/freeminingMiner.json`, JSON.stringify(minerReport, null, 4));
+    },
+
+
+    async downloadFile(dlUrl: string, dlFilePath: string): Promise<void> {
+        console.log(`${now()} [INFO] [RIG] Downloading file ${dlUrl}`);
+        await downloadFile(dlUrl, dlFilePath);
+        console.log(`${now()} [INFO] [RIG] Download complete`);
+    },
+
+
+    async extractFile(tempDir: string, dlFilePath: string): Promise<void> {
+        fs.mkdirSync(`${tempDir}${SEP}unzipped`);
+
+        console.log(`${now()} [INFO] [RIG] Extracting file ${dlFilePath}`);
+        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
+        console.log(`${now()} [INFO] [RIG] Extract complete`);
     }
 };
 
@@ -135,6 +134,7 @@ export const minerInstall: t.minerInstallInfos = {
 export const minerCommands: t.minerCommandInfos = {
     apiPort: -1,
     command: '',
+    managed: false,
 
 
     getCommandFile(config, params) {
@@ -148,17 +148,17 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async EDIT_ME_getInfos(config, params) {
-        // EXTENDS ME (as "getInfos")
+    async getInfos(config, params) {
+        // EXTENDS ME
 
-        const cpus: any[] = [];
-        const gpus: any[] = [];
         const uptime = 0;
         const algo = '';
         const poolUrl = '';
         const poolUser = '';
         const worker = '';
         const hashRate = 0;
+        const cpus: any[] = [];
+        const gpus: any[] = [];
 
         let infos: t.MinerStats = {
             miner: {

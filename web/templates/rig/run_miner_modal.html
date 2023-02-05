@@ -57,7 +57,7 @@
 
                     <div class="mb-3">
                         <label for="newMiner_coin" class="form-label">Coin<sup>*</sup></label>
-                        <select id="newMiner_coin" name="coin" class="form-select required" aria-describedby="newMiner_coin_Help" onchange="modalStartMinerChangeCoin()">
+                        <select id="newMiner_coin" name="coin" class="form-select" aria-describedby="newMiner_coin_Help" onchange="modalStartMinerChangeCoin()">
                             <option></option>
 
                             <%
@@ -84,7 +84,7 @@
 
                     <div class="mb-3">
                         <label for="newMiner_wallet" class="form-label">Wallet<sup>*</sup></label>
-                        <select id="newMiner_wallet" name="wallet" class="form-select required" aria-describedby="newMiner_wallet_Help" onchange="modalStartMinerChangeWallet()">
+                        <select id="newMiner_wallet" name="wallet" class="form-select" aria-describedby="newMiner_wallet_Help" onchange="modalStartMinerChangeWallet()">
                             <option></option>
                         </select>
                         <div id="newMiner_wallet_Help" class="form-text"></div>
@@ -93,7 +93,7 @@
 
                     <div class="mb-3">
                         <label for="newMiner_pool" class="form-label">Pool<sup>*</sup></label>
-                        <select id="newMiner_pool" name="pool" class="form-select required" aria-describedby="newMiner_pool_Help" onchange="modalStartMinerChangePool()">
+                        <select id="newMiner_pool" name="pool" class="form-select" aria-describedby="newMiner_pool_Help" onchange="modalStartMinerChangePool()">
                             <option></option>
                         </select>
                         <div id="newMiner_pool_Help" class="form-text"></div>
@@ -113,14 +113,22 @@
                                 if (! runnableMiners.includes(miner)) return;
 
                                 const managedMiners = rigInfos.status.managedMiners;
-                                if (! managedMiners.includes(miner)) return;
+                                const isManaged = managedMiners.includes(miner);
+                                //if (! isManaged) return;
 
-                                if (miner in rigInfos.status.minersStats) {
-                                    return '<option value="' + miner + '" disabled>' + miner + '</option>';
+                                let suffix = '';
+                                let disabled = '';
 
-                                } else {
-                                    return '<option value="' + miner + '">' + miner + '</option>';
+                                if (! isManaged) {
+                                    suffix += ' ⚠️ not managed';
                                 }
+
+                                if (miner in rigInfos.status.runningMiners) {
+                                    suffix += ' ⛔ already running';
+                                    disabled = 'disabled';
+                                }
+
+                                return `<option value="${miner}" ${disabled}>${miner}${suffix}</option>`;
                             }).join('') %>
                         </select>
                         <div id="newMiner_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
