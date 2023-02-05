@@ -8,14 +8,14 @@ Node status
     <tr>
         <th>Fullnode</th>
         <th>Alias</th>
-        <th>PID</th>
-        <th>Uptime</th>
-        <th>blocks</th>
-        <th>headers</th>
-        <th>bestBlockTime</th>
-        <th>peers</th>
-        <th>Size on disk</th>
-        <th>walletAddress</th>
+        <th class="text-end">Uptime</th>
+        <th class="text-end">Blocks</th>
+        <th class="text-end">Headers</th>
+        <th class="text-end">Best Time</th>
+        <th class="text-end">Peers</th>
+        <th class="text-end">Size on disk</th>
+        <th class="text-end">PID</th>
+        <th>Wallet Addr.</th>
     </tr>
 </thead>
 <tbody>
@@ -40,13 +40,13 @@ Node status
         html += `<tr>`;
         html += `  <td>${fullnodeName}</td>`;
         html += `  <td>${fullnodeAlias}</td>`;
-        html += `  <td>${pid}</td>`;
-        html += `  <td>${formatNumber(uptime, 'seconds')}</td>`;
-        html += `  <td>${formatNumber(blocks)}</td>`;
-        html += `  <td>${formatNumber(headers)}</td>`;
-        html += `  <td>${blockDate.toJSON().slice(0, 19).replace('T', ' ')}</td>`;
-        html += `  <td>${peers}</td>`;
-        html += `  <td>${formatNumber(sizeOnDisk, 'size')}</td>`;
+        html += `  <td class="text-end">${formatNumber(uptime, 'seconds')}</td>`;
+        html += `  <td class="text-end">${formatNumber(blocks)}</td>`;
+        html += `  <td class="text-end">${formatNumber(headers)}</td>`;
+        html += `  <td class="text-end">${blockDate.toJSON().slice(0, 19).replace('T', ' ')}</td>`;
+        html += `  <td class="text-end">${peers}</td>`;
+        html += `  <td class="text-end">${formatNumber(sizeOnDisk, 'size')}</td>`;
+        html += `  <td class="text-end">${pid}</td>`;
         html += `  <td>${walletAddress}</td>`;
         html += `</tr>`;
 
