@@ -159,7 +159,7 @@ export function getRunningFullnodesAliases(config: t.DaemonConfigAll): t.Running
             fullnode: proc.fullnode || '',
             alias: proc.name,
             pid: proc.pid || 0,
-            dateStart: Date.now(),
+            dateStart: proc.dateStart,
             //apiPort: proc.apiPort, // TODO
         });
     }
@@ -168,31 +168,6 @@ export function getRunningFullnodesAliases(config: t.DaemonConfigAll): t.Running
 }
 
 
-
-export function getRunningFullnodes(config: t.DaemonConfigAll): t.RunningFullnodeProcess[] {
-    //const nodeInfos = await getNodeInfos(config);
-    //const runningFullnodes = Object.keys(nodeInfos.fullnodesStats);
-
-    let procName: string;
-    let nodeProcesses = getProcesses();
-    const runningFullnodes: t.RunningFullnodeProcess[] = [];
-
-    for (procName in nodeProcesses) {
-        const proc = nodeProcesses[procName];
-        if (! proc.process) continue;
-
-        runningFullnodes.push({
-            fullnode: proc.fullnode || '',
-            alias: proc.name,
-            pid: proc.pid || 0,
-            dateStart: Date.now(),
-            //apiPort: proc.apiPort, // TODO
-            //p2pPort: proc.apiPort, // TODO
-        });
-    }
-
-    return runningFullnodes;
-}
 
 
 export function getInstallableFullnodes(config: t.DaemonConfigAll): string[] {
@@ -331,6 +306,7 @@ export async function fullnodeRunStart(config: t.DaemonConfigAll, params: t.full
         dataDir,
         appDir: aliasDir,
         cmdPath,
+        dateStart: Date.now(),
         pid: undefined,
         process: undefined
     };
@@ -582,7 +558,7 @@ export async function getNodeInfos(config: t.DaemonConfigAll): Promise<t.NodeInf
 
 export async function getAllFullnodes(config: t.DaemonConfigAll): Promise<t.AllFullnodes> {
     const installedFullnodes = await getInstalledFullnodes(config);
-    const runningFullnodesAliases = getRunningFullnodes(config);
+    const runningFullnodesAliases = getRunningFullnodesAliases(config);
     const installableFullnodes = getInstallableFullnodes(config); // TODO: mettre en cache
     const runnableFullnodes = getRunnableFullnodes(config); // TODO: mettre en cache
     const managedFullnodes = getManagedFullnodes(config); // TODO: mettre en cache

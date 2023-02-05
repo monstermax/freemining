@@ -82,7 +82,6 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // TODO: RPC REQUEST
             // EDIT THESE VALUES - START //
-            const fullnodeName = ''; // edit-me
             const coin = ''; // edit-me
             const blocks = -1; // edit-me
             const blockHeaders = -1; // edit-me
@@ -90,7 +89,7 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
-                    name: fullnodeName,
+                    name: fullnodeTitle,
                     coin,
                 },
                 blockchain: {

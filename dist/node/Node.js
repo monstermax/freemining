@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFullnodes = exports.getNodeInfos = exports.getProcesses = exports.fullnodeRunGetInfos = exports.fullnodeRunGetLog = exports.fullnodeRunGetStatus = exports.fullnodeRunStop = exports.fullnodeRunStart = exports.getInstalledFullnodeConfiguration = exports.fullnodeInstallStart = exports.getManagedFullnodes = exports.getRunnableFullnodes = exports.getInstallableFullnodes = exports.getRunningFullnodes = exports.getRunningFullnodesAliases = exports.getInstalledFullnodesAliases = exports.getInstalledFullnodes = exports.monitorCheckNode = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllFullnodes = exports.getNodeInfos = exports.getProcesses = exports.fullnodeRunGetInfos = exports.fullnodeRunGetLog = exports.fullnodeRunGetStatus = exports.fullnodeRunStop = exports.fullnodeRunStart = exports.getInstalledFullnodeConfiguration = exports.fullnodeInstallStart = exports.getManagedFullnodes = exports.getRunnableFullnodes = exports.getInstallableFullnodes = exports.getRunningFullnodesAliases = exports.getInstalledFullnodesAliases = exports.getInstalledFullnodes = exports.monitorCheckNode = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -128,35 +128,13 @@ function getRunningFullnodesAliases(config) {
             fullnode: proc.fullnode || '',
             alias: proc.name,
             pid: proc.pid || 0,
-            dateStart: Date.now(),
+            dateStart: proc.dateStart,
             //apiPort: proc.apiPort, // TODO
         });
     }
     return runningFullnodes;
 }
 exports.getRunningFullnodesAliases = getRunningFullnodesAliases;
-function getRunningFullnodes(config) {
-    //const nodeInfos = await getNodeInfos(config);
-    //const runningFullnodes = Object.keys(nodeInfos.fullnodesStats);
-    let procName;
-    let nodeProcesses = getProcesses();
-    const runningFullnodes = [];
-    for (procName in nodeProcesses) {
-        const proc = nodeProcesses[procName];
-        if (!proc.process)
-            continue;
-        runningFullnodes.push({
-            fullnode: proc.fullnode || '',
-            alias: proc.name,
-            pid: proc.pid || 0,
-            dateStart: Date.now(),
-            //apiPort: proc.apiPort, // TODO
-            //p2pPort: proc.apiPort, // TODO
-        });
-    }
-    return runningFullnodes;
-}
-exports.getRunningFullnodes = getRunningFullnodes;
 function getInstallableFullnodes(config) {
     return Object.entries(fullnodesConfigs_1.fullnodesInstalls).map(entry => {
         const [fullnodeName, fullnodeInstall] = entry;
@@ -275,6 +253,7 @@ function fullnodeRunStart(config, params) {
             dataDir,
             appDir: aliasDir,
             cmdPath,
+            dateStart: Date.now(),
             pid: undefined,
             process: undefined
         };
@@ -482,7 +461,7 @@ exports.getNodeInfos = getNodeInfos;
 function getAllFullnodes(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const installedFullnodes = yield getInstalledFullnodes(config);
-        const runningFullnodesAliases = getRunningFullnodes(config);
+        const runningFullnodesAliases = getRunningFullnodesAliases(config);
         const installableFullnodes = getInstallableFullnodes(config); // TODO: mettre en cache
         const runnableFullnodes = getRunnableFullnodes(config); // TODO: mettre en cache
         const managedFullnodes = getManagedFullnodes(config); // TODO: mettre en cache

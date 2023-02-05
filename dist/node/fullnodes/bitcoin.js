@@ -5,7 +5,6 @@ const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const os_1 = tslib_1.__importDefault(require("os"));
-const RpcClient = require("rpc-client");
 const utils_1 = require("../../common/utils");
 const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
@@ -84,8 +83,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             return '';
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: 8333, rpcPort: 8332, command: 'bin/bitcoind', managed: true, // set true when the getInfos() script is ready
-    getCommandArgs(config, params) {
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: 8333, rpcPort: 8332, command: 'bin/bitcoind', managed: true, getCommandArgs(config, params) {
         const args = [
             `-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
             `-printtoconsole`,
@@ -112,32 +110,17 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // RPC REQUEST
+            // bitcoin-cli -rpcuser=user -rpcpassword=pass help
+            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
             // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
             // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            const rpcClient = new RpcClient({ host: "127.0.0.1", port: this.rpcPort, protocol: "http" });
-            rpcClient.setBasicAuth("user", "pass");
-            const getblockchaininfo = yield new Promise((resolve, reject) => {
-                rpcClient.call("getblockchaininfo", [], function (err, result) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(result);
-                });
-            }).catch((err) => {
-                console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] Cannot get getblockchaininfo ${fullnodeName} : ${err.message}`);
-            });
-            const getnetworkinfo = yield new Promise((resolve, reject) => {
-                rpcClient.call("getnetworkinfo", [], function (err, result) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(result);
-                });
-            }).catch((err) => {
-                console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] Cannot get getnetworkinfo ${fullnodeName} : ${err.message}`);
-            });
+            const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
+            const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
+            const getwalletinfo = yield this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+            const getaddressesbylabel = yield this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
             // EDIT THESE VALUES - START //
             const coin = 'BTC';
             const blocks = getblockchaininfo.blocks || -1;
@@ -160,6 +143,11 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
                     sizeOnDisk,
                     peers,
                 },
+                wallet: {
+                    address: Object.keys(getaddressesbylabel || {}).shift() || '',
+                    balance: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.balance) || -1,
+                    txcount: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.txcount) || -1,
+                }
             };
             return infos;
         });

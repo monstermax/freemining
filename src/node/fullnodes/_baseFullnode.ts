@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import fetch from 'node-fetch';
+const RpcClient = require("rpc-client");
 
 import { now, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
@@ -168,6 +169,29 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         };
 
         return infos;
+    },
+
+
+    async rpcRequest(fullnodeName: string, method: string, params: any) {
+        const rpcClient = new RpcClient({
+            host: "127.0.0.1",
+            port: this.rpcPort,
+            protocol: "http",
+        });
+        rpcClient.setBasicAuth("user", "pass");
+
+        return new Promise((resolve, reject) => {
+            rpcClient.call(method, params, function(err: any, result: any){
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+            });
+
+        }).catch((err: any) => {
+            console.warn(`${now()} [WARNING] [NODE] Cannot get ${method} ${fullnodeName} : ${err.message}`);
+        });
     }
 };
 

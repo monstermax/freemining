@@ -93,8 +93,8 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: 22556, // default = 22556
     rpcPort: 22555, // default = 22555
-    command: 'bin/dogecoind', // the filename of the executable (without .exe extension)
-    managed: false, // set true when the getInfos() script is ready
+    command: 'bin/dogecoind',
+    managed: true,
 
 
     getCommandArgs(config, params) {
@@ -125,20 +125,32 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
 
     async getInfos(config, params) {
-        const apiUrl = `http://127.0.0.1:${this.rpcPort}`;
-        const headers: any = {};
+        // RPC REQUEST
 
-        // TODO: RPC REQUEST
+        // dogecoin-cli -rpcuser=user -rpcpassword=pass help
+        // dogecoin-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
 
-        //const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
-        //const fullnodeSummary: any = await fullnodeSummaryRes.json();
+        // #curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "descriptors", "avoid_reuse": true, "descriptors": true, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+
+        const getblockchaininfo: any = await this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
+        const getnetworkinfo: any = await this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
+        const getwalletinfo: any = await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+        const getaddressesbylabel: any = await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
 
         // EDIT THESE VALUES - START //
-        const fullnodeName = 'edit-me';
-        const coin = 'edit-me';
-        const blocks = -1; // edit-me
-        const blockHeaders = -1; // edit-me
-        const peers = -1; // edit-me
+        const coin = 'DOGE';
+        const blocks = getblockchaininfo.blocks || -1;
+        const blockHeaders = getblockchaininfo.headers || -1;
+        const bestBlockHash = getblockchaininfo.bestblockhash || '';
+        const bestBlockTime = getblockchaininfo.mediantime || -1;
+        const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
+        const peers = getnetworkinfo.connections || -1;
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
@@ -149,8 +161,16 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             blockchain: {
                 blocks,
                 headers: blockHeaders,
-                peers, // number
+                bestBlockHash,
+                bestBlockTime,
+                sizeOnDisk,
+                peers,
             },
+            wallet: {
+                address: Object.keys(getaddressesbylabel || {}).shift() || '',
+                balance: getwalletinfo?.balance || -1,
+                txcount: getwalletinfo?.txcount || -1,
+            }
         };
 
         return infos;

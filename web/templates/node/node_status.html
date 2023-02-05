@@ -3,6 +3,61 @@ Node status
 
 <hr />
 
-<pre>
+<table class="table table-bordered table-hover">
+<thead>
+    <tr>
+        <th>Fullnode</th>
+        <th>Alias</th>
+        <th>PID</th>
+        <th>Uptime</th>
+        <th>blocks</th>
+        <th>headers</th>
+        <th>bestBlockTime</th>
+        <th>peers</th>
+        <th>Size on disk</th>
+        <th>walletAddress</th>
+    </tr>
+</thead>
+<tbody>
+    <%- nodeInfos.status.runningFullnodesAliases.map(runningFullnodeAliase => {
+        const fullnodeName = runningFullnodeAliase.fullnode;
+        const fullnodeAlias = runningFullnodeAliase.alias;
+        const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+        const uptime = (Date.now() - runningFullnodeAliase.dateStart) / 1000;
+        const pid = runningFullnodeAliase.pid;
+
+        const stats = nodeInfos.status.fullnodesStats[fullnodeFullName] || {};
+        const blocks = (stats.blockchain || {}).blocks || -1;
+        const headers = (stats.blockchain || {}).headers || -1;
+        const bestBlockHash = (stats.blockchain || {}).bestBlockHash || '-';
+        const bestBlockTime = (stats.blockchain || {}).bestBlockTime || -1;
+        const peers = (stats.blockchain || {}).peers || -1;
+        const sizeOnDisk = (stats.blockchain || {}).sizeOnDisk || -1;
+        const walletAddress = (stats.wallet || {}).address || '-';
+        const blockDate = new Date(bestBlockTime*1000);
+
+        let html = ``;
+        html += `<tr>`;
+        html += `  <td>${fullnodeName}</td>`;
+        html += `  <td>${fullnodeAlias}</td>`;
+        html += `  <td>${pid}</td>`;
+        html += `  <td>${formatNumber(uptime, 'seconds')}</td>`;
+        html += `  <td>${formatNumber(blocks)}</td>`;
+        html += `  <td>${formatNumber(headers)}</td>`;
+        html += `  <td>${blockDate.toJSON().slice(0, 19).replace('T', ' ')}</td>`;
+        html += `  <td>${peers}</td>`;
+        html += `  <td>${formatNumber(sizeOnDisk, 'size')}</td>`;
+        html += `  <td>${walletAddress}</td>`;
+        html += `</tr>`;
+
+        return html;
+
+    }).join('') %>
+</tbody>
+</table>
+
+<hr />
+
+<pre class="d-none">
 <%- JSON.stringify(nodeInfos, null, 4) %>
 </pre>

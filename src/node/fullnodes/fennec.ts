@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+const RpcClient = require("rpc-client");
 
 
 import { now, getOpt, downloadFile } from '../../common/utils';
@@ -91,10 +92,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 export const fullnodeCommands: t.fullnodeCommandInfos = {
     ...baseFullnode.fullnodeCommands,
 
-    p2pPort: 8338, // edit-me // default = 8338
-    rpcPort: 8339, // edit-me // default = 8339
+    p2pPort: 8338, // default = 8338
+    rpcPort: 8339, // default = 8339
     command: 'fennecd',
-    managed: false, // set true when the getInfos() script is ready
+    managed: true,
 
 
     getCommandArgs(config, params) {
@@ -102,8 +103,8 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             `-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
             `-printtoconsole`,
             `-maxmempool=100`,
-            `-zmqpubrawblock=tcp://127.0.0.1:28332`,
-            `-zmqpubrawtx=tcp://127.0.0.1:28333`,
+            //`-zmqpubrawblock=tcp://127.0.0.1:28339`,
+            //`-zmqpubrawtx=tcp://127.0.0.1:28338`,
         ];
 
         if (this.p2pPort > 0) {
@@ -128,14 +129,32 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
 
     async getInfos(config, params) {
-        // TODO: RPC REQUEST
+        // RPC REQUEST
+
+        // fennec-cli -rpcuser=user -rpcpassword=pass help
+        // fennec-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
+
+        // #curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+
+        const getblockchaininfo: any = await this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
+        const getnetworkinfo: any = await this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
+        const getwalletinfo: any = await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+        const getaddressesbylabel: any = await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
 
         // EDIT THESE VALUES - START //
-        const fullnodeName = ''; // edit-me
-        const coin = ''; // edit-me
-        const blocks = -1; // edit-me
-        const blockHeaders = -1; // edit-me
-        const peers = -1; // edit-me
+        const coin = 'FNNC';
+        const blocks = getblockchaininfo.blocks || -1;
+        const blockHeaders = getblockchaininfo.headers || -1;
+        const bestBlockHash = getblockchaininfo.bestblockhash || '';
+        const bestBlockTime = getblockchaininfo.mediantime || -1;
+        const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
+        const peers = getnetworkinfo.connections || -1;
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
@@ -146,8 +165,16 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             blockchain: {
                 blocks,
                 headers: blockHeaders,
+                bestBlockHash,
+                bestBlockTime,
+                sizeOnDisk,
                 peers,
             },
+            wallet: {
+                address: Object.keys(getaddressesbylabel || {}).shift() || '',
+                balance: getwalletinfo?.balance || -1,
+                txcount: getwalletinfo?.txcount || -1,
+            }
         };
 
         return infos;

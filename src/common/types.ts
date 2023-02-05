@@ -163,11 +163,16 @@ export type Process = {
     name: string,
     miner?: string,
     fullnode?: string,
+    //alias?: string, // TODO: name=xxxFullName + miner/fullnode + alias
     cmdFile: string,
     args: string[],
     dataDir: string,
     appDir: string,
     cmdPath: string,
+    dateStart: number,
+    //apiPort: number,
+    //p2pPort: number,
+    //rpcPort: number,
     pid: number | undefined,
     process: childProcess.ChildProcessWithoutNullStreams | undefined,
 }
@@ -595,6 +600,11 @@ export type FullnodeStats = {
         sizeOnDisk?: number,
         peers: number,
         walletAddress?: string,
+    },
+    wallet?: {
+        address: string,
+        balance: number,
+        txcount: number,
     },
     dataDate?: number,
 };

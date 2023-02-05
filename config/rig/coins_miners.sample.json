@@ -39,6 +39,11 @@
             "algo": "ZEL"
         }
     },
+    "FNNC": {
+        "srbminer": {
+            "algo": "yescryptr16"
+        }
+    },
     "MEWC": {
         "gminer": {
             "algo": "kawpow"

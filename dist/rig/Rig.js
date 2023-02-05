@@ -159,7 +159,7 @@ function getRunningMinersAliases(config) {
             miner: proc.miner || '',
             alias: proc.name,
             pid: proc.pid || 0,
-            dateStart: Date.now(),
+            dateStart: proc.dateStart,
             //apiPort: proc.apiPort, // TODO
         });
     }
@@ -302,6 +302,7 @@ function minerRunStart(config, params) {
             dataDir,
             appDir: aliasDir,
             cmdPath,
+            dateStart: Date.now(),
             pid: undefined,
             process: undefined
         };

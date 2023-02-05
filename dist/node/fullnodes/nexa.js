@@ -62,15 +62,23 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'bin/nexad', managed: false, // set true when the getInfos() script is ready
-    getCommandArgs(config, params) {
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: 7228, rpcPort: 7227, command: 'bin/nexad', managed: true, getCommandArgs(config, params) {
         const args = [
-            `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
+            `-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
+            `-printtoconsole`,
+            //`-zmqpubrawblock=tcp://127.0.0.1:27228`,
+            //`-zmqpubrawtx=tcp://127.0.0.1:27228`,
         ];
         if (this.p2pPort > 0) {
+            args.push(`-server`);
+            args.push(`-port=${this.p2pPort.toString()}`);
         }
         if (this.rpcPort > 0) {
-            args.push(`-edit-me-rpcport=${this.rpcPort.toString()}`);
+            args.push(`-rpcport=${this.rpcPort.toString()}`);
+            args.push(`-rpcbind=0.0.0.0`);
+            args.push(`-rpcuser=user`);
+            args.push(`-rpcpassword=pass`);
+            args.push(`-rpcallowip=127.0.0.1`);
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);
@@ -79,24 +87,37 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // TODO: RPC REQUEST
+            const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
+            const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
+            const getwalletinfo = yield this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+            const getaddressesbylabel = null; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
             // EDIT THESE VALUES - START //
-            const fullnodeName = ''; // edit-me
-            const coin = ''; // edit-me
-            const blocks = -1; // edit-me
-            const blockHeaders = -1; // edit-me
-            const peers = -1; // edit-me
+            const coin = 'NEXA';
+            const blocks = getblockchaininfo.blocks || -1;
+            const blockHeaders = getblockchaininfo.headers || -1;
+            const bestBlockHash = getblockchaininfo.bestblockhash || '';
+            const bestBlockTime = getblockchaininfo.mediantime || -1;
+            const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
+            const peers = getnetworkinfo.connections || -1;
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
-                    name: fullnodeName,
+                    name: fullnodeTitle,
                     coin,
                 },
                 blockchain: {
                     blocks,
                     headers: blockHeaders,
+                    bestBlockHash,
+                    bestBlockTime,
+                    sizeOnDisk,
                     peers,
                 },
+                wallet: {
+                    address: Object.keys(getaddressesbylabel || {}).shift() || '',
+                    balance: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.balance) || -1,
+                    txcount: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.txcount) || -1,
+                }
             };
             return infos;
         });

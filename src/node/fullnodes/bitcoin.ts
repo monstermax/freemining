@@ -2,7 +2,6 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-const RpcClient = require("rpc-client");
 
 import { now, hasOpt, getOpt, downloadFile } from '../../common/utils';
 import { decompressFile } from '../../common/decompress_archive';
@@ -122,7 +121,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
     p2pPort: 8333, // default = 8333
     rpcPort: 8332, // default = 8332
     command: 'bin/bitcoind', // the filename of the executable (without .exe extension)
-    managed: true, // set true when the getInfos() script is ready
+    managed: true,
 
 
     getCommandArgs(config, params) {
@@ -157,37 +156,21 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     async getInfos(config, params) {
         // RPC REQUEST
+
+        // bitcoin-cli -rpcuser=user -rpcpassword=pass help
+
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+        // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+
         // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
         // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
 
-        const rpcClient = new RpcClient( { host:"127.0.0.1", port:this.rpcPort, protocol:"http" } );
-        rpcClient.setBasicAuth("user", "pass");
-
-        const getblockchaininfo: any = await new Promise((resolve, reject) => {
-            rpcClient.call("getblockchaininfo", [], function(err: any, result: any){
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(result);
-            });
-
-        }).catch((err: any) => {
-            console.warn(`${now()} [WARNING] [NODE] Cannot get getblockchaininfo ${fullnodeName} : ${err.message}`);
-        });
-
-        const getnetworkinfo: any = await new Promise((resolve, reject) => {
-            rpcClient.call("getnetworkinfo", [], function(err: any, result: any){
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(result);
-            });
-
-        }).catch((err: any) => {
-            console.warn(`${now()} [WARNING] [NODE] Cannot get getnetworkinfo ${fullnodeName} : ${err.message}`);
-        });
+        const getblockchaininfo: any = await this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
+        const getnetworkinfo: any = await this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
+        const getwalletinfo: any = await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
+        const getaddressesbylabel: any = await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
 
         // EDIT THESE VALUES - START //
         const coin = 'BTC';
@@ -212,6 +195,11 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
                 sizeOnDisk,
                 peers,
             },
+            wallet: {
+                address: Object.keys(getaddressesbylabel || {}).shift() || '',
+                balance: getwalletinfo?.balance || -1,
+                txcount: getwalletinfo?.txcount || -1,
+            }
         };
 
         return infos;
