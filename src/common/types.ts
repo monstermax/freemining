@@ -76,6 +76,7 @@ export type CliParamsAll = CliParams & CommonParams & string;
 
 export type DaemonParams = (
     "--user-dir" |
+    "--create-config" |
 
     "--listen-address" |
     "--listen-port" |

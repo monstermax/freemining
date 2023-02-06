@@ -45,6 +45,8 @@ frmd <params>
      --help                                  # display this this message
      --user-dir                              # default %HOME%/.freemining-beta OR %HOME%/AppData/Local/freemining-beta
 
+     --create-config
+
      --listen-address                        # daemon listen address. default 127.0.0.1
      --listen-port                           # daemon listen port. default 1234
      --wss-conn-timeout                      # clients connection timeout (if no ping). default 10 seconds
@@ -74,7 +76,11 @@ function run(args = []) {
     }
     catchSignals();
     config = (0, Config_1.loadDaemonConfig)(args);
-    console.log(`${(0, utils_1.now)()} [DEBUG] [DAEMON] Daemon start...`);
+    if ((0, utils_1.hasOpt)('--create-config', args)) {
+        console.log(`${(0, utils_1.now)()} [INFO] [DAEMON] config files generated`);
+        return;
+    }
+    console.info(`${(0, utils_1.now)()} [INFOO] [DAEMON] Daemon start...`);
     const app = (0, express_1.default)(); // express app
     const server = http.createServer(app); // express server
     const wss = new WebSocket.Server({ server }); // websocket server
