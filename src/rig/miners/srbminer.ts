@@ -93,7 +93,7 @@ export const minerCommands: t.minerCommandInfos = {
 
     apiPort: 52011,
     command: 'SRBMiner-MULTI', // the filename of the executable (without .exe extension)
-    managed: false, // set true when the getInfos() script is ready
+    managed: true,
 
     getCommandArgs(config, params) {
         const args: string[] = [
@@ -137,29 +137,38 @@ export const minerCommands: t.minerCommandInfos = {
 
     async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-        const headers: any = {}; // edit-me if needed
+        const headers: any = {};
 
-        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers});
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const minerName = 'edit-me';
-        const uptime = -1; // edit-me
-        const algo = 'edit-me';
-        const workerHashRate = -1; // edit-me
+        const _algo = minerSummary.algorithms[0] || {};
+        const uptime = _algo?.mining_time || -1;
+        const algo = _algo?.name || '';
+        const workerHashRate = _algo?.hashrate.gpu.total || -1;
 
-        const poolUrl = ''; // edit-me
-        const poolUser = ''; // edit-me
+        const poolUrl = _algo?.pool.pool || '';
+        const poolUser = '';
         const workerName = poolUser.split('.').pop() as string || ''; // edit-me
 
-        const cpus: t.MinerCpuInfos[] = []; // edit-me
+        const cpus: t.MinerCpuInfos[] = [];
 
-        const gpus: t.MinerGpuInfos[] = []; // edit-me
+        const gpus: t.MinerGpuInfos[] = minerSummary.gpu_devices.map((gpu: any) => {
+            return {
+                id: gpu.id,
+                name: gpu.model,
+                hashRate: _algo.hashrate.gpu[`gpu${gpu.id}`],
+                temperature: gpu.temperature,
+                fanSpeed: -1,
+                power: gpu.asic_power,
+            };
+        })
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerStats = {
             miner: {
-                name: minerName,
+                name: minerTitle,
                 worker: workerName,
                 uptime,
                 algo,
