@@ -68,6 +68,7 @@ function loadDaemonConfig(args) {
     let listenAddress = defaultListenAddress;
     let listenPort = defaultListenPort;
     let wssConnTimeout = defaultWssConnTimeout;
+    let httpAllowedIps = [];
     let httpStaticDir = defaultHttpStaticDir;
     let httpTemplatesDir = defaultHttpTemplatesDir;
     let userFrmDir = defaultUserFrmDir;
@@ -147,6 +148,7 @@ function loadDaemonConfig(args) {
             listenAddress = coreConfig.listenAddress || listenAddress;
             listenPort = coreConfig.listenPort || listenPort;
             wssConnTimeout = coreConfig.wssConnTimeout || wssConnTimeout;
+            httpAllowedIps = coreConfig.httpAllowedIps || httpAllowedIps;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read core config: ${err.message}`);
@@ -161,6 +163,7 @@ function loadDaemonConfig(args) {
         listenPort,
         wssConnTimeout,
         version: freeminingVersion,
+        httpAllowedIps: [],
     };
     fs_1.default.writeFileSync(coreConfigFile, JSON.stringify(coreConfig, null, 4));
     // set listenAddress
@@ -319,14 +322,16 @@ function loadDaemonRigMinersConfig(confDir) {
 function loadDaemonFarmConfig(confDir) {
     // Read farm config
     let farmName = defaultFarmName;
-    let farmWsPassword = '';
+    let farmWssPassword = '';
+    let wssAllowedIps = [];
     const farmConfigFile = `${confDir}${SEP}farm${SEP}farm.json`;
     if (fs_1.default.existsSync(farmConfigFile)) {
         const farmConfigJson = fs_1.default.readFileSync(farmConfigFile).toString();
         try {
             const farmConfig = JSON.parse(farmConfigJson);
             farmName = farmConfig.name || farmName;
-            farmWsPassword = farmConfig.wsPass || farmWsPassword;
+            farmWssPassword = farmConfig.wssPass || farmWssPassword;
+            wssAllowedIps = farmConfig.wssAllowedIps || wssAllowedIps;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read farm config: ${err.message}`);
@@ -338,7 +343,8 @@ function loadDaemonFarmConfig(confDir) {
     // Rewrite farm config file
     const farmConfig = {
         name: farmName,
-        wsPass: farmWsPassword,
+        wssPass: farmWssPassword,
+        wssAllowedIps: [],
     };
     (0, fs_1.mkdirSync)(`${confDir}${SEP}farm${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(farmConfigFile, JSON.stringify(farmConfig, null, 4));

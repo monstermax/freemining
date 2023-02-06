@@ -85,7 +85,7 @@ export function rigAuthRequest(config: t.DaemonConfigAll, params: t.MapString<an
         return false;
     }
 
-    const websocketPassword = config.farm.wsPass || '';
+    const websocketPassword = config.farm.wssPass || '';
 
     //if (! pass) {
     //    return false;

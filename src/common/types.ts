@@ -141,6 +141,7 @@ export type DaemonConfig = {
     dataDir: string,
     logDir: string,
     pidDir: string,
+    httpAllowedIps: string[],
     httpTemplatesDir: string,
     httpStaticDir: string,
     rig: RigConfig,
@@ -483,7 +484,8 @@ export type AllMiners = {
 
 export type FarmConfig = {
     name?: string,
-    wsPass?: string,
+    wssPass?: string,
+    wssAllowedIps?: string[],
 };
 
 export type FarmInfos = {

@@ -109,6 +109,12 @@ function registerHttpRoutes(config, app) {
         console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] ${req.method.toLocaleUpperCase()} ${req.url}`);
         next();
     });
+    if (config.httpAllowedIps.length > 0) {
+    }
+    app.use(function (req, res, next) {
+        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] ${req.method.toLocaleUpperCase()} ${req.url}`);
+        next();
+    });
     // Parse Body (POST only)
     app.use(express_1.default.urlencoded({ extended: true }));
     // Static files

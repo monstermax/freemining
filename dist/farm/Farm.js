@@ -65,7 +65,7 @@ function rigAuthRequest(config, params) {
     if (!rig) {
         return false;
     }
-    const websocketPassword = config.farm.wsPass || '';
+    const websocketPassword = config.farm.wssPass || '';
     //if (! pass) {
     //    return false;
     //}

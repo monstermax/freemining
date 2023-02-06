@@ -139,6 +139,14 @@ function registerHttpRoutes(config: t.DaemonConfigAll, app: express.Express): vo
         next();
     });
 
+    if (config.httpAllowedIps.length > 0) {
+
+    }
+    app.use(function (req: express.Request, res: express.Response, next: Function) {
+        console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] ${req.method.toLocaleUpperCase()} ${req.url}`);
+        next();
+    });
+
     // Parse Body (POST only)
     app.use(express.urlencoded({ extended: true }));
 
