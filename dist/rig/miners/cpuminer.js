@@ -17,6 +17,8 @@ Website  :
 Github   : https://github.com/JayDDee/cpuminer-opt
 Download :
 
+Build dependencies: libcurl4-gnutls-dev libgmp-dev
+
 */
 /* ########## CONFIG ######### */
 const minerName = 'cpuminer';
