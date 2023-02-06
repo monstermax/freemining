@@ -110,11 +110,18 @@ function registerHttpRoutes(config, app) {
         next();
     });
     if (config.httpAllowedIps.length > 0) {
+        // IP Filter
+        app.use(function (req, res, next) {
+            const clientIP = req.header('x-real-ip') || req.header('x-forwarded-for') || req.ip;
+            if (!config.httpAllowedIps.includes(clientIP)) {
+                console.warn(`${(0, utils_1.now)()} [${safe_1.default.blue('WARNING')}] [DAEMON] IP REFUSED ${req.method.toLocaleUpperCase()} ${req.url}`);
+                res.send(`Access not granted`);
+                res.end();
+                return;
+            }
+            next();
+        });
     }
-    app.use(function (req, res, next) {
-        console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] ${req.method.toLocaleUpperCase()} ${req.url}`);
-        next();
-    });
     // Parse Body (POST only)
     app.use(express_1.default.urlencoded({ extended: true }));
     // Static files

@@ -16,21 +16,21 @@ function getPoolInfos(config) {
             poolOs: os_1.default.version(),
         };
     }
-    const { name, hostname, ip, rigOs } = poolMainInfos;
+    const { name, hostname, ip, poolOs } = poolMainInfos;
     const uptime = os_1.default.uptime();
     const loadAvg = os_1.default.loadavg()[0];
     const memoryUsed = os_1.default.totalmem() - os_1.default.freemem();
     const memoryTotal = os_1.default.totalmem();
     const freeminingVersion = ''; // TODO
-    const farmConfig = {}; // TODO
-    const farmStatus = {}; // TODO
-    const farmDevices = { cpus: [] }; // TODO
+    const poolConfig = {}; // TODO
+    const poolStatus = {}; // TODO
+    const poolDevices = { cpus: [] }; // TODO
     return {
         pool: {
             name,
             hostname,
             ip,
-            os: rigOs,
+            os: poolOs,
             freeminingVersion,
         },
         usage: {
@@ -41,9 +41,9 @@ function getPoolInfos(config) {
                 total: memoryTotal,
             },
         },
-        devices: farmDevices,
-        config: farmConfig,
-        status: farmStatus,
+        devices: poolDevices,
+        config: poolConfig,
+        status: poolStatus,
         dataDate: null,
     };
 }

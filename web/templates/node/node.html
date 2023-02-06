@@ -1,26 +1,33 @@
 
 <div class="row">
     <div class="col-8">
-        <h1>NODE HOME</h1>
+
+        <div>
+            <h1 class="d-inline-block">Freemining</h1>
+            <h6 class="d-inline-block"> / RIG Manager</h6>
+        </div>
+
+        <br />
+
+        <div>
+            <a class="btn btn-primary btn-sm p-1 m-1"  href="status">Node status</a>
+            &nbsp;
+            <a class="btn btn-secondary btn-sm p-1 m-1"  href="status.json">JSON status</a>
+            &nbsp;&nbsp;
+            &nbsp;&nbsp;
+            <% if (monitorStatus) { %>
+                Monitor is running.
+            <% } else { %>
+                Monitor is not running.
+            <% } %>
+            <a class="btn btn-primary btn-sm p-1 m-1"  href="monitor-run">Manage monitor</a>
+        </div>
+
     </div>
     <div class="col-4 text-end">
         <img src="/img/fullnode1.png" class="rounded me-2" style="width:128px; height:128px;" />
     </div>
 </div>
-
-<hr />
-
-<a class="btn btn-primary btn-sm p-1 m-1"  href="status">Node status</a>
-&nbsp;
-<a class="btn btn-secondary btn-sm p-1 m-1"  href="status.json">JSON status</a>
-&nbsp;&nbsp;
-&nbsp;&nbsp;
-<% if (monitorStatus) { %>
-    Monitor is running.
-<% } else { %>
-    Monitor is not running.
-<% } %>
-<a class="btn btn-primary btn-sm p-1 m-1"  href="monitor-run">Manage monitor</a>
 
 <hr />
 

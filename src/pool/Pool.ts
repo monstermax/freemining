@@ -25,23 +25,23 @@ export function getPoolInfos(config: t.DaemonConfigAll): t.PoolInfos {
         }
     }
 
-    const { name, hostname, ip, rigOs } = poolMainInfos;
+    const { name, hostname, ip, poolOs } = poolMainInfos;
     const uptime = os.uptime();
     const loadAvg = os.loadavg()[0];
     const memoryUsed = os.totalmem() - os.freemem();
     const memoryTotal = os.totalmem();
 
     const freeminingVersion = ''; // TODO
-    const farmConfig = {}; // TODO
-    const farmStatus = {}; // TODO
-    const farmDevices = { cpus:[] }; // TODO
+    const poolConfig = {}; // TODO
+    const poolStatus = {}; // TODO
+    const poolDevices = { cpus:[] }; // TODO
 
     return {
         pool: {
             name,
             hostname,
             ip,
-            os: rigOs,
+            os: poolOs,
             freeminingVersion,
         },
         usage: {
@@ -52,9 +52,9 @@ export function getPoolInfos(config: t.DaemonConfigAll): t.PoolInfos {
                 total: memoryTotal,
             },
         },
-        devices: farmDevices,
-        config: farmConfig,
-        status: farmStatus,
+        devices: poolDevices,
+        config: poolConfig,
+        status: poolStatus,
         dataDate: null,
     }
 }

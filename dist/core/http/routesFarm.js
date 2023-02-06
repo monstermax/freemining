@@ -84,7 +84,7 @@ function getRigData(rigName) {
     const rigInfos = farmInfos.rigsInfos[rigName];
     //const rigConfig = rigInfos.config;
     //const rigStatus = rigInfos.status;
-    const allMiners = {}; // TODO
+    const allMiners = getRigAllMiners(rigInfos);
     if (!rigInfos) {
         return null;
     }
@@ -102,4 +102,48 @@ function getRigData(rigName) {
         //},
     };
     return rigData;
+}
+function getRigAllMiners(rigInfos) {
+    var _a, _b, _c, _d, _e, _f;
+    const installedMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installableMiners) || [];
+    const runningMinersAliases = ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.runningMinersAliases) || [];
+    const installableMiners = ((_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.installableMiners) || [];
+    const runnableMiners = ((_d = rigInfos.status) === null || _d === void 0 ? void 0 : _d.runnableMiners) || [];
+    const managedMiners = ((_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.managedMiners) || [];
+    const installedMinersAliases = ((_f = rigInfos.status) === null || _f === void 0 ? void 0 : _f.installedMinersAliases) || [];
+    const minersNames = Array.from(new Set([
+        ...installedMiners,
+        ...runningMinersAliases.map(runningMiner => runningMiner.miner),
+        ...installableMiners,
+        ...runnableMiners,
+        ...managedMiners,
+    ]));
+    const miners = Object.fromEntries(minersNames.map(minerName => {
+        return [
+            minerName,
+            {
+                installable: installableMiners.includes(minerName),
+                installed: installedMiners.includes(minerName),
+                installedAliases: installedMinersAliases,
+                runnable: runnableMiners.includes(minerName),
+                running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
+                runningAlias: runningMinersAliases,
+                managed: managedMiners.includes(minerName),
+            }
+        ];
+    }));
+    /*
+    // result:
+    miners = {
+        miner1: {
+            installed: boolean,
+            running: boolean,
+            installable: boolean,
+            runnable: boolean,
+            managed: boolean,
+        },
+        ...
+    }
+    */
+    return miners;
 }

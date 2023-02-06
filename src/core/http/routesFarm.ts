@@ -125,7 +125,7 @@ function getRigData(rigName: string): t.RigData | null {
     //const rigConfig = rigInfos.config;
     //const rigStatus = rigInfos.status;
 
-    const allMiners: t.AllMiners = {}; // TODO
+    const allMiners = getRigAllMiners(rigInfos);
 
     if (! rigInfos) {
         return null;
@@ -146,4 +146,58 @@ function getRigData(rigName: string): t.RigData | null {
     };
 
     return rigData;
+}
+
+
+
+function getRigAllMiners(rigInfos: t.RigInfos): t.AllMiners {
+    const installedMiners = rigInfos.status?.installableMiners || [];
+    const runningMinersAliases = rigInfos.status?.runningMinersAliases || [];
+    const installableMiners = rigInfos.status?.installableMiners || [];
+    const runnableMiners = rigInfos.status?.runnableMiners || [];
+    const managedMiners = rigInfos.status?.managedMiners || [];
+    const installedMinersAliases = rigInfos.status?.installedMinersAliases || [];
+
+    const minersNames = Array.from(
+        new Set( [
+            ...installedMiners,
+            ...runningMinersAliases.map(runningMiner => runningMiner.miner),
+            ...installableMiners,
+            ...runnableMiners,
+            ...managedMiners,
+        ])
+    );
+
+    const miners: t.AllMiners = Object.fromEntries(
+        minersNames.map(minerName => {
+            return [
+                minerName,
+                {
+                    installable: installableMiners.includes(minerName),
+                    installed: installedMiners.includes(minerName),
+                    installedAliases: installedMinersAliases,
+                    runnable: runnableMiners.includes(minerName),
+                    running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
+                    runningAlias: runningMinersAliases,
+                    managed: managedMiners.includes(minerName),
+                }
+            ]
+        })
+    );
+
+    /*
+    // result: 
+    miners = {
+        miner1: {
+            installed: boolean,
+            running: boolean,
+            installable: boolean,
+            runnable: boolean,
+            managed: boolean,
+        },
+        ...
+    }
+    */
+
+    return miners;
 }

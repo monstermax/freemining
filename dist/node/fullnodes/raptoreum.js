@@ -150,4 +150,7 @@ raptoreum-cli -rpcuser=user -rpcpassword=pass getnewaddress fullnode => RAv7soKo
 raptoreum-cli -rpcuser=user -rpcpassword=pass dumpprivkey RAv7soKof4nE1fmF4bywGPYrRXDaDTptsj
 raptoreum-cli -rpcuser=user -rpcpassword=pass getaddressesbylabel fullnode => { "RAv7soKof4nE1fmF4bywGPYrRXDaDTptsj": { purpose: "receive" } }
 
+raptoreum-cli -rpcuser=user -rpcpassword=pass upgradetohd mnemonic
+raptoreum-cli -rpcuser=user -rpcpassword=pass dumphdinfo
+
 */

@@ -163,7 +163,7 @@ function loadDaemonConfig(args) {
         listenPort,
         wssConnTimeout,
         version: freeminingVersion,
-        httpAllowedIps: [],
+        httpAllowedIps,
     };
     fs_1.default.writeFileSync(coreConfigFile, JSON.stringify(coreConfig, null, 4));
     // set listenAddress
