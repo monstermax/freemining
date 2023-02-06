@@ -200,7 +200,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         listenPort,
         wssConnTimeout,
         version: freeminingVersion,
-        httpAllowedIps: [],
+        httpAllowedIps,
     };
     fs.writeFileSync(coreConfigFile, JSON.stringify(coreConfig, null, 4));
 
