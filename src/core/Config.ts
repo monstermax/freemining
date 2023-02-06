@@ -21,7 +21,7 @@ const defaultWssConnTimeout: number = 10_000; // disconnect clients who dont pon
 const defaultHttpStaticDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
 
-const userHomeDir: string = os.userInfo().homedir.replaceAll(path.sep, SEP);
+const userHomeDir: string = os.userInfo().homedir.replace( new RegExp(path.sep, 'g') , SEP);
 const defaultUserFrmDirUnix: string = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin: string = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
@@ -105,7 +105,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
     }
 
     //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
-    userFrmDir = stringTemplate(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
+    userFrmDir = stringTemplate(userFrmDir.replace( new RegExp('\\', 'g'), '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
 
     if (! fs.existsSync(userFrmDir)) {
         try {

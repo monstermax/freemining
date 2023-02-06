@@ -33,7 +33,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            const versionBis = version.replaceAll('.', '_');
+            const versionBis = version.replace(new RegExp('.', 'g'), '_');
             let subDir = ``;
             // Download url selection
             const dlUrls = {

@@ -45,7 +45,7 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        const versionBis = version.replaceAll('.', '-');
+        const versionBis = version.replace( new RegExp('.', 'g'), '-');
         let subDir = `${SEP}SRBMiner-Multi-${versionBis}`;
 
         // Download url selection

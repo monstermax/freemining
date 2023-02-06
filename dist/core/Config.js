@@ -14,7 +14,7 @@ const defaultListenPort = 1234;
 const defaultWssConnTimeout = 10000; // disconnect clients who dont pong after x seconds
 const defaultHttpStaticDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
-const userHomeDir = os_1.default.userInfo().homedir.replaceAll(path_1.default.sep, SEP);
+const userHomeDir = os_1.default.userInfo().homedir.replace(new RegExp(path_1.default.sep, 'g'), SEP);
 const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
@@ -82,7 +82,7 @@ function loadDaemonConfig(args) {
         process.exit(1);
     }
     //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
-    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replaceAll('\\', '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
+    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replace(new RegExp('\\', 'g'), '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
     if (!fs_1.default.existsSync(userFrmDir)) {
         try {
             fs_1.default.mkdirSync(userFrmDir);

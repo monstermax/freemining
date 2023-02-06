@@ -45,7 +45,7 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        const versionBis = version.replaceAll('.', '_');
+        const versionBis = version.replace( new RegExp('.', 'g'), '_');
         let subDir = ``;
 
         // Download url selection
