@@ -46,7 +46,7 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let versionBis = version.replaceAll('.', '_');
+        let versionBis = version.replace( new RegExp('.', 'g'), '_');
         let subDir = `${SEP}TeamBlackMiner_${versionBis}_cuda_12`;
 
         if (platform === 'linux') subDir = `${SEP}TeamBlackMiner_${versionBis}_Ubuntu_18_04_Cuda_12`;
