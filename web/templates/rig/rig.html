@@ -10,9 +10,9 @@
 
 <hr />
 
-<a class="btn btn-primary btn-sm" href="status">Rig status</a>
+<a class="btn btn-primary btn-sm p-1 m-1" href="status">Rig status</a>
 &nbsp;
-<a class="btn btn-secondary btn-sm" href="status.json">JSON status</a>
+<a class="btn btn-secondary btn-sm p-1 m-1" href="status.json">JSON status</a>
 &nbsp;&nbsp;
 &nbsp;&nbsp;
 
@@ -21,7 +21,7 @@
 <% } else { %>
     Monitor is not running.
 <% } %>
-<a class="btn btn-primary btn-sm" href="monitor-run">Manage monitor</a>
+<a class="btn btn-primary btn-sm p-1 m-1" href="monitor-run">Manage monitor</a>
 &nbsp;&nbsp;
 &nbsp;&nbsp;
 
@@ -32,7 +32,7 @@
 <% } else { %>
     Farm connection is not active.
 <% } %>
-<a class="btn btn-primary btn-sm" href="farm-agent/run">Manage connection</a>
+<a class="btn btn-primary btn-sm p-1 m-1" href="farm-agent/run">Manage connection</a>
 
 <hr />
 
@@ -92,53 +92,48 @@
             <div class="card-body">
                 <%- minerName %> is :
                 <br />
-                - <% if (miner.running) { %>
-                    <div class="badge bg-success">running</div>
 
-                    <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Manage</a>
-                    <% if (managedMiners.includes(minerName)) { %>
-                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=status">JSON</a>
-                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=log">Log</a>
+                - <% if (miner.runnable) { %>
+                    <% if (miner.running) { %>
+                        <div class="badge bg-success">running</div>
+
+                        <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run">Manage</a>
+                        <% if (managedMiners.includes(minerName)) { %>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run?action=status">JSON</a>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run?action=log">Log</a>
+                        <% } %>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not running</div>
+
+                        <% if (installedMiners.includes(minerName) && runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run">Start</a>
+                        <% } %>
                     <% } %>
 
                 <% } else { %>
-                    <div class="badge bg-danger">not running</div>
-
-                    <% if (installedMiners.includes(minerName) && runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
-                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Start</a>
-                    <% } %>
-                <% } %>
-                <br />
-
-                - <% if (miner.installed) { %>
-                    <div class="badge bg-success">installed</div>
-
-                    <% if (! runningMiners.includes(minerName)) { %>
-                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">Uninstall</a>
-                    <% } %>
-
-                <% } else { %>
-                    <div class="badge bg-danger">not installed</div>
+                    <div class="badge bg-danger">not runnable</div>
                 <% } %>
                 <br />
 
                 - <% if (miner.installable) { %>
-                    <div class="badge bg-success">installable</div>
+                    <% if (miner.installed) { %>
+                        <div class="badge bg-success">installed</div>
+
+                        <% if (! runningMiners.includes(minerName)) { %>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/install">Uninstall</a>
+                        <% } %>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not installed</div>
+                    <% } %>
 
                     <% if (! installedMiners.includes(minerName)) { %>
-                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">Install</a>
+                        <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/install">Install</a>
                     <% } %>
 
                 <% } else { %>
                     <div class="badge bg-danger">not installable</div>
-                <% } %>
-                <br />
-
-                - <% if (miner.runnable) { %>
-                    <div class="badge bg-success">runnable</div>
-
-                <% } else { %>
-                    <div class="badge bg-danger">not runnable</div>
                 <% } %>
                 <br />
 
