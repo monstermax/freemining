@@ -47,6 +47,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         let version = params.version || this.lastVersion;
         let subDir = ``; // edit-me
 
+        if (! fullnodeName)  throw { message: `Install script not completed` };
+        if (! fullnodeTitle) throw { message: `Install script not completed` };
+        if (! lastVersion)   throw { message: `Install script not completed` };
+
         // Download url selection
         const dlUrls: any = {
             'linux':   ``, // edit-me
@@ -124,9 +128,17 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
         // EDIT THESE VALUES - START //
         const coin = ''; // edit-me
+
         const blocks = -1; // edit-me
         const blockHeaders = -1; // edit-me
         const peers = -1; // edit-me
+        const bestBlockHash = ''; // edit-me
+        const bestBlockTime = -1; // edit-me
+        const sizeOnDisk = -1; // edit-me
+
+        const walletAddress = ''; // edit-me
+        const walletBalance = -1; // edit-me
+        const walletTxCount = -1; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
@@ -137,8 +149,16 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
             blockchain: {
                 blocks,
                 headers: blockHeaders,
+                bestBlockHash,
+                bestBlockTime,
+                sizeOnDisk,
                 peers,
             },
+            wallet: {
+                address: walletAddress,
+                balance: walletBalance,
+                txcount: walletTxCount,
+            }
         };
 
         return infos;

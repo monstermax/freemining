@@ -57,10 +57,10 @@ const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].manag
 const minerName = '<%=miner%>';
 
 function startMiner() {
-    const onStart = window.onStartMinerModalStart = null;
-    const onSuccess = window.onStartMinerModalSuccess = () => window.location.reload();
-    const onFail = window.onStartMinerModalFail = null;
-    startMinerModal(minerName, onStart, onSuccess, onFail);
+    const onStart = null;
+    const onSuccess = () => window.location.reload();
+    const onFail = null;
+    startMinerModal(minerName, minerAlias, onStart, onSuccess, onFail);
 }
 
 function stopMiner(minerAlias='') {
@@ -70,5 +70,22 @@ function stopMiner(minerAlias='') {
 
     stopMinerAjax(minerName, minerAlias, onStart, onSuccess, onFail);
 }
+</script>
+
+
+<%
+const availableMinersCoins = Object.keys(rigInfos.config.coinsMiners);
+const availableCoins = Object.keys(rigInfos.config.coinsUserconf).filter(coin => availableMinersCoins.includes(coin));
+%>
+<script>
+
+const coinsUserconf = <%- JSON.stringify(rigInfos.config.coinsUserconf, null, 0) %>;
+
+const miners = <%- JSON.stringify(rigInfos.config.miners, null, 0) %>;
+
+const coinsMiners = <%- JSON.stringify(rigInfos.config.coinsMiners, null, 0) %>;
+
+const availableCoins = <%- JSON.stringify(availableCoins, null, 0) %>;
+
 </script>
 

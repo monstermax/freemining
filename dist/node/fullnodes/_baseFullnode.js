@@ -100,16 +100,26 @@ exports.fullnodeInstall = {
     downloadFile(dlUrl, dlFilePath) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Downloading file ${dlUrl}`);
-            yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Download complete`);
+            try {
+                yield (0, utils_1.downloadFile)(dlUrl, dlFilePath);
+                console.log(`${(0, utils_1.now)()} [INFO] [NODE] Download complete`);
+            }
+            catch (err) {
+                console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] Download failed`);
+            }
         });
     },
     extractFile(tempDir, dlFilePath) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             fs_1.default.mkdirSync(`${tempDir}${SEP}unzipped`);
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extracting file ${dlFilePath}`);
-            yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
-            console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extract complete`);
+            try {
+                yield (0, decompress_archive_1.decompressFile)(dlFilePath, `${tempDir}${SEP}unzipped`);
+                console.log(`${(0, utils_1.now)()} [INFO] [NODE] Extract complete`);
+            }
+            catch (err) {
+                console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] Extract failed`);
+            }
         });
     }
 };

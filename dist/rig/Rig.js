@@ -161,6 +161,8 @@ function getRunningMinersAliases(config) {
             alias: proc.name,
             pid: proc.pid || 0,
             dateStart: proc.dateStart,
+            args: proc.args,
+            params: proc.params,
             //apiPort: proc.apiPort, // TODO
         });
     }
@@ -300,6 +302,7 @@ function minerRunStart(config, params) {
             type: 'miner-run',
             name: minerAlias,
             miner: minerName,
+            params: params,
             cmdFile,
             args,
             dataDir,

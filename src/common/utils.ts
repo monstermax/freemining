@@ -319,8 +319,12 @@ export async function sleep(delay: number): Promise<void> {
 
 
 export async function downloadFile(url: string, targetFile: string): Promise<void> {
-    const res = await fetch(url);
+    const res = await fetch(url).catch((err: any) => {
+        throw err;
+    });
+
     const fileStream = fs.createWriteStream(targetFile);
+
     return new Promise((resolve, reject) => {
         res.body.pipe(fileStream);
         res.body.on("error", reject);

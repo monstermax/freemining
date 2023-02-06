@@ -163,6 +163,7 @@ export type Process = {
     name: string,
     miner?: string,
     fullnode?: string,
+    params: minerRunStartParams | fullnodeRunStartParams,
     //alias?: string, // TODO: name=xxxFullName + miner/fullnode + alias
     cmdFile: string,
     args: string[],
@@ -401,6 +402,8 @@ export type RunningMinerProcess = {
     alias: string,
     pid: number,
     dateStart: number,
+    args: string[],
+    params: minerRunStartParams,
     //apiPort: number, // TODO
 };
 
@@ -636,6 +639,8 @@ export type RunningFullnodeProcess = {
     alias: string,
     pid: number,
     dateStart: number,
+    args: string[],
+    params: fullnodeRunStartParams,
     //apiPort: number, // TODO
     //p2pPort: number, // TODO
 };

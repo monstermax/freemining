@@ -8,112 +8,150 @@
     </div>
 </div>
 
-
 <hr />
 
-<h2>Rig status:</h2>
-<a href="status">Rig status</a>
-<br />
-<a href="status.json">JSON status</a>
-<br />
-<br />
+<a class="btn btn-primary btn-sm" href="status">Rig status</a>
+&nbsp;
+<a class="btn btn-secondary btn-sm" href="status.json">JSON status</a>
+&nbsp;&nbsp;
+&nbsp;&nbsp;
 
 <% if (monitorStatus) { %>
     Monitor is running.
-    <a href="monitor-run">Stop monitor</a>
 <% } else { %>
     Monitor is not running.
-    <a href="monitor-run">Start monitor</a>
 <% } %>
-<br />
-<br />
+<a class="btn btn-primary btn-sm" href="monitor-run">Manage monitor</a>
+&nbsp;&nbsp;
+&nbsp;&nbsp;
 
 <% if (rigInfos.status?.farmAgentStatus) { %>
     Farm connection is active.
     Server: <%=rigInfos.config?.farmAgent.host%>:<%=rigInfos.config?.port%>
-    <a href="farm-agent/run">Stop connection</a>
 
 <% } else { %>
     Farm connection is not active.
-    <a href="farm-agent/run">Start connection</a>
 <% } %>
-<br />
-<br />
+<a class="btn btn-primary btn-sm" href="farm-agent/run">Manage connection</a>
 
 <hr />
 
-<h2>CPU:</h2>
-<% rigInfos.devices?.cpus.forEach(cpu => { %>
-    <li>
-        <%- cpu.id %> <%- cpu.name %> [x<%- cpu.threads %> threads]
-    </li>
+
+<h2>Devices</h2>
+
+<h3>CPU:</h3>
+<div class="row">
+    <div class="col-12">
+        <div class="border border-dark rounded bg-info text-light m-1 p-1">
+            <img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" />
+            <span class="fw-bold"><%= rigInfos.systemInfos.cpu.manufacturer %> <%= rigInfos.systemInfos.cpu.brand %></span> (<%= rigInfos.systemInfos.cpu.physicalCores %> cores, <%= rigInfos.systemInfos.cpu.cores %> threads)
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h3>GPUS:</h3>
+<div class="row">
+    <%- rigInfos.systemInfos.gpus.map(gpu => {
+        const isNvidia = gpu.vendor.toLowerCase().includes('nvidia') || gpu.model.toLowerCase().includes('nvidia');
+        const isAMD = gpu.vendor.toLowerCase().includes('amd') || gpu.model.toLowerCase().includes('amd');
+
+        let gpuImg = '/img/gpu.trans.png';
+        if (isNvidia) {
+            gpuImg = '/img/gpu5_1.trans.png';
+        } else if (isAMD) {
+            gpuImg = '/img/gpu6_4.trans.png';
+        }
+
+        return `
+            <div class="col-12 col-lg-6">
+                <div class="border border-primary rounded bg-info text-light m-1 p-1">
+                    <img src="${gpuImg}" class="rounded me-2" style="width:48px; height:48px;" />
+                    #${gpu.idx} : <span class="fw-bold">${gpu.model}</span> (${gpu.vendor})
+                </div>
+            </div>
+        `;
+    }).join('') %>
+</div>
+
+<hr />
+
+
+<h2>Miners:</h2>
+<div class="row">
+<% Object.entries(allMiners).forEach(entry => {
+    const [ minerName, miner ] = entry;
+    %>
+    <div class="col-6 col-lg-3">
+        <div class="card m-2" style="width: 18rem;">
+            <div class="card-header bg-<%=(miner.running ? "success" : (miner.installed ? "warning" : "danger"))%>">
+                <span class="badge bg-info"><%- minerName.toUpperCase().slice(0, 1) %></span>
+                <span class="h3"><%- minerName %></span>
+            </div>
+            <div class="card-body">
+                <%- minerName %> is :
+                <br />
+                - <% if (miner.running) { %>
+                    <div class="badge bg-success">running</div>
+
+                    <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Manage</a>
+                    <% if (managedMiners.includes(minerName)) { %>
+                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=status">JSON</a>
+                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=log">Log</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not running</div>
+
+                    <% if (installedMiners.includes(minerName) && runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
+                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Start</a>
+                    <% } %>
+                <% } %>
+                <br />
+
+                - <% if (miner.installed) { %>
+                    <div class="badge bg-success">installed</div>
+
+                    <% if (! runningMiners.includes(minerName)) { %>
+                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">Uninstall</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not installed</div>
+                <% } %>
+                <br />
+
+                - <% if (miner.installable) { %>
+                    <div class="badge bg-success">installable</div>
+
+                    <% if (! installedMiners.includes(minerName)) { %>
+                        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">Install</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not installable</div>
+                <% } %>
+                <br />
+
+                - <% if (miner.runnable) { %>
+                    <div class="badge bg-success">runnable</div>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not runnable</div>
+                <% } %>
+                <br />
+
+                - <% if (miner.managed) { %>
+                    <div class="badge bg-success">managed</div>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not managed</div>
+                <% } %>
+            </div>
+        </div>
+    </div>
 <% }) %>
+</div>
 
-<hr />
-
-<h2>GPUS:</h2>
-<% rigInfos.devices?.gpus.forEach(gpu => { %>
-    <li>
-        [<%- gpu.id %>] <%- gpu.name %>
-    </li>
-<% }) %>
-
-<hr />
-
-<h2>Running miners:</h2>
-<% runningMiners.forEach(minerName => { %>
-    <li>
-        <%- minerName %>
-        &nbsp;&nbsp;
-        <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Manage...</a>
-        <% if (managedMiners.includes(minerName)) { %>
-            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run?action=status">JSON Status</a>
-        <% } %>
-    </li>
-<% }) %>
-
-<hr />
-
-<h2>Installed miners:</h2>
-<% installedMiners.forEach(minerName => { %>
-    <li>
-        <%- minerName %>
-        &nbsp;&nbsp;
-        <% if (runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
-            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/run">Start...</a>
-        <% } %>
-    </li>
-<% }) %>
-
-
-<hr />
-
-<h2>Installable miners:</h2>
-<% installableMiners.forEach(minerName => { %>
-    <li>
-        <%- minerName %>
-        &nbsp;&nbsp;
-        <% if (! installedMiners.includes(minerName)) { %>
-            <a class="btn btn-primary btn-sm" href="miners/<%- minerName %>/install">Install...</a>
-        <% } %>
-    </li>
-<% }) %>
-<hr />
-
-<h2>Runnable miners:</h2>
-<% runnableMiners.forEach(minerName => { %>
-    <li><%- minerName %></li>
-<% }) %>
-<hr />
-
-<h2>Managed miners:</h2>
-<% managedMiners.forEach(minerName => { %>
-    <li><%- minerName %></li>
-<% }) %>
-
-
-<hr />
-
-<pre>
-<%- JSON.stringify(config, null, 4) %>
-</pre>
+    

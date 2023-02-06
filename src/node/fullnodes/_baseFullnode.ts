@@ -115,16 +115,26 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
     async downloadFile(dlUrl: string, dlFilePath: string): Promise<void> {
         console.log(`${now()} [INFO] [NODE] Downloading file ${dlUrl}`);
-        await downloadFile(dlUrl, dlFilePath);
-        console.log(`${now()} [INFO] [NODE] Download complete`);
+        try {
+            await downloadFile(dlUrl, dlFilePath);
+            console.log(`${now()} [INFO] [NODE] Download complete`);
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [NODE] Download failed`);
+        }
     },
 
     async extractFile(tempDir: string, dlFilePath: string): Promise<void> {
         fs.mkdirSync(`${tempDir}${SEP}unzipped`);
 
         console.log(`${now()} [INFO] [NODE] Extracting file ${dlFilePath}`);
-        await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
-        console.log(`${now()} [INFO] [NODE] Extract complete`);
+        try {
+            await decompressFile(dlFilePath, `${tempDir}${SEP}unzipped`);
+            console.log(`${now()} [INFO] [NODE] Extract complete`);
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [NODE] Extract failed`);
+        }
     }
 };
 

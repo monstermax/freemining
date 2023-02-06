@@ -57,6 +57,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         if (platform === 'win32') subDir = `${SEP}btcd-windows-amd64-v${version}`;
 
+        if (! fullnodeName)  throw { message: `Install script not completed` };
+        if (! fullnodeTitle) throw { message: `Install script not completed` };
+        if (! lastVersion)   throw { message: `Install script not completed` };
+
         // Download url selection
         let dlUrls: any = {
             'linux':   `https://github.com/btcsuite/btcd/releases/download/v${version}/btcd-linux-amd64-v${version}.tar.gz`,
@@ -136,32 +140,41 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
 
     async getInfos(config, params) {
-        const apiUrl = `http://127.0.0.1:${this.rpcPort}`;
-        const headers: any = {};
-
         // TODO: RPC REQUEST
 
-        //const fullnodeSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
-        //const fullnodeSummary: any = await fullnodeSummaryRes.json();
-
         // EDIT THESE VALUES - START //
-        const fullnodeName = 'edit-me';
-        const coin = 'edit-me';
+        const coin = ''; // edit-me
+
         const blocks = -1; // edit-me
         const blockHeaders = -1; // edit-me
         const peers = -1; // edit-me
+        const bestBlockHash = ''; // edit-me
+        const bestBlockTime = -1; // edit-me
+        const sizeOnDisk = -1; // edit-me
+
+        const walletAddress = ''; // edit-me
+        const walletBalance = -1; // edit-me
+        const walletTxCount = -1; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
             fullnode: {
-                name: fullnodeName,
+                name: fullnodeTitle,
                 coin,
             },
             blockchain: {
                 blocks,
                 headers: blockHeaders,
+                bestBlockHash,
+                bestBlockTime,
+                sizeOnDisk,
                 peers,
             },
+            wallet: {
+                address: walletAddress,
+                balance: walletBalance,
+                txcount: walletTxCount,
+            }
         };
 
         return infos;

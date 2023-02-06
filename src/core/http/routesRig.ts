@@ -74,6 +74,7 @@ export async function rigHomepage(rigData: t.RigData, req: express.Request, res:
         },
         contentTemplate: `..${SEP}rig${SEP}rig.html`,
         ...rigData,
+        allMiners,
         installedMiners, // a supprimer
         runningMiners, // a supprimer
         installableMiners, // a supprimer
@@ -151,7 +152,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
             return;
         }
 
-        res.send(`try action start/stop`);
+        res.send(`try action start/stop. <a href="?action=start">start</a> | <a href="?action=stop">stop</a>`);
 
         // TODO: afficher page html
     });
@@ -394,6 +395,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         const config = Daemon.getConfig();
         const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
 
+        const coin = req.body.coin?.toString() || '';
         const algo = req.body.algo?.toString() || '';
         const poolUrl = req.body.poolUrl?.toString() || '';
         const poolUser = req.body.poolUser?.toString() || '';
@@ -407,6 +409,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
             const params = {
                 miner: minerName,
+                coin,
                 algo,
                 poolUrl,
                 poolUser,

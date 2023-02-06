@@ -194,6 +194,8 @@ export function getRunningMinersAliases(config: t.DaemonConfigAll): t.RunningMin
             alias: proc.name,
             pid: proc.pid || 0,
             dateStart: proc.dateStart,
+            args: proc.args,
+            params: proc.params as t.minerRunStartParams,
             //apiPort: proc.apiPort, // TODO
         });
     }
@@ -357,6 +359,7 @@ export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRu
         type: 'miner-run',
         name: minerAlias,
         miner: minerName,
+        params: params,
         cmdFile,
         args,
         dataDir,

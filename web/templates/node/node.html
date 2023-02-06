@@ -10,71 +10,93 @@
 
 <hr />
 
-<a href="status">Node status</a>
-<br />
-<a href="status.json">JSON status</a>
-<br />
-<br />
+<a class="btn btn-primary btn-sm"  href="status">Node status</a>
+&nbsp;
+<a class="btn btn-secondary btn-sm"  href="status.json">JSON status</a>
+&nbsp;&nbsp;
+&nbsp;&nbsp;
 <% if (monitorStatus) { %>
     Monitor is running.
-    <a href="monitor-run">Stop monitor</a>
 <% } else { %>
     Monitor is not running.
-    <a href="monitor-run">Start monitor</a>
 <% } %>
-<br />
-<br />
+<a class="btn btn-primary btn-sm"  href="monitor-run">Manage monitor</a>
 
 <hr />
 
-<h2>Running fullnodes:</h2>
-<% runningFullnodes.forEach(fullnodeName => { %>
-    <li>
-        <%- fullnodeName %>
-        &nbsp;&nbsp;
-        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run">Manage...</a>
-        <% if (managedFullnodes.includes(fullnodeName)) { %>
-            <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run?action=status">JSON Status</a>
-        <% } %>
-    </li>
+<h2>Fullnodes</h2>
+<div class="row">
+<% Object.entries(allFullnodes).forEach(entry => {
+    const [ fullnodeName, fullnode ] = entry;
+    %>
+    <div class="col-6 col-lg-3">
+        <div class="card m-2" style="width: 18rem;">
+            <div class="card-header bg-<%=(fullnode.running ? "success" : (fullnode.installed ? "warning" : "danger"))%>">
+                <img src="/img/fullnodes/<%=fullnodeName%>.webp" style="width:32px;" />
+                <span class="h3"><%- fullnodeName %></span>
+            </div>
+            <div class="card-body">
+                <%- fullnodeName %> is :
+                <br />
+                - <% if (fullnode.running) { %>
+                    <div class="badge bg-success">running</div>
+
+                    <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run">Manage</a>
+                    <% if (managedFullnodes.includes(fullnodeName)) { %>
+                        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run?action=status">JSON</a>
+                        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run?action=log">Log</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not running</div>
+
+                    <% if (installedFullnodes.includes(fullnodeName) && runnableFullnodes.includes(fullnodeName) && ! runningFullnodes.includes(fullnodeName)) { %>
+                        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run">Start</a>
+                    <% } %>
+                <% } %>
+                <br />
+
+                - <% if (fullnode.installed) { %>
+                    <div class="badge bg-success">installed</div>
+
+                    <% if (! runningFullnodes.includes(fullnodeName)) { %>
+                        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/install">Uninstall</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not installed</div>
+                <% } %>
+                <br />
+
+                - <% if (fullnode.installable) { %>
+                    <div class="badge bg-success">installable</div>
+
+                    <% if (! installedFullnodes.includes(fullnodeName)) { %>
+                        <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/install">Install</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not installable</div>
+                <% } %>
+                <br />
+
+                - <% if (fullnode.runnable) { %>
+                    <div class="badge bg-success">runnable</div>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not runnable</div>
+                <% } %>
+                <br />
+
+                - <% if (fullnode.managed) { %>
+                    <div class="badge bg-success">managed</div>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not managed</div>
+                <% } %>
+            </div>
+        </div>
+    </div>
 <% }) %>
-
-<hr />
-
-<h2>Installed fullnodes:</h2>
-<% installedFullnodes.forEach(fullnodeName => { %>
-    <li>
-        <%- fullnodeName %>
-        &nbsp;&nbsp;
-        <% if (runnableFullnodes.includes(fullnodeName) && ! runningFullnodes.includes(fullnodeName)) { %>
-            <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/run">Start...</a>
-        <% } %>
-    </li>
-<% }) %>
-
-
-<hr />
-
-<h2>Installable fullnodes:</h2>
-<% installableFullnodes.forEach(fullnodeName => { %>
-    <li>
-        <%- fullnodeName %>
-        &nbsp;&nbsp;
-        <% if (! installedFullnodes.includes(fullnodeName)) { %>
-            <a class="btn btn-primary btn-sm" href="fullnodes/<%- fullnodeName %>/install">Install...</a>
-        <% } %>
-    </li>
-<% }) %>
-<hr />
-
-<h2>Runnable fullnodes:</h2>
-<% runnableFullnodes.forEach(fullnodeName => { %>
-    <li><%- fullnodeName %></li>
-<% }) %>
-<hr />
-
-<h2>Managed fullnodes:</h2>
-<% managedFullnodes.forEach(fullnodeName => { %>
-    <li><%- fullnodeName %></li>
-<% }) %>
+</div>
 

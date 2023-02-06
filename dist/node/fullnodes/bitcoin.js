@@ -36,6 +36,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
             let subDir = `${SEP}bitcoin-${version}`;
+            if (!fullnodeName)
+                throw { message: `Install script not completed` };
+            if (!fullnodeTitle)
+                throw { message: `Install script not completed` };
+            if (!lastVersion)
+                throw { message: `Install script not completed` };
             // Download url selection
             let dlUrls = {
                 'linux': `https://bitcoincore.org/bin/bitcoin-core-${version}/bitcoin-${version}-x86_64-linux-gnu.tar.gz`,
@@ -109,26 +115,22 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // RPC REQUEST
-            // bitcoin-cli -rpcuser=user -rpcpassword=pass help
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-            const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
-            const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
-            const getwalletinfo = null; //await this.rpcRequest(fullnodeName, 'getwalletinfo', []);
-            const getaddressesbylabel = null; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
+            // RPC REQUESTS
+            const getblockchaininfo = (yield this.rpcRequest(fullnodeName, 'getblockchaininfo', [])) || {};
+            const getnetworkinfo = (yield this.rpcRequest(fullnodeName, 'getnetworkinfo', [])) || {};
+            const getwalletinfo = {}; //await this.rpcRequest(fullnodeName, 'getwalletinfo', []); // requires -rpcwallet=...
+            const getaddressesbylabel = {}; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']); // requires -rpcwallet=...
             // EDIT THESE VALUES - START //
             const coin = 'BTC';
-            const blocks = getblockchaininfo.blocks || -1;
-            const blockHeaders = getblockchaininfo.headers || -1;
-            const bestBlockHash = getblockchaininfo.bestblockhash || '';
-            const bestBlockTime = getblockchaininfo.time || -1;
-            const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
-            const peers = getnetworkinfo.connections || -1;
+            const blocks = Number(getblockchaininfo.blocks);
+            const blockHeaders = Number(getblockchaininfo.headers);
+            const bestBlockHash = getblockchaininfo.bestblockhash || '-';
+            const bestBlockTime = Number(getblockchaininfo.time);
+            const sizeOnDisk = Number(getblockchaininfo.size_on_disk);
+            const peers = Number(getnetworkinfo.connections);
+            const walletAddress = Object.keys(getaddressesbylabel || {}).shift() || '-';
+            const walletBalance = Number(getwalletinfo.balance);
+            const walletTxCount = Number(getwalletinfo.txcount);
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
@@ -144,11 +146,31 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
                     peers,
                 },
                 wallet: {
-                    address: Object.keys(getaddressesbylabel || {}).shift() || '',
-                    balance: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.balance) || -1,
-                    txcount: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.txcount) || -1,
+                    address: walletAddress,
+                    balance: walletBalance,
+                    txcount: walletTxCount,
                 }
             };
             return infos;
         });
     } });
+/*
+
+
+bitcoin-cli -rpcuser=user -rpcpassword=pass help
+
+bitcoin-cli -rpcuser=user -rpcpassword=pass loadwallet $HOME/.freemining-beta/data/node/fullnodes/bitcoin/fullnode
+bitcoin-cli -rpcuser=user -rpcpassword=pass getwalletinfo
+bitcoin-cli -rpcwallet=$HOME/.freemining-beta/data/node/fullnodes/bitcoin/fullnode/wallet.dat getwalletinfo => KO: Requested wallet does not exist or is not loaded
+bitcoin-cli -rpcwallet=$HOME/.freemining-beta/data/node/fullnodes/bitcoin/fullnode/wallet.dat getaddressesbylabel => KO: Requested wallet does not exist or is not loaded
+bitcoin-cli -rpcuser=user -rpcpassword=pass dumpprivkey $ADDRESS
+
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+
+*/

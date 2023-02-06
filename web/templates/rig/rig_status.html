@@ -37,7 +37,7 @@
 
 <h2>System informations</h2>
 
-<div class="alert alert-secondary">
+<div class="alert alert-secondary shadow">
     <div class="row">
         <div class="mb-2 col-6 col-lg-2"><b>Hostname</b> <br /> <%= rigInfos.rig.hostname %></div>
         <div class="mb-2 col-6 col-lg-2"><b>IP</b> <br /> <%= rigInfos.rig.ip %></div>
@@ -48,18 +48,18 @@
     </div>
 </div>
 
-<br />
 
 <h2>Hardware devices</h2>
 
-<div class="alert alert-secondary">
+<div class="alert alert-secondary shadow">
     <div class="row mb-1">
         <div class="col-12">
             <b>CPU</b>
         </div>
         <div class="col-12">
-            <div class="border border-dark rounded bg-light m-1 p-1">
-                <%= rigInfos.systemInfos.cpu.manufacturer %> <%= rigInfos.systemInfos.cpu.brand %> (<%= rigInfos.systemInfos.cpu.physicalCores %> cores, <%= rigInfos.systemInfos.cpu.cores %> threads)
+            <div class="border shadow rounded bg-info m-1 p-1">
+                <img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" />
+                <span class="fw-bold"><%= rigInfos.systemInfos.cpu.manufacturer %> <%= rigInfos.systemInfos.cpu.brand %></span> (<%= rigInfos.systemInfos.cpu.physicalCores %> cores, <%= rigInfos.systemInfos.cpu.cores %> threads)
             </div>
         </div>
     </div>
@@ -69,18 +69,27 @@
             <b>GPU</b>
         </div>
         <%- rigInfos.systemInfos.gpus.map(gpu => {
+            const isNvidia = gpu.vendor.toLowerCase().includes('nvidia') || gpu.model.toLowerCase().includes('nvidia');
+            const isAMD = gpu.vendor.toLowerCase().includes('amd') || gpu.model.toLowerCase().includes('amd');
+
+            let gpuImg = '/img/gpu.trans.png';
+            if (isNvidia) {
+                gpuImg = '/img/gpu5_1.trans.png';
+            } else if (isAMD) {
+                gpuImg = '/img/gpu6_4.trans.png';
+            }
+
             return `
                 <div class="col-12 col-lg-6">
-                    <div class="border border-primary rounded bg-light m-1 p-1">
-                        #${gpu.idx} : ${gpu.model} (${gpu.vendor})
+                    <div class="border shadow rounded bg-info m-1 p-1">
+                        <img src="${gpuImg}" class="rounded me-2" style="width:48px; height:48px;" />
+                        #${gpu.idx} : <span class="fw-bold">${gpu.model}</span> (${gpu.vendor})
                     </div>
                 </div>
             `;
         }).join('') %>
     </div>
 </div>
-
-<br />
 
 
 <h2>Mining services</h2>
@@ -90,7 +99,7 @@
 <% } %>
 
 <%- rigInfos.status.runningMinersAliases.map(runningMiner => {
-    const { miner, alias, pid } = runningMiner;
+    const { miner, alias, pid, args, params } = runningMiner;
     const minerFullName = `${miner}-${alias}`;
     const minerFullTitle = (miner === alias || ! alias) ? miner : `${alias} (${miner})`;
 
@@ -106,9 +115,9 @@
             devicesHtml += `
             <div class="border border-dark rounded bg-light">
                 <div class="row">
-                    <div class="col-1"></div>
+                    <div class="col-1"><img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" /></div>
                     <div class="col-2"><b>CPU</b> # <br /> ${cpu.id}</div>
-                    <div class="col-7"><b>Name</b> <br /> ${cpu.name}</div>
+                    <div class="col-7"><b>Name</b> <br /> ${cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')}</div>
                     <div class="col-2"><b>Hashrate</b> <br /> ${formatNumber(cpu.hashRate, 'size')}H/sec.</div>
                 </div>
             </div>
@@ -117,10 +126,20 @@
 
         if (service.devices.gpus.length > 0) {
             service.devices.gpus.forEach(gpu => {
+                const isNvidia = gpu.name.toLowerCase().includes('nvidia');
+                const isAMD = gpu.name.toLowerCase().includes('amd');
+
+                let gpuImg = '/img/gpu.trans.png';
+                if (isNvidia) {
+                    gpuImg = '/img/gpu5_1.trans.png';
+                } else if (isAMD) {
+                    gpuImg = '/img/gpu6_4.trans.png';
+                }
+
                 devicesHtml += `
                 <div class="border border-dark rounded bg-light my-2">
                     <div class="row">
-                        <div class="col-1"></div>
+                        <div class="col-1"><img src="${gpuImg}" class="rounded me-2" style="width:48px; height:48px;" /></div>
                         <div class="col-2"><b>GPU #</b> <br /> ${gpu.id}</div>
                         <div class="col-5"><b>Name</b> <br /> ${gpu.name}</div>
                         <div class="col-1"><b>Temperature</b> <br /> ${gpu.temperature}°</div>
@@ -133,16 +152,16 @@
         }
 
         let html = `
-            <div id="rig-service-${minerFullName.replaceAll('.', '-')}" class="alert alert-success rig-service">
+            <div id="rig-service-${minerFullName.replaceAll('.', '-')}" class="alert alert-success rig-service shadow">
                 <div class="row">
                     <div class="col-12 col-lg-2 text-truncate">
                         <div class="alert alert-dark h4 text-center">${service.miner.name}<br /><small class="text-muted">${alias}</small></div>
                     </div>
-                    <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.miner.algo}</div>
-                    <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.miner.worker}</div>
+                    <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> ${service.miner.algo || params.algo}</div>
+                    <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <br /> ${service.miner.worker || (params.poolUser.split('.')[1] || '-')}</div>
                     <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> ${formatNumber(service.miner.uptime, 'seconds')}</div>
-                    <div class="col-12 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.miner.hashRate, 'size')}H/sec.</div>
-                    <div class="col-12 col-lg-1">
+                    <div class="col-6 col-lg-3 text-truncate"><b>Hashrate</b> <br /> ${formatNumber(service.miner.hashRate, 'size')}H/sec.</div>
+                    <div class="col-6 col-lg-1">
                         <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('${miner}', '${alias}')" />
                     </div>
                 </div>
@@ -150,8 +169,9 @@
                 <br />
 
                 <div class="row">
-                    <div class="col-6 col-lg-6 text-truncate"><b>Pool url</b> <br /> ${service.pool.url}</div>
-                    <div class="col-6 col-lg-6 text-truncate"><b>Pool account</b> <br /> ${service.pool.account}</div>
+                    <div class="col-6 col-lg-2 text-truncate"><b>Coin</b> <br /> <img src="/img/coins/${params.coin}.webp" class="rounded me-2" style="width:32px; height:32px;" /> ${params.coin || '-'}</div>
+                    <div class="col-6 col-lg-4 text-truncate"><b>Pool url</b> <br /> ${service.pool.url || params.poolUrl}</div>
+                    <div class="col-6 col-lg-6 text-truncate"><b>Pool account</b> <br /> ${service.pool.account || params.poolUser}</div>
                 </div>
 
                 ${devicesHtml.length > 0 ? '<br /><h4>Mining devices</h4>' : ''}
@@ -186,6 +206,7 @@
                 </div>
             </div>
         `;
+
         return html;
     }
 }).join('<br />') %>
@@ -214,137 +235,11 @@ function stopMiner(minerName, minerAlias) {
         jQuery(`#rig-service-${minerFullName.replaceAll('.', '-')}`).remove();
         jQuery('#startMinerModal').remove();
     };
-    const onFail = () => {
-    };
+    const onFail = null;
     stopMinerAjax(minerName, minerAlias, onStart, onSuccess, onFail);
 }
 </script>
 
-
-<script>
-function modalStartMinerChangeCoin() {
-    const $coins = jQuery('#newMiner_coin');
-    const $wallets = jQuery('#newMiner_wallet');
-    const $pools = jQuery('#newMiner_pool');
-    const $miners = jQuery('#newMiner_miner');
-    const $extraArgs = jQuery('#newMiner_extraArgs');
-
-    const coin = $coins.val();
-
-    $wallets[0].length = 1;
-    $pools.html('<option value=""></option>');
-
-    if (! coin) {
-        // no coin selected
-
-        //$miners.children().attr('disabled', true); // disable all miners
-        $miners.children().attr('disabled', false); // re-enable all miners
-
-    } else {
-        // coin selected
-
-
-        const coinWallets = coinsUserconf[coin].wallets || {};
-        const walletsHtml = Object.entries(coinWallets).map(entry => {
-            const [walletName, walletAddress] = entry;
-            return `<option value="${walletAddress}">${walletName} : ${walletAddress}</option>`;
-        }).join('');
-        $wallets.append(walletsHtml);
-
-        if ($wallets[0].length == 2) {
-            $wallets[0].selectedIndex = 1;
-            $wallets.trigger('change');
-        }
-
-
-        const coinsPools = coinsUserconf[coin].pools || {};
-        const poolsHtml = Object.entries(coinsPools).map(entry => {
-            const [poolName, poolServers] = entry;
-
-            const htmlOptions = Object.entries(poolServers).map(entry => {
-                const [serverName, poolUrl] = entry;
-                return `<option value="${poolUrl}">${poolUrl}</option>`;
-            });
-
-            let html = '';
-            if (htmlOptions.length > 0) {
-                html += `<optgroup label="${poolName}">`;
-                html += htmlOptions.join('');
-                html += `</optgroup`;
-            }
-            return html;
-        }).join('');
-        $pools.append(poolsHtml);
-
-        if ($pools[0].length == 2) {
-            $pools[0].selectedIndex = 1;
-            $pools.trigger('change');
-        }
-
-
-        $miners.children().each((idx, opt) => {
-            const $opt = jQuery(opt);
-            const minerName = $opt.val();
-
-            if (minerName == '' || (minerName in coinsMiners[coin])) {
-                $opt.attr('disabled', false);
-
-            } else {
-                $opt.attr('disabled', true);
-            }
-        });
-    }
-
-    if ($miners.children(':selected:disabled').length) {
-        $miners.val('');
-        $miners.trigger('change');
-    }
-
-    if ($miners.children(':not(:disabled)').length == 2) {
-        $miners.val( $miners.children(':not(:disabled)')[1].value );
-        $miners.trigger('change');
-    }
-}
-
-function modalStartMinerChangeWallet() {
-    const $wallets = jQuery('#newMiner_wallet');
-    const $user = jQuery('#newMiner_pool_user');
-    $user.val( $wallets.val() );
-}
-
-function modalStartMinerChangePool() {
-    const $pools = jQuery('#newMiner_pool');
-    const $pool = jQuery('#newMiner_pool_url');
-    $pool.val( $pools.val() );
-}
-
-function modalStartMinerChangeMiner() {
-    const $miner = jQuery('#newMiner_miner');
-    const $algo = jQuery('#newMiner_algo');
-    const $extraArgs = jQuery('#newMiner_extraArgs');
-    const $coins = jQuery('#newMiner_coin');
-
-    const coin = $coins.val();
-    const miner = $miner.val();
-
-    if (coin && miner) {
-        const coinMinerConf = coinsMiners[coin] ? coinsMiners[coin][miner] : null;
-        const minerConf = miners[miner];
-        $algo.val(coinMinerConf ? coinMinerConf.algo : '');
-
-        let extraArgsArr = [];
-        if (minerConf && minerConf.extraArgs && minerConf.extraArgs.trim()) {
-            extraArgsArr.push(minerConf.extraArgs.trim());
-        }
-        if (coinMinerConf && coinMinerConf.extraArgs && coinMinerConf.extraArgs.trim()) {
-            extraArgsArr.push(coinMinerConf.extraArgs.trim());
-        }
-        const extraArgs = extraArgsArr.join(' ');
-        $extraArgs.val(extraArgs);
-    }
-
-}
-</script>
 
 
 <%
@@ -362,3 +257,4 @@ const coinsMiners = <%- JSON.stringify(rigInfos.config.coinsMiners, null, 0) %>;
 const availableCoins = <%- JSON.stringify(availableCoins, null, 0) %>;
 
 </script>
+

@@ -33,6 +33,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
             let subDir = ``; // none
+            if (!fullnodeName)
+                throw { message: `Install script not completed` };
+            if (!fullnodeTitle)
+                throw { message: `Install script not completed` };
+            if (!lastVersion)
+                throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/FennecBlockchain/Fennec/releases/download/v${version}/Fennec-Linux.tar.gz`,
@@ -88,19 +94,12 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // RPC REQUEST
-            // fennec-cli -rpcuser=user -rpcpassword=pass help
-            // fennec-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
-            // #curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
-            const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
-            const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
-            const getwalletinfo = yield this.rpcRequest(fullnodeName, 'getwalletinfo', []);
-            const getaddressesbylabel = yield this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
+            // RPC REQUESTS
+            const getblockchaininfo = (yield this.rpcRequest(fullnodeName, 'getblockchaininfo', [])) || {};
+            const getnetworkinfo = (yield this.rpcRequest(fullnodeName, 'getnetworkinfo', [])) || {};
+            const getwalletinfo = (yield this.rpcRequest(fullnodeName, 'getwalletinfo', [])) || {};
+            const getaddressesbylabel = (yield this.rpcRequest(fullnodeName, 'getaddressesbylabel', [''])) || {};
+            //const getaccountaddress: any = await this.rpcRequest(fullnodeName, 'getaccountaddress', ['']) || ''; // method not found
             // EDIT THESE VALUES - START //
             const coin = 'FNNC';
             const blocks = getblockchaininfo.blocks || -1;
@@ -109,6 +108,9 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
             const bestBlockTime = getblockchaininfo.mediantime || -1;
             const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
             const peers = getnetworkinfo.connections || -1;
+            const walletAddress = Object.keys(getaddressesbylabel || {}).shift() || '';
+            const walletBalance = (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.balance) || -1;
+            const walletTxCount = (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.txcount) || -1;
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
@@ -124,11 +126,26 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
                     peers,
                 },
                 wallet: {
-                    address: Object.keys(getaddressesbylabel || {}).shift() || '',
-                    balance: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.balance) || -1,
-                    txcount: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.txcount) || -1,
+                    address: walletAddress,
+                    balance: walletBalance,
+                    txcount: walletTxCount,
                 }
             };
             return infos;
         });
     } });
+/*
+
+
+fennec-cli -rpcuser=user -rpcpassword=pass help
+fennec-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
+
+#curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8339/
+
+*/

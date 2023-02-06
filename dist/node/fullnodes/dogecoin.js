@@ -33,6 +33,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
             let subDir = `${SEP}dogecoin-${version}`;
+            if (!fullnodeName)
+                throw { message: `Install script not completed` };
+            if (!fullnodeTitle)
+                throw { message: `Install script not completed` };
+            if (!lastVersion)
+                throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/dogecoin/dogecoin/releases/download/v${version}/dogecoin-${version}-x86_64-linux-gnu.tar.gz`,
@@ -85,31 +91,27 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // RPC REQUEST
-            // dogecoin-cli -rpcuser=user -rpcpassword=pass help
-            // dogecoin-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
-            // #curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "descriptors", "avoid_reuse": true, "descriptors": true, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
-            // curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
-            const getblockchaininfo = yield this.rpcRequest(fullnodeName, 'getblockchaininfo', []);
-            const getnetworkinfo = yield this.rpcRequest(fullnodeName, 'getnetworkinfo', []);
-            const getwalletinfo = yield this.rpcRequest(fullnodeName, 'getwalletinfo', []);
-            const getaddressesbylabel = null; //await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']);
+            // RPC REQUESTS
+            const getblockchaininfo = (yield this.rpcRequest(fullnodeName, 'getblockchaininfo', [])) || {};
+            const getnetworkinfo = (yield this.rpcRequest(fullnodeName, 'getnetworkinfo', [])) || {};
+            const getwalletinfo = (yield this.rpcRequest(fullnodeName, 'getwalletinfo', [])) || {};
+            //const getaddressesbylabel: any = await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']); // method not found
+            const getaccountaddress = (yield this.rpcRequest(fullnodeName, 'getaccountaddress', [''])) || '';
             // EDIT THESE VALUES - START //
             const coin = 'DOGE';
-            const blocks = getblockchaininfo.blocks || -1;
-            const blockHeaders = getblockchaininfo.headers || -1;
-            const bestBlockHash = getblockchaininfo.bestblockhash || '';
-            const bestBlockTime = getblockchaininfo.mediantime || -1;
-            const sizeOnDisk = getblockchaininfo.size_on_disk || -1;
-            const peers = getnetworkinfo.connections || -1;
+            const blocks = Number(getblockchaininfo.blocks);
+            const blockHeaders = Number(getblockchaininfo.headers);
+            const bestBlockHash = getblockchaininfo.bestblockhash || '-';
+            const bestBlockTime = Number(getblockchaininfo.mediantime);
+            const sizeOnDisk = Number(getblockchaininfo.size_on_disk);
+            const peers = Number(getnetworkinfo.connections);
+            const walletAddress = getaccountaddress || '-';
+            const walletBalance = Number(getwalletinfo.balance);
+            const walletTxCount = Number(getwalletinfo.txcount);
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
-                    name: fullnodeName,
+                    name: fullnodeTitle,
                     coin,
                 },
                 blockchain: {
@@ -121,11 +123,25 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
                     peers,
                 },
                 wallet: {
-                    address: Object.keys(getaddressesbylabel || {}).shift() || '',
-                    balance: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.balance) || -1,
-                    txcount: (getwalletinfo === null || getwalletinfo === void 0 ? void 0 : getwalletinfo.txcount) || -1,
+                    address: walletAddress,
+                    balance: walletBalance,
+                    txcount: walletTxCount,
                 }
             };
             return infos;
         });
     } });
+/*
+
+dogecoin-cli -rpcuser=user -rpcpassword=pass help
+dogecoin-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
+
+#curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "descriptors", "avoid_reuse": true, "descriptors": true, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getaddressesbylabel", "params": [""]}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnewaddress", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getnetworkinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:22555/
+
+*/

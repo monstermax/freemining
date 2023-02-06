@@ -51,7 +51,8 @@ function rigHomepage(rigData, req, res, next) {
         const data = Object.assign(Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager`,
                 noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}rig.html` }), rigData), { installedMiners,
+            }, contentTemplate: `..${SEP}rig${SEP}rig.html` }), rigData), { allMiners,
+            installedMiners,
             runningMiners,
             installableMiners,
             runnableMiners,
@@ -107,7 +108,7 @@ function registerRigRoutes(app, urlPrefix = '') {
             res.send('Rig farm-agent started [TODO]');
             return;
         }
-        res.send(`try action start/stop`);
+        res.send(`try action start/stop. <a href="?action=start">start</a> | <a href="?action=stop">stop</a>`);
         // TODO: afficher page html
     }));
     // POST Rig farm-agent start => /rig/farm-agent/run
@@ -299,15 +300,16 @@ function registerRigRoutes(app, urlPrefix = '') {
     }));
     // POST Miner run page => /rig/miners/{minerName}/run
     app.post(`${urlPrefix}/miners/:minerName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _o, _p, _q, _r, _s;
+        var _o, _p, _q, _r, _s, _t;
         const minerName = req.params.minerName;
         const action = ((_o = req.body.action) === null || _o === void 0 ? void 0 : _o.toString()) || '';
         const config = Daemon.getConfig();
         const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
-        const algo = ((_p = req.body.algo) === null || _p === void 0 ? void 0 : _p.toString()) || '';
-        const poolUrl = ((_q = req.body.poolUrl) === null || _q === void 0 ? void 0 : _q.toString()) || '';
-        const poolUser = ((_r = req.body.poolUser) === null || _r === void 0 ? void 0 : _r.toString()) || '';
-        const extraArgs = (((_s = req.body.extraArgs) === null || _s === void 0 ? void 0 : _s.toString()) || '').split(' ').filter((arg) => !!arg);
+        const coin = ((_p = req.body.coin) === null || _p === void 0 ? void 0 : _p.toString()) || '';
+        const algo = ((_q = req.body.algo) === null || _q === void 0 ? void 0 : _q.toString()) || '';
+        const poolUrl = ((_r = req.body.poolUrl) === null || _r === void 0 ? void 0 : _r.toString()) || '';
+        const poolUser = ((_s = req.body.poolUser) === null || _s === void 0 ? void 0 : _s.toString()) || '';
+        const extraArgs = (((_t = req.body.extraArgs) === null || _t === void 0 ? void 0 : _t.toString()) || '').split(' ').filter((arg) => !!arg);
         if (action === 'start') {
             if (!minerName || !algo || !poolUrl || !poolUser) {
                 res.send(`Error: missing parameters`);
@@ -315,6 +317,7 @@ function registerRigRoutes(app, urlPrefix = '') {
             }
             const params = {
                 miner: minerName,
+                coin,
                 algo,
                 poolUrl,
                 poolUser,
@@ -353,11 +356,11 @@ function registerRigRoutes(app, urlPrefix = '') {
         res.send(`Error: invalid action`);
     }));
     app.get(`${urlPrefix}/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _t;
+        var _u;
         const minerName = req.query.miner || '';
         const config = Daemon.getConfig();
         const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
-        const minerAlias = ((_t = req.query.alias) === null || _t === void 0 ? void 0 : _t.toString()) || minerConfig.defaultAlias;
+        const minerAlias = ((_u = req.query.alias) === null || _u === void 0 ? void 0 : _u.toString()) || minerConfig.defaultAlias;
         const rigInfos = yield Rig.getRigInfos(config);
         const allMiners = yield Rig.getAllMiners(config);
         const runningMiners = Object.entries(allMiners).filter((entry) => entry[1].running).map(entry => entry[0]);

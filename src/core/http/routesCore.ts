@@ -39,6 +39,15 @@ export function registerCoreRoutes(app: express.Express, urlPrefix: string='') {
     });
 
 
+    // Config => /config.json
+    app.get(`${urlPrefix}/config.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const config = Daemon.getConfig();
+        let content = JSON.stringify(config, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    });
+
+
     // Sysinfos => /sysinfos.json
     app.get(`${urlPrefix}/sysinfos.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const sysInfos = await getSystemInfos();

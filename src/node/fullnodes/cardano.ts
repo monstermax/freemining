@@ -45,7 +45,11 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``;
+        let subDir = ``; // edit-me
+
+        if (! fullnodeName)  throw { message: `Install script not completed` };
+        if (! fullnodeTitle) throw { message: `Install script not completed` };
+        if (! lastVersion)   throw { message: `Install script not completed` };
 
         // Download url selection
         const dlUrls: any = {
@@ -123,23 +127,38 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
         // TODO: RPC REQUEST
 
         // EDIT THESE VALUES - START //
-        const fullnodeName = ''; // edit-me
         const coin = ''; // edit-me
+
         const blocks = -1; // edit-me
         const blockHeaders = -1; // edit-me
         const peers = -1; // edit-me
+        const bestBlockHash = ''; // edit-me
+        const bestBlockTime = -1; // edit-me
+        const sizeOnDisk = -1; // edit-me
+
+        const walletAddress = ''; // edit-me
+        const walletBalance = -1; // edit-me
+        const walletTxCount = -1; // edit-me
         // EDIT THESE VALUES - END //
 
         let infos: t.FullnodeStats = {
             fullnode: {
-                name: fullnodeName,
+                name: fullnodeTitle,
                 coin,
             },
             blockchain: {
                 blocks,
                 headers: blockHeaders,
+                bestBlockHash,
+                bestBlockTime,
+                sizeOnDisk,
                 peers,
             },
+            wallet: {
+                address: walletAddress,
+                balance: walletBalance,
+                txcount: walletTxCount,
+            }
         };
 
         return infos;

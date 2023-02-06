@@ -37,12 +37,9 @@ let dateLastCheck: number;
  * ./ts-node frm-cli.ts --node-monitor-start
  */
 export function monitorStart(config: t.DaemonConfigAll): void {
-    if (monitorIntervalId) {
-        return;
-    }
+    if (monitorIntervalId) return;
 
-    const pollDelay = Number(getOpt('--node-monitor-poll-delay')) || defaultPollDelay;
-    monitorIntervalId = setInterval(monitorCheckNode, pollDelay, config);
+    /* await */ monitorAutoCheckNode(config);
 
     console.log(`${now()} [INFO] [NODE] Node monitor started`);
 }
@@ -53,18 +50,33 @@ export function monitorStart(config: t.DaemonConfigAll): void {
  * ./ts-node frm-cli.ts --node-monitor-stop
  */
 export function monitorStop(): void {
-    if (monitorIntervalId) {
-        clearInterval(monitorIntervalId);
-        monitorIntervalId = null;
+    if (! monitorIntervalId) return;
 
-        console.log(`${now()} [INFO] [NODE] Node monitor stopped`);
-    }
+    clearInterval(monitorIntervalId);
+    monitorIntervalId = null;
+
+    console.log(`${now()} [INFO] [NODE] Node monitor stopped`);
 }
 
 
 export function monitorGetStatus(): boolean {
     return monitorIntervalId !== null;
 }
+
+
+
+async function monitorAutoCheckNode(config: t.DaemonConfigAll) {
+    const pollDelay = Number(getOpt('--node-monitor-poll-delay')) || defaultPollDelay;
+
+    if (monitorIntervalId) {
+        clearTimeout(monitorIntervalId);
+    }
+
+    await monitorCheckNode(config);
+
+    monitorIntervalId = setTimeout(monitorAutoCheckNode, pollDelay, config);
+}
+
 
 
 
@@ -160,6 +172,8 @@ export function getRunningFullnodesAliases(config: t.DaemonConfigAll): t.Running
             alias: proc.name,
             pid: proc.pid || 0,
             dateStart: proc.dateStart,
+            args: proc.args,
+            params: proc.params as t.fullnodeRunStartParams,
             //apiPort: proc.apiPort, // TODO
         });
     }
@@ -309,6 +323,7 @@ export async function fullnodeRunStart(config: t.DaemonConfigAll, params: t.full
         type: 'fullnode-run',
         name: fullnodeAlias,
         fullnode: fullnodeName,
+        params: params,
         cmdFile,
         args,
         dataDir,

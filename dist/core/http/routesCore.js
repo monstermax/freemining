@@ -22,6 +22,13 @@ function registerCoreRoutes(app, urlPrefix = '') {
             }, contentTemplate: `.${SEP}homepage.html` });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     }));
+    // Config => /config.json
+    app.get(`${urlPrefix}/config.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
+        let content = JSON.stringify(config, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    }));
     // Sysinfos => /sysinfos.json
     app.get(`${urlPrefix}/sysinfos.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         const sysInfos = yield (0, sysinfos_1.getSystemInfos)();

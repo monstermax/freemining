@@ -17,9 +17,9 @@ Downnload : https://github.com/NeoxaChain/Neoxa/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = '';
-const fullnodeTitle = '';
-const github = '';
+const fullnodeName = 'neoxa';
+const fullnodeTitle = 'Neoxa';
+const github = 'NeoxaChain/Neoxa';
 const lastVersion = '1.0.3';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
@@ -34,6 +34,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
             let subDir = ``; // none
+            if (!fullnodeName)
+                throw { message: `Install script not completed` };
+            if (!fullnodeTitle)
+                throw { message: `Install script not completed` };
+            if (!lastVersion)
+                throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/NeoxaChain/Neoxa/releases/download/v${version}/neoxad-linux64.zip`,
@@ -42,7 +48,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            if (dlUrl === '')
+            if (!dlUrl)
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
             const { fullnodeAlias, tempDir, fullnodeDir, aliasDir } = this.getInstallOptions(config, params, version);
@@ -63,15 +69,23 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'neoxad', managed: false, // set true when the getInfos() script is ready
-    getCommandArgs(config, params) {
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: 8788, rpcPort: 9766, command: 'neoxad', managed: true, getCommandArgs(config, params) {
         const args = [
-            `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
+            `-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
+            `-printtoconsole`,
+            //`-zmqpubrawblock=tcp://127.0.0.1:29766`,
+            //`-zmqpubrawtx=tcp://127.0.0.1:28788`,
         ];
         if (this.p2pPort > 0) {
+            args.push(`-server`);
+            args.push(`-port=${this.p2pPort.toString()}`);
         }
         if (this.rpcPort > 0) {
-            args.push(`-edit-me-rpcport=${this.rpcPort.toString()}`);
+            args.push(`-rpcport=${this.rpcPort.toString()}`);
+            args.push(`-rpcbind=0.0.0.0`);
+            args.push(`-rpcuser=user`);
+            args.push(`-rpcpassword=pass`);
+            args.push(`-rpcallowip=127.0.0.1`);
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);
@@ -80,25 +94,51 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
     },
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // TODO: RPC REQUEST
+            // RPC REQUESTS
+            const getblockchaininfo = (yield this.rpcRequest(fullnodeName, 'getblockchaininfo', [])) || {};
+            const getnetworkinfo = (yield this.rpcRequest(fullnodeName, 'getnetworkinfo', [])) || {};
+            const getwalletinfo = (yield this.rpcRequest(fullnodeName, 'getwalletinfo', [])) || {};
+            //const getaddressesbylabel: any = await this.rpcRequest(fullnodeName, 'getaddressesbylabel', ['']) || {}; // method not found
+            const getaccountaddress = (yield this.rpcRequest(fullnodeName, 'getaccountaddress', [''])) || '';
             // EDIT THESE VALUES - START //
-            const fullnodeName = ''; // edit-me
-            const coin = ''; // edit-me
-            const blocks = -1; // edit-me
-            const blockHeaders = -1; // edit-me
-            const peers = -1; // edit-me
+            const coin = 'NEOX';
+            const blocks = Number(getblockchaininfo.blocks);
+            const blockHeaders = Number(getblockchaininfo.headers);
+            const bestBlockHash = getblockchaininfo.bestblockhash || '-';
+            const bestBlockTime = Number(getblockchaininfo.mediantime);
+            const sizeOnDisk = Number(getblockchaininfo.size_on_disk);
+            const peers = Number(getnetworkinfo.connections);
+            const walletAddress = getaccountaddress || '-';
+            const walletBalance = Number(getwalletinfo.balance);
+            const walletTxCount = Number(getwalletinfo.txcount);
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
-                    name: fullnodeName,
+                    name: fullnodeTitle,
                     coin,
                 },
                 blockchain: {
                     blocks,
                     headers: blockHeaders,
+                    bestBlockHash,
+                    bestBlockTime,
+                    sizeOnDisk,
                     peers,
                 },
+                wallet: {
+                    address: walletAddress,
+                    balance: walletBalance,
+                    txcount: walletTxCount,
+                }
             };
             return infos;
         });
     } });
+/*
+
+neoxa-cli -rpcuser=user -rpcpassword=pass getaccountaddress ""
+neoxa-cli -rpcuser=user -rpcpassword=pass dumpprivkey GYYAreZ8vmikyEuntQG6snTnUQuqVGw118
+neoxa-cli -rpcuser=user -rpcpassword=pass dumpwallet /tmp/wall.tmp
+neoxa-cli -rpcuser=user -rpcpassword=pass getmywords ""
+
+*/ 

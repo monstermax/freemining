@@ -23,11 +23,9 @@ let dateLastCheck;
  * ./ts-node frm-cli.ts --node-monitor-start
  */
 function monitorStart(config) {
-    if (monitorIntervalId) {
+    if (monitorIntervalId)
         return;
-    }
-    const pollDelay = Number((0, utils_1.getOpt)('--node-monitor-poll-delay')) || defaultPollDelay;
-    monitorIntervalId = setInterval(monitorCheckNode, pollDelay, config);
+    /* await */ monitorAutoCheckNode(config);
     console.log(`${(0, utils_1.now)()} [INFO] [NODE] Node monitor started`);
 }
 exports.monitorStart = monitorStart;
@@ -37,17 +35,27 @@ exports.monitorStart = monitorStart;
  * ./ts-node frm-cli.ts --node-monitor-stop
  */
 function monitorStop() {
-    if (monitorIntervalId) {
-        clearInterval(monitorIntervalId);
-        monitorIntervalId = null;
-        console.log(`${(0, utils_1.now)()} [INFO] [NODE] Node monitor stopped`);
-    }
+    if (!monitorIntervalId)
+        return;
+    clearInterval(monitorIntervalId);
+    monitorIntervalId = null;
+    console.log(`${(0, utils_1.now)()} [INFO] [NODE] Node monitor stopped`);
 }
 exports.monitorStop = monitorStop;
 function monitorGetStatus() {
     return monitorIntervalId !== null;
 }
 exports.monitorGetStatus = monitorGetStatus;
+function monitorAutoCheckNode(config) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const pollDelay = Number((0, utils_1.getOpt)('--node-monitor-poll-delay')) || defaultPollDelay;
+        if (monitorIntervalId) {
+            clearTimeout(monitorIntervalId);
+        }
+        yield monitorCheckNode(config);
+        monitorIntervalId = setTimeout(monitorAutoCheckNode, pollDelay, config);
+    });
+}
 /**
  * Check node active processes
  *
@@ -129,6 +137,8 @@ function getRunningFullnodesAliases(config) {
             alias: proc.name,
             pid: proc.pid || 0,
             dateStart: proc.dateStart,
+            args: proc.args,
+            params: proc.params,
             //apiPort: proc.apiPort, // TODO
         });
     }
@@ -254,6 +264,7 @@ function fullnodeRunStart(config, params) {
             type: 'fullnode-run',
             name: fullnodeAlias,
             fullnode: fullnodeName,
+            params: params,
             cmdFile,
             args,
             dataDir,

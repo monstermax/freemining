@@ -18,7 +18,7 @@ async function startMinerModal(minerName='', minerAlias='', onStart=null, onSucc
         if (minerName) {
             jQuery('#newMiner_miner').val(minerName);
 
-            if (minerName) {
+            if (minerAlias) {
                 jQuery('#newMiner_alias').val(minerAlias);
             }
         }
@@ -39,6 +39,7 @@ async function startMinerModal(minerName='', minerAlias='', onStart=null, onSucc
 
 function resetStartMinerModalForm() {
     //jQuery('#newMiner_preset').val('');
+    jQuery('#newMiner_coin').val('');
     jQuery('#newMiner_miner').val('');
     jQuery('#newMiner_alias').val('');
     jQuery('#newMiner_algo').val('');
@@ -56,6 +57,7 @@ function loadStartMinerConfig(selectedPreset) {
 
     const parts = selectedPreset.split('.');
     if (parts.length != 2) {
+        jQuery('#newMiner_coin').val('');
         jQuery('#newMiner_miner').val('');
         jQuery('#newMiner_alias').val('');
         jQuery('#newMiner_algo').val('');
@@ -68,6 +70,7 @@ function loadStartMinerConfig(selectedPreset) {
 
     const config = presets[part1][part2];
 
+    jQuery('#newMiner_coin').val(config.miner || '');
     jQuery('#newMiner_miner').val(config.miner || '');
     jQuery('#newMiner_alias').val(config.alias || '');
     jQuery('#newMiner_algo').val(config.algo || '');
@@ -89,6 +92,7 @@ function startMinerFromModal(modalOnStart=null, modalOnSuccess=null, modalOnFail
     //document.getElementById('action').value = 'start';
     //document.getElementById('startMinerForm').submit();
 
+    const coin = jQuery('#newMiner_coin').val();
     const minerName = jQuery('#newMiner_miner').val();
     const minerAlias = jQuery('#newMiner_alias').val();
     const algo = jQuery('#newMiner_algo').val();
@@ -131,7 +135,7 @@ function startMinerFromModal(modalOnStart=null, modalOnSuccess=null, modalOnFail
             modalOnFail(minerName, minerAlias, response);
         }
     };
-    startMinerAjax(minerName, minerAlias, algo, poolUrl, poolUser, extraArgs, onStart, onSuccess, onFail);
+    startMinerAjax(minerName, minerAlias, coin, algo, poolUrl, poolUser, extraArgs, onStart, onSuccess, onFail);
 }
 
 
@@ -160,7 +164,11 @@ function checkStartMinerForm() {
 
 
 // MINER RUN START
-function startMinerAjax(minerName, minerAlias='', algo='', poolUrl='', poolUser='', extraArgs='', onStart=null, onSuccess=null, onFail=null) {
+function startMinerAjax(minerName, minerAlias='', coin='', algo='', poolUrl='', poolUser='', extraArgs='', onStart=null, onSuccess=null, onFail=null) {
+    if (! coin) {
+        //console.warn(`Error: Missing {coin} parameter`);
+        //return;
+    }
     if (! minerName) {
         console.warn(`Error: Missing {miner} parameter`);
         return;
@@ -185,10 +193,11 @@ function startMinerAjax(minerName, minerAlias='', algo='', poolUrl='', poolUser=
     const data = {
         action: 'start',
         miner: minerName,
+        coin,
         algo,
         poolUrl,
         poolUser,
-        extraArgs: extraArgs || '',
+        extraArgs,
     };
 
     if (typeof onStart === 'function') {
@@ -558,5 +567,133 @@ function stopRigMonitorAjax(onStart=null, onSuccess=null, onFail=null) {
             //alertify.error('Cancel');
         }
     );
+}
+
+
+
+
+
+
+function modalStartMinerChangeCoin() {
+    const $coins = jQuery('#newMiner_coin');
+    const $wallets = jQuery('#newMiner_wallet');
+    const $pools = jQuery('#newMiner_pool');
+    const $miners = jQuery('#newMiner_miner');
+    const $extraArgs = jQuery('#newMiner_extraArgs');
+
+    const coin = $coins.val();
+
+    $wallets[0].length = 1;
+    $pools.html('<option value=""></option>');
+
+    if (! coin) {
+        // no coin selected
+
+        //$miners.children().attr('disabled', true); // disable all miners
+        $miners.children().attr('disabled', false); // re-enable all miners
+
+    } else {
+        // coin selected
+
+
+        const coinWallets = coinsUserconf[coin].wallets || {};
+        const walletsHtml = Object.entries(coinWallets).map(entry => {
+            const [walletName, walletAddress] = entry;
+            return `<option value="${walletAddress}">${walletName} : ${walletAddress}</option>`;
+        }).join('');
+        $wallets.append(walletsHtml);
+
+        if ($wallets[0].length == 2) {
+            $wallets[0].selectedIndex = 1;
+            $wallets.trigger('change');
+        }
+
+
+        const coinsPools = coinsUserconf[coin].pools || {};
+        const poolsHtml = Object.entries(coinsPools).map(entry => {
+            const [poolName, poolServers] = entry;
+
+            const htmlOptions = Object.entries(poolServers).map(entry => {
+                const [serverName, poolUrl] = entry;
+                return `<option value="${poolUrl}">${poolUrl}</option>`;
+            });
+
+            let html = '';
+            if (htmlOptions.length > 0) {
+                html += `<optgroup label="${poolName}">`;
+                html += htmlOptions.join('');
+                html += `</optgroup`;
+            }
+            return html;
+        }).join('');
+        $pools.append(poolsHtml);
+
+        if ($pools[0].length == 2) {
+            $pools[0].selectedIndex = 1;
+            $pools.trigger('change');
+        }
+
+
+        $miners.children().each((idx, opt) => {
+            const $opt = jQuery(opt);
+            const minerName = $opt.val();
+
+            if (minerName == '' || (minerName in coinsMiners[coin])) {
+                $opt.attr('disabled', false);
+
+            } else {
+                $opt.attr('disabled', true);
+            }
+        });
+    }
+
+    if ($miners.children(':selected:disabled').length) {
+        $miners.val('');
+        $miners.trigger('change');
+    }
+
+    if ($miners.children(':not(:disabled)').length == 2) {
+        $miners.val( $miners.children(':not(:disabled)')[1].value );
+        $miners.trigger('change');
+    }
+}
+
+function modalStartMinerChangeWallet() {
+    const $wallets = jQuery('#newMiner_wallet');
+    const $user = jQuery('#newMiner_pool_user');
+    $user.val( $wallets.val() );
+}
+
+function modalStartMinerChangePool() {
+    const $pools = jQuery('#newMiner_pool');
+    const $pool = jQuery('#newMiner_pool_url');
+    $pool.val( $pools.val() );
+}
+
+function modalStartMinerChangeMiner() {
+    const $miner = jQuery('#newMiner_miner');
+    const $algo = jQuery('#newMiner_algo');
+    const $extraArgs = jQuery('#newMiner_extraArgs');
+    const $coins = jQuery('#newMiner_coin');
+
+    const coin = $coins.val();
+    const miner = $miner.val();
+
+    if (coin && miner) {
+        const coinMinerConf = coinsMiners[coin] ? coinsMiners[coin][miner] : null;
+        const minerConf = miners[miner];
+        $algo.val(coinMinerConf ? coinMinerConf.algo : '');
+
+        let extraArgsArr = [];
+        if (minerConf && minerConf.extraArgs && minerConf.extraArgs.trim()) {
+            extraArgsArr.push(minerConf.extraArgs.trim());
+        }
+        if (coinMinerConf && coinMinerConf.extraArgs && coinMinerConf.extraArgs.trim()) {
+            extraArgsArr.push(coinMinerConf.extraArgs.trim());
+        }
+        const extraArgs = extraArgsArr.join(' ');
+        $extraArgs.val(extraArgs);
+    }
+
 }
 

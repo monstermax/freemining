@@ -282,7 +282,9 @@ function sleep(delay) {
 exports.sleep = sleep;
 function downloadFile(url, targetFile) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const res = yield (0, node_fetch_1.default)(url);
+        const res = yield (0, node_fetch_1.default)(url).catch((err) => {
+            throw err;
+        });
         const fileStream = fs_1.default.createWriteStream(targetFile);
         return new Promise((resolve, reject) => {
             res.body.pipe(fileStream);

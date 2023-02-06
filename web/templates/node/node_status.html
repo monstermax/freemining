@@ -7,7 +7,6 @@ Node status
 <thead>
     <tr>
         <th>Fullnode</th>
-        <th>Alias</th>
         <th class="text-end">Uptime</th>
         <th class="text-end">Blocks</th>
         <th class="text-end">Headers</th>
@@ -16,6 +15,7 @@ Node status
         <th class="text-end">Size on disk</th>
         <th class="text-end">PID</th>
         <th>Wallet Addr.</th>
+        <th class="text-end">Wallet balance</th>
     </tr>
 </thead>
 <tbody>
@@ -27,27 +27,30 @@ Node status
         const pid = runningFullnodeAliase.pid;
 
         const stats = nodeInfos.status.fullnodesStats[fullnodeFullName] || {};
-        const blocks = (stats.blockchain || {}).blocks || -1;
-        const headers = (stats.blockchain || {}).headers || -1;
+        const coin = (stats.fullnode || {}).coin || '';
+        const blocks = Number((stats.blockchain || {}).blocks);
+        const headers = Number((stats.blockchain || {}).headers);
         const bestBlockHash = (stats.blockchain || {}).bestBlockHash || '-';
-        const bestBlockTime = (stats.blockchain || {}).bestBlockTime || -1;
-        const peers = (stats.blockchain || {}).peers || -1;
-        const sizeOnDisk = (stats.blockchain || {}).sizeOnDisk || -1;
+        const bestBlockTime = Number((stats.blockchain || {}).bestBlockTime);
+        const peers = Number((stats.blockchain || {}).peers);
+        const sizeOnDisk = Number((stats.blockchain || {}).sizeOnDisk);
         const walletAddress = (stats.wallet || {}).address || '-';
-        const blockDate = new Date(bestBlockTime*1000);
+        const walletBalance = Number((stats.wallet || {}).balance);
+        const blockDate = new Date(bestBlockTime*1000) || null;
+        const blockDateTxt = bestBlockTime ? blockDate.toJSON().slice(0, 10).replace('T', ' ') : '-';
 
         let html = ``;
         html += `<tr>`;
-        html += `  <td>${fullnodeName}</td>`;
-        html += `  <td>${fullnodeAlias}</td>`;
+        html += `  <td><img src="/img/fullnodes/${fullnodeName}.webp" style="width:16px;" /> ${fullnodeName}<br /><span class="text-muted">${fullnodeAlias}</span></td>`;
         html += `  <td class="text-end">${formatNumber(uptime, 'seconds')}</td>`;
         html += `  <td class="text-end">${formatNumber(blocks)}</td>`;
         html += `  <td class="text-end">${formatNumber(headers)}</td>`;
-        html += `  <td class="text-end">${blockDate.toJSON().slice(0, 19).replace('T', ' ')}</td>`;
+        html += `  <td class="text-end">${blockDateTxt}</td>`;
         html += `  <td class="text-end">${peers}</td>`;
         html += `  <td class="text-end">${formatNumber(sizeOnDisk, 'size')}</td>`;
         html += `  <td class="text-end">${pid}</td>`;
         html += `  <td>${walletAddress}</td>`;
+        html += `  <td class="text-end">${walletBalance} ${coin}</td>`;
         html += `</tr>`;
 
         return html;

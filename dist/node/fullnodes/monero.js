@@ -41,6 +41,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 subDir = `${SEP}monero-x86_64-apple-darwin11-v${version}`;
             if (platform === 'freebsd')
                 subDir = `${SEP}monero-x86_64-unknown-freebsd-v${version}`;
+            if (!fullnodeName)
+                throw { message: `Install script not completed` };
+            if (!fullnodeTitle)
+                throw { message: `Install script not completed` };
+            if (!lastVersion)
+                throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
                 'linux': `https://downloads.getmonero.org/cli/linux64`,
@@ -99,22 +105,35 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // TODO: RPC REQUEST
             // EDIT THESE VALUES - START //
-            const fullnodeName = ''; // edit-me
             const coin = ''; // edit-me
             const blocks = -1; // edit-me
             const blockHeaders = -1; // edit-me
             const peers = -1; // edit-me
+            const bestBlockHash = ''; // edit-me
+            const bestBlockTime = -1; // edit-me
+            const sizeOnDisk = -1; // edit-me
+            const walletAddress = ''; // edit-me
+            const walletBalance = -1; // edit-me
+            const walletTxCount = -1; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
                 fullnode: {
-                    name: fullnodeName,
+                    name: fullnodeTitle,
                     coin,
                 },
                 blockchain: {
                     blocks,
                     headers: blockHeaders,
+                    bestBlockHash,
+                    bestBlockTime,
+                    sizeOnDisk,
                     peers,
                 },
+                wallet: {
+                    address: walletAddress,
+                    balance: walletBalance,
+                    txcount: walletTxCount,
+                }
             };
             return infos;
         });
