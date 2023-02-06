@@ -41,8 +41,8 @@
 
         %>
         <tr class="bg-light" style="font-size:.9em; font-weight:bold;">
-            <td rowspan="2" class="${colorClass} text-center" style="vertical-align:middle;">
-                <a class="text-light" href="${rigName}/"><%=rigName%></a>
+            <td rowspan="2" class="<%=colorClass%> text-center" style="vertical-align:middle;">
+                <a class="text-light" href="<%=rigName%>/"><%=rigName%></a>
             </td>
             <td><%=rigInfos.rig.hostname%></td>
             <td><%=rigInfos.rig.ip%></td>
@@ -69,11 +69,11 @@
                         let html = '';
 
                         html += service.devices.cpus.forEach(cpu => {
+                            const cpuName = cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ');
                             %>
-                            <pre><%= JSON.stringify(runningMiner, null, 4) %></pre>
                             <div class="rounded bg-primary p-1 m-1 text-start row">
-                                    <div class="badge col-3 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-warning"><%=cpu.name%>
-                                    </b></div>
+                                <div class="badge col-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
+                                    <div class="badge col-2 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-warning"><%=cpuName%></b></div>
                                     <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning"><%=formatNumber(cpu.hashRate, 'size')%>H/s</span></div>
                                     <div class="badge col-1">&nbsp;</div>
                                     <div class="badge col-1">&nbsp;</div>
@@ -99,8 +99,8 @@
 
                             %>
                             <div class="rounded bg-primary p-1 m-1 text-start row">
-                                    <div class="badge col-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%> <img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%></span></div>
-                                    <div class="badge col-3 text-start text-truncate"><b class="text-warning"><%=gpu.name%></b></span></div>
+                                    <div class="badge col-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
+                                    <div class="badge col-2 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%><b class="text-warning"><%=gpu.name%></b></div>
                                     <div class="badge col-2 text-start"><b>hashRate</b>: <span class="text-warning"><%=formatNumber(gpu.hashRate, 'size')%>H/s</span></div>
                                     <div class="badge col-1 text-start"><b>temp.</b>: <span class="text-info"><%=gpu.temperature%>°</span></div>
                                     <div class="badge col-1 text-start"><b>fan</b>: <span class="text-info"><%=gpu.fanSpeed%>%</span></div>
