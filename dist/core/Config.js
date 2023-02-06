@@ -82,7 +82,7 @@ function loadDaemonConfig(args) {
         process.exit(1);
     }
     //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
-    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replace(new RegExp('\\', 'g'), '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
+    userFrmDir = (0, utils_1.stringTemplate)(userFrmDir.replace(new RegExp('\\\\', 'g'), '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
     if (!fs_1.default.existsSync(userFrmDir)) {
         try {
             fs_1.default.mkdirSync(userFrmDir);
