@@ -92,7 +92,7 @@ export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
     apiPort: 52011,
-    command: 'SRBMiner-MULTI', // the filename of the executable (without .exe extension)
+    command: 'SRBMiner-MULTI',
     managed: true,
 
     getCommandArgs(config, params) {

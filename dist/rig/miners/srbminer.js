@@ -64,8 +64,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52011, command: 'SRBMiner-MULTI', managed: false, // set true when the getInfos() script is ready
-    getCommandArgs(config, params) {
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52011, command: 'SRBMiner-MULTI', managed: true, getCommandArgs(config, params) {
         const args = [
             '--disable-cpu',
         ];
@@ -97,23 +96,32 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {}; // edit-me if needed
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
+            const headers = {};
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers });
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const minerName = 'edit-me';
-            const uptime = -1; // edit-me
-            const algo = 'edit-me';
-            const workerHashRate = -1; // edit-me
-            const poolUrl = ''; // edit-me
-            const poolUser = ''; // edit-me
+            const _algo = minerSummary.algorithms[0] || {};
+            const uptime = (_algo === null || _algo === void 0 ? void 0 : _algo.mining_time) || -1;
+            const algo = (_algo === null || _algo === void 0 ? void 0 : _algo.name) || '';
+            const workerHashRate = (_algo === null || _algo === void 0 ? void 0 : _algo.hashrate.gpu.total) || -1;
+            const poolUrl = (_algo === null || _algo === void 0 ? void 0 : _algo.pool.pool) || '';
+            const poolUser = '';
             const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = []; // edit-me
-            const gpus = []; // edit-me
+            const cpus = [];
+            const gpus = minerSummary.gpu_devices.map((gpu) => {
+                return {
+                    id: gpu.id,
+                    name: gpu.model,
+                    hashRate: _algo.hashrate.gpu[`gpu${gpu.id}`],
+                    temperature: gpu.temperature,
+                    fanSpeed: -1,
+                    power: gpu.asic_power,
+                };
+            });
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {
-                    name: minerName,
+                    name: minerTitle,
                     worker: workerName,
                     uptime,
                     algo,
