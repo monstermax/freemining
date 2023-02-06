@@ -105,7 +105,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
     }
 
     //userFrmDir = stringTemplate(userFrmDir, {}, false, false, true) || ''; // OK on Linux
-    userFrmDir = stringTemplate(userFrmDir.replace( new RegExp('\\', 'g'), '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
+    userFrmDir = stringTemplate(userFrmDir.replace( new RegExp('\\\\', 'g'), '\\\\'), {}, false, false, true) || ''; // OK on Linux & Windows
 
     if (! fs.existsSync(userFrmDir)) {
         try {
