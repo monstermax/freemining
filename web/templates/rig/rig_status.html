@@ -56,21 +56,21 @@
         <div id="rig-service-<%=minerFullName.replaceAll('.', '-')%>" class="alert alert-success rig-service shadow">
             <div class="row">
                 <div class="col-6 col-lg-2 text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <b><%=params.coin || '-'%></b></div>
-                <div class="col-6 col-lg-3 text-truncate"><b>Hashrate</b> <br /> <%=formatNumber(service.miner.hashRate, 'size')%>H/sec.</div>
+                <div class="col-6 col-lg-3 text-truncate"><b>Hashrate</b> <br /> <span class="text-dark fs-5 bg-light rounded p-1"><%=formatNumber(service.miner.hashRate, 'size')%>H/sec.</span></div>
                 <div class="col-4 col-lg-2 text-truncate"><b>Algo</b> <br /> <%=service.miner.algo || params.algo%></div>
                 <div class="col-4 col-lg-2 text-truncate"><b>Uptime</b> <br /> <%=formatNumber(service.miner.uptime, 'seconds')%></div>
-                <div class="col-12 col-lg-2 text-truncate">
-                    <div class="badge bg-dark p-3 text-center"><%=service.miner.name%><br /><small class="text-muted"><%=alias%></small></div>
+                <div class="col-4 col-lg-2 text-truncate text-center">
+                    <div class="bg-dark text-light rounded p-1 text-center"><%=service.miner.name%><br /><small class="text-muted"><%=alias%></small></div>
                 </div>
-                <div class="col-6 col-lg-1">
+                <div class="col-12 col-lg-1">
                     <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('<%=miner%>', '<%=alias%>')" />
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-4 col-lg-2 text-truncate"><b>Worker</b> <%=service.miner.worker || (params.poolUser.split('.')[1] || '-')%></div>
-                <div class="col-6 col-lg-4 text-truncate"><b>Pool url</b> <%=service.pool.url || params.poolUrl%></div>
-                <div class="col-6 col-lg-6 text-truncate"><b>Pool account</b> <%=service.pool.account || params.poolUser%></div>
+                <div class="col-12 col-lg-2 text-truncate"><b>Worker</b> <%=service.miner.worker || (params.poolUser.split('.')[1] || '-')%></div>
+                <div class="col-12 col-lg-4 text-truncate"><b>Pool url</b> <%=service.pool.url || params.poolUrl%></div>
+                <div class="col-12 col-lg-6 text-truncate"><b>Pool account</b> <%=service.pool.account || params.poolUser%></div>
             </div>
 
             <%-(false && service.devices.cpus.length + service.devices.gpus.length) > 0 ? '<h4 class="mt-2">Mining devices</h4>' : ''%>
@@ -83,10 +83,10 @@
                     %>
                     <div class="border border-light text-light rounded bg-<%= (cpu.hashRate ? "success" : "warning") %> p-1 my-2">
                         <div class="row">
-                            <div class="col-1"><img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" /></div>
-                            <div class="col-1"></div>
-                            <div class="col-8"><b>Name</b> <br /> <%=cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')%></div>
-                            <div class="col-2 text-end"><b>Hashrate</b> <br /> <%=formatNumber(cpu.hashRate, 'size')%>H/sec.</div>
+                            <div class="col-2 col-lg-1"><img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" /></div>
+                            <div class="col-2 col-lg-1"><b>ID</b> <br /> 0</div>
+                            <div class="col-8 col-lg-8 text-truncate"><b>Name</b> <br /> <%=cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')%></div>
+                            <div class="col-12 col-lg-2 text-truncate text-end"><b>Hashrate</b> <br /> <span class="text-dark fs-5 bg-light rounded p-1"><%=formatNumber(cpu.hashRate, 'size')%>H/sec.</span></div>
                         </div>
                     </div>
                     <%
@@ -107,13 +107,13 @@
                         %>
                         <div class="border border-light text-light rounded bg-<%= (gpu.hashRate ? "success" : "warning") %> p-1 my-2">
                             <div class="row">
-                                <div class="col-1"><img src="<%=gpuImg%>" class="rounded me-2" style="width:48px; height:48px;" /></div>
-                                <div class="col-1"><b>ID</b> <br /> <%=gpu.id%></div>
-                                <div class="col-3"><b>Name</b> <br /> <%=gpu.name%></div>
-                                <div class="col-1 text-end"><b>Power</b> <br /> <%=gpu.power%> W</div>
-                                <div class="col-2 text-end"><b>Temperature</b> <br /> <%=gpu.temperature%>°</div>
-                                <div class="col-2 text-end"><b>Fan speed</b> <br /> <%=gpu.fanSpeed%>%</div>
-                                <div class="col-2 text-end"><b>Hashrate</b> <br /> <%=formatNumber(gpu.hashRate, 'size')%>H/sec.</div>
+                                <div class="col-2 col-lg-1"><img src="<%=gpuImg%>" class="rounded me-2" style="width:48px; height:48px;" /></div>
+                                <div class="col-2 col-lg-1"><b>ID</b> <br /> <%=gpu.id%></div>
+                                <div class="col-8 col-lg-3 text-truncate"><b>Name</b> <br /> <%=gpu.name%></div>
+                                <div class="col-4 col-lg-1 text-truncate text-end"><b>Power</b> <br /> <%=gpu.power%> W</div>
+                                <div class="col-4 col-lg-2 text-truncate text-end"><b>Temperature</b> <br /> <%=gpu.temperature%>°</div>
+                                <div class="col-4 col-lg-2 text-truncate text-end"><b>Fan speed</b> <br /> <%=gpu.fanSpeed%>%</div>
+                                <div class="col-12 col-lg-2 text-truncate text-end fs-5"><b>Hashrate</b> <br /> <span class="text-dark fs-5 bg-light rounded p-1"><%=formatNumber(gpu.hashRate, 'size')%>H/sec.</span></div>
                             </div>
                         </div>
                         <%

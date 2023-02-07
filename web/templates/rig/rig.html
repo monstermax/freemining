@@ -90,7 +90,7 @@
 <% Object.entries(allMiners).forEach(entry => {
     const [ minerName, miner ] = entry;
     %>
-    <div class="col-6 col-lg-3">
+    <div class="col-12 col-lg-3">
         <div class="card m-2" style="width: 18rem;">
             <div class="card-header bg-<%=(miner.running ? "success" : (miner.installed ? "warning" : "danger"))%>">
                 <span class="badge bg-info"><%- minerName.toUpperCase().slice(0, 1) %></span>

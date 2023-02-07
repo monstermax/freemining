@@ -21,11 +21,11 @@
         <th>Hostname</th>
         <th>IP</th>
         <th>Operating system</th>
-        <th class="text-end">Uptime</th>
-        <th class="text-end">Load avg.</th>
-        <th class="text-end">Memory</th>
-        <th class="text-end">Services</th>
-        <th class="text-end">Freshness</th>
+        <th class="text-end d-none">Uptime</th>
+        <th class="text-end">Load</th>
+        <th class="text-end d-none">Memory</th>
+        <th class="text-end d-none">Services</th>
+        <th class="text-end d-none">Freshness</th>
     </tr>
 </thead>
 <tbody>
@@ -47,11 +47,11 @@
             <td><%=rigInfos.rig.hostname%></td>
             <td><%=rigInfos.rig.ip%></td>
             <td><%=rigInfos.systemInfos.os.distro%><%=(rigInfos.systemInfos.os.codename ? ` (${rigInfos.systemInfos.os.codename})` : '')%></td>
-            <td class="text-end"><%=formatNumber(rigInfos.usage.uptime, 'seconds')%></td>
+            <td class="text-end d-none"><%=formatNumber(rigInfos.usage.uptime, 'seconds')%></td>
             <td class="text-end"><%=formatNumber(rigInfos.usage.cpuLoad)%>%</td>
-            <td class="text-end"><%=formatNumber(rigInfos.usage.memory.used, 'size')%>B / <%=formatNumber(rigInfos.usage.memory.total, 'size')%>B</td>
-            <td class="text-end"><%=Object.keys(rigInfos.status.minersStats).length%></td>
-            <td class="text-end"><span class="dataAge"><%=formatNumber(dataAge, 'seconds')%></span></td>
+            <td class="text-end d-none"><%=formatNumber(rigInfos.usage.memory.used, 'size')%>B / <%=formatNumber(rigInfos.usage.memory.total, 'size')%>B</td>
+            <td class="text-end d-none"><%=Object.keys(rigInfos.status.minersStats).length%></td>
+            <td class="text-end d-none"><span class="dataAge"><%=formatNumber(dataAge, 'seconds')%></span></td>
         </tr>
         <tr class="bg-light">
             <td colspan="8" class="">
@@ -72,15 +72,15 @@
                             const cpuName = (cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')) + ` X${cpu.threads}/${rigInfos.systemInfos.cpu.cores}`;
                             %>
                             <div class="rounded bg-primary p-1 m-1 text-start row">
-                                <div class="badge col-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
-                                <div class="badge col-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(cpu.hashRate, 'size')%>H/s</span></div>
-                                <div class="badge col-4 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-light"><%=cpuName%></b></div>
-                                <div class="badge col-1">&nbsp;</div>
-                                <div class="badge col-1">&nbsp;</div>
-                                <div class="badge col-1">&nbsp;</div>
-                                <div class="badge col-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
-                                <div class="badge col-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
-                                <div class="badge col-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
+                                <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
+                                <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(cpu.hashRate, 'size')%>H/s</span></div>
+                                <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-light"><%=cpuName%></b></div>
+                                <div class="badge col-4 col-lg-1">&nbsp;</div>
+                                <div class="badge col-4 col-lg-1">&nbsp;</div>
+                                <div class="badge col-4 col-lg-1">&nbsp;</div>
+                                <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
+                                <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
+                                <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
                             </div>
                             <%
                         });
@@ -100,15 +100,15 @@
 
                             %>
                             <div class="rounded bg-primary p-1 m-1 text-start row">
-                                    <div class="badge col-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(gpu.hashRate, 'size')%>H/s</span></div>
-                                    <div class="badge col-4 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%><b class="text-light"><%=gpu.name%></b></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">power</b><br /> <span class="text-light"><%=formatNumber(gpu.power)%> W</span></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">temp.</b><br /> <span class="text-light"><%=formatNumber(gpu.temperature)%>°</span></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">fan</b><br /> <span class="text-light"><%=formatNumber(gpu.fanSpeed)%>%</span></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
-                                    <div class="badge col-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
+                                    <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
+                                    <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(gpu.hashRate, 'size')%>H/s</span></div>
+                                    <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%><b class="text-light"><%=gpu.name%></b></div>
+                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">power</b><br /> <span class="text-light"><%=formatNumber(gpu.power)%> W</span></div>
+                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">temp.</b><br /> <span class="text-light"><%=formatNumber(gpu.temperature)%>°</span></div>
+                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">fan</b><br /> <span class="text-light"><%=formatNumber(gpu.fanSpeed)%>%</span></div>
+                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
+                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
+                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
                             </div>
                             <%
                         });
