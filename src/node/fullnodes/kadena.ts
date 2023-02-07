@@ -13,17 +13,18 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : 
+Github   : https://github.com/kadena-io/chainweb-node
+Download : https://github.com/kadena-io/chainweb-node/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName    = 'kadena';
+const fullnodeTitle   = 'Kadena';
+const github          = 'kadena-io/chainweb-node';
+const lastVersion     = '2.17.2';
+const lastVersionLong = '2.17.2.ghc-8.10.7.ubuntu-22.04.aa36983';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +37,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,8 +46,8 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let versionLong = ''; // edit-me
-        let subDir = ``; // edit-me
+        let versionLong = lastVersionLong
+        let subDir = ``; // none
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -54,10 +55,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/kadena-io/chainweb-node/releases/download/${version}/chainweb-${versionLong}.tar.gz`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/kadena-io/chainweb-node/releases/download/${version}/chainweb-${versionLong}.tar.gz`,
+            'win32':   ``,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
 

@@ -454,6 +454,7 @@ export type minerRunInfosParams = {
 
 export type getMinerCommandArgsParams = {
     miner: string,
+    alias?: string,
     algo: string,
     poolUrl: string,
     poolUser: string,
@@ -701,6 +702,7 @@ export type AllFullnodes = {
 
 export type getFullnodeCommandArgsParams = {
     fullnode: string,
+    alias?: string,
     extraArgs?: string,
 }
 

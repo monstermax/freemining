@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : https://lightning.network/
+Github   : https://github.com/lightningnetwork/lnd
+Download : https://github.com/lightningnetwork/lnd/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'lightningnetwork';
+const fullnodeTitle = 'Lightning Network';
+const github        = 'lightningnetwork/lnd';
+const lastVersion   = '0.15.5-beta';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +36,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +45,11 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = `${SEP}lnd-${platform }-amd64-v${version}`;
+
+        if (platform === 'linux')  subDir = `lnd-linux-amd64-v${version}`;
+        if (platform === 'win32')  subDir = `lnd-windows-amd64-v${version}`;
+        if (platform === 'darwin') subDir = `lnd-darwin-amd64-v${version}`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +57,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-linux-amd64-v${version}.tar.gz`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-linux-amd64-v${version}.tar.gz`,
+            'win32':   `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-windows-amd64-v${version}.zip`,
+            'darwin':  `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-darwin-amd64-v${version}.tar.gz`,
+            'freebsd': `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-freebsd-amd64-v${version}.tar.gz`,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -98,7 +100,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'lnd',
     managed: false, // set true when the getInfos() script is ready
 
 

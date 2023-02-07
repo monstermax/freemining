@@ -13,17 +13,19 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : https://geth.ethereum.org/
+Github   : 
+Download : https://geth.ethereum.org/downloads
+Download : https://github.com/ethereum/go-ethereum/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'ethereum';
+const fullnodeTitle = 'Ethereum';
+const github        = ''; // ethereum/go-ethereum
+const lastVersion   = '1.10.26';
+const versionBis    = 'e5eb32ac';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +38,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +47,11 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = `${SEP}geth-${platform}-amd64-${version}-${versionBis}`;
+
+        if (platform === 'linux')  subDir = `${SEP}geth-linux-amd64-${version}-${versionBis}`;
+        if (platform === 'win32')  subDir = `${SEP}geth-windows-amd64-${version}-${versionBis}`;
+        if (platform === 'darwin') subDir = `${SEP}geth-darwin-amd64-${version}-${versionBis}`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +59,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${version}.tar.gz`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${version}-${versionBis}.tar.gz`,
+            'win32':   `https://gethstore.blob.core.windows.net/builds/geth-windows-amd64-${version}-${versionBis}.zip`,
+            'darwin':  `https://gethstore.blob.core.windows.net/builds/geth-darwin-amd64-${version}-${versionBis}.tar.gz`,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -97,8 +101,8 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
     ...baseFullnode.fullnodeCommands,
 
     p2pPort: -1, // edit-me
-    rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    rpcPort: 8545,
+    command: 'geth',
     managed: false, // set true when the getInfos() script is ready
 
 

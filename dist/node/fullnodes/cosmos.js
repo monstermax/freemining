@@ -10,29 +10,29 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  :
+Github   : https://github.com/cosmos/gaia
+Download : https://github.com/cosmos/gaia/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'cosmos';
+const fullnodeTitle = 'Cosmos';
+const github = 'cosmos/gaia';
+const lastVersion = '9.0.0-rc3';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = ``; // no zip
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -42,12 +42,11 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-linux-amd64`,
-                'win32': ``,
-                'darwin': ``,
-                'freebsd': ``, // edit-me
+                'win32': `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-darwin-amd64`,
+                'darwin': `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-windows-amd64.exe`,
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -57,11 +56,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const dlFilePath = `${tempDir}${SEP}${dlFileName}`;
             yield this.downloadFile(dlUrl, dlFilePath);
             // Extracting
-            yield this.extractFile(tempDir, dlFilePath);
+            //await this.extractFile(tempDir, dlFilePath);
             // Install to target dir
-            fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            fs_1.default.mkdirSync(aliasDir, { recursive: true });
+            const suffix = (platform === 'win32') ? '.exe' : '';
+            fs_1.default.renameSync(dlFilePath, `${aliasDir}${SEP}gaiad${suffix}`);
             // Write report files
             this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
             // Cleaning
@@ -69,7 +69,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'gaiad', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

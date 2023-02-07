@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://xdag.io/
-Github    : https://github.com/XDagger/xdagj
-Downnload : https://github.com/XDagger/xdagj/releases
+Website  : https://xdag.io/
+Github   : https://github.com/XDagger/xdagj
+Download : https://github.com/XDagger/xdagj/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'xdag';
+const fullnodeTitle = 'XDag';
+const github        = 'XDagger/xdagj';
+const lastVersion   = ''; // 0.5.3
 
 /* ########## MAIN ######### */
 
@@ -53,10 +53,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/XDagger/xdagj`,
+            'win32':   ``,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
 

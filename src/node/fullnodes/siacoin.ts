@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : https://sia.tech/
+Github   : https://github.com/SiaFoundation/siad
+Download : https://sia.tech/get-started
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'siacoin';
+const fullnodeTitle = 'Sia';
+const github        = ''; // SiaFoundation/siad
+const lastVersion   = '1.5.9';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +36,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +45,11 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``;
+        let subDir = `Sia-v${version}-${platform}-amd64`;
+
+        if (platform === 'linux')  subDir = `Sia-v${version}-linux-amd64`;
+        if (platform === 'win32')  subDir = `Sia-v${version}-windows-amd64`;
+        if (platform === 'darwin') subDir = `Sia-v${version}-darwin-amd64`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +57,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://sia.tech/releases/siad/Sia-v${version}-linux-amd64.zip`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://sia.tech/releases/siad/Sia-v${version}-linux-amd64.zip`,
+            'win32':   `https://sia.tech/releases/siad/Sia-v${version}-windows-amd64.zip`,
+            'darwin':  `https://sia.tech/releases/siad/Sia-v${version}-darwin-amd64.zip`,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -98,7 +100,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'siad',
     managed: false, // set true when the getInfos() script is ready
 
 

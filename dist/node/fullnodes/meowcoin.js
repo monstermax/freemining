@@ -10,29 +10,29 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  :
+Github   : https://github.com/JustAResearcher/Meowcoin
+Download : https://github.com/JustAResearcher/Meowcoin/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'meowcoin';
+const fullnodeTitle = 'Meowcoin';
+const github = 'JustAResearcher/Meowcoin';
+const lastVersion = '1.0.3';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``;
+            let subDir = ``; // none
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -42,12 +42,11 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/JustAResearcher/Meowcoin/releases/download/V${version}/MEOW-${version}-CLI-x86_64-linux-gnu.tar.gz`,
-                'win32': ``,
-                'darwin': ``,
-                'freebsd': ``, // edit-me
+                'win32': `https://github.com/JustAResearcher/Meowcoin/releases/download/V${version}/MEOW-${version}-CLI-Win64.zip`,
+                'darwin': `https://github.com/JustAResearcher/Meowcoin/releases/download/V${version}/MEOW-${version}-CLI-OSX.zip`,
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -69,7 +68,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'meowcoind', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

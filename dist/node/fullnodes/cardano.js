@@ -10,29 +10,30 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  : https://cardano.org/
+Github   : https://github.com/input-output-hk/cardano-node
+Download : https://github.com/input-output-hk/cardano-node/releases
+Download : https://developers.cardano.org/docs/get-started/installing-cardano-node/
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'cardano';
+const fullnodeTitle = 'Cardano';
+const github = 'input-output-hk/cardano-node';
+const lastVersion = '1.35.4';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = ``; // none
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -42,12 +43,11 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Download url selection
             const dlUrls = {
                 'linux': `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-linux.tar.gz`,
-                'win32': ``,
-                'darwin': ``,
-                'freebsd': ``, // edit-me
+                'win32': `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-win64.zip`,
+                'darwin': `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-linux.tar.gz`,
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -69,7 +69,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'cardano-node', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

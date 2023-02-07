@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : 
+Github   : https://github.com/bitcoin-cash-node/bitcoin-cash-node
+Download : https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'bitcoincash';
+const fullnodeTitle = 'Bitcoin Cash';
+const github        = 'bitcoin-cash-node/bitcoin-cash-node';
+const lastVersion   = '26.0.0';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +36,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +45,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = `${SEP}bitcoin-cash-node-${version}`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +53,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${version}/bitcoin-cash-node-${version}-x86_64-linux-gnu.tar.gz`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${version}/bitcoin-cash-node-${version}-x86_64-linux-gnu.tar.gz`,
+            'win32':   `https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${version}/bitcoin-cash-node-${version}-win64.zip`,
+            'darwin':  `https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${version}/bitcoin-cash-node-${version}-osx64.tar.gz`,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -98,7 +96,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'bin/bitcoind',
     managed: false, // set true when the getInfos() script is ready
 
 

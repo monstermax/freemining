@@ -14,9 +14,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.fennecblockchain.com/
-Github    : https://github.com/FennecBlockchain/Fennec
-Downnload : https://github.com/FennecBlockchain/Fennec/releases
+Website  : https://www.fennecblockchain.com/
+Github   : https://github.com/FennecBlockchain/Fennec
+Download : https://github.com/FennecBlockchain/Fennec/releases
 
 */
 /* ########## CONFIG ######### */

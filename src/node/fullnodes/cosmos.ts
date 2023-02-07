@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : 
+Github   : https://github.com/cosmos/gaia
+Download : https://github.com/cosmos/gaia/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'cosmos';
+const fullnodeTitle = 'Cosmos';
+const github        = 'cosmos/gaia';
+const lastVersion   = '9.0.0-rc3';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +36,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +45,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = ``; // no zip
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +53,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-linux-amd64`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-linux-amd64`,
+            'win32':   `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-darwin-amd64`,
+            'darwin':  `https://github.com/cosmos/gaia/releases/download/v${version}/gaiad-v${version}-windows-amd64.exe`,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -74,12 +72,13 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         await this.downloadFile(dlUrl, dlFilePath);
 
         // Extracting
-        await this.extractFile(tempDir, dlFilePath);
+        //await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
-        fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        const suffix = (platform === 'win32') ? '.exe' : '';
+        fs.renameSync( dlFilePath, `${aliasDir}${SEP}gaiad${suffix}`);
 
         // Write report files
         this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
@@ -98,7 +97,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'gaiad',
     managed: false, // set true when the getInfos() script is ready
 
 

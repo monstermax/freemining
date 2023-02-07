@@ -10,16 +10,16 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.nimiq.com/
-Github    : https://github.com/nimiq/core-js
-Downnload : https://github.com/nimiq/core-js/releases
+Website  : https://www.nimiq.com/
+Github   : https://github.com/nimiq/core-js
+Download : https://github.com/nimiq/core-js/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'nimiq';
+const fullnodeTitle = 'Nimiq';
+const github = ''; // nimiq/core-js
+const lastVersion = ''; // 1.6.0
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -41,10 +41,10 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': ``,
+                'linux': `https://github.com/nimiq/core-js`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
             throw { message: `edit-me then delete this line` };

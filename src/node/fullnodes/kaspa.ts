@@ -13,9 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : https://github.com/kaspanet/kaspad
-Downnload : https://github.com/kaspanet/kaspad/releases
+Website  : 
+Github   : https://github.com/kaspanet/kaspad
+Download : https://github.com/kaspanet/kaspad/releases
 
 */
 /* ########## CONFIG ######### */
@@ -36,7 +36,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 

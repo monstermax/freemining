@@ -13,18 +13,20 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.ethereumpow.org/
-Doc       : https://github.com/ethereumpow/docs/blob/main/prepare-full-node.md
-Github    : https://github.com/ethereumpow/go-ethereum
-Downnload : 
+Website  : https://www.ethereumpow.org/
+Doc      : https://github.com/ethereumpow/docs/blob/main/prepare-full-node.md
+Github   : https://github.com/ethereumpow/go-ethereum
+Download : https://github.com/ethereumpow/go-ethereum/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = '';
+const fullnodeTitle = '';
+const github        = '';
+const lastVersion   = '1.10.23';
+const versionBisLinux  = '2a4c42d43eb7ea0a20ec096946e8a80c52f4000c75001d115c29395abafe2a7c';
+const versionBisWin    = '94212683c0dbb988aadbcf8944ec5528c3b6a7cc894d60173a1bf7f0e28521ff';
 
 /* ########## MAIN ######### */
 
@@ -46,7 +48,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = ``; // none
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -54,14 +56,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/ethereumpow/go-ethereum/releases/download/v${version}.1/geth_linux_amd64_${version}_${versionBisLinux}.zip`,
+            'win32':   `https://github.com/ethereumpow/go-ethereum/releases/download/v${version}.1/geth_windows_amd64_${version}_${versionBisWin}.zip`,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -99,7 +99,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'geth',
     managed: false, // set true when the getInfos() script is ready
 
 

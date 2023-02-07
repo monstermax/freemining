@@ -13,18 +13,18 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://alephium.org/
-Doc       : https://docs.alephium.org/full-node/getting-started/
-Github    : 
-Downnload : 
+Website  : https://alephium.org/
+Doc      : https://docs.alephium.org/full-node/getting-started/
+Github   : https://github.com/alephium/alephium
+Download : https://github.com/alephium/alephium/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'alephium';
+const fullnodeTitle = 'Alephium';
+const github        = 'alephium/alephium';
+const lastVersion   = '1.6.4';
 
 /* ########## MAIN ######### */
 
@@ -37,7 +37,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion, // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -46,7 +46,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = ``; // no zip
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -54,14 +54,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/alephium/alephium/releases/download/v${version}/alephium-${version}.jar`,
+            'win32':   `https://github.com/alephium/alephium/releases/download/v${version}/alephium-${version}.jar`,
+            'darwin':  `https://github.com/alephium/alephium/releases/download/v${version}/alephium-${version}.jar`,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -75,12 +73,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         await this.downloadFile(dlUrl, dlFilePath);
 
         // Extracting
-        await this.extractFile(tempDir, dlFilePath);
+        //await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
-        fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.renameSync( dlFilePath, `${aliasDir}${SEP}${fullnodeName}.jar`);
 
         // Write report files
         this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
@@ -99,13 +97,20 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'java',
     managed: false, // set true when the getInfos() script is ready
 
 
     getCommandArgs(config, params) {
+        const fullnodeAlias: string = params.alias || ''; // || fullnodeInstall.dedefaultVersion; // TODO
+        const fullnodeDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${fullnodeName}`
+        //const aliasDir = `${fullnodeDir}${SEP}${fullnodeAlias}`;
+
         const args: string[] = [
-            `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
+            `-Xmx4G`,
+            `-jar ${config.appDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}${SEP}${fullnodeAlias}${SEP}${fullnodeName}.jar`,
+            `--mainnet`,
+            `-c`, `${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
         ];
 
         if (this.p2pPort > 0) {

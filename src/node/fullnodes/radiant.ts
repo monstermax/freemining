@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
+Website  : https://radiantblockchain.org/
+Github   : https://github.com/RadiantBlockchain/radiant-node
 Download : 
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'radiant';
+const fullnodeTitle = 'Radiant';
+const github        = '';
+const lastVersion   = '';
 
 /* ########## MAIN ######### */
 
@@ -53,10 +53,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/RadiantBlockchain/radiant-node`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/RadiantBlockchain/radiant-node`,
+            'win32':   ``,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
 

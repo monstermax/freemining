@@ -10,16 +10,16 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://xdag.io/
-Github    : https://github.com/XDagger/xdagj
-Downnload : https://github.com/XDagger/xdagj/releases
+Website  : https://xdag.io/
+Github   : https://github.com/XDagger/xdagj
+Download : https://github.com/XDagger/xdagj/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'xdag';
+const fullnodeTitle = 'XDag';
+const github = 'XDagger/xdagj';
+const lastVersion = ''; // 0.5.3
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -41,10 +41,10 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': ``,
+                'linux': `https://github.com/XDagger/xdagj`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
             throw { message: `edit-me then delete this line` };

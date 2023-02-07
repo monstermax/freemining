@@ -38,5 +38,6 @@ export * as siacoin from './siacoin';
 export * as solana from './solana';
 export * as tron from './tron';
 export * as xdag from './xdag';
+export * as yerbas from './yerbas';
 export * as zcash from './zcash';
 

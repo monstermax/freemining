@@ -10,10 +10,10 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://confluxnetwork.org/
-Doc       : https://developer.confluxnetwork.org/conflux-doc/docs/get_started/
-Github    :
-Downnload :
+Website  : https://confluxnetwork.org/
+Doc      : https://developer.confluxnetwork.org/conflux-doc/docs/get_started/
+Github   :
+Download :
 
 */
 /* ########## CONFIG ######### */

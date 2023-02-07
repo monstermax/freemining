@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.nimiq.com/
-Github    : https://github.com/nimiq/core-js
-Downnload : https://github.com/nimiq/core-js/releases
+Website  : https://www.nimiq.com/
+Github   : https://github.com/nimiq/core-js
+Download : https://github.com/nimiq/core-js/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'nimiq';
+const fullnodeTitle = 'Nimiq';
+const github        = ''; // nimiq/core-js
+const lastVersion   = ''; // 1.6.0
 
 /* ########## MAIN ######### */
 
@@ -53,10 +53,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/nimiq/core-js`,
+            'win32':   ``,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
 

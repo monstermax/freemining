@@ -10,29 +10,29 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://novonode.org/
-Github    : https://github.com/novoworks/novo
-Downnload : https://github.com/novoworks/novo/releases
+Website  : https://novonode.org/
+Github   : https://github.com/novoworks/novo
+Download : https://github.com/novoworks/novo/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'novo';
+const fullnodeTitle = 'Novo';
+const github = 'novoworks/novo';
+const lastVersion = '0.3.0rc1';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``;
+            let subDir = `${SEP}novo-${version}`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -41,13 +41,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': ``,
+                'linux': `https://github.com/novoworks/novo/releases/download/v${version}/novo-${version}-x86_64-linux-gnu.tar.gz`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -69,7 +68,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'bin/novod', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

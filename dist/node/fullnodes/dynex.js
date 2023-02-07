@@ -12,9 +12,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://dynexcoin.org/
-Github    : https://github.com/dynexcoin/Dynex
-Downnload : https://github.com/dynexcoin/Dynex/releases
+Website  : https://dynexcoin.org/
+Github   : https://github.com/dynexcoin/Dynex
+Download : https://github.com/dynexcoin/Dynex/releases
 
 */
 /* ########## CONFIG ######### */

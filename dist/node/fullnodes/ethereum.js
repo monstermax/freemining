@@ -10,29 +10,37 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  : https://geth.ethereum.org/
+Github   :
+Download : https://geth.ethereum.org/downloads
+Download : https://github.com/ethereum/go-ethereum/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'ethereum';
+const fullnodeTitle = 'Ethereum';
+const github = ''; // ethereum/go-ethereum
+const lastVersion = '1.10.26';
+const versionBis = 'e5eb32ac';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = `${SEP}geth-${platform}-amd64-${version}-${versionBis}`;
+            if (platform === 'linux')
+                subDir = `${SEP}geth-linux-amd64-${version}-${versionBis}`;
+            if (platform === 'win32')
+                subDir = `${SEP}geth-windows-amd64-${version}-${versionBis}`;
+            if (platform === 'darwin')
+                subDir = `${SEP}geth-darwin-amd64-${version}-${versionBis}`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -41,13 +49,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': `https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${version}.tar.gz`,
-                'win32': ``,
-                'darwin': ``,
-                'freebsd': ``, // edit-me
+                'linux': `https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${version}-${versionBis}.tar.gz`,
+                'win32': `https://gethstore.blob.core.windows.net/builds/geth-windows-amd64-${version}-${versionBis}.zip`,
+                'darwin': `https://gethstore.blob.core.windows.net/builds/geth-darwin-amd64-${version}-${versionBis}.tar.gz`,
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -69,7 +76,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: 8545, command: 'geth', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

@@ -14,9 +14,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://nexa.org/
-Github    : 
-Downnload : https://www.bitcoinunlimited.info/nexa/
+Website  : https://nexa.org/
+Github   : 
+Download : https://www.bitcoinunlimited.info/nexa/
 
 */
 /* ########## CONFIG ######### */

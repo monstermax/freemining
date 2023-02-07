@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    : https://github.com/KomodoPlatform/komodo
-Downnload :
+Website  :
+Github   : https://github.com/KomodoPlatform/komodo
+Download :
 
 */
 /* ########## CONFIG ######### */
@@ -41,7 +41,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': ``,
+                'linux': `https://github.com/KomodoPlatform/komodo`,
                 'win32': ``,
                 'darwin': ``,
                 'freebsd': ``, // edit-me

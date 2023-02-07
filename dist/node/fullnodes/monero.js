@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.getmonero.org
-Github    : https://github.com/monero-project/monero
-Downnload : https://www.getmonero.org/downloads/
+Website  : https://www.getmonero.org
+Github   : https://github.com/monero-project/monero
+Download : https://www.getmonero.org/downloads/
 
 */
 /* ########## CONFIG ######### */

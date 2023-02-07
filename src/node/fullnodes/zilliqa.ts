@@ -13,16 +13,16 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.zilliqa.com/
-Github    : https://github.com/Zilliqa/Zilliqa
-Downnload :
+Website  : https://www.zilliqa.com/
+Github   : https://github.com/Zilliqa/Zilliqa
+Download :
 
 */
 /* ########## CONFIG ######### */
 
 const fullnodeName  = 'zilliqa';
 const fullnodeTitle = 'zilliqa';
-const github        = '';
+const github        = ''; // Zilliqa/Zilliqa
 const lastVersion   = ''; // edit-me
 
 /* ########## MAIN ######### */
@@ -53,10 +53,10 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/Zilliqa/Zilliqa`,
+            'win32':   ``,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
 

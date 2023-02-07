@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : 
-Github   : https://github.com/EthereumCommonwealth/go-callisto
-Download : https://github.com/EthereumCommonwealth/go-callisto/releases
+Website  : https://yerbas.org/
+Github   : https://github.com/The-Yerbas-Endeavor/yerbas
+Download : https://github.com/The-Yerbas-Endeavor/yerbas/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = 'callisto';
-const fullnodeTitle = 'Callisto';
-const github        = 'EthereumCommonwealth/go-callisto';
-const lastVersion   = '1.3.1.1';
+const fullnodeName  = 'yerbas';
+const fullnodeTitle = 'Yerbas';
+const github        = 'The-Yerbas-Endeavor/yerbas';
+const lastVersion   = '2.1.1.4';
 
 /* ########## MAIN ######### */
 
@@ -45,7 +45,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // no zip
+        let subDir = `${SEP}yerbas-build`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,9 +53,9 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/EthereumCommonwealth/go-callisto/releases/download/${version}/geth-linux-amd64`,
-            'win32':   ``,
-            'darwin':  ``,
+            'linux':   `https://github.com/The-Yerbas-Endeavor/yerbas/releases/download/v${version}/yerbas-ubuntu20-${version}.tar.gz`,
+            'win32':   `https://github.com/The-Yerbas-Endeavor/yerbas/releases/download/v${version}/yerbas-win-${version}.zip`,
+            'darwin':  `https://github.com/The-Yerbas-Endeavor/yerbas/releases/download/v${version}/yerbas-macos-${version}.tar.gz`,
             'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
@@ -72,12 +72,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         await this.downloadFile(dlUrl, dlFilePath);
 
         // Extracting
-        //await this.extractFile(tempDir, dlFilePath);
+        await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
-        fs.rmSync(aliasDir, { recursive: true, force: true });
         fs.mkdirSync(aliasDir, {recursive: true});
-        fs.renameSync( dlFilePath, `${aliasDir}${SEP}${dlFilePath}`);
+        fs.rmSync(aliasDir, { recursive: true, force: true });
+        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
 
         // Write report files
         this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
@@ -96,7 +96,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'yerbasd',
     managed: false, // set true when the getInfos() script is ready
 
 

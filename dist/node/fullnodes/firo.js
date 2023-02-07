@@ -10,29 +10,30 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  :
+Github   : https://github.com/firoorg/firo
+Download : https://github.com/firoorg/firo/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'firo';
+const fullnodeTitle = 'Firo';
+const github = 'firoorg/firo';
+const lastVersion = '0.14.12.0';
+const versionBis = 'b8abba9ee8b8'; // used in subdir (in the downloaded archive)
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = `${SEP}firo-${versionBis}`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -42,12 +43,11 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/firoorg/firo/releases/download/v${version}/firo-${version}-linux64.tar.gz`,
-                'win32': ``,
+                'win32': `https://github.com/firoorg/firo/releases/download/v${version}/firo-${version}-win64.zip`,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options

@@ -10,16 +10,16 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  : https://solanalabs.com/
-Github   : https://github.com/solana-labs/solana
-Download : https://github.com/solana-labs/solana/releases
+Website  : https://yerbas.org/
+Github   : https://github.com/The-Yerbas-Endeavor/yerbas
+Download : https://github.com/The-Yerbas-Endeavor/yerbas/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = 'solana';
-const fullnodeTitle = 'Solana';
-const github = 'solana-labs/solana';
-const lastVersion = '1.15.0';
+const fullnodeName = 'yerbas';
+const fullnodeTitle = 'Yerbas';
+const github = 'The-Yerbas-Endeavor/yerbas';
+const lastVersion = '2.1.1.4';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -32,7 +32,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = `${SEP}solana-release`;
+            let subDir = `${SEP}yerbas-build`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -41,9 +41,9 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': `https://github.com/solana-labs/solana/releases/download/v${version}/solana-release-x86_64-unknown-linux-gnu.tar.bz2`,
-                'win32': ``,
-                'darwin': `https://github.com/solana-labs/solana/releases/download/v${version}/solana-release-aarch64-apple-darwin.tar.bz2`,
+                'linux': `https://github.com/The-Yerbas-Endeavor/yerbas/releases/download/v${version}/yerbas-ubuntu20-${version}.tar.gz`,
+                'win32': `https://github.com/The-Yerbas-Endeavor/yerbas/releases/download/v${version}/yerbas-win-${version}.zip`,
+                'darwin': `https://github.com/The-Yerbas-Endeavor/yerbas/releases/download/v${version}/yerbas-macos-${version}.tar.gz`,
                 'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
@@ -68,7 +68,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'bin/solana-validator', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'yerbasd', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

@@ -10,29 +10,35 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  : https://lightning.network/
+Github   : https://github.com/lightningnetwork/lnd
+Download : https://github.com/lightningnetwork/lnd/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'lightningnetwork';
+const fullnodeTitle = 'Lightning Network';
+const github = 'lightningnetwork/lnd';
+const lastVersion = '0.15.5-beta';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = `${SEP}lnd-${platform}-amd64-v${version}`;
+            if (platform === 'linux')
+                subDir = `lnd-linux-amd64-v${version}`;
+            if (platform === 'win32')
+                subDir = `lnd-windows-amd64-v${version}`;
+            if (platform === 'darwin')
+                subDir = `lnd-darwin-amd64-v${version}`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -42,12 +48,11 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Download url selection
             const dlUrls = {
                 'linux': `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-linux-amd64-v${version}.tar.gz`,
-                'win32': ``,
-                'darwin': ``,
-                'freebsd': ``, // edit-me
+                'win32': `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-windows-amd64-v${version}.zip`,
+                'darwin': `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-darwin-amd64-v${version}.tar.gz`,
+                'freebsd': `https://github.com/lightningnetwork/lnd/releases/download/v${version}/lnd-freebsd-amd64-v${version}.tar.gz`,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -69,7 +74,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'lnd', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

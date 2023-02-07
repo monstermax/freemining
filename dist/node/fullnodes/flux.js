@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  :
+Github   :
+Download :
 
 */
 /* ########## CONFIG ######### */

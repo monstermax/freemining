@@ -11,9 +11,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    : https://github.com/NeoxaChain/Neoxa
-Downnload : https://github.com/NeoxaChain/Neoxa/releases
+Website  :
+Github   : https://github.com/NeoxaChain/Neoxa
+Download : https://github.com/NeoxaChain/Neoxa/releases
 
 */
 /* ########## CONFIG ######### */

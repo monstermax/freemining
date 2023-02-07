@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.fennecblockchain.com/
-Github    : https://github.com/FennecBlockchain/Fennec
-Downnload : https://github.com/FennecBlockchain/Fennec/releases
+Website  : https://www.fennecblockchain.com/
+Github   : https://github.com/FennecBlockchain/Fennec
+Download : https://github.com/FennecBlockchain/Fennec/releases
 
 */
 /* ########## CONFIG ######### */

@@ -10,17 +10,19 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.ethereumpow.org/
-Doc       : https://github.com/ethereumpow/docs/blob/main/prepare-full-node.md
-Github    : https://github.com/ethereumpow/go-ethereum
-Downnload :
+Website  : https://www.ethereumpow.org/
+Doc      : https://github.com/ethereumpow/docs/blob/main/prepare-full-node.md
+Github   : https://github.com/ethereumpow/go-ethereum
+Download : https://github.com/ethereumpow/go-ethereum/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = '';
+const fullnodeTitle = '';
+const github = '';
+const lastVersion = '1.10.23';
+const versionBisLinux = '2a4c42d43eb7ea0a20ec096946e8a80c52f4000c75001d115c29395abafe2a7c';
+const versionBisWin = '94212683c0dbb988aadbcf8944ec5528c3b6a7cc894d60173a1bf7f0e28521ff';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -33,7 +35,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = ``; // none
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -42,13 +44,12 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': ``,
-                'win32': ``,
+                'linux': `https://github.com/ethereumpow/go-ethereum/releases/download/v${version}.1/geth_linux_amd64_${version}_${versionBisLinux}.zip`,
+                'win32': `https://github.com/ethereumpow/go-ethereum/releases/download/v${version}.1/geth_windows_amd64_${version}_${versionBisWin}.zip`,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -70,7 +71,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'geth', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,

@@ -13,10 +13,10 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://confluxnetwork.org/
-Doc       : https://developer.confluxnetwork.org/conflux-doc/docs/get_started/
-Github    : 
-Downnload : 
+Website  : https://confluxnetwork.org/
+Doc      : https://developer.confluxnetwork.org/conflux-doc/docs/get_started/
+Github   : 
+Download : 
 
 */
 /* ########## CONFIG ######### */

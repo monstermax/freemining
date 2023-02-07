@@ -10,16 +10,16 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
+Website  : https://radiantblockchain.org/
+Github   : https://github.com/RadiantBlockchain/radiant-node
 Download :
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'radiant';
+const fullnodeTitle = 'Radiant';
+const github = '';
+const lastVersion = '';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -44,7 +44,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 'linux': `https://github.com/RadiantBlockchain/radiant-node`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
             throw { message: `edit-me then delete this line` };

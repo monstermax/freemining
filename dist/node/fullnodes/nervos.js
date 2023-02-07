@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    : https://github.com/nervosnetwork/ckb
-Downnload : https://github.com/nervosnetwork/ckb/releases
+Website  :
+Github   : https://github.com/nervosnetwork/ckb
+Download : https://github.com/nervosnetwork/ckb/releases
 
 */
 /* ########## CONFIG ######### */

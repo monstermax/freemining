@@ -13,17 +13,18 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : 
+Github   : https://github.com/RavenProject
+Download : https://github.com/RavenProject/Ravencoin/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName    = 'ravencoin';
+const fullnodeTitle   = 'Ravencoin';
+const github          = 'RavenProject/Ravencoin';
+const lastVersion     = '4.6.1';
+const lastVersionLong = '4.6.1-7864c39c2';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +37,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +46,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``;
+        let subDir = `${SEP}raven-${lastVersionLong}`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +54,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/RavenProject/Ravencoin/releases/download/v${version}/raven-${version}-x86_64-linux-gnu.zip`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/RavenProject/Ravencoin/releases/download/v${version}/raven-${lastVersionLong}-x86_64-linux-gnu.tar.gz`,
+            'win32':   `https://github.com/RavenProject/Ravencoin/releases/download/v${version}/raven-${lastVersionLong}-win64.zip`,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -98,7 +97,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'bin/ravend',
     managed: false, // set true when the getInfos() script is ready
 
 

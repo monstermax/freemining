@@ -10,30 +10,31 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    :
-Downnload :
+Website  :
+Github   : https://github.com/kadena-io/chainweb-node
+Download : https://github.com/kadena-io/chainweb-node/releases
 
 */
 /* ########## CONFIG ######### */
-const fullnodeName = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const fullnodeName = 'kadena';
+const fullnodeTitle = 'Kadena';
+const github = 'kadena-io/chainweb-node';
+const lastVersion = '2.17.2';
+const lastVersionLong = '2.17.2.ghc-8.10.7.ubuntu-22.04.aa36983';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let versionLong = ''; // edit-me
-            let subDir = ``; // edit-me
+            let versionLong = lastVersionLong;
+            let subDir = ``; // none
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
@@ -45,7 +46,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 'linux': `https://github.com/kadena-io/chainweb-node/releases/download/${version}/chainweb-${versionLong}.tar.gz`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
             throw { message: `edit-me then delete this line` };

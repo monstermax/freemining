@@ -13,17 +13,18 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : https://cardano.org/
+Github   : https://github.com/input-output-hk/cardano-node
+Download : https://github.com/input-output-hk/cardano-node/releases
+Download : https://developers.cardano.org/docs/get-started/installing-cardano-node/
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'cardano';
+const fullnodeTitle = 'Cardano';
+const github        = 'input-output-hk/cardano-node';
+const lastVersion   = '1.35.4';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +37,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +46,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = ``; // none
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +54,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-linux.tar.gz`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-linux.tar.gz`,
+            'win32':   `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-win64.zip`,
+            'darwin':  `https://update-cardano-mainnet.iohk.io/cardano-node-releases/cardano-node-${version}-linux.tar.gz`,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -98,7 +97,7 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'cardano-node',
     managed: false, // set true when the getInfos() script is ready
 
 

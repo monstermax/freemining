@@ -13,17 +13,18 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : 
+Github   : https://github.com/firoorg/firo
+Download : https://github.com/firoorg/firo/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'firo';
+const fullnodeTitle = 'Firo';
+const github        = 'firoorg/firo';
+const lastVersion   = '0.14.12.0';
+const versionBis    = 'b8abba9ee8b8'; // used in subdir (in the downloaded archive)
 
 /* ########## MAIN ######### */
 
@@ -36,7 +37,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +46,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = `${SEP}firo-${versionBis}`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +54,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/firoorg/firo/releases/download/v${version}/firo-${version}-linux64.tar.gz`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/firoorg/firo/releases/download/v${version}/firo-${version}-linux64.tar.gz`,
+            'win32':   `https://github.com/firoorg/firo/releases/download/v${version}/firo-${version}-win64.zip`,
+            'darwin':  ``, // https://github.com/firoorg/firo/releases/download/v${version}/firo-${version}-macos.dmg
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 

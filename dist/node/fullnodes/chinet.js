@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://chinet.io/
-Github    : https://github.com/chinet-project/chinet-core
-Downnload : https://github.com/chinet-project/chinet-core/releases
+Website  : https://chinet.io/
+Github   : https://github.com/chinet-project/chinet-core
+Download : https://github.com/chinet-project/chinet-core/releases
 
 */
 /* ########## CONFIG ######### */
@@ -36,7 +36,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             if (platform === 'linux')
                 subDir = `${SEP}chinet-v1.5.1-cli-linux`;
             if (platform === 'win32')
-                subDir = `${SEP}chinet-v1.5.1-cli-windows`; // edit-me
+                subDir = `${SEP}chinet-v1.5.1-cli-windows`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)

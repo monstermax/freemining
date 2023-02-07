@@ -15,9 +15,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : https://github.com/NeoxaChain/Neoxa
-Downnload : https://github.com/NeoxaChain/Neoxa/releases
+Website  : 
+Github   : https://github.com/NeoxaChain/Neoxa
+Download : https://github.com/NeoxaChain/Neoxa/releases
 
 */
 /* ########## CONFIG ######### */

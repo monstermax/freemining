@@ -13,17 +13,17 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : 
-Downnload : 
+Website  : 
+Github   : https://github.com/tronprotocol/java-tron
+Download : https://github.com/tronprotocol/java-tron/releases
 
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = ''; // edit-me
-const fullnodeTitle = ''; // edit-me
-const github        = ''; // edit-me
-const lastVersion   = ''; // edit-me
+const fullnodeName  = 'tron';
+const fullnodeTitle = 'Tron';
+const github        = 'tronprotocol/java-tron';
+const lastVersion   = '4.7.0.1';
 
 /* ########## MAIN ######### */
 
@@ -36,7 +36,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
     ...baseFullnode.fullnodeInstall,
     fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
 
 
@@ -45,7 +45,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``;
+        let subDir = ``; // no zip
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
@@ -53,14 +53,12 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/tronprotocol/java-tron/releases/download/GreatVoyage-v${version}/FullNode.jar`, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/tronprotocol/java-tron/releases/download/GreatVoyage-v${version}/FullNode.jar`,
+            'win32':   `https://github.com/tronprotocol/java-tron/releases/download/GreatVoyage-v${version}/FullNode.jar`,
+            'darwin':  `https://github.com/tronprotocol/java-tron/releases/download/GreatVoyage-v${version}/FullNode.jar`,
+            'freebsd': `https://github.com/tronprotocol/java-tron/releases/download/GreatVoyage-v${version}/FullNode.jar`,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -77,9 +75,9 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         await this.extractFile(tempDir, dlFilePath);
 
         // Install to target dir
-        fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.mkdirSync(aliasDir, {recursive: true});
+        fs.renameSync( dlFilePath, `${aliasDir}${SEP}FullNode.jar`);
 
         // Write report files
         this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
@@ -98,13 +96,20 @@ export const fullnodeCommands: t.fullnodeCommandInfos = {
 
     p2pPort: -1, // edit-me
     rpcPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'java',
     managed: false, // set true when the getInfos() script is ready
 
 
     getCommandArgs(config, params) {
+        const fullnodeAlias: string = params.alias || ''; // || fullnodeInstall.dedefaultVersion; // TODO
+        const fullnodeDir = `${config?.appDir}${SEP}node${SEP}fullnodes${SEP}${fullnodeName}`
+        //const aliasDir = `${fullnodeDir}${SEP}${fullnodeAlias}`;
+
         const args: string[] = [
-            `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
+            `-Xmx4G`,
+            `-jar ${config.appDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}${SEP}${fullnodeAlias}${SEP}FullNode.jar`,
+            `--mainnet`,
+            `-c`, `${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
         ];
 
         if (this.p2pPort > 0) {

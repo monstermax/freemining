@@ -15,9 +15,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://dynexcoin.org/
-Github    : https://github.com/dynexcoin/Dynex
-Downnload : https://github.com/dynexcoin/Dynex/releases
+Website  : https://dynexcoin.org/
+Github   : https://github.com/dynexcoin/Dynex
+Download : https://github.com/dynexcoin/Dynex/releases
 
 */
 /* ########## CONFIG ######### */

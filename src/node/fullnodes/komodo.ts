@@ -13,9 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : https://github.com/KomodoPlatform/komodo
-Downnload : 
+Website  : 
+Github   : https://github.com/KomodoPlatform/komodo
+Download : 
 
 */
 /* ########## CONFIG ######### */
@@ -53,7 +53,7 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
+            'linux':   `https://github.com/KomodoPlatform/komodo`,
             'win32':   ``, // edit-me
             'darwin':  ``, // edit-me
             'freebsd': ``, // edit-me

@@ -10,9 +10,9 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   :
-Github    : https://github.com/kaspanet/kaspad
-Downnload : https://github.com/kaspanet/kaspad/releases
+Website  :
+Github   : https://github.com/kaspanet/kaspad
+Download : https://github.com/kaspanet/kaspad/releases
 
 */
 /* ########## CONFIG ######### */
@@ -25,7 +25,7 @@ const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeInstall), { fullnodeName,
     fullnodeTitle,
-    //lastVersion,   // uncomment me when install script is ready
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {

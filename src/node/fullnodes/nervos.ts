@@ -13,9 +13,9 @@ import type *  as t from '../../common/types';
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : 
-Github    : https://github.com/nervosnetwork/ckb
-Downnload : https://github.com/nervosnetwork/ckb/releases
+Website  : 
+Github   : https://github.com/nervosnetwork/ckb
+Download : https://github.com/nervosnetwork/ckb/releases
 
 */
 /* ########## CONFIG ######### */

@@ -10,15 +10,15 @@ const baseFullnode = tslib_1.__importStar(require("./_baseFullnode"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website   : https://www.zilliqa.com/
-Github    : https://github.com/Zilliqa/Zilliqa
-Downnload :
+Website  : https://www.zilliqa.com/
+Github   : https://github.com/Zilliqa/Zilliqa
+Download :
 
 */
 /* ########## CONFIG ######### */
 const fullnodeName = 'zilliqa';
 const fullnodeTitle = 'zilliqa';
-const github = '';
+const github = ''; // Zilliqa/Zilliqa
 const lastVersion = ''; // edit-me
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
@@ -41,10 +41,10 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
                 throw { message: `Install script not completed` };
             // Download url selection
             const dlUrls = {
-                'linux': ``,
+                'linux': `https://github.com/Zilliqa/Zilliqa`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
             throw { message: `edit-me then delete this line` };
