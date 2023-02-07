@@ -75,10 +75,12 @@ function sendRigStatusAuto(ws, config) {
 function sendRigStatus(ws, rigInfos) {
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${websocket._connId}]`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
-    const req = {
-        method: "farmRigUpdateStatus",
-        params: rigInfos,
-    };
+    //const req: any = {
+    //    method: "farmRigUpdateStatus",
+    //    params: rigInfos,
+    //};
+    let reqId = ++requestsCount;
+    const req = (0, utils_1.buildRpcRequest)(reqId, "farmRigUpdateStatus", rigInfos);
     ws.send(JSON.stringify(req));
 }
 // WEBSOCKET
@@ -126,35 +128,11 @@ function websocketConnect(config) {
             });
             console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] sending auth to server (open) [connId ${connectionId}]`);
             this.send(JSON.stringify(req));
-            /*
             // Send rig config
             reqId = ++requestsCount;
-            req = buildRpcRequest(reqId, "farmRigUpdateConfig", {
-                config,
-            });
-            console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`)
-            this.send( JSON.stringify(req) );
-    
-            // Send installed miners
-            const installedMiners = await Rig.getInstalledMiners(config);
-            const installedMinersAliases: any = {}; // TODO
-            reqId = ++requestsCount;
-            req = buildRpcRequest(reqId, "farmRigUpdateInstalledMiners", {
-                installedMiners,
-            });
-            console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending installedMiners to server (open) [conn ${connectionId}]`)
-            this.send( JSON.stringify(req) );
-    
-    
-            // Send running miners
-            const runningMinersAliases = Rig.getRunningMinersAliases(config);
-            reqId = ++requestsCount;
-            req = buildRpcRequest(reqId, "farmRigUpdateRunningMinersAliases", {
-                runningMinersAliases,
-            });
-            console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending runningMinersAliases to server (open) [conn ${connectionId}]`)
-            this.send( JSON.stringify(req) );
-            */
+            req = (0, utils_1.buildRpcRequest)(reqId, "farmRigUpdateConfig", config);
+            console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`);
+            this.send(JSON.stringify(req));
             // Send rig status
             const rigInfos = yield Rig.getRigInfos(config);
             if (!rigInfos) {

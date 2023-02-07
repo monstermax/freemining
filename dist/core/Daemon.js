@@ -427,13 +427,21 @@ function registerWssRoutes(config, wss) {
                                 const rigName = ws.auth.name;
                                 const rigInfos = req.params;
                                 Farm.setRigStatus(rigName, rigInfos);
-                                var debugme = 1;
+                                rpcSendResponse(ws, req.id, 'OK');
                             }
                             break;
-                        /*
                         case 'farmRigUpdateConfig':
+                            if (!ws.auth || ws.auth.type !== 'rig') {
+                                rpcSendError(ws, req.id, { code: -1, message: `Auth required` });
+                                ws.close();
+                                break;
+                            }
+                            const rigName = ws.auth.name;
+                            const rigConfig = req.params;
+                            Farm.setRigConfig(rigName, rigConfig);
+                            rpcSendResponse(ws, req.id, 'OK');
                             break;
-    
+                        /*
                         case 'farmRigUpdateInstalledMiners':
                             break;
     

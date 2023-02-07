@@ -590,7 +590,7 @@ function modalStartMinerChangeCoin() {
         // no coin selected
 
         //$miners.children().attr('disabled', true); // disable all miners
-        $miners.children().attr('disabled', false); // re-enable all miners
+        $miners.children().attr('disabled', false).removeClass('d-none'); // re-enable all miners
 
     } else {
         // coin selected
@@ -641,10 +641,10 @@ function modalStartMinerChangeCoin() {
             const minerName = $opt.val();
 
             if (minerName == '' || (minerName in coinsMiners[coin])) {
-                $opt.attr('disabled', false);
+                $opt.attr('disabled', false).removeClass('d-none');
 
             } else {
-                $opt.attr('disabled', true);
+                $opt.attr('disabled', true).addClass('d-none');
             }
         });
     }
@@ -719,21 +719,23 @@ function modalStartMinerChangeMiner() {
     const coin = $coins.val();
     const miner = $miner.val();
 
+    const minerConf = miners[miner];
+    let extraArgsArr = [];
+    if (minerConf && minerConf.extraArgs && minerConf.extraArgs.trim()) {
+        extraArgsArr.push(minerConf.extraArgs.trim());
+    }
+
     if (coin && miner) {
         const coinMinerConf = coinsMiners[coin] ? coinsMiners[coin][miner] : null;
-        const minerConf = miners[miner];
         $algo.val(coinMinerConf ? coinMinerConf.algo : '');
 
-        let extraArgsArr = [];
-        if (minerConf && minerConf.extraArgs && minerConf.extraArgs.trim()) {
-            extraArgsArr.push(minerConf.extraArgs.trim());
-        }
         if (coinMinerConf && coinMinerConf.extraArgs && coinMinerConf.extraArgs.trim()) {
             extraArgsArr.push(coinMinerConf.extraArgs.trim());
         }
-        const extraArgs = extraArgsArr.join(' ');
-        $extraArgs.val(extraArgs);
     }
+
+    const extraArgs = extraArgsArr.join(' ');
+    $extraArgs.val(extraArgs);
 
 }
 

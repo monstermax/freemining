@@ -95,10 +95,14 @@ function sendRigStatus(ws: WebSocket, rigInfos: t.RigInfos): void {
     console.log(`${now()} [${colors.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${(websocket as any)._connId}]`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
 
-    const req: any = {
-        method: "farmRigUpdateStatus",
-        params: rigInfos,
-    };
+    //const req: any = {
+    //    method: "farmRigUpdateStatus",
+    //    params: rigInfos,
+    //};
+
+    let reqId = ++requestsCount;
+    const req = buildRpcRequest(reqId, "farmRigUpdateStatus", rigInfos);
+
     ws.send(JSON.stringify(req));
 }
 
@@ -161,35 +165,11 @@ function websocketConnect(config: t.DaemonConfigAll) {
         this.send( JSON.stringify(req) );
 
 
-        /*
         // Send rig config
         reqId = ++requestsCount;
-        req = buildRpcRequest(reqId, "farmRigUpdateConfig", {
-            config,
-        });
+        req = buildRpcRequest(reqId, "farmRigUpdateConfig", config);
         console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending rigConfig to server (open) [conn ${connectionId}]`)
         this.send( JSON.stringify(req) );
-
-        // Send installed miners
-        const installedMiners = await Rig.getInstalledMiners(config);
-        const installedMinersAliases: any = {}; // TODO
-        reqId = ++requestsCount;
-        req = buildRpcRequest(reqId, "farmRigUpdateInstalledMiners", {
-            installedMiners,
-        });
-        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending installedMiners to server (open) [conn ${connectionId}]`)
-        this.send( JSON.stringify(req) );
-
-
-        // Send running miners
-        const runningMinersAliases = Rig.getRunningMinersAliases(config);
-        reqId = ++requestsCount;
-        req = buildRpcRequest(reqId, "farmRigUpdateRunningMinersAliases", {
-            runningMinersAliases,
-        });
-        console.log(`${now()} [${colors.blue('INFO')}] [RIG] sending runningMinersAliases to server (open) [conn ${connectionId}]`)
-        this.send( JSON.stringify(req) );
-        */
 
 
         // Send rig status

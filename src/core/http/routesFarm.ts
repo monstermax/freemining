@@ -72,7 +72,6 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
 
 
     app.get(`${urlPrefix}/rigs/:rigName/`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        //const config = Daemon.getConfig();
         const rigName = req.params.rigName;
         const rigData = getRigData(rigName);
 
@@ -87,7 +86,6 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
 
 
     app.get(`${urlPrefix}/rigs/:rigName/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        //const config = Daemon.getConfig();
         const rigName = req.params.rigName;
         const rigData = getRigData(rigName);
 
@@ -113,27 +111,44 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
         res.header('Content-Type', 'application/json');
         res.send(content);
     });
+
+
+    app.get(`${urlPrefix}/rigs/:rigName/config.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+
+        if (! rigData?.rigInfos) {
+            res.send(`Error: invalid rig`);
+            return;
+        }
+
+        let content = JSON.stringify(rigData.config, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    });
+
+
+    app.get(`${urlPrefix}/rigs/:rigName/rig/miners-run-modal`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerRunModal(rigData, req, res, next);
+    });
 }
 
 
 
-function getRigData(rigName: string): t.RigData | null {
+function getRigData(rigName: string): t.RigData {
     const config = Daemon.getConfig();
+
     const farmInfos = Farm.getFarmInfos(config);
     const rigInfos = farmInfos.rigsInfos[rigName];
 
-    //const rigConfig = rigInfos.config;
-    //const rigStatus = rigInfos.status;
+    const rigConfig = Farm.getRigConfig(rigName);
 
     const allMiners = getRigAllMiners(rigInfos);
 
-    if (! rigInfos) {
-        return null;
-    }
-
     const rigData: t.RigData = {
-        config,
-        //config: rigConfig,
+        config: rigConfig,
         rigInfos,
         monitorStatus: rigInfos.status?.monitorStatus || false,
         allMiners,
@@ -151,12 +166,21 @@ function getRigData(rigName: string): t.RigData | null {
 
 
 function getRigAllMiners(rigInfos: t.RigInfos): t.AllMiners {
-    const installedMiners = rigInfos.status?.installableMiners || [];
-    const runningMinersAliases = rigInfos.status?.runningMinersAliases || [];
-    const installableMiners = rigInfos.status?.installableMiners || [];
-    const runnableMiners = rigInfos.status?.runnableMiners || [];
-    const managedMiners = rigInfos.status?.managedMiners || [];
-    const installedMinersAliases = rigInfos.status?.installedMinersAliases || [];
+    let installedMiners: string[] = [];
+    let runningMinersAliases: t.RunningMinerProcess[] = [];
+    let installableMiners: string[] = [];
+    let runnableMiners: string[] = [];
+    let managedMiners: string[] = [];
+    let installedMinersAliases: t.InstalledMinerConfig[] = [];
+
+    if (rigInfos) {
+        installedMiners = rigInfos.status?.installableMiners || [];
+        runningMinersAliases = rigInfos.status?.runningMinersAliases || [];
+        installableMiners = rigInfos.status?.installableMiners || [];
+        runnableMiners = rigInfos.status?.runnableMiners || [];
+        managedMiners = rigInfos.status?.managedMiners || [];
+        installedMinersAliases = rigInfos.status?.installedMinersAliases || [];
+    }
 
     const minersNames = Array.from(
         new Set( [

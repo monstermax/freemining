@@ -99,9 +99,7 @@
                         <div id="newMiner_pool_Help" class="form-text"></div>
                     </div>
 
-                    <br />
                     <hr />
-                    <br />
 
                     <div class="row">
                         <div class="col-6">
@@ -124,15 +122,15 @@
                                             suffix += ' ⚠️ not managed';
                                         }
 
-                                        if (miner in rigInfos.status.runningMiners) {
+                                        if (rigInfos.status.runningMiners.includes(miner)) {
                                             suffix += ' ⛔ already running';
-                                            disabled = 'disabled';
+                                            disabled = 'disabled'; // a revoir: valeur ecrasée par modalStartMinerChange*()
                                         }
 
                                         return `<option value="${miner}" ${disabled}>${miner}${suffix}</option>`;
                                     }).join('') %>
                                 </select>
-                                <div id="newMiner_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
+                                <div id="newMiner_miner_Help" class="form-text"> &gt; Choose the miner software to run</div>
                             </div>
 
                             <input type="hidden" name="newMiner_alias" value="" /> <!-- TODO: select/option ajax when newMiner_miner changes -->
@@ -142,7 +140,7 @@
                             <div class="mb-3">
                                 <label for="newMiner_algo" class="form-label">Algo<sup>*</sup></label>
                                 <input type="text" class="form-control required" id="newMiner_algo" name="algo" aria-describedby="newMiner_algo_Help">
-                                <div id="newMiner_algo_Help" class="form-text"> &gt; Algorithm of the coin to mine</div>
+                                <div id="newMiner_algo_Help" class="form-text"> &gt; Algorithm of the selected coin. Depending on miner.</div>
                             </div>
                         </div>
 

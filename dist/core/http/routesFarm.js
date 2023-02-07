@@ -45,7 +45,6 @@ function registerFarmRoutes(app, urlPrefix = '') {
         res.render(`.${SEP}core${SEP}layout.html`, data);
     }));
     app.get(`${urlPrefix}/rigs/:rigName/`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        //const config = Daemon.getConfig();
         const rigName = req.params.rigName;
         const rigData = getRigData(rigName);
         if (!rigData || !rigData.rigInfos) {
@@ -55,7 +54,6 @@ function registerFarmRoutes(app, urlPrefix = '') {
         routesRig.rigHomepage(rigData, req, res, next);
     }));
     app.get(`${urlPrefix}/rigs/:rigName/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        //const config = Daemon.getConfig();
         const rigName = req.params.rigName;
         const rigData = getRigData(rigName);
         if (!(rigData === null || rigData === void 0 ? void 0 : rigData.rigInfos)) {
@@ -75,6 +73,22 @@ function registerFarmRoutes(app, urlPrefix = '') {
         res.header('Content-Type', 'application/json');
         res.send(content);
     }));
+    app.get(`${urlPrefix}/rigs/:rigName/config.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        if (!(rigData === null || rigData === void 0 ? void 0 : rigData.rigInfos)) {
+            res.send(`Error: invalid rig`);
+            return;
+        }
+        let content = JSON.stringify(rigData.config, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    }));
+    app.get(`${urlPrefix}/rigs/:rigName/rig/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerRunModal(rigData, req, res, next);
+    }));
 }
 exports.registerFarmRoutes = registerFarmRoutes;
 function getRigData(rigName) {
@@ -82,15 +96,10 @@ function getRigData(rigName) {
     const config = Daemon.getConfig();
     const farmInfos = Farm.getFarmInfos(config);
     const rigInfos = farmInfos.rigsInfos[rigName];
-    //const rigConfig = rigInfos.config;
-    //const rigStatus = rigInfos.status;
+    const rigConfig = Farm.getRigConfig(rigName);
     const allMiners = getRigAllMiners(rigInfos);
-    if (!rigInfos) {
-        return null;
-    }
     const rigData = {
-        config,
-        //config: rigConfig,
+        config: rigConfig,
         rigInfos,
         monitorStatus: ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.monitorStatus) || false,
         allMiners,
@@ -105,12 +114,20 @@ function getRigData(rigName) {
 }
 function getRigAllMiners(rigInfos) {
     var _a, _b, _c, _d, _e, _f;
-    const installedMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installableMiners) || [];
-    const runningMinersAliases = ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.runningMinersAliases) || [];
-    const installableMiners = ((_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.installableMiners) || [];
-    const runnableMiners = ((_d = rigInfos.status) === null || _d === void 0 ? void 0 : _d.runnableMiners) || [];
-    const managedMiners = ((_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.managedMiners) || [];
-    const installedMinersAliases = ((_f = rigInfos.status) === null || _f === void 0 ? void 0 : _f.installedMinersAliases) || [];
+    let installedMiners = [];
+    let runningMinersAliases = [];
+    let installableMiners = [];
+    let runnableMiners = [];
+    let managedMiners = [];
+    let installedMinersAliases = [];
+    if (rigInfos) {
+        installedMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installableMiners) || [];
+        runningMinersAliases = ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.runningMinersAliases) || [];
+        installableMiners = ((_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.installableMiners) || [];
+        runnableMiners = ((_d = rigInfos.status) === null || _d === void 0 ? void 0 : _d.runnableMiners) || [];
+        managedMiners = ((_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.managedMiners) || [];
+        installedMinersAliases = ((_f = rigInfos.status) === null || _f === void 0 ? void 0 : _f.installedMinersAliases) || [];
+    }
     const minersNames = Array.from(new Set([
         ...installedMiners,
         ...runningMinersAliases.map(runningMiner => runningMiner.miner),

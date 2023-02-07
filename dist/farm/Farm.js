@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFarmInfos = exports.getRigStatus = exports.setRigStatus = exports.rigAuthRequest = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.rigsServerGetStatus = exports.rigsServerStop = exports.rigsServerStart = void 0;
+exports.getFarmInfos = exports.getRigConfig = exports.setRigConfig = exports.getRigStatus = exports.setRigStatus = exports.rigAuthRequest = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.rigsServerGetStatus = exports.rigsServerStop = exports.rigsServerStart = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
 const farmRigsServerWebsocket = tslib_1.__importStar(require("./farmRigsServerWebsocket"));
 const utils_1 = require("../common/utils");
 /* ########## MAIN ######### */
+const rigsConfigs = {};
 const rigsInfos = {};
 /*
 TODO: a transformer en :
@@ -89,6 +90,20 @@ function getRigStatus(rigName) {
     return rigsInfos[rigName];
 }
 exports.getRigStatus = getRigStatus;
+function setRigConfig(rigName, rigConfig) {
+    if (!farmRigsServerWebsocket.status())
+        return;
+    rigsConfigs[rigName] = rigConfig;
+}
+exports.setRigConfig = setRigConfig;
+function getRigConfig(rigName) {
+    if (!farmRigsServerWebsocket.status())
+        return null;
+    if (!(rigName in rigsConfigs))
+        return null;
+    return rigsConfigs[rigName];
+}
+exports.getRigConfig = getRigConfig;
 function getFarmInfos(config) {
     if (farmMainInfos === null) {
         farmMainInfos = {

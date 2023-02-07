@@ -10,6 +10,7 @@ import type *  as t from '../common/types';
 
 /* ########## MAIN ######### */
 
+const rigsConfigs: { [rigName: string]: t.DaemonConfigAll } = {};
 const rigsInfos: { [rigName: string]: t.RigInfos } = {};
 
 /*
@@ -113,6 +114,20 @@ export function getRigStatus(rigName: string): t.RigInfos | null {
     return rigsInfos[rigName];
 }
 
+
+export function setRigConfig(rigName: string, rigConfig: t.DaemonConfigAll): void {
+    if (! farmRigsServerWebsocket.status()) return;
+
+    rigsConfigs[rigName] = rigConfig;
+}
+
+
+export function getRigConfig(rigName: string): t.DaemonConfigAll | null {
+    if (! farmRigsServerWebsocket.status()) return null;
+    if (! (rigName in rigsConfigs)) return null;
+
+    return rigsConfigs[rigName];
+}
 
 
 export function getFarmInfos(config: t.DaemonConfigAll): t.FarmInfos {

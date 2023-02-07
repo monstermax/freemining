@@ -308,7 +308,7 @@ export type RigInfos = {
 }
 
 export type RigData = {
-    config: DaemonConfigAll,
+    config: DaemonConfigAll | null,
     rigInfos: RigInfos,
     monitorStatus: boolean,
     allMiners: AllMiners,

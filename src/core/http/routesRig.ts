@@ -53,18 +53,12 @@ async function getRigData(): Promise<t.RigData> {
 
 
 export async function rigHomepage(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
-    //const config = Daemon.getConfig();
-    const { config, monitorStatus, allMiners, rigInfos } = rigData;
-    //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
-
-    // variables à ne plus utiliser... (utiliser allMiners à la place)
+    const { allMiners } = rigData;
     const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
     const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
     const installableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installable).map(entry => entry[0]);
     const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
     const managedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].managed).map(entry => entry[0]);
-
-    // installableMiners = rigInfos.
 
     const data = {
         ...utilFuncs,
@@ -75,20 +69,17 @@ export async function rigHomepage(rigData: t.RigData, req: express.Request, res:
         contentTemplate: `..${SEP}rig${SEP}rig.html`,
         ...rigData,
         allMiners,
-        installedMiners, // a supprimer
-        runningMiners, // a supprimer
-        installableMiners, // a supprimer
-        runnableMiners, // a supprimer
-        managedMiners, // a supprimer
+        installedMiners, // a supprimer ?
+        runningMiners, // a supprimer ?
+        installableMiners, // a supprimer ?
+        runnableMiners, // a supprimer ?
+        managedMiners, // a supprimer ?
     };
     res.render(`.${SEP}core${SEP}layout.html`, data);
 }
 
 
 export async function rigStatus(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
-    const { config, monitorStatus, allMiners, rigInfos } = rigData;
-    //const runningMinersAliases = rigInfos.status?.runningMinersAliases;
-
     const data = {
         ...utilFuncs,
         meta: {
@@ -96,8 +87,7 @@ export async function rigStatus(rigData: t.RigData, req: express.Request, res: e
             noIndex: false,
         },
         contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
-        rigInfos,
-        //monitorStatus,
+        ...rigData,
         //runningMinersAliases,
         //allMiners,
         //installedMiners,
@@ -110,18 +100,66 @@ export async function rigStatus(rigData: t.RigData, req: express.Request, res: e
 };
 
 
+export async function rigMinerRunModal(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const minerName = req.query.miner as string || '';
+
+    if (! rigData.config) {
+        res.send(`Rig not configured`);
+        res.end();
+        return;
+    }
+
+    //const config = Daemon.getConfig();
+    const config = rigData.config;
+    const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
+    const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
+
+    const rigInfos = rigData.rigInfos; // await Rig.getRigInfos(config);
+    const allMiners = rigData.allMiners; // await Rig.getAllMiners(config);
+    const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
+    const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
+    const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
+
+    if (! rigInfos) {
+        res.send(`Rig not initialized`);
+        res.end();
+        return;
+    }
+
+    let presets = {};
+    const poolsFilePath = `${config.confDir}${SEP}rig${SEP}pools.json`;
+    if (fs.existsSync(poolsFilePath)) {
+        presets = require(poolsFilePath);
+    }
+
+    const data = {
+        ...utilFuncs,
+        rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
+        rigInfos,
+        miners: allMiners,
+        runnableMiners,
+        runningMiners,
+        installedMiners,
+        presets,
+        miner: minerName,
+        minerAlias,
+    };
+    res.render(`.${SEP}rig${SEP}run_miner_modal.html`, data);
+};
+
+
+/* #### */
+
 export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
     // GET Rig homepage => /rig/
     app.get(`${urlPrefix}/`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const config = Daemon.getConfig();
         rigHomepage(await getRigData(), req, res, next);
     });
 
 
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
-        const config = Daemon.getConfig();
         rigStatus(await getRigData(), req, res, next);
     });
 
@@ -455,43 +493,7 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
 
     app.get(`${urlPrefix}/miners-run-modal`, async (req: express.Request, res: express.Response, next: Function) => {
-        const minerName = req.query.miner as string || '';
-
-        const config = Daemon.getConfig();
-        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
-        const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
-
-        const rigInfos = await Rig.getRigInfos(config);
-        const allMiners = await Rig.getAllMiners(config);
-        const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
-        const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
-        const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
-
-        if (! rigInfos) {
-            res.send(`Rig not initialized`);
-            res.end();
-            return;
-        }
-
-        let presets = {};
-        const poolsFilePath = `${config.confDir}${SEP}rig${SEP}pools.json`;
-        if (fs.existsSync(poolsFilePath)) {
-            presets = require(poolsFilePath);
-        }
-
-        const data = {
-            ...utilFuncs,
-            rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
-            rigInfos,
-            miners: allMiners,
-            runnableMiners,
-            runningMiners,
-            installedMiners,
-            presets,
-            miner: minerName,
-            minerAlias,
-        };
-        res.render(`.${SEP}rig${SEP}run_miner_modal.html`, data);
+        rigMinerRunModal(await getRigData(), req, res, next);
     });
 
 
