@@ -681,6 +681,16 @@ function modalStartMinerChangeWallet() {
                 poolUser = poolUser.replace( new RegExp('{wallet}', 'g'), walletAddress );
             }
         }
+
+        if (poolUser.startsWith('.')) {
+            poolUser = '';
+        }
+        if (poolUser.endsWith('.')) {
+            poolUser = poolUser.slice(0, -1);
+        }
+        if (poolUser.endsWith('+')) {
+            poolUser = poolUser.slice(0, -1);
+        }
     }
 
     $user.val(poolUser);
@@ -692,6 +702,11 @@ function modalStartMinerChangePool() {
     $pool.val( $pools.val() );
 
     // la valeur de poolUser depend du choix de la pool, on declenche donc un refresh wallet
+    modalStartMinerChangeWallet();
+}
+
+function modalStartMinerChangeWorker() {
+    // la valeur de poolUser depend du choix du worker, on declenche donc un refresh wallet
     modalStartMinerChangeWallet();
 }
 
