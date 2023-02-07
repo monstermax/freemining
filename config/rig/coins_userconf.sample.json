@@ -5,7 +5,10 @@
         },
         "pools": {
             "jjpool": {
-                "europe": "eu.jjpool.fr:3333"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "europe": "eu.jjpool.fr:3333"
+                }
             }
         }
     },
@@ -15,7 +18,10 @@
         },
         "pools": {
             "jjpool": {
-                "default": "eu.jjpool.fr:3056"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "eu.jjpool.fr:3056"
+                }
             }
         }
     },
@@ -25,7 +31,10 @@
         },
         "pools": {
             "2miners": {
-                "default": "firo.2miners.com:8181"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "firo.2miners.com:8181"
+                }
             }
         }
     },
@@ -35,7 +44,10 @@
         },
         "pools": {
             "minerpool": {
-                "default": "flux-eu.minerpool.pro:2032"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "flux-eu.minerpool.pro:2032"
+                }
             }
         }
     },
@@ -45,7 +57,10 @@
         },
         "pools": {
             "minerpool": {
-                "default": "connect.fennecblockchain.com:8200"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "connect.fennecblockchain.com:8200"
+                }
             }
         }
     },
@@ -55,7 +70,10 @@
         },
         "pools": {
             "minerpool": {
-                "default": "mewc-eu.minerpool.pro:7034"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "mewc-eu.minerpool.pro:7034"
+                }
             }
         }
     },
@@ -65,7 +83,10 @@
         },
         "pools": {
             "jjpool": {
-                "default": "jjpool.eu:7070"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "jjpool.eu:7070"
+                }
             }
         }
     },
@@ -75,7 +96,10 @@
         },
         "pools": {
             "jjpool": {
-                "default": "eu.jjpool.fr:5550"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "eu.jjpool.fr:5550"
+                }
             }
         }
     },
@@ -85,10 +109,16 @@
         },
         "pools": {
             "minerpool": {
-                "default": "rvn-eu.minerpool.pro:16059"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "rvn-eu.minerpool.pro:16059"
+                }
             },
             "2miners": {
-                "default": "rvn.2miners.com:6060"
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "rvn.2miners.com:6060"
+                }
             }
         }
     },
@@ -98,7 +128,10 @@
         },
         "pools": {
             "xmrpool": {
-                "default": "xmrpool.eu:5555"
+                "user": "{wallet}+{worker}",
+                "urls": {
+                    "default": "xmrpool.eu:5555"
+                }
             }
         }
     }

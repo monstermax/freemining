@@ -99,54 +99,73 @@
                         <div id="newMiner_pool_Help" class="form-text"></div>
                     </div>
 
-
                     <br />
                     <hr />
                     <br />
 
-                    <div class="mb-3">
-                        <label for="newMiner_miner" class="form-label">Miner<sup>*</sup></label>
-                        <select id="newMiner_miner" name="miner" class="form-select required" aria-describedby="newMiner_miner_Help" onchange="modalStartMinerChangeMiner()">
-                            <option></option>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="newMiner_miner" class="form-label">Miner<sup>*</sup></label>
+                                <select id="newMiner_miner" name="miner" class="form-select required" aria-describedby="newMiner_miner_Help" onchange="modalStartMinerChangeMiner()">
+                                    <option></option>
 
-                            <%- installedMiners.map(miner => {
-                                if (! runnableMiners.includes(miner)) return;
+                                    <%- installedMiners.map(miner => {
+                                        if (! runnableMiners.includes(miner)) return;
 
-                                const managedMiners = rigInfos.status.managedMiners;
-                                const isManaged = managedMiners.includes(miner);
-                                //if (! isManaged) return;
+                                        const managedMiners = rigInfos.status.managedMiners;
+                                        const isManaged = managedMiners.includes(miner);
+                                        //if (! isManaged) return;
 
-                                let suffix = '';
-                                let disabled = '';
+                                        let suffix = '';
+                                        let disabled = '';
 
-                                if (! isManaged) {
-                                    suffix += ' ⚠️ not managed';
-                                }
+                                        if (! isManaged) {
+                                            suffix += ' ⚠️ not managed';
+                                        }
 
-                                if (miner in rigInfos.status.runningMiners) {
-                                    suffix += ' ⛔ already running';
-                                    disabled = 'disabled';
-                                }
+                                        if (miner in rigInfos.status.runningMiners) {
+                                            suffix += ' ⛔ already running';
+                                            disabled = 'disabled';
+                                        }
 
-                                return `<option value="${miner}" ${disabled}>${miner}${suffix}</option>`;
-                            }).join('') %>
-                        </select>
-                        <div id="newMiner_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
+                                        return `<option value="${miner}" ${disabled}>${miner}${suffix}</option>`;
+                                    }).join('') %>
+                                </select>
+                                <div id="newMiner_miner_Help" class="form-text"> &gt; Choose the miner software to run<br />The best choice depends on your hardware and on each coin algorithm</div>
+                            </div>
+
+                            <input type="hidden" name="newMiner_alias" value="" /> <!-- TODO: select/option ajax when newMiner_miner changes -->
+                        </div>
+
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="newMiner_algo" class="form-label">Algo<sup>*</sup></label>
+                                <input type="text" class="form-control required" id="newMiner_algo" name="algo" aria-describedby="newMiner_algo_Help">
+                                <div id="newMiner_algo_Help" class="form-text"> &gt; Algorithm of the coin to mine</div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <input type="hidden" name="newMiner_alias" value="" /> <!-- TODO: select/option ajax when newMiner_miner changes -->
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="newMiner_pool_url" class="form-label">Pool url<sup>*</sup></label>
+                                <input type="text" class="form-control required" id="newMiner_pool_url" name="pool_url" aria-describedby="newMiner_pool_url_Help">
+                                <div id="newMiner_pool_url_Help" class="form-text"> &gt; HOST:PORT only (no tcp/stratum/ssl)</div>
+                            </div>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="newMiner_algo" class="form-label">Algo<sup>*</sup></label>
-                        <input type="text" class="form-control required" id="newMiner_algo" name="algo" aria-describedby="newMiner_algo_Help">
-                        <div id="newMiner_algo_Help" class="form-text"> &gt; Algorithm of the coin to mine</div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="newMiner_worker" class="form-label">Worker</label>
+                                <input type="text" class="form-control required" id="newMiner_worker" value="<%=rigInfos.rig.name%>" name="worker" aria-describedby="newMiner_worker_Help">
+                                <div id="newMiner_worker_Help" class="form-text"> &gt; Worker name</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="newMiner_pool_url" class="form-label">Pool url<sup>*</sup></label>
-                        <input type="text" class="form-control required" id="newMiner_pool_url" name="pool_url" aria-describedby="newMiner_pool_url_Help">
-                        <div id="newMiner_pool_url_Help" class="form-text"> &gt; HOST:PORT only (no tcp/stratum/ssl)</div>
-                    </div>
 
                     <div class="mb-3">
                         <label for="newMiner_pool_user" class="form-label">Pool account<sup>*</sup></label>

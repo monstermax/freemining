@@ -31,7 +31,7 @@ body.dark .table {
     --bs-table-bg: #2e2d2d;
     --bs-table-color: hsl(0, 3%, 71%);
 }
-body.dark .form-control {
+body.dark .form-control, body.dark .form-select {
     background-color: #1c1c1e;
     color: hsl(0, 3%, 71%);
     border-color: #3e3e3e;

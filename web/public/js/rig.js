@@ -611,11 +611,13 @@ function modalStartMinerChangeCoin() {
 
         const coinsPools = coinsUserconf[coin].pools || {};
         const poolsHtml = Object.entries(coinsPools).map(entry => {
-            const [poolName, poolServers] = entry;
+            const [poolName, pool] = entry;
+            const poolUrls = pool.urls || {};
+            let poolUser = pool.user || '';
 
-            const htmlOptions = Object.entries(poolServers).map(entry => {
+            const htmlOptions = Object.entries(poolUrls).map(entry => {
                 const [serverName, poolUrl] = entry;
-                return `<option value="${poolUrl}">${poolUrl}</option>`;
+                return `<option value="${poolUrl}" data-pooluser="${poolUser}">${serverName} | ${poolUrl}</option>`;
             });
 
             let html = '';
@@ -659,15 +661,38 @@ function modalStartMinerChangeCoin() {
 }
 
 function modalStartMinerChangeWallet() {
+    const $pools = jQuery('#newMiner_pool');
     const $wallets = jQuery('#newMiner_wallet');
+    const $worker = jQuery('#newMiner_worker');
     const $user = jQuery('#newMiner_pool_user');
-    $user.val( $wallets.val() );
+    const walletAddress = $wallets.val();
+
+    const workerName = $worker.val();
+    let poolUser = walletAddress ? `${walletAddress}.${workerName}` : '';
+
+    if (poolUser) {
+        const $selectPoolOption = $pools.find(':selected');
+
+        if ($selectPoolOption.length) {
+            const _poolUser = $selectPoolOption.data('pooluser');
+            if (_poolUser) {
+                poolUser = _poolUser;
+                poolUser = poolUser.replace( new RegExp('{worker}', 'g'), workerName );
+                poolUser = poolUser.replace( new RegExp('{wallet}', 'g'), walletAddress );
+            }
+        }
+    }
+
+    $user.val(poolUser);
 }
 
 function modalStartMinerChangePool() {
     const $pools = jQuery('#newMiner_pool');
     const $pool = jQuery('#newMiner_pool_url');
     $pool.val( $pools.val() );
+
+    // la valeur de poolUser depend du choix de la pool, on declenche donc un refresh wallet
+    modalStartMinerChangeWallet();
 }
 
 function modalStartMinerChangeMiner() {
