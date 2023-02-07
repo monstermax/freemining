@@ -128,11 +128,40 @@ export function registerFarmRoutes(app: express.Express, urlPrefix: string='') {
     });
 
 
-    app.get(`${urlPrefix}/rigs/:rigName/rig/miners-run-modal`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+    app.get(`${urlPrefix}/rigs/:rigName/miners/:minerName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerInstall(rigData, req, res, next);
+    });
+
+
+    app.post(`${urlPrefix}/rigs/:rigName/miners/:minerName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerInstallPost(rigData, req, res, next);
+    });
+
+
+    app.get(`${urlPrefix}/rigs/:rigName/miners/:minerName/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerRun(rigData, req, res, next);
+    });
+
+
+    app.post(`${urlPrefix}/rigs/:rigName/miners/:minerName/run`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerRunPost(rigData, req, res, next);
+    });
+
+
+    app.get(`${urlPrefix}/rigs/:rigName/miners-run-modal`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         const rigName = req.params.rigName;
         const rigData = getRigData(rigName);
         routesRig.rigMinerRunModal(rigData, req, res, next);
     });
+
 }
 
 
@@ -174,7 +203,7 @@ function getRigAllMiners(rigInfos: t.RigInfos): t.AllMiners {
     let installedMinersAliases: t.InstalledMinerConfig[] = [];
 
     if (rigInfos) {
-        installedMiners = rigInfos.status?.installableMiners || [];
+        installedMiners = rigInfos.status?.installedMiners || [];
         runningMinersAliases = rigInfos.status?.runningMinersAliases || [];
         installableMiners = rigInfos.status?.installableMiners || [];
         runnableMiners = rigInfos.status?.runnableMiners || [];

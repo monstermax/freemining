@@ -84,7 +84,27 @@ function registerFarmRoutes(app, urlPrefix = '') {
         res.header('Content-Type', 'application/json');
         res.send(content);
     }));
-    app.get(`${urlPrefix}/rigs/:rigName/rig/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    app.get(`${urlPrefix}/rigs/:rigName/miners/:minerName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerInstall(rigData, req, res, next);
+    }));
+    app.post(`${urlPrefix}/rigs/:rigName/miners/:minerName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerInstallPost(rigData, req, res, next);
+    }));
+    app.get(`${urlPrefix}/rigs/:rigName/miners/:minerName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerRun(rigData, req, res, next);
+    }));
+    app.post(`${urlPrefix}/rigs/:rigName/miners/:minerName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const rigName = req.params.rigName;
+        const rigData = getRigData(rigName);
+        routesRig.rigMinerRunPost(rigData, req, res, next);
+    }));
+    app.get(`${urlPrefix}/rigs/:rigName/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         const rigName = req.params.rigName;
         const rigData = getRigData(rigName);
         routesRig.rigMinerRunModal(rigData, req, res, next);
@@ -121,7 +141,7 @@ function getRigAllMiners(rigInfos) {
     let managedMiners = [];
     let installedMinersAliases = [];
     if (rigInfos) {
-        installedMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installableMiners) || [];
+        installedMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installedMiners) || [];
         runningMinersAliases = ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.runningMinersAliases) || [];
         installableMiners = ((_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.installableMiners) || [];
         runnableMiners = ((_d = rigInfos.status) === null || _d === void 0 ? void 0 : _d.runnableMiners) || [];

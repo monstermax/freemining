@@ -1,6 +1,6 @@
 
 const isFarm = (window.location.pathname.startsWith('/farm/'));
-const urlPrefix = isFarm ? window.location.pathname.split('/').slice(0, 4).join('/') : '';
+const urlPrefix = isFarm ? window.location.pathname.split('/').slice(0, 4).join('/') : '/rig';
 
 
 // MINER RUN START-MODAL
@@ -10,7 +10,7 @@ async function startMinerModal(minerName='', minerAlias='', onStart=null, onSucc
     let startMinerModalObj;
 
     if (! window.startMinerModalObj) {
-        const modalContent = await jQuery.get(urlPrefix + '/rig/miners-run-modal?miner=' + minerName);
+        const modalContent = await jQuery.get(urlPrefix + '/miners-run-modal?miner=' + minerName);
         const $modalContainer = jQuery('<div id="modalMinerRun"></div>')
         $modalContainer.append(modalContent);
         jQuery(document.body).append($modalContainer);
@@ -189,7 +189,7 @@ function startMinerAjax(minerName, minerAlias='', coin='', algo='', poolUrl='', 
     //const minerFullName = `${minerName}-${minerAlias}`;
     const minerFullTitle = (minerName === minerAlias || ! minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
 
-    const url = `/rig/miners/${minerName}/run`;
+    const url = `/miners/${minerName}/run`;
     const data = {
         action: 'start',
         miner: minerName,
@@ -246,7 +246,7 @@ function stopMinerAjax(minerName, minerAlias='', onStart=null, onSuccess=null, o
                 onStart(minerName, minerAlias);
             }
 
-            const url = `/rig/miners/${minerName}/run`;
+            const url = `/miners/${minerName}/run`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -298,7 +298,7 @@ function startMinerInstallAjax(minerName, minerAlias='', onStart=null, onSuccess
                 onStart(minerName, minerAlias);
             }
 
-            const url = `/rig/miners/${minerName}/install`;
+            const url = `/miners/${minerName}/install`;
             const data = {
                 action: 'start',
                 miner: minerName,
@@ -350,7 +350,7 @@ function stopMinerInstallAjax(minerName, minerAlias='', onStart=null, onSuccess=
                 onStart(minerName, minerAlias);
             }
 
-            const url = `/rig/miners/${minerName}/install`;
+            const url = `/miners/${minerName}/install`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -401,7 +401,7 @@ function startMinerUninstallAjax(minerName, minerAlias='', onStart=null, onSucce
                 onStart(minerName, minerAlias);
             }
 
-            const url = `/rig/miners/${minerName}/uninstall`;
+            const url = `/miners/${minerName}/uninstall`;
             const data = {
                 action: 'start',
                 miner: minerName,
@@ -453,7 +453,7 @@ function stopMinerUninstallAjax(minerName, minerAlias='', onStart=null, onSucces
                 onStart(minerName, minerAlias);
             }
 
-            const url = `/rig/miners/${minerName}/uninstall`;
+            const url = `/miners/${minerName}/uninstall`;
             const data = {
                 action: 'stop',
                 miner: minerName,
@@ -495,7 +495,7 @@ function startRigMonitorAjax(onStart=null, onSuccess=null, onFail=null) {
                 onStart();
             }
 
-            const url = `/rig/monitor-run`;
+            const url = `/monitor-run`;
             const data = {
                 action: 'start',
             };
@@ -537,7 +537,7 @@ function stopRigMonitorAjax(onStart=null, onSuccess=null, onFail=null) {
                 onStart();
             }
 
-            const url = `/rig/monitor-run`;
+            const url = `/monitor-run`;
             const data = {
                 action: 'stop',
             };

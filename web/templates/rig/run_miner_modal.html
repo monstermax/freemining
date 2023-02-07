@@ -108,7 +108,7 @@
                                 <select id="newMiner_miner" name="miner" class="form-select required" aria-describedby="newMiner_miner_Help" onchange="modalStartMinerChangeMiner()">
                                     <option></option>
 
-                                    <%- installedMiners.map(miner => {
+                                    <%- rigInfos.status.installedMiners.map(miner => {
                                         if (! runnableMiners.includes(miner)) return;
 
                                         const managedMiners = rigInfos.status.managedMiners;

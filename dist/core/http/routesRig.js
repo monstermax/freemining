@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerRigRoutes = exports.rigMinerRunModal = exports.rigStatus = exports.rigHomepage = void 0;
+exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigHomepage = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
@@ -79,7 +79,7 @@ function rigMinerRunModal(rigData, req, res, next) {
         }
         //const config = Daemon.getConfig();
         const config = rigData.config;
-        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
+        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName); // TODO farm
         const minerAlias = ((_a = req.query.alias) === null || _a === void 0 ? void 0 : _a.toString()) || minerConfig.defaultAlias;
         const rigInfos = rigData.rigInfos; // await Rig.getRigInfos(config);
         const allMiners = rigData.allMiners; // await Rig.getAllMiners(config);
@@ -104,6 +104,209 @@ function rigMinerRunModal(rigData, req, res, next) {
     });
 }
 exports.rigMinerRunModal = rigMinerRunModal;
+;
+function rigMinerInstall(rigData, req, res, next) {
+    var _a, _b;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = req.params.minerName;
+        //const action = req.query.action?.toString() || '';
+        const config = rigData.config;
+        const rigInfos = rigData.rigInfos;
+        const minerConfig = !config ? { defaultAlias: '' } : Rig.getInstalledMinerConfiguration(config, minerName); // TODO farm / a revoir
+        const minerAlias = ((_a = req.query.alias) === null || _a === void 0 ? void 0 : _a.toString()) || minerConfig.defaultAlias;
+        const minerFullName = `${minerName}-${minerAlias}`;
+        const minerInfos = (_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.minersStats[minerFullName];
+        const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName }));
+        const allMiners = rigData.allMiners;
+        const installStatus = false;
+        const uninstallStatus = false;
+        const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager - Miner install`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}miner_install.html`, rigInfos, miner: minerName, minerAlias,
+            minerStatus,
+            minerInfos,
+            allMiners,
+            installStatus,
+            uninstallStatus });
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigMinerInstall = rigMinerInstall;
+;
+function rigMinerInstallPost(rigData, req, res, next) {
+    var _a, _b, _c, _d;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = req.params.minerName;
+        const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        const minerAlias = ((_b = req.body.alias) === null || _b === void 0 ? void 0 : _b.toString()) || '';
+        const minerDefault = ((_c = req.body.default) === null || _c === void 0 ? void 0 : _c.toString()) || '';
+        const version = ((_d = req.body.version) === null || _d === void 0 ? void 0 : _d.toString()) || '';
+        const config = rigData.config;
+        const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName })); // TODO farm
+        if (action === 'start') {
+            if (!minerName) {
+                res.send(`Error: missing 'miner' parameter`);
+                return;
+            }
+            if (minerStatus) {
+                res.send(`Error: cannot start miner install while it is running`);
+                return;
+            }
+            if (!config) {
+                res.send(`Error: cannot start miner install without config`);
+                return;
+            }
+            const params = {
+                miner: minerName,
+                alias: minerAlias,
+                default: (minerDefault === '1'),
+                version,
+            };
+            try {
+                yield Rig.minerInstallStart(config, params); // TODO farm
+                res.send(`OK: miner install started`);
+            }
+            catch (err) {
+                res.send(`Error: cannot start miner install => ${err.message}`);
+            }
+            return;
+        }
+        res.send(`Error: invalid action`);
+    });
+}
+exports.rigMinerInstallPost = rigMinerInstallPost;
+;
+function rigMinerRun(rigData, req, res, next) {
+    var _a, _b, _c;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = req.params.minerName;
+        const action = ((_a = req.query.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        const config = rigData.config;
+        const minerConfig = !config ? { defaultAlias: '' } : Rig.getInstalledMinerConfiguration(config, minerName); // TODO farm
+        const minerAlias = ((_b = req.query.alias) === null || _b === void 0 ? void 0 : _b.toString()) || minerConfig.defaultAlias;
+        const minerFullName = `${minerName}-${minerAlias}`;
+        const monitorStatus = rigData.monitorStatus;
+        const rigInfos = rigData.rigInfos;
+        const minerInfos = (_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.minersStats[minerFullName];
+        const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName })); // TODO farm
+        const allMiners = rigData.allMiners;
+        if (action === 'log') {
+            //res.send( `not yet available` );
+            if (!config) {
+                res.send(`Error: cannot show miner log without config`);
+                return;
+            }
+            res.header('Content-Type', 'text/plain');
+            const log = yield Rig.minerRunGetLog(config, { miner: minerName, lines: 50 }); // TODO farm ?
+            res.send(log);
+            return;
+        }
+        else if (action === 'status') {
+            if (!monitorStatus) {
+                res.send(`Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a>`);
+                return;
+            }
+            if (!allMiners[minerName]) {
+                res.send(`Warning: invalid miner`);
+                return;
+            }
+            if (!minerStatus) {
+                res.send(`Warning: this miner is not running`);
+                return;
+            }
+            if (!allMiners[minerName].managed) {
+                res.send(`Warning: this miner is not managed`);
+                return;
+            }
+            if (!minerInfos) {
+                res.send(`Warning: data not yet available`);
+                return;
+            }
+            res.header('Content-Type', 'application/json');
+            res.send(JSON.stringify(minerInfos));
+            return;
+        }
+        //if (! minerInfos) {
+        //    res.send(`Error: miner is not running or is not managed or rig monitor is not started or miner API is not loaded`);
+        //    return;
+        //}
+        const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager - Miner run`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}miner_run.html`, monitorStatus,
+            rigInfos, miner: minerName, minerAlias,
+            minerStatus,
+            minerInfos,
+            allMiners });
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigMinerRun = rigMinerRun;
+;
+function rigMinerRunPost(rigData, req, res, next) {
+    var _a, _b, _c, _d, _e, _f;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = req.params.minerName;
+        const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        const config = rigData.config;
+        const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName })); // TODO farm
+        const coin = ((_b = req.body.coin) === null || _b === void 0 ? void 0 : _b.toString()) || '';
+        const algo = ((_c = req.body.algo) === null || _c === void 0 ? void 0 : _c.toString()) || '';
+        const poolUrl = ((_d = req.body.poolUrl) === null || _d === void 0 ? void 0 : _d.toString()) || '';
+        const poolUser = ((_e = req.body.poolUser) === null || _e === void 0 ? void 0 : _e.toString()) || '';
+        const extraArgs = (((_f = req.body.extraArgs) === null || _f === void 0 ? void 0 : _f.toString()) || '').split(' ').filter((arg) => !!arg);
+        if (action === 'start') {
+            if (!minerName || !algo || !poolUrl || !poolUser) {
+                res.send(`Error: missing parameters`);
+                return;
+            }
+            if (!config) {
+                res.send(`Error: cannot start miner install without config`);
+                return;
+            }
+            const params = {
+                miner: minerName,
+                coin,
+                algo,
+                poolUrl,
+                poolUser,
+                extraArgs,
+            };
+            try {
+                yield Rig.minerRunStart(config, params); // TODO farm
+                res.send(`OK: miner run started`);
+            }
+            catch (err) {
+                res.send(`Error: cannot start miner run => ${err.message}`);
+            }
+            return;
+        }
+        else if (action === 'stop') {
+            if (!minerName) {
+                res.send(`Error: missing parameters`);
+                return;
+            }
+            if (!minerStatus) {
+                res.send(`Error: cannot stop miner run while it is not running`);
+                return;
+            }
+            const params = {
+                miner: minerName,
+            };
+            try {
+                Rig.minerRunStop(config, params); // TODO farm
+                res.send(`OK: miner run stopped`);
+            }
+            catch (err) {
+                res.send(`Error: cannot stop miner run => ${err.message}`);
+            }
+            return;
+        }
+        res.send(`Error: invalid action`);
+    });
+}
+exports.rigMinerRunPost = rigMinerRunPost;
 ;
 /* #### */
 function registerRigRoutes(app, urlPrefix = '') {
@@ -208,182 +411,19 @@ function registerRigRoutes(app, urlPrefix = '') {
     }));
     // GET Miner install page => /rig/miners/{minerName}/install
     app.get(`${urlPrefix}/miners/:minerName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _d, _e;
-        const minerName = req.params.minerName;
-        //const action = req.query.action?.toString() || '';
-        const config = Daemon.getConfig();
-        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
-        const minerAlias = ((_d = req.query.alias) === null || _d === void 0 ? void 0 : _d.toString()) || minerConfig.defaultAlias;
-        const minerFullName = `${minerName}-${minerAlias}`;
-        const rigInfos = yield Rig.getRigInfos(config);
-        const minerInfos = (_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.minersStats[minerFullName];
-        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
-        const allMiners = yield Rig.getAllMiners(config);
-        const installStatus = false;
-        const uninstallStatus = false;
-        const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
-                title: `Freemining - Rig Manager - Miner install`,
-                noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}miner_install.html`, rigInfos, miner: minerName, minerAlias,
-            minerStatus,
-            minerInfos,
-            allMiners,
-            installStatus,
-            uninstallStatus });
-        res.render(`.${SEP}core${SEP}layout.html`, data);
+        rigMinerInstall(yield getRigData(), req, res, next);
     }));
     // POST Miner install page => /rig/miners/{minerName}/install
     app.post(`${urlPrefix}/miners/:minerName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _f, _g, _h, _j;
-        const minerName = req.params.minerName;
-        const action = ((_f = req.body.action) === null || _f === void 0 ? void 0 : _f.toString()) || '';
-        const minerAlias = ((_g = req.body.alias) === null || _g === void 0 ? void 0 : _g.toString()) || '';
-        const minerDefault = ((_h = req.body.default) === null || _h === void 0 ? void 0 : _h.toString()) || '';
-        const version = ((_j = req.body.version) === null || _j === void 0 ? void 0 : _j.toString()) || '';
-        const config = Daemon.getConfig();
-        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
-        if (action === 'start') {
-            if (!minerName) {
-                res.send(`Error: missing 'miner' parameter`);
-                return;
-            }
-            if (minerStatus) {
-                res.send(`Error: cannot start miner install while it is running`);
-                return;
-            }
-            const params = {
-                miner: minerName,
-                alias: minerAlias,
-                default: (minerDefault === '1'),
-                version,
-            };
-            try {
-                yield Rig.minerInstallStart(config, params);
-                res.send(`OK: miner install started`);
-            }
-            catch (err) {
-                res.send(`Error: cannot start miner install => ${err.message}`);
-            }
-            return;
-        }
-        res.send(`Error: invalid action`);
+        rigMinerInstallPost(yield getRigData(), req, res, next);
     }));
     // GET Miner run page => /rig/miners/{minerName}/run
     app.get(`${urlPrefix}/miners/:minerName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _k, _l, _m;
-        const minerName = req.params.minerName;
-        const action = ((_k = req.query.action) === null || _k === void 0 ? void 0 : _k.toString()) || '';
-        const config = Daemon.getConfig();
-        const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName);
-        const minerAlias = ((_l = req.query.alias) === null || _l === void 0 ? void 0 : _l.toString()) || minerConfig.defaultAlias;
-        const minerFullName = `${minerName}-${minerAlias}`;
-        const monitorStatus = Rig.monitorGetStatus();
-        const rigInfos = yield Rig.getRigInfos(config);
-        const minerInfos = (_m = rigInfos.status) === null || _m === void 0 ? void 0 : _m.minersStats[minerFullName];
-        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
-        const allMiners = yield Rig.getAllMiners(config);
-        if (action === 'log') {
-            //res.send( `not yet available` );
-            res.header('Content-Type', 'text/plain');
-            const log = yield Rig.minerRunGetLog(config, { miner: minerName, lines: 50 });
-            res.send(log);
-            return;
-        }
-        else if (action === 'status') {
-            if (!monitorStatus) {
-                res.send(`Warning: JSON status requires rig monitor to be started. Click here to <a href="/rig/monitor-start">start monitor</a>`);
-                return;
-            }
-            if (!allMiners[minerName]) {
-                res.send(`Warning: invalid miner`);
-                return;
-            }
-            if (!minerStatus) {
-                res.send(`Warning: this miner is not running`);
-                return;
-            }
-            if (!allMiners[minerName].managed) {
-                res.send(`Warning: this miner is not managed`);
-                return;
-            }
-            if (!minerInfos) {
-                res.send(`Warning: data not yet available`);
-                return;
-            }
-            res.header('Content-Type', 'application/json');
-            res.send(JSON.stringify(minerInfos));
-            return;
-        }
-        //if (! minerInfos) {
-        //    res.send(`Error: miner is not running or is not managed or rig monitor is not started or miner API is not loaded`);
-        //    return;
-        //}
-        const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
-                title: `Freemining - Rig Manager - Miner run`,
-                noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}miner_run.html`, monitorStatus,
-            rigInfos, miner: minerName, minerAlias,
-            minerStatus,
-            minerInfos,
-            allMiners });
-        res.render(`.${SEP}core${SEP}layout.html`, data);
+        rigMinerRun(yield getRigData(), req, res, next);
     }));
     // POST Miner run page => /rig/miners/{minerName}/run
     app.post(`${urlPrefix}/miners/:minerName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var _o, _p, _q, _r, _s, _t;
-        const minerName = req.params.minerName;
-        const action = ((_o = req.body.action) === null || _o === void 0 ? void 0 : _o.toString()) || '';
-        const config = Daemon.getConfig();
-        const minerStatus = Rig.minerRunGetStatus(config, { miner: minerName });
-        const coin = ((_p = req.body.coin) === null || _p === void 0 ? void 0 : _p.toString()) || '';
-        const algo = ((_q = req.body.algo) === null || _q === void 0 ? void 0 : _q.toString()) || '';
-        const poolUrl = ((_r = req.body.poolUrl) === null || _r === void 0 ? void 0 : _r.toString()) || '';
-        const poolUser = ((_s = req.body.poolUser) === null || _s === void 0 ? void 0 : _s.toString()) || '';
-        const extraArgs = (((_t = req.body.extraArgs) === null || _t === void 0 ? void 0 : _t.toString()) || '').split(' ').filter((arg) => !!arg);
-        if (action === 'start') {
-            if (!minerName || !algo || !poolUrl || !poolUser) {
-                res.send(`Error: missing parameters`);
-                return;
-            }
-            const params = {
-                miner: minerName,
-                coin,
-                algo,
-                poolUrl,
-                poolUser,
-                extraArgs,
-            };
-            try {
-                yield Rig.minerRunStart(config, params);
-                res.send(`OK: miner run started`);
-            }
-            catch (err) {
-                res.send(`Error: cannot start miner run => ${err.message}`);
-            }
-            return;
-        }
-        else if (action === 'stop') {
-            if (!minerName) {
-                res.send(`Error: missing parameters`);
-                return;
-            }
-            if (!minerStatus) {
-                res.send(`Error: cannot stop miner run while it is not running`);
-                return;
-            }
-            const params = {
-                miner: minerName,
-            };
-            try {
-                Rig.minerRunStop(config, params);
-                res.send(`OK: miner run stopped`);
-            }
-            catch (err) {
-                res.send(`Error: cannot stop miner run => ${err.message}`);
-            }
-            return;
-        }
-        res.send(`Error: invalid action`);
+        rigMinerRunPost(yield getRigData(), req, res, next);
     }));
     app.get(`${urlPrefix}/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         rigMinerRunModal(yield getRigData(), req, res, next);
