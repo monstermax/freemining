@@ -14,7 +14,7 @@ const defaultListenPort = 1234;
 const defaultWssConnTimeout = 10000; // disconnect clients who dont pong after x seconds
 const defaultHttpStaticDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
-const userHomeDir = os_1.default.userInfo().homedir.replace(new RegExp(path_1.default.sep, 'g'), SEP);
+const userHomeDir = os_1.default.userInfo().homedir; //.replace( new RegExp(path.sep, 'g') , SEP);
 const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
 const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
