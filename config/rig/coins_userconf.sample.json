@@ -1,4 +1,22 @@
 {
+    "BEAM": {
+        "wallets": {},
+        "pools": {
+            "cruxpool": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "beam.cruxpool.com:3333"
+                }
+            },
+            "2miners": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "beam.2miners.com:5252",
+                    "default2": "beam.2miners.com:5353"
+                }
+            }
+        }
+    },
     "ETC": {
         "wallets": {
             "wallet1": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w"
@@ -8,6 +26,31 @@
                 "user": "{wallet}.{worker}",
                 "urls": {
                     "europe": "eu.jjpool.fr:3333"
+                }
+            },
+            "cruxpool": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "ethw.cruxpool.com:5555"
+                }
+            },
+            "2miners": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "etc.2miners.com:1010"
+                }
+            }
+        }
+    },
+    "ETHW": {
+        "wallets": {
+            "wallet1": "t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w"
+        },
+        "pools": {
+            "2miners": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "ethw.2miners.com:2020"
                 }
             }
         }
@@ -20,7 +63,19 @@
             "jjpool": {
                 "user": "{wallet}.{worker}",
                 "urls": {
-                    "default": "eu.jjpool.fr:3056"
+                    "europe": "eu.jjpool.fr:3056"
+                }
+            },
+            "cruxpool": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "ergo.cruxpool.com:4444"
+                }
+            },
+            "2miners": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "erg.2miners.com:8888"
                 }
             }
         }
@@ -35,6 +90,12 @@
                 "urls": {
                     "default": "firo.2miners.com:8181"
                 }
+            },
+            "cruxpool": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "firo.cruxpool.com:2222"
+                }
             }
         }
     },
@@ -47,6 +108,12 @@
                 "user": "{wallet}.{worker}",
                 "urls": {
                     "default": "flux-eu.minerpool.pro:2032"
+                }
+            },
+            "2miners": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "flux.2miners.com:9090"
                 }
             }
         }
@@ -98,7 +165,7 @@
             "jjpool": {
                 "user": "{wallet}.{worker}",
                 "urls": {
-                    "default": "eu.jjpool.fr:5550"
+                    "europe": "eu.jjpool.fr:5550"
                 }
             }
         }
@@ -117,7 +184,21 @@
             "2miners": {
                 "user": "{wallet}.{worker}",
                 "urls": {
-                    "default": "rvn.2miners.com:6060"
+                    "default": "rvn.2miners.com:6060",
+                    "default2": "rvn.2miners.com:6161"
+                }
+            },
+            "cruxpool": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "rvn.cruxpool.com:9999"
+                }
+            },
+            "hiveoin": {
+                "user": "{wallet}.{worker}",
+                "urls": {
+                    "default": "rvn.hiveon.com:8888",
+                    "default2": "rvn.hiveon.com:9999"
                 }
             }
         }
@@ -130,7 +211,8 @@
             "xmrpool": {
                 "user": "{wallet}+{worker}",
                 "urls": {
-                    "default": "xmrpool.eu:5555"
+                    "Low end hardware": "xmrpool.eu:3333",
+                    "Mid range hardware": "xmrpool.eu:5555"
                 }
             }
         }

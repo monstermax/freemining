@@ -221,8 +221,8 @@ function websocketConnect(config: t.DaemonConfigAll) {
             const err: t.RpcError = JSON.parse(messageJson);
 
         } else if ('result' in message) {
-            console.log(`${now()} [${colors.blue('INFO')}] [RIG] received response from farm : \n${messageJson}`);
-            const res: t.RpcResponse = JSON.parse(messageJson);
+            //console.log(`${now()} [${colors.blue('INFO')}] [RIG] received response from farm : \n${messageJson}`);
+            //const res: t.RpcResponse = JSON.parse(messageJson);
 
         } else if ('method' in message && 'params' in message) {
             //console.log(`${now()} [${colors.blue('INFO')}] [RIG] received request from farm : \n${messageJson}`);

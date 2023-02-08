@@ -102,33 +102,33 @@ function rigMinerRunModal(rigData, req, res, next) {
 exports.rigMinerRunModal = rigMinerRunModal;
 ;
 function rigMinerInstall(rigData, req, res, next) {
-    var _a, _b, _c, _d;
+    var _a;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = req.params.minerName;
         //const action = req.query.action?.toString() || '';
         const config = rigData.config;
         const rigInfos = rigData.rigInfos;
-        const installedMinerConfig = (_a = rigData.rigInfos.status) === null || _a === void 0 ? void 0 : _a.installedMinersAliases[minerName];
-        if (!installedMinerConfig) {
-            res.send(`Error: missing miner config`);
-            return;
-        }
-        const minerAlias = ((_b = req.query.alias) === null || _b === void 0 ? void 0 : _b.toString()) || installedMinerConfig.defaultAlias;
-        const minerFullName = `${minerName}-${minerAlias}`;
-        const minerInfos = (_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.minersStats[minerFullName];
-        const minerStatus = (_d = rigInfos.status) === null || _d === void 0 ? void 0 : _d.runningMiners.includes(minerName);
+        //const installedMinerConfig = rigData.rigInfos.status?.installedMinersAliases[minerName];
+        //if (! installedMinerConfig) {
+        //    res.send(`Error: missing miner config`);
+        //    return;
+        //}
+        //const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
+        //const minerFullName = `${minerName}-${minerAlias}`;
+        //const minerInfos = rigInfos.status?.minersStats[minerFullName];
+        const minerStatus = (_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.runningMiners.includes(minerName);
         const allMiners = rigData.allMiners;
-        const installStatus = false;
-        const uninstallStatus = false;
+        //const installStatus = false;
+        //const uninstallStatus = false;
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
                 title: `Freemining - Rig Manager - Miner install`,
                 noIndex: false,
-            }, contentTemplate: `..${SEP}rig${SEP}miner_install.html`, rigInfos, miner: minerName, minerAlias,
+            }, contentTemplate: `..${SEP}rig${SEP}miner_install.html`, config,
+            rigInfos, miner: minerName, 
+            //minerAlias,
             minerStatus,
-            minerInfos,
-            allMiners,
-            installStatus,
-            uninstallStatus });
+            //minerInfos,
+            allMiners });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 }

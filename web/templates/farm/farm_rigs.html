@@ -57,11 +57,15 @@
             <td colspan="8" class="">
                 <% Object.entries(rigInfos.status.runningMinersAliases).forEach(minerEntry => {
                     const [ minerName, minerConfig ] = minerEntry;
+                    let rigNotUpdated = false;
 
                     Object.entries(minerConfig).forEach(aliasEntry => {
                         const [ minerFullName, aliasConfig ] = aliasEntry;
 
+                        if (rigNotUpdated) return;
+
                         if (typeof aliasConfig !== 'object' || ! ('params' in aliasConfig)) {
+                            rigNotUpdated = true;
                             %>
                             <div>
                                 RIG not updated

@@ -143,22 +143,22 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
     const config = rigData.config;
     const rigInfos = rigData.rigInfos;
 
-    const installedMinerConfig = rigData.rigInfos.status?.installedMinersAliases[minerName];
+    //const installedMinerConfig = rigData.rigInfos.status?.installedMinersAliases[minerName];
 
-    if (! installedMinerConfig) {
-        res.send(`Error: missing miner config`);
-        return;
-    }
+    //if (! installedMinerConfig) {
+    //    res.send(`Error: missing miner config`);
+    //    return;
+    //}
 
-    const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
-    const minerFullName = `${minerName}-${minerAlias}`;
+    //const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
+    //const minerFullName = `${minerName}-${minerAlias}`;
 
-    const minerInfos = rigInfos.status?.minersStats[minerFullName];
+    //const minerInfos = rigInfos.status?.minersStats[minerFullName];
     const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
     const allMiners = rigData.allMiners;
 
-    const installStatus = false;
-    const uninstallStatus = false;
+    //const installStatus = false;
+    //const uninstallStatus = false;
 
     const data = {
         ...utilFuncs,
@@ -167,14 +167,15 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
             noIndex: false,
         },
         contentTemplate: `..${SEP}rig${SEP}miner_install.html`,
+        config,
         rigInfos,
         miner: minerName,
-        minerAlias,
+        //minerAlias,
         minerStatus,
-        minerInfos,
+        //minerInfos,
         allMiners,
-        installStatus,
-        uninstallStatus,
+        //installStatus,
+        //uninstallStatus,
     };
     res.render(`.${SEP}core${SEP}layout.html`, data);
 };

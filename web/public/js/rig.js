@@ -608,7 +608,7 @@ function modalStartMinerChangeCoin() {
             $wallets.trigger('change');
         }
 
-
+        // refresh pools
         const coinsPools = coinsUserconf[coin].pools || {};
         const poolsHtml = Object.entries(coinsPools).map(entry => {
             const [poolName, pool] = entry;
@@ -624,7 +624,7 @@ function modalStartMinerChangeCoin() {
             if (htmlOptions.length > 0) {
                 html += `<optgroup label="${poolName}">`;
                 html += htmlOptions.join('');
-                html += `</optgroup`;
+                html += `</optgroup>`;
             }
             return html;
         }).join('');
@@ -635,7 +635,7 @@ function modalStartMinerChangeCoin() {
             $pools.trigger('change');
         }
 
-
+        // refresh miners
         $miners.children().each((idx, opt) => {
             const $opt = jQuery(opt);
             const minerName = $opt.val();

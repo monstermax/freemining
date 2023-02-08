@@ -9,6 +9,9 @@ const installedMiners = Object.entries(allMiners).filter((entry) => entry[1].ins
 const installableMiners = Object.entries(allMiners).filter((entry) => entry[1].installable).map(entry => entry[0]);
 const runnableMiners = Object.entries(allMiners).filter((entry) => entry[1].runnable).map(entry => entry[0]);
 const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].managed).map(entry => entry[0]);
+
+const installStatus = false; // TODO
+const uninstallStatus = false; // TODO
 %>
 
 

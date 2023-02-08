@@ -4,6 +4,24 @@
             "algo": "alph"
         }
     },
+    "BEAM": {
+		"bminer": {
+            "algo": ""
+        },
+		"gminer": {
+            "algo": "beamhash"
+        },
+		"lolminer": {
+            "algo": "",
+            "extraArgs": "--coin BEAM"
+        },
+		"nbminer": {
+            "algo": "beamv3"
+        },
+		"miniz": {
+            "algo": ""
+        }
+    },
     "ERG": {
         "bzminer": {
             "algo": "ergo"
@@ -13,6 +31,9 @@
         },
         "nbminer": {
             "algo": "ergo"
+        },
+		"srbminer": {
+            "algo": "autolykos2"
         },
         "teamredminer": {
             "algo": "ergo"
@@ -24,6 +45,27 @@
     "ETHW": {
         "cpuminer": {
             "algo": "ethw"
+        },
+		"gminer": {
+            "algo": "ethash"
+        },
+		"lolminer": {
+            "algo": "ethash"
+        },
+		"miniz": {
+            "algo": ""
+        },
+		"phoenix": {
+            "algo": ""
+        },
+		"teamredminer": {
+            "algo": "ethash"
+        },
+		"trex": {
+            "algo": "ethash"
+        },
+		"nbminer": {
+            "algo": "ethash"
         }
     },
     "ETC": {
@@ -31,8 +73,7 @@
             "algo": "etchash"
         },
         "lolminer": {
-            "algo": "ETCHASH",
-            "extraArgs": ""
+            "algo": "ETCHASH"
         }
     },
     "FIRO": {
@@ -42,6 +83,9 @@
         "firominer": {
             "algo": "auto"
         },
+		"teamredminer": {
+            "algo": "firopow"
+        },
         "trex": {
             "algo": "firopow"
         }
@@ -49,10 +93,14 @@
     "FLUX": {
         "gminer": {
             "algo": "125_4",
-            "extraArgs": ""
+            "extraArgs": "--pers ZelProof"
         },
         "lolminer": {
             "algo": "ZEL"
+        },
+		"miniz": {
+            "algo": "",
+            "extra": "--par=125,4 --pers=ZelProof"
         }
     },
     "FNNC": {
@@ -92,10 +140,28 @@
         }
     },
     "RVN": {
+		"bminer": {
+            "algo": ""
+        },
         "bzminer": {
             "algo": "rvn"
         },
+		"kawpowminer": {
+            "algo": ""
+        },
         "gminer": {
+            "algo": "kawpow"
+        },
+		"miniz": {
+            "algo": ""
+        },
+		"teamredminer": {
+            "algo": "kawpow"
+        },
+		"trex": {
+            "algo": "kawpow"
+        },
+		"nbminer": {
             "algo": "kawpow"
         }
     },
@@ -107,6 +173,9 @@
     "XMR": {
         "xmrig": {
             "algo": "rx/0"
+        },
+        "nanominer": {
+            "algo": "randomx"
         }
     }
 }
