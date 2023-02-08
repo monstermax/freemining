@@ -1,65 +1,37 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFarmInfos = exports.getRigConfig = exports.setRigConfig = exports.getRigStatus = exports.setRigStatus = exports.rigAuthRequest = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.rigsServerGetStatus = exports.rigsServerStop = exports.rigsServerStart = void 0;
+exports.farmMinerRunLog = exports.farmMinerRunGetStatus = exports.farmMinerRunStop = exports.farmMinerRunStart = exports.farmMinerInstallStop = exports.farmMinerInstallStart = exports.setRigWs = exports.getRigWs = exports.getFarmInfos = exports.getRigConfig = exports.setRigConfig = exports.getRigStatus = exports.setRigStatus = exports.rigAuthRequest = exports.rigsServerGetStatus = exports.rigsServerStop = exports.rigsServerStart = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
-const farmRigsServerWebsocket = tslib_1.__importStar(require("./farmRigsServerWebsocket"));
 const utils_1 = require("../common/utils");
 /* ########## MAIN ######### */
 const rigsConfigs = {};
 const rigsInfos = {};
-/*
-TODO: a transformer en :
-{
-    rig: {
-        name: string,
-        hostname: string,
-        ip: string,
-        os: string,
-        uptime: number,
-    }
-    usage
-    devices
-    freeminingVersion: string,
-    installableMiners: string[],
-    installedMiners: string[], // + aliases ?
-    runningMiners: string[], // + aliases ?
-    monitorStatus: boolean,
-    minersStats: t.RigInfos (renommer RigInfos en MinersStats)
-}
-*/
-//const websocketPassword = 'xxx'; // password to access farm websocket server
+const rigsWs = {};
 let farmMainInfos = null;
+let active = false;
 /* ########## FUNCTIONS ######### */
 function rigsServerStart(config) {
-    farmRigsServerWebsocket.start(config);
+    if (active)
+        return;
+    active = true;
+    // TODO
+    //console.log(`${now()} [INFO] [FARM] Rigs server started`);
 }
 exports.rigsServerStart = rigsServerStart;
 function rigsServerStop() {
-    farmRigsServerWebsocket.stop();
+    //if (! active) return;
+    active = false;
+    // TODO
+    //console.log(`${now()} [INFO] [FARM] Rigs server stopped`);
 }
 exports.rigsServerStop = rigsServerStop;
 function rigsServerGetStatus() {
-    return farmRigsServerWebsocket.status();
+    return active;
 }
 exports.rigsServerGetStatus = rigsServerGetStatus;
-function farmAgentStart(config) {
-    farmRigsServerWebsocket.start(config);
-    console.log(`${(0, utils_1.now)()} [INFO] [FARM] Rigs server started`);
-}
-exports.farmAgentStart = farmAgentStart;
-function farmAgentStop() {
-    farmRigsServerWebsocket.stop();
-    console.log(`${(0, utils_1.now)()} [INFO] [FARM] Rigs server stopped`);
-}
-exports.farmAgentStop = farmAgentStop;
-function farmAgentGetStatus() {
-    // TODO
-    return false;
-}
-exports.farmAgentGetStatus = farmAgentGetStatus;
 function rigAuthRequest(config, params) {
-    if (!farmRigsServerWebsocket.status())
+    if (!rigsServerGetStatus())
         return;
     const rig = params.user;
     const pass = params.pass || '';
@@ -77,13 +49,13 @@ function rigAuthRequest(config, params) {
 }
 exports.rigAuthRequest = rigAuthRequest;
 function setRigStatus(rigName, rigInfos) {
-    if (!farmRigsServerWebsocket.status())
+    if (!rigsServerGetStatus())
         return;
     rigsInfos[rigName] = rigInfos;
 }
 exports.setRigStatus = setRigStatus;
 function getRigStatus(rigName) {
-    if (!farmRigsServerWebsocket.status())
+    if (!rigsServerGetStatus())
         return null;
     if (!(rigName in rigsInfos))
         return null;
@@ -91,13 +63,13 @@ function getRigStatus(rigName) {
 }
 exports.getRigStatus = getRigStatus;
 function setRigConfig(rigName, rigConfig) {
-    if (!farmRigsServerWebsocket.status())
+    if (!rigsServerGetStatus())
         return;
     rigsConfigs[rigName] = rigConfig;
 }
 exports.setRigConfig = setRigConfig;
 function getRigConfig(rigName) {
-    if (!farmRigsServerWebsocket.status())
+    if (!rigsServerGetStatus())
         return null;
     if (!(rigName in rigsConfigs))
         return null;
@@ -138,3 +110,70 @@ function getFarmInfos(config) {
     };
 }
 exports.getFarmInfos = getFarmInfos;
+function getRigWs(rigName) {
+    return rigsWs[rigName];
+}
+exports.getRigWs = getRigWs;
+function setRigWs(rigName, rigWs) {
+    if (rigWs === null) {
+        delete rigsWs[rigName];
+    }
+    else {
+        rigsWs[rigName] = rigWs;
+    }
+}
+exports.setRigWs = setRigWs;
+function rpcSendRequest(ws, id, method, params) {
+    const req = (0, utils_1.buildRpcRequest)(id, method, params);
+    const reqStr = JSON.stringify(req);
+    //console.debug(`${now()} [DEBUG] [FARM] sending request: ${reqStr}`);
+    ws.send(reqStr);
+}
+function farmMinerInstallStart(rigName, params) {
+    const rigWs = rigsWs[rigName];
+    if (!rigWs)
+        return; // todo return error
+    const method = 'farmMinerInstallStart';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+exports.farmMinerInstallStart = farmMinerInstallStart;
+function farmMinerInstallStop(rigName, params) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs)
+        return; // todo return error
+    const method = 'farmMinerInstallStop';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+exports.farmMinerInstallStop = farmMinerInstallStop;
+function farmMinerRunStart(rigName, params) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs)
+        return; // todo return error
+    const method = 'farmMinerRunStart';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+exports.farmMinerRunStart = farmMinerRunStart;
+function farmMinerRunStop(rigName, params, forceKill = false) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs)
+        return; // todo return error
+    const method = 'farmMinerRunStop';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+exports.farmMinerRunStop = farmMinerRunStop;
+function farmMinerRunGetStatus(rigName, params) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs)
+        return; // todo return error
+    const method = 'farmMinerRunGetStatus';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+exports.farmMinerRunGetStatus = farmMinerRunGetStatus;
+function farmMinerRunLog(rigName, params) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs)
+        return; // todo return error
+    const method = 'farmMinerRunLog';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+exports.farmMinerRunLog = farmMinerRunLog;

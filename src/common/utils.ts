@@ -351,6 +351,14 @@ export function getDirFiles(dir: string): Promise<string[]> {
 }
 
 
+export function getDirFilesSync(dir: string): string[] {
+    if (! fs.existsSync(dir)) {
+        return [];
+    }
+    return fs.readdirSync(dir);
+}
+
+
 export async function getDirSize(dir: string, recursive: boolean=true): Promise<number> {
     let totalSize = 0;
     const files = await fs.promises.readdir(dir);

@@ -55,70 +55,85 @@
         </tr>
         <tr class="bg-light">
             <td colspan="8" class="">
-                <% rigInfos.status.runningMinersAliases.forEach(runningMiner => {
-                    const { miner, alias, pid, args, params } = runningMiner;
-                    const minerFullName = `${miner}-${alias}`;
-                    const minerFullTitle = (miner === alias || ! alias) ? miner : `${alias} (${miner})`;
+                <% Object.entries(rigInfos.status.runningMinersAliases).forEach(minerEntry => {
+                    const [ minerName, minerConfig ] = minerEntry;
 
-                    if (minerFullName in rigInfos.status.minersStats) {
-                        // service API is UP
+                    Object.entries(minerConfig).forEach(aliasEntry => {
+                        const [ minerFullName, aliasConfig ] = aliasEntry;
 
-                        const service = rigInfos.status.minersStats[minerFullName];
-                        //const [minerFullName, service] = entry;
-
-                        let html = '';
-
-                        html += service.devices.cpus.forEach(cpu => {
-                            const cpuName = (cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')) + ` X${cpu.threads}/${rigInfos.systemInfos.cpu.cores}`;
+                        if (typeof aliasConfig !== 'object' || ! ('params' in aliasConfig)) {
                             %>
-                            <div class="rounded bg-primary p-1 m-1 text-start row">
-                                <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
-                                <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(cpu.hashRate, 'size')%>H/s</span></div>
-                                <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-light"><%=cpuName%></b></div>
-                                <div class="badge col-4 col-lg-1">&nbsp;</div>
-                                <div class="badge col-4 col-lg-1">&nbsp;</div>
-                                <div class="badge col-4 col-lg-1">&nbsp;</div>
-                                <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
-                                <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
-                                <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
+                            <div>
+                                RIG not updated
                             </div>
                             <%
-                        });
+                            return;
+                        }
 
-                        html += service.devices.gpus.forEach(gpu => {
-                            const gpuSuffix = (service.devices.gpus.length > 1) ? ('.' + gpu.id) : '';
+                        const { miner, alias, pid, args, params } = aliasConfig;
+                        //const minerFullName = `${miner}-${alias}`;
+                        const minerFullTitle = (miner === alias || ! alias) ? miner : `${alias} (${miner})`;
 
-                            const isNvidia = gpu.name.toLowerCase().includes('nvidia');
-                            const isAMD = gpu.name.toLowerCase().includes('amd');
+                        if (minerFullName in rigInfos.status.minersStats) {
+                            // service API is UP
 
-                            let gpuImg = '/img/gpu.trans.png';
-                            if (isNvidia) {
-                                gpuImg = '/img/gpu5_1.trans.png';
-                            } else if (isAMD) {
-                                gpuImg = '/img/gpu6_4.trans.png';
-                            }
+                            const service = rigInfos.status.minersStats[minerFullName];
+                            //const [minerFullName, service] = entry;
 
-                            %>
-                            <div class="rounded bg-primary p-1 m-1 text-start row">
+                            let html = '';
+
+                            html += service.devices.cpus.forEach(cpu => {
+                                const cpuName = (cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')) + ` X${cpu.threads}/${rigInfos.systemInfos.cpu.cores}`;
+                                %>
+                                <div class="rounded bg-primary p-1 m-1 text-start row">
                                     <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
-                                    <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(gpu.hashRate, 'size')%>H/s</span></div>
-                                    <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%><b class="text-light"><%=gpu.name%></b></div>
-                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">power</b><br /> <span class="text-light"><%=formatNumber(gpu.power)%> W</span></div>
-                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">temp.</b><br /> <span class="text-light"><%=formatNumber(gpu.temperature)%>°</span></div>
-                                    <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">fan</b><br /> <span class="text-light"><%=formatNumber(gpu.fanSpeed)%>%</span></div>
+                                    <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(cpu.hashRate, 'size')%>H/s</span></div>
+                                    <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-light"><%=cpuName%></b></div>
+                                    <div class="badge col-4 col-lg-1">&nbsp;</div>
+                                    <div class="badge col-4 col-lg-1">&nbsp;</div>
+                                    <div class="badge col-4 col-lg-1">&nbsp;</div>
                                     <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
                                     <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
                                     <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
-                            </div>
+                                </div>
+                                <%
+                            });
+
+                            html += service.devices.gpus.forEach(gpu => {
+                                const gpuSuffix = (service.devices.gpus.length > 1) ? ('.' + gpu.id) : '';
+
+                                const isNvidia = gpu.name.toLowerCase().includes('nvidia');
+                                const isAMD = gpu.name.toLowerCase().includes('amd');
+
+                                let gpuImg = '/img/gpu.trans.png';
+                                if (isNvidia) {
+                                    gpuImg = '/img/gpu5_1.trans.png';
+                                } else if (isAMD) {
+                                    gpuImg = '/img/gpu6_4.trans.png';
+                                }
+
+                                %>
+                                <div class="rounded bg-primary p-1 m-1 text-start row">
+                                        <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
+                                        <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(gpu.hashRate, 'size')%>H/s</span></div>
+                                        <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%><b class="text-light"><%=gpu.name%></b></div>
+                                        <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">power</b><br /> <span class="text-light"><%=formatNumber(gpu.power)%> W</span></div>
+                                        <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">temp.</b><br /> <span class="text-light"><%=formatNumber(gpu.temperature)%>°</span></div>
+                                        <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">fan</b><br /> <span class="text-light"><%=formatNumber(gpu.fanSpeed)%>%</span></div>
+                                        <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">miner</b><br /> <span class="text-light"><%=service.miner.minerName%></span></div>
+                                        <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">algo</b><br /> <span class="text-light"><%=service.miner.algo%></span></div>
+                                        <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">uptime</b><br /> <span class="text-light"><%=formatNumber(service.miner.uptime, 'seconds')%></span></div>
+                                </div>
+                                <%
+                            });
+
+
+                        } else {
+                            %>
+                            Starting...
                             <%
-                        });
-
-
-                    } else {
-                        %>
-                        Starting...
-                        <%
-                    }
+                        }
+                    })
 
                 }) %>
             </td>

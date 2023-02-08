@@ -3,7 +3,7 @@ import os from 'os';
 import WebSocket from 'ws';
 import colors from 'colors/safe';
 
-import { now, buildRpcRequest } from '../common/utils';
+import { now, buildRpcRequest, buildRpcResponse, buildRpcError } from '../common/utils';
 import * as Rig from './Rig';
 import * as Daemon from '../core/Daemon';
 
@@ -195,84 +195,97 @@ function websocketConnect(config: t.DaemonConfigAll) {
 
     // Handle connections heartbeat
     websocket.on('ping', function ping() {
-        // received a ping from the server
+        // received a ping from the farm
         heartbeat.call(this);
     });
 
 
-    // Handle incoming message from server
+    // Handle incoming message from farm
     websocket.on('message', async function message(data: Buffer) {
-        const message = data.toString();
-        console.log(`${now()} [${colors.blue('INFO')}] [RIG] received: ${message} [connId ${connectionId}]`);
+        const messageJson = data.toString();
+        //console.log(`${now()} [${colors.blue('INFO')}] [RIG] received: ${message} [connId ${connectionId}]`);
 
-        const args = message.split(' ');
+        let message: t.RpcResponse | t.RpcRequest;
+        try {
+            message = JSON.parse(messageJson);
 
-        if (args[0] === 'miner-install') {
-            // TODO
-
-        } else if (args[0] === 'miner-uninstall') {
-            // TODO
-
-        //} else if (args[0] === 'get-installed-miners') {
-        //    // TODO
-
-        } else if (args[0] === 'service') {
-
-            if (args[1] === 'start') {
-                args.shift();
-                args.shift();
-                const minerName = args.shift();
-                //const minerAlias = args.shift() || '';
-                const minerAlias = ''; // TODO: get from params
-
-                if (minerName && args.length > 0) {
-                    const paramsJson = args.join(' ');
-
-                    let params: any;
-                    try {
-                        params = JSON.parse(paramsJson);
-
-                    } catch (err: any) {
-                        console.error(`${now()} [${colors.red('ERROR')}] [RIG] cannot start service : ${err.message} [connId: ${connectionId}]`);
-                        return;
-                    }
-
-                    params.miner = minerName;
-                    params.alias = minerAlias;
-
-                    const config = Daemon.getConfig();
-                    const ok = await Rig.minerRunStart(config, params);
-                    var debugme = 1;
-
-                } else {
-                    // error
-                }
-
-            }
-
-            if (args[1] === 'stop') {
-                args.shift();
-                args.shift();
-                const minerName = args.shift();
-                //const minerAlias = args.shift() || '';
-                const minerAlias = ''; // TODO: get from params
-
-                if (minerName) {
-                    const config = Daemon.getConfig();
-                    const params = {
-                        miner: minerName,
-                        alias: minerAlias,
-                    };
-                    const ok = await Rig.minerRunStop(config, params);
-                    var debugme = 1;
-
-                } else {
-                    // error
-                }
-
-            }
-
+        } catch (err: any) {
+            console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] received invalid json from farm : \n${messageJson}`);
+            return;
         }
+
+
+
+        if ('error' in message) {
+            console.log(`${now()} [${colors.blue('INFO')}] [RIG] received error from farm : \n${messageJson}`);
+            const err: t.RpcError = JSON.parse(messageJson);
+
+        } else if ('result' in message) {
+            console.log(`${now()} [${colors.blue('INFO')}] [RIG] received response from farm : \n${messageJson}`);
+            const res: t.RpcResponse = JSON.parse(messageJson);
+
+        } else if ('method' in message && 'params' in message) {
+            //console.log(`${now()} [${colors.blue('INFO')}] [RIG] received request from farm : \n${messageJson}`);
+            //console.log(`${now()} [${colors.blue('INFO')}] [RIG] received request from farm (${messageJson.length} chars.)`);
+            const req: t.RpcRequest = JSON.parse(messageJson);
+
+            console.log(`${now()} [${colors.blue('INFO')}] [RIG] received request from farm (${req.method})`);
+
+            switch (req.method) {
+
+                case 'farmMinerInstallStart':
+                    {
+                        const ok = Rig.minerInstallStart(config, message.params);
+                        rpcSendResponse(this, req.id, 'OK');
+                    }
+                    break;
+
+                case 'farmMinerInstallStop':
+                    {
+                        const ok = Rig.minerInstallStop(config, message.params);
+                        rpcSendResponse(this, req.id, 'OK');
+                    }
+                    break;
+
+                case 'farmMinerRunStart':
+                    {
+                        const ok = Rig.minerRunStart(config, message.params);
+                        rpcSendResponse(this, req.id, 'OK');
+                    }
+                    break;
+
+                case 'farmMinerRunStop':
+                    {
+                        const ok = Rig.minerRunStop(config, message.params);
+                        rpcSendResponse(this, req.id, 'OK');
+                    }
+                    break;
+
+                case 'farmMinerRunStatus':
+                    {
+                        const status = Rig.minerRunGetStatus(config, message.params);
+                        rpcSendResponse(this, req.id, status);
+                    }
+                    break;
+
+                case 'farmMinerRunLog':
+                    {
+                        const log = Rig.minerRunGetLog(config, message.params);
+                        rpcSendResponse(this, req.id, log);
+                    }
+                    break;
+
+                default:
+                    rpcSendError(this, req.id, { code: -32601, message:  `the method ${req.method} does not exist/is not available on RIG` });
+                    break;
+
+            }
+
+        } else {
+            console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] received invalid message from farm : \n${messageJson}`);
+            //ws.close();
+        }
+
     });
 
 
@@ -321,4 +334,22 @@ function websocketConnect(config: t.DaemonConfigAll) {
 
     return websocket;
 }
+
+
+
+function rpcSendResponse(ws: WebSocket, id: number, result: any) {
+    const res: t.RpcResponse = buildRpcResponse(id, result);
+    const resStr = JSON.stringify(res);
+    //console.debug(`${now()} [DEBUG] [CLI] sending response: ${resStr}`);
+    ws.send(resStr);
+}
+
+
+function rpcSendError(ws: WebSocket, id: number, result: any) {
+    const err: t.RpcError = buildRpcError(id, result);
+    const errStr = JSON.stringify(err);
+    //console.debug(`${now()} [DEBUG] [CLI] sending error: ${errStr}`);
+    ws.send(errStr);
+}
+
 

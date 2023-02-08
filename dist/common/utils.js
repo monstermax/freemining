@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendSocketMessage = exports.tailFile = exports.getDirSize = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
+exports.sendSocketMessage = exports.tailFile = exports.getDirSize = exports.getDirFilesSync = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -312,6 +312,13 @@ function getDirFiles(dir) {
     });
 }
 exports.getDirFiles = getDirFiles;
+function getDirFilesSync(dir) {
+    if (!fs_1.default.existsSync(dir)) {
+        return [];
+    }
+    return fs_1.default.readdirSync(dir);
+}
+exports.getDirFilesSync = getDirFilesSync;
 function getDirSize(dir, recursive = true) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let totalSize = 0;

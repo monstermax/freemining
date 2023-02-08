@@ -244,7 +244,7 @@ function registerNodeRoutes(app, urlPrefix = '') {
                 fullnode: fullnodeName,
             };
             try {
-                yield Node.fullnodeRunStart(config, params);
+                Node.fullnodeRunStart(config, params);
                 res.send(`OK: fullnode run started`);
             }
             catch (err) {

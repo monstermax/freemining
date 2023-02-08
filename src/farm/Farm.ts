@@ -1,9 +1,9 @@
 
 import os from 'os';
-import colors from 'colors/safe';
+//import colors from 'colors/safe';
+import WebSocket from 'ws';
 
-import * as farmRigsServerWebsocket from './farmRigsServerWebsocket';
-import { now, getOpt, getLocalIpAddresses } from '../common/utils';
+import { now, getLocalIpAddresses, buildRpcRequest } from '../common/utils';
 
 import type *  as t from '../common/types';
 
@@ -12,72 +12,48 @@ import type *  as t from '../common/types';
 
 const rigsConfigs: { [rigName: string]: t.DaemonConfigAll } = {};
 const rigsInfos: { [rigName: string]: t.RigInfos } = {};
-
-/*
-TODO: a transformer en :
-{
-    rig: {
-        name: string,
-        hostname: string,
-        ip: string,
-        os: string,
-        uptime: number,
-    }
-    usage
-    devices
-    freeminingVersion: string,
-    installableMiners: string[],
-    installedMiners: string[], // + aliases ?
-    runningMiners: string[], // + aliases ?
-    monitorStatus: boolean,
-    minersStats: t.RigInfos (renommer RigInfos en MinersStats)
-}
-*/
-
-
-//const websocketPassword = 'xxx'; // password to access farm websocket server
+const rigsWs: { [rigName: string]: WebSocket } = {};
 
 let farmMainInfos: any | null = null;
+let active = false;
 
 
 /* ########## FUNCTIONS ######### */
 
+
 export function rigsServerStart(config: t.DaemonConfigAll) {
-    farmRigsServerWebsocket.start(config);
+    if (active) return;
+
+    active = true;
+
+    // TODO
+
+    //console.log(`${now()} [INFO] [FARM] Rigs server started`);
 }
 
 
 export function rigsServerStop() {
-    farmRigsServerWebsocket.stop();
+    //if (! active) return;
+
+    active = false;
+    // TODO
+
+    //console.log(`${now()} [INFO] [FARM] Rigs server stopped`);
 }
+
 
 export function rigsServerGetStatus(): boolean {
-    return farmRigsServerWebsocket.status();
+    return active;
 }
 
 
 
 
-export function farmAgentStart(config: t.DaemonConfigAll): void {
-    farmRigsServerWebsocket.start(config);
-    console.log(`${now()} [INFO] [FARM] Rigs server started`);
-}
-
-
-export function farmAgentStop(): void {
-    farmRigsServerWebsocket.stop();
-    console.log(`${now()} [INFO] [FARM] Rigs server stopped`);
-}
-
-export function farmAgentGetStatus(): boolean {
-    // TODO
-    return false;
-}
 
 
 
 export function rigAuthRequest(config: t.DaemonConfigAll, params: t.MapString<any>) {
-    if (! farmRigsServerWebsocket.status()) return;
+    if (! rigsServerGetStatus()) return;
 
     const rig = params.user;
     const pass = params.pass || '';
@@ -101,14 +77,14 @@ export function rigAuthRequest(config: t.DaemonConfigAll, params: t.MapString<an
 
 
 export function setRigStatus(rigName: string, rigInfos: t.RigInfos): void {
-    if (! farmRigsServerWebsocket.status()) return;
+    if (! rigsServerGetStatus()) return;
 
     rigsInfos[rigName] = rigInfos;
 }
 
 
 export function getRigStatus(rigName: string): t.RigInfos | null {
-    if (! farmRigsServerWebsocket.status()) return null;
+    if (! rigsServerGetStatus()) return null;
     if (! (rigName in rigsInfos)) return null;
 
     return rigsInfos[rigName];
@@ -116,14 +92,14 @@ export function getRigStatus(rigName: string): t.RigInfos | null {
 
 
 export function setRigConfig(rigName: string, rigConfig: t.DaemonConfigAll): void {
-    if (! farmRigsServerWebsocket.status()) return;
+    if (! rigsServerGetStatus()) return;
 
     rigsConfigs[rigName] = rigConfig;
 }
 
 
 export function getRigConfig(rigName: string): t.DaemonConfigAll | null {
-    if (! farmRigsServerWebsocket.status()) return null;
+    if (! rigsServerGetStatus()) return null;
     if (! (rigName in rigsConfigs)) return null;
 
     return rigsConfigs[rigName];
@@ -167,3 +143,73 @@ export function getFarmInfos(config: t.DaemonConfigAll): t.FarmInfos {
     }
 }
 
+
+export function getRigWs(rigName: string): WebSocket | undefined {
+    return rigsWs[rigName];
+}
+
+
+export function setRigWs(rigName: string, rigWs: WebSocket | null): void {
+    if (rigWs === null) {
+        delete rigsWs[rigName];
+
+    } else {
+        rigsWs[rigName] = rigWs;
+    }
+}
+
+
+
+
+function rpcSendRequest(ws: WebSocket, id: number, method: string, params: any) {
+    const req: t.RpcRequest = buildRpcRequest(id, method, params);
+    const reqStr = JSON.stringify(req);
+    //console.debug(`${now()} [DEBUG] [FARM] sending request: ${reqStr}`);
+    ws.send(reqStr);
+}
+
+
+export function farmMinerInstallStart(rigName: string, params: t.minerInstallStartParams) {
+    const rigWs = rigsWs[rigName];
+    if (!rigWs) return; // todo return error
+    const method = 'farmMinerInstallStart';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+
+export function farmMinerInstallStop(rigName: string, params: t.minerInstallStopParams) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs) return; // todo return error
+    const method = 'farmMinerInstallStop';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+
+
+export function farmMinerRunStart(rigName: string, params: t.minerRunStartParams) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs) return; // todo return error
+    const method = 'farmMinerRunStart';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+
+
+export function farmMinerRunStop(rigName: string, params: t.minerRunStopParams, forceKill: boolean=false) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs) return; // todo return error
+    const method = 'farmMinerRunStop';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+
+
+export function farmMinerRunGetStatus(rigName: string, params: t.minerRunStatusParams) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs) return; // todo return error
+    const method = 'farmMinerRunGetStatus';
+    rpcSendRequest(rigWs, 1, method, params);
+}
+
+export function farmMinerRunLog(rigName: string, params: t.minerRunLogParams) {
+    const rigWs = getRigWs(rigName);
+    if (!rigWs) return; // todo return error
+    const method = 'farmMinerRunLog';
+    rpcSendRequest(rigWs, 1, method, params);
+}

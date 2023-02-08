@@ -7,6 +7,7 @@ import type express from 'express';
 
 import { now, formatNumber } from '../../common/utils';
 import * as Rig from '../../rig/Rig';
+import * as Farm from '../../farm/Farm';
 import * as Daemon from '../../core/Daemon';
 
 import type * as t from '../../common/types';
@@ -28,10 +29,14 @@ const utilFuncs = {
 
 async function getRigData(): Promise<t.RigData> {
     const config = Daemon.getConfig();
+    const rigInfos = await Rig.getRigInfos(config);
+    const rigName = config.rig.name || rigInfos.rig.name || 'anonymous-rig';
 
     const rigData: t.RigData = {
+        rigName,
+        isFarm: false,
         config,
-        rigInfos: await Rig.getRigInfos(config),
+        rigInfos,
         monitorStatus: Rig.monitorGetStatus(),
         allMiners: await Rig.getAllMiners(config),
         //farmAgentStatus: Rig.farmAgentGetStatus(),
@@ -88,13 +93,6 @@ export async function rigStatus(rigData: t.RigData, req: express.Request, res: e
         },
         contentTemplate: `..${SEP}rig${SEP}rig_status.html`,
         ...rigData,
-        //runningMinersAliases,
-        //allMiners,
-        //installedMiners,
-        //runningMiners,
-        //installableMiners,
-        //runnableMiners,
-        //managedMiners,
     };
     res.render(`.${SEP}core${SEP}layout.html`, data);
 };
@@ -109,13 +107,9 @@ export async function rigMinerRunModal(rigData: t.RigData, req: express.Request,
         return;
     }
 
-    //const config = Daemon.getConfig();
     const config = rigData.config;
-    const minerConfig = Rig.getInstalledMinerConfiguration(config, minerName); // TODO farm
-    const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
-
-    const rigInfos = rigData.rigInfos; // await Rig.getRigInfos(config);
-    const allMiners = rigData.allMiners; // await Rig.getAllMiners(config);
+    const rigInfos = rigData.rigInfos;
+    const allMiners = rigData.allMiners;
     const runningMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].running).map(entry => entry[0]);
     const runnableMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].runnable).map(entry => entry[0]);
     const installedMiners = Object.entries(allMiners).filter((entry: [string, any]) => entry[1].installed).map(entry => entry[0]);
@@ -126,23 +120,17 @@ export async function rigMinerRunModal(rigData: t.RigData, req: express.Request,
         return;
     }
 
-    let presets = {};
-    const poolsFilePath = `${config.confDir}${SEP}rig${SEP}pools.json`;
-    if (fs.existsSync(poolsFilePath)) {
-        presets = require(poolsFilePath);
-    }
+    const rigName = config.rig.name || rigInfos.rig.name || 'anonymous-rig';
 
     const data = {
         ...utilFuncs,
-        rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
+        rigName,
         rigInfos,
         miners: allMiners,
         runnableMiners,
         runningMiners,
         installedMiners,
-        presets,
         miner: minerName,
-        minerAlias,
     };
     res.render(`.${SEP}rig${SEP}run_miner_modal.html`, data);
 };
@@ -155,12 +143,18 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
     const config = rigData.config;
     const rigInfos = rigData.rigInfos;
 
-    const minerConfig = !config ? { defaultAlias:'' } : Rig.getInstalledMinerConfiguration(config, minerName); // TODO farm / a revoir
-    const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
+    const installedMinerConfig = rigData.rigInfos.status?.installedMinersAliases[minerName];
+
+    if (! installedMinerConfig) {
+        res.send(`Error: missing miner config`);
+        return;
+    }
+
+    const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
     const minerFullName = `${minerName}-${minerAlias}`;
 
     const minerInfos = rigInfos.status?.minersStats[minerFullName];
-    const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName }));
+    const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
     const allMiners = rigData.allMiners;
 
     const installStatus = false;
@@ -194,7 +188,8 @@ export async function rigMinerInstallPost(rigData: t.RigData, req: express.Reque
     const version = req.body.version?.toString() || '';
 
     const config = rigData.config;
-    const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName })); // TODO farm
+    const rigInfos = rigData.rigInfos;
+    const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
 
     if (action === 'start') {
         if (! minerName) {
@@ -220,7 +215,12 @@ export async function rigMinerInstallPost(rigData: t.RigData, req: express.Reque
         };
 
         try {
-            await Rig.minerInstallStart(config, params); // TODO farm
+            if (! rigData.isFarm) {
+                Rig.minerInstallStart(config, params);
+
+            } else {
+                Farm.farmMinerInstallStart(rigData.rigName, params);
+            }
             res.send(`OK: miner install started`);
 
         } catch (err: any) {
@@ -238,14 +238,20 @@ export async function rigMinerRun(rigData: t.RigData, req: express.Request, res:
     const action = req.query.action?.toString() || '';
 
     const config = rigData.config;
-    const minerConfig = !config ? { defaultAlias:'' } : Rig.getInstalledMinerConfiguration(config, minerName); // TODO farm
-    const minerAlias = req.query.alias?.toString() || minerConfig.defaultAlias;
+    const installedMinerConfig = rigData.rigInfos.status?.installedMinersAliases[minerName];
+
+    if (! installedMinerConfig) {
+        res.send(`Error: missing miner config`);
+        return;
+    }
+
+    const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
     const minerFullName = `${minerName}-${minerAlias}`;
 
     const monitorStatus = rigData.monitorStatus;
     const rigInfos = rigData.rigInfos;
     const minerInfos = rigInfos.status?.minersStats[minerFullName];
-    const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName })); // TODO farm
+    const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
     const allMiners = rigData.allMiners;
 
     if (action === 'log') {
@@ -257,7 +263,15 @@ export async function rigMinerRun(rigData: t.RigData, req: express.Request, res:
         }
 
         res.header('Content-Type', 'text/plain');
-        const log = await Rig.minerRunGetLog(config, { miner: minerName, lines: 50 }); // TODO farm ?
+
+        let log = '';
+        if (! rigData.isFarm) {
+            log = await Rig.minerRunGetLog(config, { miner: minerName, lines: 50 });
+
+        } else {
+            //Farm.farmMinerRunGetLog(rigData.rigName, params);
+
+        }
         res.send(log);
         return;
 
@@ -316,7 +330,8 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
     const action = req.body.action?.toString() || '';
 
     const config = rigData.config;
-    const minerStatus = (config && Rig.minerRunGetStatus(config, { miner: minerName })); // TODO farm
+    const rigInfos = rigData.rigInfos;
+    const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
 
     const coin = req.body.coin?.toString() || '';
     const algo = req.body.algo?.toString() || '';
@@ -345,7 +360,12 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
         };
 
         try {
-            await Rig.minerRunStart(config, params); // TODO farm
+            if (! rigData.isFarm) {
+                Rig.minerRunStart(config, params);
+
+            } else {
+                Farm.farmMinerRunStart(rigData.rigName, params);
+            }
             res.send(`OK: miner run started`);
 
         } catch (err: any) {
@@ -359,6 +379,11 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
             return;
         }
 
+        if (!config) {
+            res.send(`Error: cannot stop miner run without config`);
+            return;
+        }
+
         if (!minerStatus) {
             res.send(`Error: cannot stop miner run while it is not running`);
             return;
@@ -369,7 +394,12 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
         };
 
         try {
-            Rig.minerRunStop(config, params); // TODO farm
+            if (! rigData.isFarm) {
+                Rig.minerRunStop(config, params);
+
+            } else {
+                Farm.farmMinerRunStop(rigData.rigName, params);
+            }
             res.send(`OK: miner run stopped`);
 
         } catch (err: any) {

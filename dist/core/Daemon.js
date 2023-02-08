@@ -172,7 +172,6 @@ function registerWssRoutes(config, wss) {
                 const clientName = ((_a = ws.auth) === null || _a === void 0 ? void 0 : _a.name) || 'anonymous';
                 const messageJson = data.toString();
                 //console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] request from client ${colors.cyan(clientName)} (${clientIP}) : \n${messageJson}`);
-                // try
                 let message;
                 try {
                     message = JSON.parse(messageJson);
@@ -247,7 +246,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'rigMinerInstallStart':
                             try {
-                                yield Rig.minerInstallStart(config, req.params);
+                                Rig.minerInstallStart(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {
@@ -257,7 +256,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'rigMinerRunStart':
                             try {
-                                yield Rig.minerRunStart(config, req.params);
+                                Rig.minerRunStart(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {
@@ -332,7 +331,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'nodeFullnodeInstallStart':
                             try {
-                                yield Node.fullnodeInstallStart(config, req.params);
+                                Node.fullnodeInstallStart(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {
@@ -342,7 +341,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'nodeFullnodeRunStart':
                             try {
-                                yield Node.fullnodeRunStart(config, req.params);
+                                Node.fullnodeRunStart(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {
@@ -405,12 +404,14 @@ function registerWssRoutes(config, wss) {
                             }
                             const authResult = Farm.rigAuthRequest(config, req.params);
                             if (authResult) {
+                                const rigName = req.params.user;
                                 ws.auth = {
-                                    name: req.params.user,
+                                    name: rigName,
                                     ip: clientIP,
                                     type: 'rig',
                                 };
                                 rpcSendResponse(ws, req.id, 'OK');
+                                Farm.setRigWs(rigName, ws);
                             }
                             else {
                                 rpcSendError(ws, req.id, { code: -1, message: `Auth rejected` });
@@ -457,7 +458,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         /* DEFAULT */
                         default:
-                            rpcSendError(ws, req.id, { code: -32601, message: `the method ${req.method} does not exist/is not available` });
+                            rpcSendError(ws, req.id, { code: -32601, message: `the method ${req.method} does not exist/is not available on DAEMON` });
                             break;
                     }
                 }

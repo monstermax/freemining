@@ -325,7 +325,7 @@ export function registerNodeRoutes(app: express.Express, urlPrefix: string='') {
             };
 
             try {
-                await Node.fullnodeRunStart(config, params);
+                Node.fullnodeRunStart(config, params);
                 res.send(`OK: fullnode run started`);
 
             } catch (err: any) {

@@ -124,47 +124,53 @@ function monitorCheckRig(config) {
 }
 exports.monitorCheckRig = monitorCheckRig;
 function getInstalledMiners(config) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const minersDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners`;
-        const minersNames = yield (0, utils_1.getDirFiles)(minersDir);
-        return minersNames;
-    });
+    const minersDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners`;
+    const minersNames = (0, utils_1.getDirFilesSync)(minersDir);
+    return minersNames;
 }
 exports.getInstalledMiners = getInstalledMiners;
 function getInstalledMinersAliases(config) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const minersDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners`;
-        const minersNames = yield (0, utils_1.getDirFiles)(minersDir);
-        const installedMinersAliases = minersNames.map(minerName => {
-            const minerConfigFile = `${minersDir}${SEP}${minerName}${SEP}freeminingMiner.json`;
-            if (fs_1.default.existsSync(minerConfigFile)) {
-                const minerConfigFileJson = fs_1.default.readFileSync(minerConfigFile).toString();
-                const minerConfig = JSON.parse(minerConfigFileJson);
-                return minerConfig;
-            }
-            return null;
-        }).filter(conf => !!conf);
-        return installedMinersAliases;
-    });
+    const minersDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners`;
+    const minersNames = (0, utils_1.getDirFilesSync)(minersDir);
+    const installedMinersAliases = {};
+    for (const minerName of minersNames) {
+        const minerConfigFile = `${minersDir}${SEP}${minerName}${SEP}freeminingMiner.json`;
+        if (!fs_1.default.existsSync(minerConfigFile)) {
+            continue;
+        }
+        const minerConfigFileJson = fs_1.default.readFileSync(minerConfigFile).toString();
+        try {
+            const minerConfig = JSON.parse(minerConfigFileJson); // as t.InstalledMinerConfig;
+            installedMinersAliases[minerName] = minerConfig;
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot parse json : ${err.message}`);
+        }
+    }
+    return installedMinersAliases;
 }
 exports.getInstalledMinersAliases = getInstalledMinersAliases;
 function getRunningMinersAliases(config) {
     let procName;
     let rigProcesses = getProcesses();
-    const runningMiners = [];
+    const runningMiners = {};
     for (procName in rigProcesses) {
         const proc = rigProcesses[procName];
         if (!proc.process)
             continue;
-        runningMiners.push({
-            miner: proc.miner || '',
-            alias: proc.name,
+        const minerName = proc.miner || '';
+        const minerAlias = proc.name;
+        const minerFullName = `${minerName}-${minerAlias}`;
+        runningMiners[minerName] = runningMiners[minerName] || {};
+        runningMiners[minerName][minerFullName] = {
+            miner: minerName,
+            alias: minerAlias,
             pid: proc.pid || 0,
             dateStart: proc.dateStart,
             args: proc.args,
             params: proc.params,
             //apiPort: proc.apiPort, // TODO
-        });
+        };
     }
     return runningMiners;
 }
@@ -199,21 +205,19 @@ function getManagedMiners(config) {
 }
 exports.getManagedMiners = getManagedMiners;
 function minerInstallStart(config, params) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const minerName = params.miner;
-        if (!minerName) {
-            throw new Error(`Missing miner parameter`);
-        }
-        //if (`miner-install-${minerName}` in processes) {
-        //    throw { message: `Miner ${minerName} install is already running` };
-        //}
-        if (!(minerName in minersConfigs_1.minersCommands)) {
-            throw { message: `Unknown miner ${minerName}` };
-        }
-        const minerInstall = minersConfigs_1.minersInstalls[minerName];
-        /* await */ minerInstall.install(config, params).catch((err) => {
-            console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot start miner ${minerName} : ${err.message}`);
-        });
+    const minerName = params.miner;
+    if (!minerName) {
+        throw new Error(`Missing miner parameter`);
+    }
+    //if (`miner-install-${minerName}` in processes) {
+    //    throw { message: `Miner ${minerName} install is already running` };
+    //}
+    if (!(minerName in minersConfigs_1.minersCommands)) {
+        throw { message: `Unknown miner ${minerName}` };
+    }
+    const minerInstall = minersConfigs_1.minersInstalls[minerName];
+    /* await */ minerInstall.install(config, params).catch((err) => {
+        console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot start miner ${minerName} : ${err.message}`);
     });
 }
 exports.minerInstallStart = minerInstallStart;
@@ -250,100 +254,98 @@ function getInstalledMinerConfiguration(config, minerName) {
 }
 exports.getInstalledMinerConfiguration = getInstalledMinerConfiguration;
 function minerRunStart(config, params) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const minerName = params.miner;
-        const minerConfig = getInstalledMinerConfiguration(config, minerName);
-        const minerAlias = params.alias || minerConfig.defaultAlias;
-        const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
-        if (!minerName) {
-            throw new Error(`Missing miner parameter`);
-        }
-        if (!minerAlias) {
-            throw new Error(`Missing alias parameter`);
-        }
-        if (!(minerName in minersConfigs_1.minersCommands)) {
-            throw { message: `Unknown miner ${minerName}` };
-        }
-        if (`miner-run-${minerAlias}` in processes) {
-            throw { message: `Miner ${minerFullTitle} run is already running` };
-        }
-        const rigInfos = yield getRigInfos(config);
-        const opts = {
-            rigName: config.rig.name || rigInfos.rig.name || 'anonymous-rig',
-        };
-        params.poolUser = (0, utils_1.stringTemplate)(params.poolUser, opts, false, false, false) || '';
-        const minerCommands = minersConfigs_1.minersCommands[minerName];
-        const cmdFile = minerCommands.getCommandFile(config, params);
-        const args = minerCommands.getCommandArgs(config, params);
-        const dataDir = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
-        const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
-        const aliasDir = `${minerDir}${SEP}${minerAlias}`;
-        const cmdPath = `${aliasDir}${SEP}${cmdFile}`;
-        const logDir = `${config.logDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
-        const logFile = `${logDir}${SEP}${minerAlias}.run.log`;
-        const errFile = `${logDir}${SEP}${minerAlias}.run.err`;
-        const pidDir = `${config.pidDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
-        const pidFile = `${pidDir}${SEP}${minerAlias}.run.pid`;
-        fs_1.default.mkdirSync(dataDir, { recursive: true });
-        fs_1.default.mkdirSync(logDir, { recursive: true });
-        fs_1.default.mkdirSync(pidDir, { recursive: true });
-        if (true) {
-            // truncate log files
-            fs_1.default.writeFileSync(logFile, '');
-            fs_1.default.writeFileSync(errFile, '');
-        }
-        if (!fs_1.default.existsSync(aliasDir)) {
-            throw { message: `Miner ${minerName} is not installed` };
-        }
-        if (!fs_1.default.existsSync(cmdPath)) {
-            throw { message: `Miner ${minerName} cmdPath is misconfigured` };
-        }
-        const process = {
-            type: 'miner-run',
-            name: minerAlias,
-            miner: minerName,
-            params: params,
-            cmdFile,
-            args,
-            dataDir,
-            appDir: aliasDir,
-            cmdPath,
-            dateStart: Date.now(),
-            pid: undefined,
-            process: undefined
-        };
-        processes[`miner-run-${minerName}-${minerAlias}`] = process;
-        const processName = `[freemining-beta.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
-        console.log(`${(0, utils_1.now)()} [INFO] [RIG] Miner Run Start: ${minerName} (${minerAlias}))`);
-        const onSpawn = function (proc) {
-            processes[`miner-run-${minerName}-${minerAlias}`].pid = proc.pid;
-            processes[`miner-run-${minerName}-${minerAlias}`].process = proc;
-            fs_1.default.writeFileSync(pidFile, (proc.pid || -1).toString());
-            console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] PROCESS SPWANED ${minerName}-${minerAlias} (pid: ${proc.pid})`);
-            /* await */ monitorAutoCheckRig(config);
-        };
-        const onStdOut = function (data) {
-            //console.log('RECEIVED FROM CMD STDOUT:', data.toString());
-            fs_1.default.appendFileSync(logFile, data);
-        };
-        const onStdErr = function (data) {
-            //console.log('RECEIVED FROM CMD STDERR:', data.toString());
-            fs_1.default.appendFileSync(logFile, data);
-            fs_1.default.appendFileSync(errFile, data);
-        };
-        const onEnd = function (returnCode, err) {
-            delete processes[`miner-run-${minerName}-${minerAlias}`];
-            fs_1.default.rmSync(pidFile, { force: true });
-            /* await */ monitorAutoCheckRig(config);
-            console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] PROCESS COMPLETED ${minerName}-${minerAlias} (rc: ${returnCode})`);
-        };
-        //console.debug(`${now()} [DEBUG] [RIG] Running command: ${cmdPath} ${args.join(' ')}`);
-        (0, exec_1.exec)(cmdPath, args, '', dataDir, onSpawn, onStdOut, onStdErr, onEnd, processName)
-            .catch((err) => {
-            console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] PROCESS ERROR ${minerName}-${minerAlias} : ${err.message}`);
-        });
-        return processes[`miner-run-${minerName}-${minerAlias}`];
+    const minerName = params.miner;
+    const minerConfig = getInstalledMinerConfiguration(config, minerName);
+    const minerAlias = params.alias || minerConfig.defaultAlias;
+    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
+    if (!minerName) {
+        throw new Error(`Missing miner parameter`);
+    }
+    if (!minerAlias) {
+        throw new Error(`Missing alias parameter`);
+    }
+    if (!(minerName in minersConfigs_1.minersCommands)) {
+        throw { message: `Unknown miner ${minerName}` };
+    }
+    if (`miner-run-${minerAlias}` in processes) {
+        throw { message: `Miner ${minerFullTitle} run is already running` };
+    }
+    const rigName = config.rig.name || os_1.default.hostname();
+    const opts = {
+        rigName,
+    };
+    params.poolUser = (0, utils_1.stringTemplate)(params.poolUser, opts, false, false, false) || '';
+    const minerCommands = minersConfigs_1.minersCommands[minerName];
+    const cmdFile = minerCommands.getCommandFile(config, params);
+    const args = minerCommands.getCommandArgs(config, params);
+    const dataDir = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
+    const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
+    const aliasDir = `${minerDir}${SEP}${minerAlias}`;
+    const cmdPath = `${aliasDir}${SEP}${cmdFile}`;
+    const logDir = `${config.logDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
+    const logFile = `${logDir}${SEP}${minerAlias}.run.log`;
+    const errFile = `${logDir}${SEP}${minerAlias}.run.err`;
+    const pidDir = `${config.pidDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
+    const pidFile = `${pidDir}${SEP}${minerAlias}.run.pid`;
+    fs_1.default.mkdirSync(dataDir, { recursive: true });
+    fs_1.default.mkdirSync(logDir, { recursive: true });
+    fs_1.default.mkdirSync(pidDir, { recursive: true });
+    if (true) {
+        // truncate log files
+        fs_1.default.writeFileSync(logFile, '');
+        fs_1.default.writeFileSync(errFile, '');
+    }
+    if (!fs_1.default.existsSync(aliasDir)) {
+        throw { message: `Miner ${minerName} is not installed` };
+    }
+    if (!fs_1.default.existsSync(cmdPath)) {
+        throw { message: `Miner ${minerName} cmdPath is misconfigured` };
+    }
+    const process = {
+        type: 'miner-run',
+        name: minerAlias,
+        miner: minerName,
+        params: params,
+        cmdFile,
+        args,
+        dataDir,
+        appDir: aliasDir,
+        cmdPath,
+        dateStart: Date.now(),
+        pid: undefined,
+        process: undefined
+    };
+    processes[`miner-run-${minerName}-${minerAlias}`] = process;
+    const processName = `[freemining-beta.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
+    console.log(`${(0, utils_1.now)()} [INFO] [RIG] Miner Run Start: ${minerName} (${minerAlias}))`);
+    const onSpawn = function (proc) {
+        processes[`miner-run-${minerName}-${minerAlias}`].pid = proc.pid;
+        processes[`miner-run-${minerName}-${minerAlias}`].process = proc;
+        fs_1.default.writeFileSync(pidFile, (proc.pid || -1).toString());
+        console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] PROCESS SPWANED ${minerName}-${minerAlias} (pid: ${proc.pid})`);
+        /* await */ monitorAutoCheckRig(config);
+    };
+    const onStdOut = function (data) {
+        //console.log('RECEIVED FROM CMD STDOUT:', data.toString());
+        fs_1.default.appendFileSync(logFile, data);
+    };
+    const onStdErr = function (data) {
+        //console.log('RECEIVED FROM CMD STDERR:', data.toString());
+        fs_1.default.appendFileSync(logFile, data);
+        fs_1.default.appendFileSync(errFile, data);
+    };
+    const onEnd = function (returnCode, err) {
+        delete processes[`miner-run-${minerName}-${minerAlias}`];
+        fs_1.default.rmSync(pidFile, { force: true });
+        /* await */ monitorAutoCheckRig(config);
+        console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] PROCESS COMPLETED ${minerName}-${minerAlias} (rc: ${returnCode})`);
+    };
+    //console.debug(`${now()} [DEBUG] [RIG] Running command: ${cmdPath} ${args.join(' ')}`);
+    (0, exec_1.exec)(cmdPath, args, '', dataDir, onSpawn, onStdOut, onStdErr, onEnd, processName)
+        .catch((err) => {
+        console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] PROCESS ERROR ${minerName}-${minerAlias} : ${err.message}`);
     });
+    return processes[`miner-run-${minerName}-${minerAlias}`];
 }
 exports.minerRunStart = minerRunStart;
 function minerRunStop(config, params, forceKill = false) {
@@ -547,7 +549,7 @@ function getRigInfos(config) {
         const installedMiners = yield getInstalledMiners(config);
         const installedMinersAliases = yield getInstalledMinersAliases(config);
         const runningMinersAliases = getRunningMinersAliases(config);
-        const runningMiners = Array.from(new Set(runningMinersAliases.map(runningMiner => runningMiner.miner)));
+        const runningMiners = Object.keys(runningMinersAliases);
         const monitorStatus = monitorGetStatus();
         const farmAgentStatus = farmAgentGetStatus();
         const rigInfos = {
@@ -589,17 +591,18 @@ function getRigInfos(config) {
 exports.getRigInfos = getRigInfos;
 function getAllMiners(config) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const installedMiners = yield getInstalledMiners(config);
-        const runningMinersAliases = getRunningMinersAliases(config);
         const installableMiners = getInstallableMiners(config); // TODO: mettre en cache
-        const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
-        const managedMiners = getManagedMiners(config); // TODO: mettre en cache
         const installedMinersAliases = yield getInstalledMinersAliases(config);
+        const installedMiners = Object.keys(installedMinersAliases);
+        const runnableMiners = getRunnableMiners(config); // TODO: mettre en cache
+        const runningMinersAliases = getRunningMinersAliases(config);
+        const runningMiners = Object.keys(runningMinersAliases);
+        const managedMiners = getManagedMiners(config); // TODO: mettre en cache
         const minersNames = Array.from(new Set([
-            ...installedMiners,
-            ...runningMinersAliases.map(runningMiner => runningMiner.miner),
             ...installableMiners,
+            ...installedMiners,
             ...runnableMiners,
+            ...runningMiners,
             ...managedMiners,
         ]));
         const miners = Object.fromEntries(minersNames.map(minerName => {
@@ -610,7 +613,7 @@ function getAllMiners(config) {
                     installed: installedMiners.includes(minerName),
                     installedAliases: installedMinersAliases,
                     runnable: runnableMiners.includes(minerName),
-                    running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
+                    running: runningMiners.includes(minerName),
                     runningAlias: runningMinersAliases,
                     managed: managedMiners.includes(minerName),
                 }

@@ -119,9 +119,11 @@ function getRigData(rigName) {
     const rigConfig = Farm.getRigConfig(rigName);
     const allMiners = getRigAllMiners(rigInfos);
     const rigData = {
+        rigName,
+        isFarm: true,
         config: rigConfig,
         rigInfos,
-        monitorStatus: ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.monitorStatus) || false,
+        monitorStatus: ((_a = rigInfos === null || rigInfos === void 0 ? void 0 : rigInfos.status) === null || _a === void 0 ? void 0 : _a.monitorStatus) || false,
         allMiners,
         //rigConfig: { // TODO
         //    farmAgent: {
@@ -133,26 +135,29 @@ function getRigData(rigName) {
     return rigData;
 }
 function getRigAllMiners(rigInfos) {
-    var _a, _b, _c, _d, _e, _f;
-    let installedMiners = [];
-    let runningMinersAliases = [];
+    var _a, _b, _c, _d, _e, _f, _g;
     let installableMiners = [];
+    let installedMiners = [];
+    let installedMinersAliases = {};
     let runnableMiners = [];
+    let runningMiners = [];
+    let runningMinersAliases = {};
     let managedMiners = [];
-    let installedMinersAliases = [];
     if (rigInfos) {
-        installedMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installedMiners) || [];
-        runningMinersAliases = ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.runningMinersAliases) || [];
-        installableMiners = ((_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.installableMiners) || [];
+        installableMiners = ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.installableMiners) || [];
+        installedMiners = ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.installedMiners) || [];
+        installedMinersAliases = ((_c = rigInfos.status) === null || _c === void 0 ? void 0 : _c.installedMinersAliases) || {};
         runnableMiners = ((_d = rigInfos.status) === null || _d === void 0 ? void 0 : _d.runnableMiners) || [];
-        managedMiners = ((_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.managedMiners) || [];
-        installedMinersAliases = ((_f = rigInfos.status) === null || _f === void 0 ? void 0 : _f.installedMinersAliases) || [];
+        runningMiners = ((_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.runningMiners) || [];
+        runningMinersAliases = ((_f = rigInfos.status) === null || _f === void 0 ? void 0 : _f.runningMinersAliases) || {};
+        managedMiners = ((_g = rigInfos.status) === null || _g === void 0 ? void 0 : _g.managedMiners) || [];
     }
     const minersNames = Array.from(new Set([
-        ...installedMiners,
-        ...runningMinersAliases.map(runningMiner => runningMiner.miner),
         ...installableMiners,
+        ...installedMiners,
+        //...Object.keys(installedMinersAliases),
         ...runnableMiners,
+        //...Object.keys(runningMinersAliases),
         ...managedMiners,
     ]));
     const miners = Object.fromEntries(minersNames.map(minerName => {
@@ -163,7 +168,7 @@ function getRigAllMiners(rigInfos) {
                 installed: installedMiners.includes(minerName),
                 installedAliases: installedMinersAliases,
                 runnable: runnableMiners.includes(minerName),
-                running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
+                running: runningMiners.includes(minerName),
                 runningAlias: runningMinersAliases,
                 managed: managedMiners.includes(minerName),
             }

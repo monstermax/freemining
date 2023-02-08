@@ -177,9 +177,11 @@ function getRigData(rigName: string): t.RigData {
     const allMiners = getRigAllMiners(rigInfos);
 
     const rigData: t.RigData = {
+        rigName,
+        isFarm: true,
         config: rigConfig,
         rigInfos,
-        monitorStatus: rigInfos.status?.monitorStatus || false,
+        monitorStatus: rigInfos?.status?.monitorStatus || false,
         allMiners,
         //rigConfig: { // TODO
         //    farmAgent: {
@@ -195,28 +197,31 @@ function getRigData(rigName: string): t.RigData {
 
 
 function getRigAllMiners(rigInfos: t.RigInfos): t.AllMiners {
-    let installedMiners: string[] = [];
-    let runningMinersAliases: t.RunningMinerProcess[] = [];
     let installableMiners: string[] = [];
+    let installedMiners: string[] = [];
+    let installedMinersAliases: { [minerName: string]: t.InstalledMinerConfig } = {};
     let runnableMiners: string[] = [];
+    let runningMiners: string[] = [];
+    let runningMinersAliases: { [minerName: string]: { [ minerAlias: string ]: t.RunningMinerProcess } } = {};
     let managedMiners: string[] = [];
-    let installedMinersAliases: t.InstalledMinerConfig[] = [];
 
     if (rigInfos) {
-        installedMiners = rigInfos.status?.installedMiners || [];
-        runningMinersAliases = rigInfos.status?.runningMinersAliases || [];
         installableMiners = rigInfos.status?.installableMiners || [];
+        installedMiners = rigInfos.status?.installedMiners || [];
+        installedMinersAliases = rigInfos.status?.installedMinersAliases || {};
         runnableMiners = rigInfos.status?.runnableMiners || [];
+        runningMiners = rigInfos.status?.runningMiners || [];
+        runningMinersAliases = rigInfos.status?.runningMinersAliases || {};
         managedMiners = rigInfos.status?.managedMiners || [];
-        installedMinersAliases = rigInfos.status?.installedMinersAliases || [];
     }
 
     const minersNames = Array.from(
         new Set( [
-            ...installedMiners,
-            ...runningMinersAliases.map(runningMiner => runningMiner.miner),
             ...installableMiners,
+            ...installedMiners,
+            //...Object.keys(installedMinersAliases),
             ...runnableMiners,
+            //...Object.keys(runningMinersAliases),
             ...managedMiners,
         ])
     );
@@ -230,7 +235,7 @@ function getRigAllMiners(rigInfos: t.RigInfos): t.AllMiners {
                     installed: installedMiners.includes(minerName),
                     installedAliases: installedMinersAliases,
                     runnable: runnableMiners.includes(minerName),
-                    running: runningMinersAliases.map(runningMiner => runningMiner.miner).includes(minerName),
+                    running: runningMiners.includes(minerName),
                     runningAlias: runningMinersAliases,
                     managed: managedMiners.includes(minerName),
                 }

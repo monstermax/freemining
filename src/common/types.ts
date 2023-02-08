@@ -290,10 +290,10 @@ export type RigInfos = {
         monitorStatus: boolean,
         installableMiners: string[],
         installedMiners: string[],
-        installedMinersAliases: InstalledMiner[];
+        installedMinersAliases: { [minerName: string]: InstalledMinerConfig };
         runnableMiners: string[],
         runningMiners: string[],
-        runningMinersAliases: RunningMinerProcess[];
+        runningMinersAliases: { [minerName: string]: { [minerAlias: string]: RunningMinerProcess } };
         managedMiners: string[],
         minersStats: { [minerName: string]: MinerStats },
         farmAgentStatus: boolean,
@@ -308,6 +308,8 @@ export type RigInfos = {
 }
 
 export type RigData = {
+    rigName: string,
+    isFarm: boolean,
     config: DaemonConfigAll | null,
     rigInfos: RigInfos,
     monitorStatus: boolean,
@@ -380,7 +382,7 @@ export type MinerGpuInfos = GPU & {
 };
 
 
-export type InstalledMiner = InstalledMinerConfig;
+//export type InstalledMiner = InstalledMinerConfig;
 
 export type InstalledMinerConfig = {
     name: string,
@@ -470,12 +472,12 @@ export type getMinerInfosParams = {
 export type AllMiners = {
     [minerName: string]: {
         installed: boolean,
-        installedAliases: InstalledMiner[], // TODO
+        installedAliases: { [minerName: string]: InstalledMinerConfig },
         running: boolean,
         installable: boolean,
         runnable: boolean,
         managed: boolean,
-        runningAlias: RunningMinerProcess[],
+        runningAlias: { [minerName: string]: { [minerAlias: string]: RunningMinerProcess } },
     }
 };
 
@@ -543,10 +545,10 @@ export type NodeInfos = {
         monitorStatus: boolean,
         installableFullnodes: string[],
         installedFullnodes: string[],
-        installedFullnodesAliases: InstalledFullnode[],
+        installedFullnodesAliases: { [fullnodeName: string]: InstalledFullnodeConfig },
         runnableFullnodes: string[],
         runningFullnodes: string[],
-        runningFullnodesAliases: RunningFullnodeProcess[],
+        runningFullnodesAliases: { [fullnodeName: string]: { [fullnodeAlias: string]: RunningFullnodeProcess } },
         managedFullnodes: string[],
         fullnodesStats: { [fullnodeName: string]: FullnodeStats },
     },
@@ -617,7 +619,7 @@ export type FullnodeStats = {
 };
 
 
-export type InstalledFullnode = InstalledFullnodeConfig;
+//export type InstalledFullnode = InstalledFullnodeConfig;
 
 export type InstalledFullnodeConfig = {
     name: string,
@@ -689,16 +691,6 @@ export type fullnodeRunInfosParams = {
     alias?: string,
 }
 
-export type AllFullnodes = {
-    [fullnodeName: string]: {
-        installed: boolean,
-        running: boolean,
-        installable: boolean,
-        runnable: boolean,
-        managed: boolean,
-    }
-};
-
 
 export type getFullnodeCommandArgsParams = {
     fullnode: string,
@@ -712,6 +704,18 @@ export type getFullnodeCommandFileParams = {
 export type getFullnodeInfosParams = {
 }
 
+
+export type AllFullnodes = {
+    [fullnodeName: string]: {
+        installed: boolean,
+        installedAliases: { [fullnodeName: string]: InstalledFullnodeConfig },
+        running: boolean,
+        installable: boolean,
+        runnable: boolean,
+        managed: boolean,
+        runningAlias: { [fullnodeName: string]: { [fullnodeAlias: string]: RunningFullnodeProcess } },
+    }
+};
 
 
 /* POOL */
@@ -744,9 +748,9 @@ export type PoolInfos = {
     status?: {
         //monitorStatus: boolean,
         //runningEngines: string[],
-        //runningEnginesAliases: any[],
+        //runningEnginesAliases: { [engineName: string]: InstalledEngineConfig },
         //installedEngines: string[],
-        //installedEnginesAliases: any[],
+        //installedEnginesAliases: { [engineName: string]: RunningEngineProcess },
         //enginesStats: EnginesStats
         //poolsStats: PoolsStats
     },
