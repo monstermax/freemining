@@ -89,6 +89,8 @@
 <div class="row">
 <% Object.entries(allMiners).forEach(entry => {
     const [ minerName, miner ] = entry;
+
+    if (! miner.managed && ! config.rig.showNotManagedRigs) return;
     %>
     <div class="col-12 col-lg-3">
         <div class="card m-2" style="width: 18rem;">

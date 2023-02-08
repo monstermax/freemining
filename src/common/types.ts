@@ -210,6 +210,7 @@ export type RigConfig = {
         port: number,
         pass?: string,
     },
+    showNotManagedRigs?: boolean,
     coinsUserconf?: rigCoinsUserconfConfig,
     coinsMiners?: rigCoinsMinersConfig,
     miners?: rigMinersConfig,

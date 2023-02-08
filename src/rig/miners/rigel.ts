@@ -24,7 +24,7 @@ Download : https://github.com/rigelminer/rigel/releases
 const minerName   = 'rigel';
 const minerTitle  = 'rigel';
 const github      = 'rigelminer/rigel';
-const lastVersion = '1.3.4';
+const lastVersion = '1.3.5';
 
 /* ########## MAIN ######### */
 
@@ -37,8 +37,7 @@ export const minerInstall: t.minerInstallInfos = {
     ...baseMiner.minerInstall,
     minerName,
     minerTitle,
-    //lastVersion,   // uncomment me when install script is ready
-    lastVersion: '', // delete me    when install script is ready
+    lastVersion,
     github,
 
 
@@ -47,7 +46,7 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = `${SEP}rigel-${version}-linux`;
+        let subDir = `${SEP}rigel-${version}-${platform}`;
 
         if (platform === 'linux') subDir = `${SEP}rigel-${version}-linux`;
         if (platform === 'win32') subDir = `${SEP}rigel-${version}-win`;
@@ -60,8 +59,6 @@ export const minerInstall: t.minerInstallInfos = {
             'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -98,7 +95,7 @@ export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
     apiPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'rigel',
     managed: false, // set true when the getInfos() script is ready
 
 

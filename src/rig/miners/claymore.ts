@@ -15,16 +15,16 @@ import type *  as t from '../../common/types';
 /*
 
 Website  : 
-Github   : 
-Download :
+Github   : https://github.com/Claymore-Dual/Claymore-Dual-Miner
+Download : https://github.com/Claymore-Dual/Claymore-Dual-Miner/releases
 
 */
 /* ########## CONFIG ######### */
 
-const minerName   = ''; // edit-me
-const minerTitle  = ''; // edit-me
-const github      = ''; // edit-me
-const lastVersion = ''; // edit-me
+const minerName   = 'claymore';
+const minerTitle  = 'Claymore';
+const github      = 'Claymore-Dual/Claymore-Dual-Miner';
+const lastVersion = '15.0';
 
 /* ########## MAIN ######### */
 
@@ -37,8 +37,7 @@ export const minerInstall: t.minerInstallInfos = {
     ...baseMiner.minerInstall,
     minerName,
     minerTitle,
-    //lastVersion,   // uncomment me when install script is ready
-    lastVersion: '', // delete me    when install script is ready
+    lastVersion,
     github,
 
 
@@ -47,18 +46,18 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = `${SEP}Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v${version}.-.LINUX`;
+
+        if (platform === 'linux') subDir = `${SEP}Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v${version}.-.LINUX`;
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/Claymore-Dual/Claymore-Dual-Miner/releases/download/${version}/Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v${version}.-.LINUX.zip`,
+            'win32':   ``, // https://github.com/Claymore-Dual/Claymore-Dual-Miner/releases/download/${version}/Claymore.s.dual.ethereum.v${version}.-.widows.zip
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -95,7 +94,7 @@ export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
     apiPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    command: 'ethdcrminer64',
     managed: false, // set true when the getInfos() script is ready
 
 

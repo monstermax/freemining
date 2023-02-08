@@ -93,7 +93,8 @@ function rigMinerRunModal(rigData, req, res, next) {
         }
         const rigName = config.rig.name || rigInfos.rig.name || 'anonymous-rig';
         const data = Object.assign(Object.assign({}, utilFuncs), { rigName,
-            rigInfos, miners: allMiners, runnableMiners,
+            rigInfos,
+            config, miners: allMiners, runnableMiners,
             runningMiners,
             installedMiners, miner: minerName });
         res.render(`.${SEP}rig${SEP}run_miner_modal.html`, data);

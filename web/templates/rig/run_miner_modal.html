@@ -113,7 +113,7 @@
 
                                         const managedMiners = rigInfos.status.managedMiners;
                                         const isManaged = managedMiners.includes(miner);
-                                        //if (! isManaged) return;
+                                        if (! isManaged && ! config.rig.showNotManagedRigs) return;
 
                                         let suffix = '';
                                         let disabled = '';

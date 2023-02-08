@@ -12,38 +12,38 @@ const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /*
 
 Website  :
-Github   :
-Download :
+Github   : https://github.com/Claymore-Dual/Claymore-Dual-Miner
+Download : https://github.com/Claymore-Dual/Claymore-Dual-Miner/releases
 
 */
 /* ########## CONFIG ######### */
-const minerName = ''; // edit-me
-const minerTitle = ''; // edit-me
-const github = ''; // edit-me
-const lastVersion = ''; // edit-me
+const minerName = 'claymore';
+const minerTitle = 'Claymore';
+const github = 'Claymore-Dual/Claymore-Dual-Miner';
+const lastVersion = '15.0';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
 exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), { minerName,
-    minerTitle, 
-    //lastVersion,   // uncomment me when install script is ready
-    lastVersion: '', // delete me    when install script is ready
+    minerTitle,
+    lastVersion,
     github,
     install(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = `${SEP}Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v${version}.-.LINUX`;
+            if (platform === 'linux')
+                subDir = `${SEP}Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v${version}.-.LINUX`;
             // Download url selection
             const dlUrls = {
-                'linux': ``,
+                'linux': `https://github.com/Claymore-Dual/Claymore-Dual-Miner/releases/download/${version}/Claymore.s.Dual.Ethereum.AMD+NVIDIA.GPU.Miner.v${version}.-.LINUX.zip`,
                 'win32': ``,
                 'darwin': ``,
-                'freebsd': ``, // edit-me
+                'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -65,7 +65,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: '', managed: false, // set true when the getInfos() script is ready
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: 'ethdcrminer64', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {

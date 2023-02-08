@@ -217,6 +217,7 @@ function loadDaemonRigConfig(confDir) {
     let farmAgentHost = '';
     let farmAgentPort = 0;
     let farmAgentPass = '';
+    let showNotManagedRigs = false;
     const rigConfigFile = `${confDir}${SEP}rig${SEP}rig.json`;
     if (fs_1.default.existsSync(rigConfigFile)) {
         const rigConfigJson = fs_1.default.readFileSync(rigConfigFile).toString();
@@ -226,6 +227,7 @@ function loadDaemonRigConfig(confDir) {
             farmAgentHost = ((_a = rigConfig.farmAgent) === null || _a === void 0 ? void 0 : _a.host) || farmAgentHost;
             farmAgentPort = ((_b = rigConfig.farmAgent) === null || _b === void 0 ? void 0 : _b.port) || farmAgentPort;
             farmAgentPass = ((_c = rigConfig.farmAgent) === null || _c === void 0 ? void 0 : _c.pass) || farmAgentPass;
+            showNotManagedRigs = rigConfig.showNotManagedRigs || false;
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
@@ -242,6 +244,7 @@ function loadDaemonRigConfig(confDir) {
             port: farmAgentPort,
             pass: farmAgentPass,
         },
+        showNotManagedRigs,
     };
     (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
