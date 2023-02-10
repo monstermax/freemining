@@ -82,7 +82,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.rmSync(aliasDir, { recursive: true, force: true });
         fs.mkdirSync(aliasDir, {recursive: true});
-        fs.renameSync( `${tempDir}${SEP}${dlFileName}`, `${aliasDir}/${installFileName}`);
+        fs.copyFileSync( `${tempDir}${SEP}${dlFileName}`, `${aliasDir}/${installFileName}`);
         fs.chmodSync(`${aliasDir}/${installFileName}`, 0o755);
 
         // Write report files
