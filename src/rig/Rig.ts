@@ -261,7 +261,7 @@ export /* async */ function minerInstallStart(config: t.DaemonConfigAll, params:
     const minerInstall = minersInstalls[minerName];
 
     /* await */ minerInstall.install(config, params).catch((err: any) => {
-        console.warn(`${now()} [WARNING] [RIG] Cannot start miner ${minerName} : ${err.message}`);
+        console.warn(`${now()} [WARNING] [RIG] Cannot install miner ${minerName} : ${err.message}`);
     });
 }
 
