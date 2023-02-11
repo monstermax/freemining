@@ -347,7 +347,7 @@ export /* async */ function fullnodeRunStart(config: t.DaemonConfigAll, params: 
     };
     processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`] = process;
 
-    const processName = `[freemining-beta.node.fullnodes.${fullnodeName}.${fullnodeAlias}] ${cmdPath}`;
+    const processName = `[freemining.node.fullnodes.${fullnodeName}.${fullnodeAlias}] ${cmdPath}`;
 
 
     console.log(`${now()} [INFO] [NODE] Fullnode Run Start: ${fullnodeName} (${fullnodeAlias}))`);

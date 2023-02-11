@@ -382,7 +382,7 @@ export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.m
     };
     processes[`miner-run-${minerName}-${minerAlias}`] = process;
 
-    const processName = `[freemining-beta.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
+    const processName = `[freemining.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
 
 
     console.log(`${now()} [INFO] [RIG] Miner Run Start: ${minerName} (${minerAlias}))`);
@@ -556,7 +556,7 @@ export function getProcesses(): { [processName: string]: t.Process } {
 /*
 export function getRigPs(): string {
     let cmd = '';
-    cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining-beta\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
+    cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
     //cmd = `tasklist /v /fo csv`;
     //cmd = `tasklist /v /fo csv /fi "pid eq <pid>"`;
     //cmd = `tasklist /v /fo csv /fi "ppid eq <pid>"`;

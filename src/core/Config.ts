@@ -22,8 +22,8 @@ const defaultHttpStaticDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP
 const defaultHttpTemplatesDir: string = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
 
 const userHomeDir: string = os.userInfo().homedir; //.replace( new RegExp(path.sep, 'g') , SEP);
-const defaultUserFrmDirUnix: string = `${userHomeDir}${SEP}.freemining-beta`;
-const defaultUserFrmDirWin: string = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
+const defaultUserFrmDirUnix: string = `${userHomeDir}${SEP}.freemining`;
+const defaultUserFrmDirWin: string = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining`;
 const defaultUserFrmDir = (os.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 
 // cli options

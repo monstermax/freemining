@@ -53,7 +53,7 @@ Usage:
 frmd <params>
 
      --help                                  # display this this message
-     --user-dir                              # default %HOME%/.freemining-beta OR %HOME%/AppData/Local/freemining-beta
+     --user-dir                              # default %HOME%/.freemining OR %HOME%/AppData/Local/freemining
 
      --create-config
 
