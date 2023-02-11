@@ -1,0 +1,104 @@
+
+<div class="row">
+    <div class="col-8">
+
+        <div>
+            <h1 class="d-inline-block">Freemining</h1>
+            <h6 class="d-inline-block"> / RIG Manager</h6>
+        </div>
+
+        <br />
+
+        <div>
+            <a class="btn btn-primary btn-sm p-1 m-1"  href="status">Node status</a>
+            &nbsp;
+            <a class="btn btn-secondary btn-sm p-1 m-1"  href="status.json">JSON status</a>
+            &nbsp;&nbsp;
+            &nbsp;&nbsp;
+            <% if (monitorStatus) { %>
+                Monitor is running.
+            <% } else { %>
+                Monitor is not running.
+            <% } %>
+            <a class="btn btn-primary btn-sm p-1 m-1"  href="monitor-run">Manage monitor</a>
+        </div>
+
+    </div>
+    <div class="col-4 text-end">
+        <img src="/img/fullnode1.png" class="rounded me-2" style="width:128px; height:128px;" />
+    </div>
+</div>
+
+<hr />
+
+<h2>Fullnodes</h2>
+<div class="row">
+<% Object.entries(allFullnodes).forEach(entry => {
+    const [ fullnodeName, fullnode ] = entry;
+    %>
+    <div class="col-6 col-lg-3">
+        <div class="card m-2" style="width: 18rem;">
+            <div class="card-header bg-<%=(fullnode.running ? "success" : (fullnode.installed ? "warning" : "danger"))%>">
+                <img src="/img/fullnodes/<%=fullnodeName%>.webp" style="width:32px;" />
+                <span class="h3"><%- fullnodeName %></span>
+            </div>
+            <div class="card-body">
+                <%- fullnodeName %> is :
+                <br />
+
+                - <% if (fullnode.runnable) { %>
+                    <% if (fullnode.running) { %>
+                        <div class="badge bg-success">running</div>
+
+                        <a class="btn btn-primary btn-sm p-1 m-1" href="fullnodes/<%- fullnodeName %>/run">Manage</a>
+                        <% if (managedFullnodes.includes(fullnodeName)) { %>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="fullnodes/<%- fullnodeName %>/run?action=status">JSON</a>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="fullnodes/<%- fullnodeName %>/run?action=log">Log</a>
+                        <% } %>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not running</div>
+
+                        <% if (installedFullnodes.includes(fullnodeName) && runnableFullnodes.includes(fullnodeName) && ! runningFullnodes.includes(fullnodeName)) { %>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="fullnodes/<%- fullnodeName %>/run">Start</a>
+                        <% } %>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not runnable</div>
+                <% } %>
+                <br />
+
+                - <% if (fullnode.installable) { %>
+                    <% if (fullnode.installed) { %>
+                        <div class="badge bg-success">installed</div>
+
+                        <% if (! runningFullnodes.includes(fullnodeName)) { %>
+                            <a class="btn btn-warning btn-sm p-1 m-1" href="fullnodes/<%- fullnodeName %>/install">Uninstall</a>
+                        <% } %>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not installed</div>
+                    <% } %>
+
+                    <% if (! installedFullnodes.includes(fullnodeName)) { %>
+                        <a class="btn btn-primary btn-sm p-1 m-1" href="fullnodes/<%- fullnodeName %>/install">Install</a>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not installable</div>
+                <% } %>
+                <br />
+
+                - <% if (fullnode.managed) { %>
+                    <div class="badge bg-success">managed</div>
+
+                <% } else { %>
+                    <div class="badge bg-danger">not managed</div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+<% }) %>
+</div>
+

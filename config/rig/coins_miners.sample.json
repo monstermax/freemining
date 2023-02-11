@@ -1,0 +1,181 @@
+{
+    "ALPH": {
+        "bzminer": {
+            "algo": "alph"
+        }
+    },
+    "BEAM": {
+		"bminer": {
+            "algo": ""
+        },
+		"gminer": {
+            "algo": "beamhash"
+        },
+		"lolminer": {
+            "algo": "",
+            "extraArgs": "--coin BEAM"
+        },
+		"nbminer": {
+            "algo": "beamv3"
+        },
+		"miniz": {
+            "algo": ""
+        }
+    },
+    "ERG": {
+        "bzminer": {
+            "algo": "ergo"
+        },
+        "lolminer": {
+            "algo": "AUTOLYKOS2"
+        },
+        "nbminer": {
+            "algo": "ergo"
+        },
+		"srbminer": {
+            "algo": "autolykos2"
+        },
+        "teamredminer": {
+            "algo": "ergo"
+        },
+        "trex": {
+            "algo": "autolykos2"
+        }
+    },
+    "ETHW": {
+        "cpuminer": {
+            "algo": "ethw"
+        },
+		"gminer": {
+            "algo": "ethash"
+        },
+		"lolminer": {
+            "algo": "ethash"
+        },
+		"miniz": {
+            "algo": ""
+        },
+		"phoenix": {
+            "algo": ""
+        },
+		"teamredminer": {
+            "algo": "ethash"
+        },
+		"trex": {
+            "algo": "ethash"
+        },
+		"nbminer": {
+            "algo": "ethash"
+        }
+    },
+    "ETC": {
+        "cpuminer": {
+            "algo": "etchash"
+        },
+        "lolminer": {
+            "algo": "ETCHASH"
+        }
+    },
+    "FIRO": {
+        "lolminer": {
+            "algo": "ZEL"
+        },
+        "firominer": {
+            "algo": "auto"
+        },
+		"teamredminer": {
+            "algo": "firopow"
+        },
+        "trex": {
+            "algo": "firopow"
+        }
+    },
+    "FLUX": {
+        "gminer": {
+            "algo": "125_4",
+            "extraArgs": "--pers ZelProof"
+        },
+        "lolminer": {
+            "algo": "ZEL"
+        },
+		"miniz": {
+            "algo": "",
+            "extra": "--par=125,4 --pers=ZelProof"
+        }
+    },
+    "FNNC": {
+        "cpuminer": {
+            "algo": "YESCRYPTR16"
+        },
+        "srbminer": {
+            "algo": "yescryptr16"
+        }
+    },
+    "KASPA": {
+        "bzminer": {
+            "algo": "kaspa"
+        }
+    },
+    "MEWC": {
+        "bzminer": {
+            "algo": "meowcoin"
+        },
+        "gminer": {
+            "algo": "kawpow"
+        }
+    },
+    "NEOX": {
+        "bzminer": {
+            "algo": "neox"
+        }
+    },
+    "NEXA": {
+        "bzminer": {
+            "algo": "nexa"
+        }
+    },
+    "RTM": {
+        "xmrig": {
+            "algo": "ghostrider"
+        }
+    },
+    "RVN": {
+		"bminer": {
+            "algo": ""
+        },
+        "bzminer": {
+            "algo": "rvn"
+        },
+		"kawpowminer": {
+            "algo": ""
+        },
+        "gminer": {
+            "algo": "kawpow"
+        },
+		"miniz": {
+            "algo": ""
+        },
+		"teamredminer": {
+            "algo": "kawpow"
+        },
+		"trex": {
+            "algo": "kawpow"
+        },
+		"nbminer": {
+            "algo": "kawpow"
+        }
+    },
+    "RXD": {
+        "bzminer": {
+            "algo": "radiant"
+        }
+    },
+    "XMR": {
+        "xmrig": {
+            "algo": "rx/0"
+        },
+        "nanominer": {
+            "algo": "randomx"
+        }
+    }
+}

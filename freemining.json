@@ -1,6 +1,0 @@
-{
-    "frmConfDir": "~/.freemining/conf",
-    "frmLogDir": "~/.freemining/log",
-    "frmPidDir": "~/.freemining/run",
-    "frmDataDir": "~/local/share/freemining"
-}

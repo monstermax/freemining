@@ -1,0 +1,50 @@
+{
+    "FLUX": {
+        "minerpool": {
+            "default": "flux-eu.minerpool.pro:2032"
+        }
+    },
+    "XMR": {
+        "xmrpool": {
+            "default": "xmrpool.eu:5555"
+        }
+    },
+    "ERG": {
+        "jjpool": {
+            "default": "eu.jjpool.fr:3056"
+        }
+    },
+    "ETC": {
+        "jjpool": {
+            "default": "eu.jjpool.fr:3333"
+        }
+    },
+    "RTM": {
+        "jjpool": {
+            "default": "jjpool.eu:7070"
+        }
+    },
+    "RXD": {
+        "jjpool": {
+            "default": "eu.jjpool.fr:5550"
+        }
+    },
+    "RVN": {
+        "minerpool": {
+            "default": "rvn-eu.minerpool.pro:16059"
+        },
+        "2miners": {
+            "default": "rvn.2miners.com:6060"
+        }
+    },
+    "FIRO": {
+        "2miners": {
+            "default": "firo.2miners.com:8181"
+        }
+    },
+    "MEWC": {
+        "minerpool": {
+            "default": "mewc-eu.minerpool.pro:7034"
+        }
+    }
+}

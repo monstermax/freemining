@@ -1,0 +1,162 @@
+{
+    "BEAM": {
+        "cruxpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "beam.cruxpool.com:3333"
+            }
+        },
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "beam.2miners.com:5252",
+                "default2": "beam.2miners.com:5353"
+            }
+        }
+    },
+    "ETC": {
+        "jjpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "europe": "eu.jjpool.fr:3333"
+            }
+        },
+        "cruxpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "ethw.cruxpool.com:5555"
+            }
+        },
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "etc.2miners.com:1010"
+            }
+        }
+    },
+    "ETHW": {
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "ethw.2miners.com:2020"
+            }
+        }
+    },
+    "ERG": {
+        "jjpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "europe": "eu.jjpool.fr:3056"
+            }
+        },
+        "cruxpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "ergo.cruxpool.com:4444"
+            }
+        },
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "erg.2miners.com:8888"
+            }
+        }
+    },
+    "FIRO": {
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "firo.2miners.com:8181"
+            }
+        },
+        "cruxpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "firo.cruxpool.com:2222"
+            }
+        }
+    },
+    "FLUX": {
+        "minerpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "flux-eu.minerpool.pro:2032"
+            }
+        },
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "flux.2miners.com:9090"
+            }
+        }
+    },
+    "FNNC": {
+        "minerpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "connect.fennecblockchain.com:8200"
+            }
+        }
+    },
+    "MEWC": {
+        "minerpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "mewc-eu.minerpool.pro:7034"
+            }
+        }
+    },
+    "RTM": {
+        "jjpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "jjpool.eu:7070"
+            }
+        }
+    },
+    "RXD": {
+        "jjpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "europe": "eu.jjpool.fr:5550"
+            }
+        }
+    },
+    "RVN": {
+        "minerpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "rvn-eu.minerpool.pro:16059"
+            }
+        },
+        "2miners": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "rvn.2miners.com:6060",
+                "default2": "rvn.2miners.com:6161"
+            }
+        },
+        "cruxpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "rvn.cruxpool.com:9999"
+            }
+        },
+        "hiveoin": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "rvn.hiveon.com:8888",
+                "default2": "rvn.hiveon.com:9999"
+            }
+        }
+    },
+    "XMR": {
+        "xmrpool": {
+            "user": "{wallet}+{worker}",
+            "urls": {
+                "Low end hardware": "xmrpool.eu:3333",
+                "Mid range hardware": "xmrpool.eu:5555"
+            }
+        }
+    }
+}

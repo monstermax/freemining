@@ -1,0 +1,160 @@
+
+<div class="row">
+    <div class="col-10">
+
+        <div>
+            <h1 class="d-inline-block">Freemining</h1>
+            <h6 class="d-inline-block"> / RIG Manager</h6>
+        </div>
+
+        <br />
+
+        <div>
+            <a class="btn btn-primary btn-sm p-1 m-1" href="status">Rig status</a>
+            &nbsp;
+            <a class="btn btn-secondary btn-sm p-1 m-1" href="status.json">JSON status</a>
+            &nbsp;
+            <a class="btn btn-secondary btn-sm p-1 m-1" href="config.json">JSON config</a>
+            &nbsp;&nbsp;
+            &nbsp;&nbsp;
+
+            <% if (monitorStatus) { %>
+                Monitor is running.
+            <% } else { %>
+                Monitor is not running.
+            <% } %>
+            <a class="btn btn-primary btn-sm p-1 m-1" href="monitor-run">Manage monitor</a>
+            &nbsp;&nbsp;
+            &nbsp;&nbsp;
+
+            <% if (rigInfos.status?.farmAgentStatus) { %>
+                Farm connected: <%=rigInfos.config?.farmAgent.host%>:<%=rigInfos.config?.farmAgent.port%>
+
+            <% } else { %>
+                Farm not connected.
+            <% } %>
+            <a class="btn btn-primary btn-sm p-1 m-1" href="farm-agent/run">Manage connection</a>
+        </div>
+
+    </div>
+    <div class="col-2 text-end">
+        <img src="/img/mining2.png" class="rounded me-2" style="width:128px; height:128px;" />
+    </div>
+</div>
+
+<hr />
+
+
+<h2>Devices</h2>
+
+<h3>CPU:</h3>
+<div class="row">
+    <div class="col-12">
+        <div class="border border-dark rounded bg-info text-light m-1 p-1">
+            <img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" />
+            <span class="fw-bold"><%= rigInfos.systemInfos.cpu.manufacturer %> <%= rigInfos.systemInfos.cpu.brand %></span> (<%= rigInfos.systemInfos.cpu.physicalCores %> cores, <%= rigInfos.systemInfos.cpu.cores %> threads)
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h3>GPUS:</h3>
+<div class="row">
+    <% rigInfos.systemInfos.gpus.forEach(gpu => {
+        const isNvidia = gpu.vendor.toLowerCase().includes('nvidia') || gpu.model.toLowerCase().includes('nvidia');
+        const isAMD = gpu.vendor.toLowerCase().includes('amd') || gpu.model.toLowerCase().includes('amd');
+
+        let gpuImg = '/img/gpu.trans.png';
+        if (isNvidia) {
+            gpuImg = '/img/gpu5_1.trans.png';
+        } else if (isAMD) {
+            gpuImg = '/img/gpu6_4.trans.png';
+        }
+        %>
+        <div class="col-12 col-lg-6">
+            <div class="border border-primary rounded bg-info text-light m-1 p-1">
+                <img src="<%=gpuImg%>" class="rounded me-2" style="width:48px; height:48px;" />
+                #<%=gpu.idx%> : <span class="fw-bold"><%=gpu.model%></span> (<%=gpu.vendor%>)
+            </div>
+        </div>
+        <%
+    }) %>
+</div>
+
+<hr />
+
+
+<h2>Miners:</h2>
+<div class="row">
+    <% Object.entries(allMiners).forEach(entry => {
+        const [ minerName, miner ] = entry;
+
+        if (! miner.managed && ! config.rig.showNotManagedRigs) return;
+        %>
+        <div class="col-12 col-lg-3">
+            <div class="card m-2" style="width: 18rem;">
+                <div class="card-header bg-<%=(miner.running ? "success" : (miner.installed ? "warning" : "danger"))%>">
+                    <span class="badge bg-info"><%- minerName.toUpperCase().slice(0, 1) %></span>
+                    <span class="h3"><%- minerName %></span>
+                </div>
+                <div class="card-body">
+                    <%- minerName %> is :
+                    <br />
+
+                    - <% if (miner.runnable) { %>
+                        <% if (miner.running) { %>
+                            <div class="badge bg-success">running</div>
+
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run">Manage</a>
+                            <% if (managedMiners.includes(minerName)) { %>
+                                <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run?action=status">JSON</a>
+                                <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run?action=log">Log</a>
+                            <% } %>
+
+                        <% } else { %>
+                            <div class="badge bg-danger">not running</div>
+
+                            <% if (installedMiners.includes(minerName) && runnableMiners.includes(minerName) && ! runningMiners.includes(minerName)) { %>
+                                <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/run">Start</a>
+                            <% } %>
+                        <% } %>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not runnable</div>
+                    <% } %>
+                    <br />
+
+                    - <% if (miner.installable) { %>
+                        <% if (miner.installed) { %>
+                            <div class="badge bg-success">installed</div>
+
+                            <% if (! runningMiners.includes(minerName)) { %>
+                                <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/install">Uninstall</a>
+                            <% } %>
+
+                        <% } else { %>
+                            <div class="badge bg-danger">not installed</div>
+                        <% } %>
+
+                        <% if (! installedMiners.includes(minerName)) { %>
+                            <a class="btn btn-primary btn-sm p-1 m-1" href="miners/<%- minerName %>/install">Install</a>
+                        <% } %>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not installable</div>
+                    <% } %>
+                    <br />
+
+                    - <% if (miner.managed) { %>
+                        <div class="badge bg-success">managed</div>
+
+                    <% } else { %>
+                        <div class="badge bg-danger">not managed</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+</div>
+

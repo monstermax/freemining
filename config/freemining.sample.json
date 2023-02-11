@@ -1,0 +1,7 @@
+{
+    "listenAddress": "0.0.0.0",
+    "listenPort": 1234,
+    "wssConnTimeout": 10000,
+    "version": "1.0.0",
+    "httpAllowedIps": []
+}
