@@ -305,33 +305,35 @@ export function loadDaemonRigConfig(confDir: string): t.RigConfig {
     fs.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
 
 
-    const coinsUserconf = loadDaemonRigCoinsUserconfConfig(confDir);
+    const coinsWallets = loadDaemonRigCoinsWalletsConfig(confDir);
+    const coinsPools = loadDaemonRigCoinsPoolsConfig(confDir);
     const coinsMiners = loadDaemonRigCoinsMinersConfig(confDir);
     const miners = loadDaemonRigMinersConfig(confDir);
 
     return {
         ...rigConfig,
         coinsMiners,
-        coinsUserconf,
+        coinsWallets,
+        coinsPools,
         miners,
     };
 }
 
 
-function loadDaemonRigCoinsUserconfConfig(confDir: string): t.rigCoinsUserconfConfig {
-    const userconfConfigFile = `${confDir}${SEP}rig${SEP}coins_userconf.json`;
-    const userconfConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_userconf.sample.json`;
-    let userconfConfig: t.rigCoinsUserconfConfig = {};
-    let _configFile = userconfConfigFile;
+function loadDaemonRigCoinsWalletsConfig(confDir: string): t.rigCoinsWalletsConfig {
+    const walletsConfigFile = `${confDir}${SEP}rig${SEP}coins_wallets.json`;
+    const walletsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_wallets.sample.json`;
+    let walletsConfig: t.rigCoinsWalletsConfig = {};
+    let _configFile = walletsConfigFile;
 
-    if (! fs.existsSync(userconfConfigFile)) {
-        _configFile = userconfConfigDemoFile;
+    if (! fs.existsSync(walletsConfigFile)) {
+        _configFile = walletsConfigDemoFile;
     }
 
     if (fs.existsSync(_configFile)) {
-        const userconfConfigJson = fs.readFileSync(_configFile).toString();
+        const walletsConfigJson = fs.readFileSync(_configFile).toString();
         try {
-            userconfConfig = JSON.parse(userconfConfigJson);
+            walletsConfig = JSON.parse(walletsConfigJson);
 
 
         } catch (err: any) {
@@ -339,13 +341,44 @@ function loadDaemonRigCoinsUserconfConfig(confDir: string): t.rigCoinsUserconfCo
         }
     }
 
-    const coinsUserconf: t.rigCoinsUserconfConfig = {
-        ...userconfConfig,
+    const coinsWallets: t.rigCoinsWalletsConfig = {
+        ...walletsConfig,
     };
     mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
-    fs.writeFileSync(userconfConfigFile, JSON.stringify(coinsUserconf, null, 4));
+    fs.writeFileSync(walletsConfigFile, JSON.stringify(coinsWallets, null, 4));
 
-    return coinsUserconf;
+    return coinsWallets;
+}
+
+
+function loadDaemonRigCoinsPoolsConfig(confDir: string): t.rigCoinsPoolsConfig {
+    const poolsConfigFile = `${confDir}${SEP}rig${SEP}coins_pools.json`;
+    const poolsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_pools.sample.json`;
+    let poolsConfig: t.rigCoinsPoolsConfig = {};
+    let _configFile = poolsConfigFile;
+
+    if (! fs.existsSync(poolsConfigFile)) {
+        _configFile = poolsConfigDemoFile;
+    }
+
+    if (fs.existsSync(_configFile)) {
+        const poolsConfigJson = fs.readFileSync(_configFile).toString();
+        try {
+            poolsConfig = JSON.parse(poolsConfigJson);
+
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+
+    const coinsPools: t.rigCoinsPoolsConfig = {
+        ...poolsConfig,
+    };
+    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs.writeFileSync(poolsConfigFile, JSON.stringify(coinsPools, null, 4));
+
+    return coinsPools;
 }
 
 

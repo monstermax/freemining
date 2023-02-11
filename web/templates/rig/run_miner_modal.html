@@ -61,8 +61,22 @@
                             <option></option>
 
                             <%
-                            const availableMinersCoins = Object.keys(rigInfos.config.coinsMiners);
-                            const availableCoins = Object.keys(rigInfos.config.coinsUserconf).filter(coin => availableMinersCoins.includes(coin));
+                            const availableCoinsMiners = Object.keys(rigInfos.config.coinsMiners);
+                            const availableCoinsWallets = Object.keys(rigInfos.config.coinsWallets);
+                            const availableCoinsPools = Object.keys(rigInfos.config.coinsPools);
+
+                            const availableCoinsAllTmp = Array.from(new Set( [
+                                ...availableCoinsMiners,
+                                ...availableCoinsWallets,
+                                ...availableCoinsPools,
+                            ] ));
+
+                            const availableCoins = availableCoinsAllTmp.filter(coin => (
+                                true
+                                && availableCoinsMiners.includes(coin)
+                                && availableCoinsWallets.includes(coin)
+                                && availableCoinsPools.includes(coin)
+                            ));
                             %>
 
                             <%- availableCoins.map(coin => {

@@ -596,7 +596,7 @@ function modalStartMinerChangeCoin() {
         // coin selected
 
 
-        const coinWallets = coinsUserconf[coin].wallets || {};
+        const coinWallets = coinsWallets[coin] || {};
         const walletsHtml = Object.entries(coinWallets).map(entry => {
             const [walletName, walletAddress] = entry;
             return `<option value="${walletAddress}">${walletName} : ${walletAddress}</option>`;
@@ -609,8 +609,8 @@ function modalStartMinerChangeCoin() {
         }
 
         // refresh pools
-        const coinsPools = coinsUserconf[coin].pools || {};
-        const poolsHtml = Object.entries(coinsPools).map(entry => {
+        const coinPools = coinsPools[coin] || {};
+        const poolsHtml = Object.entries(coinPools).map(entry => {
             const [poolName, pool] = entry;
             const poolUrls = pool.urls || {};
             let poolUser = pool.user || '';

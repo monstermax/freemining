@@ -211,25 +211,27 @@ export type RigConfig = {
         pass?: string,
     },
     showNotManagedRigs?: boolean,
-    coinsUserconf?: rigCoinsUserconfConfig,
+    coinsWallets?: rigCoinsWalletsConfig,
+    coinsPools?: rigCoinsPoolsConfig,
     coinsMiners?: rigCoinsMinersConfig,
     miners?: rigMinersConfig,
 };
 
 
 
-export type rigCoinsUserconfConfig = {
+export type rigCoinsWalletsConfig = {
     [coinSymbol: string]: {
-        wallets: {
-            [walletName: string]: string, // wallet address
-        },
-        pools: {
-            [poolName: string]: {
-                [serverName: string]: string, // url => example.com:8888
-            }
-        },
+        [walletName: string]: string, // wallet address
     }
-};
+}
+
+export type rigCoinsPoolsConfig = {
+    [coinSymbol: string]: {
+        [poolName: string]: {
+            [serverName: string]: string, // url => example.com:8888
+        }
+    }
+}
 
 export type rigCoinsMinersConfig = {
     [coinSymbol: string]: {

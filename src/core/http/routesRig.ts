@@ -427,6 +427,15 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     });
 
 
+    // GET Rig config JSON => /rig/config.json
+    app.get(`${urlPrefix}/config.json`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        const config = Daemon.getConfig();
+        let content = JSON.stringify(config, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    });
+
+
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         rigStatus(await getRigData(), req, res, next);
