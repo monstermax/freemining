@@ -1,4 +1,23 @@
 
+<%
+const allCoins = rigInfos.config.coins;
+const availableCoinsMiners = Object.keys(rigInfos.config.coinsMiners);
+const availableCoinsWallets = Object.keys(rigInfos.config.coinsWallets);
+const availableCoinsPools = Object.keys(rigInfos.config.coinsPools);
+
+const availableCoinsAllTmp = Array.from(new Set( [
+    ...availableCoinsMiners,
+    ...availableCoinsWallets,
+    ...availableCoinsPools,
+] ));
+
+const availableCoins = availableCoinsAllTmp.filter(coin => (
+    true
+    && availableCoinsMiners.includes(coin)
+    && availableCoinsWallets.includes(coin)
+    && availableCoinsPools.includes(coin)
+));
+%>
 
 <!-- Start miner Modal -->
 <div class="modal modal-lg fade" id="startMinerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="startMinerLabel" aria-hidden="true">
@@ -12,79 +31,23 @@
                 <div class="modal-body">
                     <input type="hidden" name="action" id="action" value="" />
 
-                    <!--
-                    <div class="mb-3">
-                        <label for="newMiner_coin" class="form-label">Coin</label>
-                        <select id="newMiner_coin" name="coin" class="form-select" aria-describedby="newMiner_coin_Help">
-                            <option></option>
-                        </select>
-                        <div id="newMiner_coin_Help" class="form-text">optional. used to suggest algos. not yet implemented. do nothing</div>
-                    </div>
-                    -->
-
-                    <div class="mb-3 d-none">
-                        <label for="newMiner_preset" class="form-label">Load config</label>
-                        <select id="newMiner_preset" name="preset" class="form-select" aria-describedby="newMiner_preset_Help" onchange="loadStartMinerConfig(this.value)">
-                            <option value=""></option>
-
-                            <%- Object.entries({}).map((entry, idx) => {
-                                const [poolName, poolConfigs] = entry;
-
-                                let poolHtml = '';
-
-                                if (idx > 0) {
-                                    poolHtml += '<option value=""></option>';
-                                }
-
-                                poolHtml += '<optgroup label="+ ' + poolName + '">';
-
-                                poolHtml += Object.entries(poolConfigs).map(entry2 => {
-                                    const [coinName, preset] = entry2;
-                                    if (miner && preset.miner != miner) return;
-
-                                    let coinHtml = '<option value="' + poolName + '.' + coinName + '"> * ' + coinName + '&gt; ' + preset.name + ' (' + preset.miner + ')</option>';
-                                    return coinHtml;
-                                }).join('');
-
-                                poolHtml += '</optgroup>';
-
-                                return poolHtml;
-                            }).join('') %>
-                        </select>
-                        <div id="newMiner_preset_Help" class="form-text"></div>
-                    </div>
-
-
                     <div class="mb-3">
                         <label for="newMiner_coin" class="form-label">Coin<sup>*</sup></label>
                         <select id="newMiner_coin" name="coin" class="form-select" aria-describedby="newMiner_coin_Help" onchange="modalStartMinerChangeCoin()">
                             <option></option>
 
-                            <%
-                            const availableCoinsMiners = Object.keys(rigInfos.config.coinsMiners);
-                            const availableCoinsWallets = Object.keys(rigInfos.config.coinsWallets);
-                            const availableCoinsPools = Object.keys(rigInfos.config.coinsPools);
-
-                            const availableCoinsAllTmp = Array.from(new Set( [
-                                ...availableCoinsMiners,
-                                ...availableCoinsWallets,
-                                ...availableCoinsPools,
-                            ] ));
-
-                            const availableCoins = availableCoinsAllTmp.filter(coin => (
-                                true
-                                && availableCoinsMiners.includes(coin)
-                                && availableCoinsWallets.includes(coin)
-                                && availableCoinsPools.includes(coin)
-                            ));
-                            %>
-
                             <%- availableCoins.map(coin => {
                                 const coinMiners = Object.keys(rigInfos.config.coinsMiners[coin])
                                 const installedCoinMiners = coinMiners.filter(miner => rigInfos.status.installedMiners.includes(miner));
 
+                                let suffix = '';
+                                let _coin = allCoins[coin];
+                                if (_coin && _coin.coinName) {
+                                    suffix = ` - ${_coin.coinName}`;
+                                }
+
                                 if (installedCoinMiners.length > 0) {
-                                    return '<option value="' + coin + '">' + coin + '</option>';
+                                    return `<option value="${coin}">${coin}${suffix}</option>`;
 
                                 } else {
                                     return `<option value="${coin}" disabled>${coin} (no miner installed. Try to install one of them : ${coinMiners.join(', ')})</option>`;

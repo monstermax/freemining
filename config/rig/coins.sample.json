@@ -1,0 +1,62 @@
+{
+    "BEAM": {
+        "coinName": "Beam",
+        "algo": "",
+        "explorer": "https://explorer.beam.mw/"
+    },
+    "ETC": {
+        "coinName": "Ethereum Classic",
+        "algo": "",
+        "explorer": "https://blockscout.com/etc/mainnet"
+    },
+    "ETHW": {
+        "coinName": "Ehtereum POW",
+        "algo": "",
+        "explorer": "https://blockroma.com/ethw/mainnet"
+    },
+    "ERG": {
+        "coinName": "Ergo",
+        "algo": "",
+        "explorer": "https://explorer.ergoplatform.com/"
+    },
+    "FIRO": {
+        "coinName": "Firo",
+        "algo": "",
+        "explorer": "https://explorer.zcoin.io/"
+    },
+    "FLUX": {
+        "coinName": "Flux",
+        "algo": "",
+        "explorer": "https://explorer.runonflux.io/"
+    },
+    "FNNC": {
+        "coinName": "Fennec",
+        "algo": "",
+        "explorer": "https://scan.fennecblockchain.com/"
+    },
+    "MEWC": {
+        "coinName": "Meowcoin",
+        "algo": "",
+        "explorer": "https://explorer.mewccrypto.com/"
+    },
+    "RTM": {
+        "coinName": "Raptoreum",
+        "algo": "",
+        "explorer": "https://explorer.raptoreum.com/"
+    },
+    "RXD": {
+        "coinName": "Radiant",
+        "algo": "",
+        "explorer": "https://explorer.radiantblockchain.org/"
+    },
+    "RVN": {
+        "coinName": "Ravencoin",
+        "algo": "",
+        "explorer": "https://ravencoin.network/"
+    },
+    "XMR": {
+        "coinName": "Monero",
+        "algo": "",
+        "explorer": "https://localmonero.co/blocks/"
+    }
+}

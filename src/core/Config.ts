@@ -309,12 +309,14 @@ export function loadDaemonRigConfig(confDir: string): t.RigConfig {
     const coinsPools = loadDaemonRigCoinsPoolsConfig(confDir);
     const coinsMiners = loadDaemonRigCoinsMinersConfig(confDir);
     const miners = loadDaemonRigMinersConfig(confDir);
+    const coins = loadDaemonRigCoinsConfig(confDir);
 
     return {
         ...rigConfig,
         coinsMiners,
         coinsWallets,
         coinsPools,
+        coins,
         miners,
     };
 }
@@ -413,10 +415,10 @@ function loadDaemonRigCoinsMinersConfig(confDir: string): t.rigCoinsMinersConfig
 }
 
 
-function loadDaemonRigMinersConfig(confDir: string): t.rigCoinsMinersConfig {
+function loadDaemonRigMinersConfig(confDir: string): t.rigMinersConfig {
     const minersConfigFile = `${confDir}${SEP}rig${SEP}miners.json`;
     const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}miners.sample.json`;
-    let minersConfig: t.rigCoinsMinersConfig = {};
+    let minersConfig: t.rigMinersConfig = {};
     let _configFile = minersConfigFile;
 
     if (! fs.existsSync(minersConfigFile)) {
@@ -434,13 +436,44 @@ function loadDaemonRigMinersConfig(confDir: string): t.rigCoinsMinersConfig {
         }
     }
 
-    const miners: t.rigCoinsMinersConfig = {
+    const miners: t.rigMinersConfig = {
         ...minersConfig,
     };
     mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     fs.writeFileSync(minersConfigFile, JSON.stringify(miners, null, 4));
 
     return miners;
+}
+
+
+function loadDaemonRigCoinsConfig(confDir: string): t.rigCoinsConfig {
+    const coinsConfigFile = `${confDir}${SEP}rig${SEP}coins.json`;
+    const coinsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins.sample.json`;
+    let coinsConfig: t.rigCoinsConfig = {};
+    let _configFile = coinsConfigFile;
+
+    if (! fs.existsSync(coinsConfigFile)) {
+        _configFile = coinsConfigDemoFile;
+    }
+
+    if (fs.existsSync(_configFile)) {
+        const coinsConfigJson = fs.readFileSync(_configFile).toString();
+        try {
+            coinsConfig = JSON.parse(coinsConfigJson);
+
+
+        } catch (err: any) {
+            console.warn(`${now()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+
+    const coins: t.rigCoinsConfig = {
+        ...coinsConfig,
+    };
+    mkdirSync(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs.writeFileSync(coinsConfigFile, JSON.stringify(coins, null, 4));
+
+    return coins;
 }
 
 

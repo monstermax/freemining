@@ -214,6 +214,7 @@ export type RigConfig = {
     coinsWallets?: rigCoinsWalletsConfig,
     coinsPools?: rigCoinsPoolsConfig,
     coinsMiners?: rigCoinsMinersConfig,
+    coins?: rigCoinsConfig,
     miners?: rigMinersConfig,
 };
 
@@ -239,6 +240,15 @@ export type rigCoinsMinersConfig = {
             algo?: string,
             extraArgs?: string,
         }
+    }
+};
+
+export type rigCoinsConfig = {
+    [coinSymbol: string]: {
+        coinName?: string,
+        algo?: string,
+        explorer?: string,
+        //dateFirstBlock?: number, // TODO
     }
 };
 
