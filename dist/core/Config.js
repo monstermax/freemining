@@ -15,8 +15,8 @@ const defaultWssConnTimeout = 10000; // disconnect clients who dont pong after x
 const defaultHttpStaticDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}public`;
 const defaultHttpTemplatesDir = `${__dirname}${SEP}..${SEP}..${SEP}web${SEP}templates`;
 const userHomeDir = os_1.default.userInfo().homedir; //.replace( new RegExp(path.sep, 'g') , SEP);
-const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining-beta`;
-const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining-beta`;
+const defaultUserFrmDirUnix = `${userHomeDir}${SEP}.freemining`;
+const defaultUserFrmDirWin = `${userHomeDir}${SEP}AppData${SEP}Local${SEP}freemining`;
 const defaultUserFrmDir = (os_1.default.platform() === 'win32') ? defaultUserFrmDirWin : defaultUserFrmDirUnix;
 // cli options
 const defaultCliWsServerHost = '127.0.0.1';
@@ -248,35 +248,61 @@ function loadDaemonRigConfig(confDir) {
     };
     (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(rigConfigFile, JSON.stringify(rigConfig, null, 4));
-    const coinsUserconf = loadDaemonRigCoinsUserconfConfig(confDir);
+    const coinsWallets = loadDaemonRigCoinsWalletsConfig(confDir);
+    const coinsPools = loadDaemonRigCoinsPoolsConfig(confDir);
     const coinsMiners = loadDaemonRigCoinsMinersConfig(confDir);
     const miners = loadDaemonRigMinersConfig(confDir);
+    const coins = loadDaemonRigCoinsConfig(confDir);
     return Object.assign(Object.assign({}, rigConfig), { coinsMiners,
-        coinsUserconf,
+        coinsWallets,
+        coinsPools,
+        coins,
         miners });
 }
 exports.loadDaemonRigConfig = loadDaemonRigConfig;
-function loadDaemonRigCoinsUserconfConfig(confDir) {
-    const userconfConfigFile = `${confDir}${SEP}rig${SEP}coins_userconf.json`;
-    const userconfConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_userconf.sample.json`;
-    let userconfConfig = {};
-    let _configFile = userconfConfigFile;
-    if (!fs_1.default.existsSync(userconfConfigFile)) {
-        _configFile = userconfConfigDemoFile;
+function loadDaemonRigCoinsWalletsConfig(confDir) {
+    const walletsConfigFile = `${confDir}${SEP}rig${SEP}coins_wallets.json`;
+    const walletsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_wallets.sample.json`;
+    let walletsConfig = {};
+    let _configFile = walletsConfigFile;
+    if (!fs_1.default.existsSync(walletsConfigFile)) {
+        _configFile = walletsConfigDemoFile;
     }
     if (fs_1.default.existsSync(_configFile)) {
-        const userconfConfigJson = fs_1.default.readFileSync(_configFile).toString();
+        const walletsConfigJson = fs_1.default.readFileSync(_configFile).toString();
         try {
-            userconfConfig = JSON.parse(userconfConfigJson);
+            walletsConfig = JSON.parse(walletsConfigJson);
         }
         catch (err) {
             console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
         }
     }
-    const coinsUserconf = Object.assign({}, userconfConfig);
+    const coinsWallets = Object.assign({}, walletsConfig);
     (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
-    fs_1.default.writeFileSync(userconfConfigFile, JSON.stringify(coinsUserconf, null, 4));
-    return coinsUserconf;
+    fs_1.default.writeFileSync(walletsConfigFile, JSON.stringify(coinsWallets, null, 4));
+    return coinsWallets;
+}
+function loadDaemonRigCoinsPoolsConfig(confDir) {
+    const poolsConfigFile = `${confDir}${SEP}rig${SEP}coins_pools.json`;
+    const poolsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_pools.sample.json`;
+    let poolsConfig = {};
+    let _configFile = poolsConfigFile;
+    if (!fs_1.default.existsSync(poolsConfigFile)) {
+        _configFile = poolsConfigDemoFile;
+    }
+    if (fs_1.default.existsSync(_configFile)) {
+        const poolsConfigJson = fs_1.default.readFileSync(_configFile).toString();
+        try {
+            poolsConfig = JSON.parse(poolsConfigJson);
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+    const coinsPools = Object.assign({}, poolsConfig);
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(poolsConfigFile, JSON.stringify(coinsPools, null, 4));
+    return coinsPools;
 }
 function loadDaemonRigCoinsMinersConfig(confDir) {
     const minersConfigFile = `${confDir}${SEP}rig${SEP}coins_miners.json`;
@@ -321,6 +347,28 @@ function loadDaemonRigMinersConfig(confDir) {
     (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
     fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(miners, null, 4));
     return miners;
+}
+function loadDaemonRigCoinsConfig(confDir) {
+    const coinsConfigFile = `${confDir}${SEP}rig${SEP}coins.json`;
+    const coinsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins.sample.json`;
+    let coinsConfig = {};
+    let _configFile = coinsConfigFile;
+    if (!fs_1.default.existsSync(coinsConfigFile)) {
+        _configFile = coinsConfigDemoFile;
+    }
+    if (fs_1.default.existsSync(_configFile)) {
+        const coinsConfigJson = fs_1.default.readFileSync(_configFile).toString();
+        try {
+            coinsConfig = JSON.parse(coinsConfigJson);
+        }
+        catch (err) {
+            console.warn(`${(0, utils_1.now)()} [WARNING] [CONFIG] cannot read rig config: ${err.message}`);
+        }
+    }
+    const coins = Object.assign({}, coinsConfig);
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(coinsConfigFile, JSON.stringify(coins, null, 4));
+    return coins;
 }
 function loadDaemonFarmConfig(confDir) {
     // Read farm config

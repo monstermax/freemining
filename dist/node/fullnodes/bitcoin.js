@@ -159,10 +159,10 @@ exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnode
 
 bitcoin-cli -rpcuser=user -rpcpassword=pass help
 
-bitcoin-cli -rpcuser=user -rpcpassword=pass loadwallet $HOME/.freemining-beta/data/node/fullnodes/bitcoin/fullnode
+bitcoin-cli -rpcuser=user -rpcpassword=pass loadwallet $HOME/.freemining/data/node/fullnodes/bitcoin/fullnode
 bitcoin-cli -rpcuser=user -rpcpassword=pass getwalletinfo
-bitcoin-cli -rpcwallet=$HOME/.freemining-beta/data/node/fullnodes/bitcoin/fullnode/wallet.dat getwalletinfo => KO: Requested wallet does not exist or is not loaded
-bitcoin-cli -rpcwallet=$HOME/.freemining-beta/data/node/fullnodes/bitcoin/fullnode/wallet.dat getaddressesbylabel => KO: Requested wallet does not exist or is not loaded
+bitcoin-cli -rpcwallet=$HOME/.freemining/data/node/fullnodes/bitcoin/fullnode/wallet.dat getwalletinfo => KO: Requested wallet does not exist or is not loaded
+bitcoin-cli -rpcwallet=$HOME/.freemining/data/node/fullnodes/bitcoin/fullnode/wallet.dat getaddressesbylabel => KO: Requested wallet does not exist or is not loaded
 bitcoin-cli -rpcuser=user -rpcpassword=pass dumpprivkey $ADDRESS
 
 curl --user user:pass --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "createwallet", "params": {"wallet_name": "fullnode", "avoid_reuse": true, "descriptors": false, "load_on_startup": true}}' -H 'content-type: text/plain;' http://127.0.0.1:8332/

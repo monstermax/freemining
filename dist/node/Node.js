@@ -279,7 +279,7 @@ function fullnodeRunStart(config, params) {
         process: undefined
     };
     processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`] = process;
-    const processName = `[freemining-beta.node.fullnodes.${fullnodeName}.${fullnodeAlias}] ${cmdPath}`;
+    const processName = `[freemining.node.fullnodes.${fullnodeName}.${fullnodeAlias}] ${cmdPath}`;
     console.log(`${(0, utils_1.now)()} [INFO] [NODE] Fullnode Run Start: ${fullnodeName} (${fullnodeAlias}))`);
     const onSpawn = function (proc) {
         processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`].pid = proc.pid;

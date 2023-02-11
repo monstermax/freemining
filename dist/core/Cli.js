@@ -14,7 +14,7 @@ const sysinfos_1 = require("../common/sysinfos");
 ./frm-cli-ts --fullnode-install dogecoin
 
 # Install miner Trex
-./frm-cli-ts --miner-install trex
+./frm-cli-ts --rig-miner-install trex
 
 # Start rig monitor
 ./frm-cli-ts --rig-monitor-start
@@ -27,20 +27,20 @@ const sysinfos_1 = require("../common/sysinfos");
 
 
 # Start trex on JJPool for ERGO coin
-./frm-cli-ts --miner-start trex -algo autolykos2 -url eu.jjpool.fr:3056 -user 9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.test -- -d 0
+./frm-cli-ts --rig-miner-start trex -algo autolykos2 -url eu.jjpool.fr:3056 -user 9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.test -- -d 0
 
 # Stop trex
-./frm-cli-ts --miner-stop trex
+./frm-cli-ts --rig-miner-stop trex
 
 
 # Start xmrig on XMRPool for MONERO coin
-./frm-cli-ts --miner-start xmrig -algo rx/0 -url xmrpool.eu:5555 -user 46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+test
+./frm-cli-ts --rig-miner-start xmrig -algo rx/0 -url xmrpool.eu:5555 -user 46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+test
 
 # Start xmrig on JJPool for Raptoreum coin
-./frm-cli-ts --miner-start xmrig -algo ghostrider -url jjpool.eu:7070 -user RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.test
+./frm-cli-ts --rig-miner-start xmrig -algo ghostrider -url jjpool.eu:7070 -user RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.test
 
 # Stop xmrig
-./frm-cli-ts --miner-stop xmrig
+./frm-cli-ts --rig-miner-stop xmrig
 
 */
 /* ########## FUNCTIONS ######### */
@@ -193,7 +193,7 @@ function run(args = []) {
     }
     else if ((0, utils_1.hasOpt)('--rig-miner-log')) {
         func = function () {
-            return rigMinerRunLog(this, args);
+            return rigMinerRunGetLog(this, args);
         };
     }
     else if ((0, utils_1.hasOpt)('--rig-miner-infos')) {
@@ -409,7 +409,7 @@ function rigFarmAgentGetStatus(ws, args = []) {
     rpcSendRequest(ws, 1, method, {});
 }
 function rigMinerInstallStart(ws, args = []) {
-    const minerNameS = (0, utils_1.getOpts)('--miner-install', 1, args);
+    const minerNameS = (0, utils_1.getOpts)('--rig-miner-install', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerInstallStart';
     const params = {
@@ -421,7 +421,7 @@ function rigMinerInstallStart(ws, args = []) {
     rpcSendRequest(ws, 1, method, params);
 }
 function rigMinerRunStart(ws, args = []) {
-    const minerNameS = (0, utils_1.getOpts)('--miner-start', 1, args);
+    const minerNameS = (0, utils_1.getOpts)('--rig-miner-start', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const extraArgs = (0, utils_1.getOpts)('--', -1, args);
     const method = 'rigMinerRunStart';
@@ -435,7 +435,7 @@ function rigMinerRunStart(ws, args = []) {
     rpcSendRequest(ws, 1, method, params);
 }
 function rigMinerRunStop(ws, args = []) {
-    const minerNameS = (0, utils_1.getOpts)('--miner-stop', 1, args);
+    const minerNameS = (0, utils_1.getOpts)('--rig-miner-stop', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerRunStop';
     const params = {
@@ -444,7 +444,7 @@ function rigMinerRunStop(ws, args = []) {
     rpcSendRequest(ws, 1, method, params);
 }
 function rigMinerRunGetStatus(ws, args = []) {
-    const minerNameS = (0, utils_1.getOpts)('--miner-status', 1, args);
+    const minerNameS = (0, utils_1.getOpts)('--rig-miner-status', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerRunGetStatus';
     const params = {
@@ -452,17 +452,17 @@ function rigMinerRunGetStatus(ws, args = []) {
     };
     rpcSendRequest(ws, 1, method, params);
 }
-function rigMinerRunLog(ws, args = []) {
-    const minerNameS = (0, utils_1.getOpts)('--miner-log', 1, args);
+function rigMinerRunGetLog(ws, args = []) {
+    const minerNameS = (0, utils_1.getOpts)('--rig-miner-log', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
-    const method = 'rigMinerRunLog';
+    const method = 'rigMinerRunGetLog';
     const params = {
         miner: minerName,
     };
     rpcSendRequest(ws, 1, method, params);
 }
 function rigMinerRunInfos(ws, args = []) {
-    const minerNameS = (0, utils_1.getOpts)('--miner-infos', 1, args);
+    const minerNameS = (0, utils_1.getOpts)('--rig-miner-infos', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const method = 'rigMinerRunGetInfos';
     const params = {

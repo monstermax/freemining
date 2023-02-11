@@ -346,6 +346,13 @@ function registerRigRoutes(app, urlPrefix = '') {
     app.get(`${urlPrefix}/`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         rigHomepage(yield getRigData(), req, res, next);
     }));
+    // GET Rig config JSON => /rig/config.json
+    app.get(`${urlPrefix}/config.json`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
+        let content = JSON.stringify(config, null, 4);
+        res.header('Content-Type', 'application/json');
+        res.send(content);
+    }));
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         rigStatus(yield getRigData(), req, res, next);

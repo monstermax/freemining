@@ -217,7 +217,7 @@ function minerInstallStart(config, params) {
     }
     const minerInstall = minersConfigs_1.minersInstalls[minerName];
     /* await */ minerInstall.install(config, params).catch((err) => {
-        console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot start miner ${minerName} : ${err.message}`);
+        console.warn(`${(0, utils_1.now)()} [WARNING] [RIG] Cannot install miner ${minerName} : ${err.message}`);
     });
 }
 exports.minerInstallStart = minerInstallStart;
@@ -316,7 +316,7 @@ function minerRunStart(config, params) {
         process: undefined
     };
     processes[`miner-run-${minerName}-${minerAlias}`] = process;
-    const processName = `[freemining-beta.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
+    const processName = `[freemining.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
     console.log(`${(0, utils_1.now)()} [INFO] [RIG] Miner Run Start: ${minerName} (${minerAlias}))`);
     const onSpawn = function (proc) {
         processes[`miner-run-${minerName}-${minerAlias}`].pid = proc.pid;
@@ -457,7 +457,7 @@ exports.getProcesses = getProcesses;
 /*
 export function getRigPs(): string {
     let cmd = '';
-    cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining-beta\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
+    cmd = `ps -o pid,pcpu,pmem,user,command $(pgrep -f "\[freemining\.rig\.") |grep -e '\[free[m]ining.*\]' --color -B1`; // linux
     //cmd = `tasklist /v /fo csv`;
     //cmd = `tasklist /v /fo csv /fi "pid eq <pid>"`;
     //cmd = `tasklist /v /fo csv /fi "ppid eq <pid>"`;

@@ -16,7 +16,7 @@ import type *  as t from '../common/types';
 ./frm-cli-ts --fullnode-install dogecoin
 
 # Install miner Trex
-./frm-cli-ts --miner-install trex
+./frm-cli-ts --rig-miner-install trex
 
 # Start rig monitor
 ./frm-cli-ts --rig-monitor-start
@@ -29,20 +29,20 @@ import type *  as t from '../common/types';
 
 
 # Start trex on JJPool for ERGO coin
-./frm-cli-ts --miner-start trex -algo autolykos2 -url eu.jjpool.fr:3056 -user 9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.test -- -d 0
+./frm-cli-ts --rig-miner-start trex -algo autolykos2 -url eu.jjpool.fr:3056 -user 9i5bBBR828EUs79bXUJJpNAo6X2fdfigA4XkZvg7nDfPeUdjsRb.test -- -d 0
 
 # Stop trex
-./frm-cli-ts --miner-stop trex
+./frm-cli-ts --rig-miner-stop trex
 
 
 # Start xmrig on XMRPool for MONERO coin
-./frm-cli-ts --miner-start xmrig -algo rx/0 -url xmrpool.eu:5555 -user 46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+test
+./frm-cli-ts --rig-miner-start xmrig -algo rx/0 -url xmrpool.eu:5555 -user 46jYYGCiFQbfyUNWkhMyyB2Jyg1n3yGGPjfYjbjsq6SBarcH66i3RodSiGjJfx2Ue74dUFi4bFwxKaUbt2aurBjJEySsMrH+test
 
 # Start xmrig on JJPool for Raptoreum coin
-./frm-cli-ts --miner-start xmrig -algo ghostrider -url jjpool.eu:7070 -user RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.test
+./frm-cli-ts --rig-miner-start xmrig -algo ghostrider -url jjpool.eu:7070 -user RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR.test
 
 # Stop xmrig
-./frm-cli-ts --miner-stop xmrig
+./frm-cli-ts --rig-miner-stop xmrig
 
 */
 /* ########## FUNCTIONS ######### */
@@ -209,7 +209,7 @@ export function run(args: (t.CliParamsAll)[] = []): void {
 
     } else if (hasOpt('--rig-miner-log')) {
         func = function (this: WebSocket) {
-            return rigMinerRunLog(this, args);
+            return rigMinerRunGetLog(this, args);
         }
 
     } else if (hasOpt('--rig-miner-infos')) {
@@ -471,7 +471,7 @@ function rigFarmAgentGetStatus(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
 
 
 function rigMinerInstallStart(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
-    const minerNameS = getOpts('--miner-install', 1, args);
+    const minerNameS = getOpts('--rig-miner-install', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
 
     const method = 'rigMinerInstallStart';
@@ -486,7 +486,7 @@ function rigMinerInstallStart(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
 
 
 function rigMinerRunStart(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
-    const minerNameS = getOpts('--miner-start', 1, args);
+    const minerNameS = getOpts('--rig-miner-start', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
     const extraArgs = getOpts('--', -1, args);
 
@@ -503,7 +503,7 @@ function rigMinerRunStart(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
 
 
 function rigMinerRunStop(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
-    const minerNameS = getOpts('--miner-stop', 1, args);
+    const minerNameS = getOpts('--rig-miner-stop', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
 
     const method = 'rigMinerRunStop';
@@ -515,7 +515,7 @@ function rigMinerRunStop(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
 
 
 function rigMinerRunGetStatus(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
-    const minerNameS = getOpts('--miner-status', 1, args);
+    const minerNameS = getOpts('--rig-miner-status', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
 
     const method = 'rigMinerRunGetStatus';
@@ -525,11 +525,11 @@ function rigMinerRunGetStatus(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
     rpcSendRequest(ws, 1, method, params);
 }
 
-function rigMinerRunLog(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
-    const minerNameS = getOpts('--miner-log', 1, args);
+function rigMinerRunGetLog(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
+    const minerNameS = getOpts('--rig-miner-log', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
 
-    const method = 'rigMinerRunLog';
+    const method = 'rigMinerRunGetLog';
     const params: any = {
         miner: minerName,
     };
@@ -538,7 +538,7 @@ function rigMinerRunLog(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
 
 
 function rigMinerRunInfos(ws: WebSocket, args: (t.CliParamsAll)[] = []) {
-    const minerNameS = getOpts('--miner-infos', 1, args);
+    const minerNameS = getOpts('--rig-miner-infos', 1, args);
     const minerName = Array.isArray(minerNameS) ? minerNameS[0] : '';
 
     const method = 'rigMinerRunGetInfos';
