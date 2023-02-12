@@ -31,6 +31,9 @@ const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].manag
         if (installedMiners.includes(miner) && runnableMiners.includes(miner)) {
             html += ' <a class="btn btn-primary btn-sm" onclick="startMiner()" href="javascript:void(0)">Start Miner</a>';
         }
+
+        html += ` &nbsp;&nbsp;`;
+        html += ` <input type="text" id="alias" name="alias" class="form-control d-inline-block w-auto" readonly value="" />`;
     }
 
     return html;
@@ -51,6 +54,17 @@ const managedMiners = Object.entries(allMiners).filter((entry) => entry[1].manag
     <%- JSON.stringify(minerInfos, null, 4) %>
     </pre>
 <% } %>
+
+
+<hr />
+
+<%
+const installedMinerAliases = rigInfos.status.installedMinersAliases[miner];
+%> 
+
+<pre>
+<%- JSON.stringify(installedMinerAliases, null, 4) %>
+</pre>
 
 
 <script>

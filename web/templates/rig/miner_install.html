@@ -15,6 +15,15 @@ const uninstallStatus = false; // TODO
 %>
 
 
+
+Default version: <%=lastVersion%>
+<br />
+Last available version: <%=lastVersionAvailable%>
+<br />
+
+<br />
+
+
 <form id="form-install" method="post">
     <input type="hidden" id="action" name="action" value="" />
 
@@ -80,11 +89,15 @@ const uninstallStatus = false; // TODO
 
             if (! minerStatus && ! uninstallStatus && installableMiners.includes(miner)) {
                 if (installedMiners.includes(miner)) {
-                    html += ' <a class="btn btn-warning btn-sm" onclick="startMinerInstall()" href="javascript:void(0)">Re-install</a>';
+                    html += ` <a class="btn btn-warning btn-sm" onclick="startMinerInstall()" href="javascript:void(0)">Re-install</a>`;
+                    html += ` <a class="btn btn-warning btn-sm" onclick="startMinerUninstall()" href="javascript:void(0)">Uninstall</a>`;
 
                 } else {
-                    html += ' <a class="btn btn-primary btn-sm" onclick="startMinerInstall()" href="javascript:void(0)">Install</a>';
+                    html += ` <a class="btn btn-primary btn-sm" onclick="startMinerInstall()" href="javascript:void(0)">Install</a>`;
                 }
+
+                html += ` &nbsp;&nbsp;`;
+                html += ` <input type="text" id="alias" name="alias" class="form-control d-inline-block w-auto" readonly value="${lastVersion}" />`;
             }
         }
 
@@ -110,20 +123,40 @@ const uninstallStatus = false; // TODO
 </form>
 
 
+<hr />
+
+
+<%
+const installedMinerAliases = rigInfos.status.installedMinersAliases[miner];
+%> 
+
+<pre>
+<%- JSON.stringify(installedMinerAliases, null, 4) %>
+</pre>
+
+
+
 <script>
 const minerName = '<%=miner%>';
 
-function startMinerInstall() {
+function startMinerInstall(minerAlias='') {
     const onStart = null;
     const onSuccess = null;
     const onFail = null;
-    startMinerInstallAjax(minerName, onStart, onSuccess, onFail);
+    startMinerInstallAjax(minerName, minerAlias, onStart, onSuccess, onFail);
 }
 
-function stopMinerInstall() {
+function stopMinerInstall(minerAlias='') {
     const onStart = null;
     const onSuccess = null;
     const onFail = null;
-    stopMinerInstallAjax(minerName, onStart, onSuccess, onFail);
+    stopMinerInstallAjax(minerName, minerAlias, onStart, onSuccess, onFail);
+}
+
+function startMinerUninstall(minerAlias='') {
+    const onStart = null;
+    const onSuccess = null;
+    const onFail = null;
+    startMinerUninstallAjax(minerName, minerAlias, onStart, onSuccess, onFail);
 }
 </script>

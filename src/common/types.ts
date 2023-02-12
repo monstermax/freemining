@@ -143,6 +143,7 @@ export type DaemonConfig = {
     logDir: string,
     pidDir: string,
     httpAllowedIps: string[],
+    httpUsers: string[], // TODO: array of { user: string, pass: string, rig: string, farm: string, node: string, pool: string } // rig/farm/node/pool values = 'read' | 'write' | null
     httpTemplatesDir: string,
     httpStaticDir: string,
     rig: RigConfig,

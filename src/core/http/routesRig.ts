@@ -9,6 +9,7 @@ import { now, formatNumber } from '../../common/utils';
 import * as Rig from '../../rig/Rig';
 import * as Farm from '../../farm/Farm';
 import * as Daemon from '../../core/Daemon';
+import { minersInstalls, minersCommands } from '../../rig/minersConfigs';
 
 import type * as t from '../../common/types';
 import { config } from 'process';
@@ -259,6 +260,10 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
     const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
     const allMiners = rigData.allMiners;
 
+    const minerInstall = minersInstalls[minerName];
+    const lastVersionAvailable = minerInstall ? await minerInstall.getLastVersion() : '';
+    const lastVersion = minerInstall.lastVersion || '';
+
     //const installStatus = false;
     //const uninstallStatus = false;
 
@@ -276,6 +281,8 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
         minerStatus,
         //minerInfos,
         allMiners,
+        lastVersion,
+        lastVersionAvailable,
         //installStatus,
         //uninstallStatus,
     };

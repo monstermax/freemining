@@ -87,6 +87,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
     let listenPort = defaultListenPort;
     let wssConnTimeout = defaultWssConnTimeout;
     let httpAllowedIps: string[] = [];
+    let httpUsers: string[] = [];
 
     let httpStaticDir = defaultHttpStaticDir;
     let httpTemplatesDir = defaultHttpTemplatesDir;
@@ -185,6 +186,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
             listenPort = coreConfig.listenPort || listenPort;
             wssConnTimeout = coreConfig.wssConnTimeout || wssConnTimeout;
             httpAllowedIps = coreConfig.httpAllowedIps || httpAllowedIps;
+            httpUsers = coreConfig.httpUsers || httpUsers;
 
         } catch (err: any) {
             console.warn(`${now()} [WARNING] [CONFIG] cannot read core config: ${err.message}`);
@@ -201,6 +203,7 @@ export function loadDaemonConfig(args: (t.DaemonParamsAll)[]): t.DaemonConfigAll
         wssConnTimeout,
         version: freeminingVersion,
         httpAllowedIps,
+        httpUsers,
     };
     fs.writeFileSync(coreConfigFile, JSON.stringify(coreConfig, null, 4));
 

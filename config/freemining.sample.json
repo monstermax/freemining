@@ -3,5 +3,6 @@
     "listenPort": 1234,
     "wssConnTimeout": 10000,
     "version": "1.0.0",
-    "httpAllowedIps": []
+    "httpAllowedIps": [],
+    "httpUsers": []
 }
