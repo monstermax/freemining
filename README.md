@@ -98,6 +98,28 @@ Note: on Windows, replace `frmd` by `frmd.bat`.
 View app : http://localhost:1234/
 
 
+```bash
+$ ./frm-cli --rig-miner-status lolminer
+true
+
+
+$ ./frm-cli --rig-miner-infos cpuminer
+{"miner":{"name":"cpuminer","worker":"","uptime":"69133","algo":"yescryptr16","hashRate":"1831.78"},"pool":{"url":"connect.fennecblockchain.com:8200","account":""},"devices":{"cpus":[{"id":0,"name":"","hashRate":1835.3,"threads":19}],"gpus":[]}}
+
+
+$ echo -e $(./frm-cli --rig-miner-log lolminer)
+"   Mh/s Mh/s A/R Share Mh/s/W W MHz MHz Temp Temp Pct
+GPU 0 GTX 1650 23.67 26.49 426/0 472.2G 0.437 53.7 1875 4001 55 66 62
+--------------------------- 
+Total   23.67 26.49 426/0 472.2G 0.437 53.7     
+----------------------------------------------- 
+Average speed (15s): 27.53 Mh/s
+Average speed (15s): 27.53 Mh/s
+...
+
+```
+
+
 ### Help
 
 #### Daemon
