@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfig = exports.rigHomepage = void 0;
+exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfigRig = exports.rigConfig = exports.rigHomepage = void 0;
 const tslib_1 = require("tslib");
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../../common/utils");
 const Rig = tslib_1.__importStar(require("../../rig/Rig"));
 const Farm = tslib_1.__importStar(require("../../farm/Farm"));
 const Daemon = tslib_1.__importStar(require("../../core/Daemon"));
+const minersConfigs_1 = require("../../rig/minersConfigs");
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 const utilFuncs = {
@@ -71,6 +72,16 @@ function rigConfig(rigData, req, res, next) {
     });
 }
 exports.rigConfig = rigConfig;
+function rigConfigRig(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config_rig.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfigRig = rigConfigRig;
 function rigConfigCoins(rigData, req, res, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
@@ -179,6 +190,9 @@ function rigMinerInstall(rigData, req, res, next) {
         //const minerInfos = rigInfos.status?.minersStats[minerFullName];
         const minerStatus = (_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.runningMiners.includes(minerName);
         const allMiners = rigData.allMiners;
+        const minerInstall = minersConfigs_1.minersInstalls[minerName];
+        const lastVersionAvailable = minerInstall ? yield minerInstall.getLastVersion() : '';
+        const lastVersion = minerInstall.lastVersion || '';
         //const installStatus = false;
         //const uninstallStatus = false;
         const data = Object.assign(Object.assign({}, utilFuncs), { meta: {
@@ -189,7 +203,9 @@ function rigMinerInstall(rigData, req, res, next) {
             //minerAlias,
             minerStatus,
             //minerInfos,
-            allMiners });
+            allMiners,
+            lastVersion,
+            lastVersionAvailable });
         res.render(`.${SEP}core${SEP}layout.html`, data);
     });
 }
