@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigHomepage = void 0;
+exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfig = exports.rigHomepage = void 0;
 const tslib_1 = require("tslib");
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../../common/utils");
@@ -61,6 +61,66 @@ function rigHomepage(rigData, req, res, next) {
     });
 }
 exports.rigHomepage = rigHomepage;
+function rigConfig(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfig = rigConfig;
+function rigConfigCoins(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config_coins.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfigCoins = rigConfigCoins;
+function rigConfigMiners(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config_miners.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfigMiners = rigConfigMiners;
+function rigConfigCoinsWallets(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config_coins_wallets.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfigCoinsWallets = rigConfigCoinsWallets;
+function rigConfigCoinsPools(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config_coins_pools.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfigCoinsPools = rigConfigCoinsPools;
+function rigConfigCoinsMiners(rigData, req, res, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
+                title: `Freemining - Rig Manager`,
+                noIndex: false,
+            }, contentTemplate: `..${SEP}rig${SEP}config_coins_miners.html` }), rigData);
+        res.render(`.${SEP}core${SEP}layout.html`, data);
+    });
+}
+exports.rigConfigCoinsMiners = rigConfigCoinsMiners;
 function rigStatus(rigData, req, res, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
@@ -352,6 +412,24 @@ function registerRigRoutes(app, urlPrefix = '') {
         let content = JSON.stringify(config, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
+    }));
+    app.get(`${urlPrefix}/config`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfig(yield getRigData(), req, res, next);
+    }));
+    app.get(`${urlPrefix}/config/coins`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfigCoins(yield getRigData(), req, res, next);
+    }));
+    app.get(`${urlPrefix}/config/miners`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfigMiners(yield getRigData(), req, res, next);
+    }));
+    app.get(`${urlPrefix}/config/coins-wallets`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfigCoinsWallets(yield getRigData(), req, res, next);
+    }));
+    app.get(`${urlPrefix}/config/coins-pools`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfigCoinsPools(yield getRigData(), req, res, next);
+    }));
+    app.get(`${urlPrefix}/config/coins-miners`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfigCoinsMiners(yield getRigData(), req, res, next);
     }));
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {

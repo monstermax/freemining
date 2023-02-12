@@ -84,6 +84,107 @@ export async function rigHomepage(rigData: t.RigData, req: express.Request, res:
 }
 
 
+export async function rigConfig(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigConfigRig(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config_rig.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigConfigCoins(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config_coins.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigConfigMiners(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config_miners.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigConfigCoinsWallets(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config_coins_wallets.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigConfigCoinsPools(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config_coins_pools.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+export async function rigConfigCoinsMiners(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const data = {
+        ...utilFuncs,
+        meta: {
+            title: `Freemining - Rig Manager`,
+            noIndex: false,
+        },
+        contentTemplate: `..${SEP}rig${SEP}config_coins_miners.html`,
+        ...rigData,
+    };
+    res.render(`.${SEP}core${SEP}layout.html`, data);
+}
+
+
+
+
+
 export async function rigStatus(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
     const data = {
         ...utilFuncs,
@@ -433,6 +534,31 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
         let content = JSON.stringify(config, null, 4);
         res.header('Content-Type', 'application/json');
         res.send(content);
+    });
+
+
+    app.get(`${urlPrefix}/config`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfig(await getRigData(), req, res, next);
+    });
+
+    app.get(`${urlPrefix}/config/coins`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfigCoins(await getRigData(), req, res, next);
+    });
+
+    app.get(`${urlPrefix}/config/miners`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfigMiners(await getRigData(), req, res, next);
+    });
+
+    app.get(`${urlPrefix}/config/coins-wallets`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfigCoinsWallets(await getRigData(), req, res, next);
+    });
+
+    app.get(`${urlPrefix}/config/coins-pools`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfigCoinsPools(await getRigData(), req, res, next);
+    });
+
+    app.get(`${urlPrefix}/config/coins-miners`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfigCoinsMiners(await getRigData(), req, res, next);
     });
 
 
