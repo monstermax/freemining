@@ -42,7 +42,7 @@ Advice (optional): install and use Git Bash. https://gitforwindows.org/
 
 # Python 3 
 
-(if no already installed. For example on Ubuntu 16.04).
+(if not already installed. For example on Ubuntu 16.04).
 Use this if `npm install` failed.
 
 For Windows, Python is installed with NodeJS and NPM.
@@ -74,7 +74,13 @@ nano ~/.freemining/config/freemining.json      # change httpAllowedIps if wante
 nano ~/.freemining/config/rig/rig.json         # change name if wanted + set farmAgent host/port/pass
 ```
 
-Note: on Windows, use `frmd.bat` instead of `frmd`, and `notepad` instead of `nano`.
+Note: on Windows, adapt the code with:
+```bash
+./frmd.bat --create-config
+
+notepad ~\AppData\Local\freemining\config\freemining.json
+notepad ~\AppData\Local\freemining\config\rig\rig.json
+```
 
 
 ## Usage
@@ -86,6 +92,8 @@ screen -R freemining
 # Run daemon
 ./frmd -a -r
 ```
+
+Note: on Windows, replace `frmd` by `frmd.bat`.
 
 View app : http://localhost:1234/
 
