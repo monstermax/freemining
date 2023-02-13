@@ -28,6 +28,11 @@ Installation des outils, start/stop/status/monitoring des services.
 
 ### Requirements
 
+
+```bash
+sudo apt-get install -y curl build-essential cmake
+```
+
 #### NodeJS for Linux
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -

@@ -73,9 +73,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        //fs.copyFileSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`);
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}`, `${tempDir}${SEP}unzipped${SEP}${minerAlias}`);
-        fs.copyFileSync( `${tempDir}${SEP}unzipped${SEP}${minerAlias}`, `${minerDir}${SEP}`);
+        fs.cpSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`);
 
         // Write report files
         this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
