@@ -88,11 +88,12 @@
 
                             html += service.devices.cpus.forEach(cpu => {
                                 const cpuName = (cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')) + ` X${cpu.threads}/${rigInfos.systemInfos.cpu.cores}`;
+                                const cpuPrefix = `[CPU${cpu.id}] `;
                                 %>
                                 <div class="rounded bg-primary p-1 m-1 text-start row">
                                     <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
                                     <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(cpu.hashRate, 'size')%>H/s</span></div>
-                                    <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /> <b class="text-light"><%=cpuName%></b></div>
+                                    <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="/img/cpu4.png" class="rounded me-2" style="width:32px; height:32px;" /><%=cpuPrefix%><b class="text-light"><%=cpuName%></b></div>
                                     <div class="badge col-4 col-lg-1">&nbsp;</div>
                                     <div class="badge col-4 col-lg-1">&nbsp;</div>
                                     <div class="badge col-4 col-lg-1">&nbsp;</div>
@@ -104,7 +105,8 @@
                             });
 
                             html += service.devices.gpus.forEach(gpu => {
-                                const gpuSuffix = (service.devices.gpus.length > 1) ? ('.' + gpu.id) : '';
+                                //const gpuPrefix = (service.devices.gpus.length > 1) ? `[GPU${gpu.id}] ` : '';
+                                const gpuPrefix = `[GPU${gpu.id}] `;
 
                                 const isNvidia = gpu.name.toLowerCase().includes('nvidia');
                                 const isAMD = gpu.name.toLowerCase().includes('amd');
@@ -120,7 +122,7 @@
                                 <div class="rounded bg-primary p-1 m-1 text-start row">
                                         <div class="badge col-2 col-lg-1 text-start text-truncate"><img src="/img/coins/<%=params.coin%>.webp" class="rounded me-2" style="width:32px; height:32px;" /> <%=params.coin%></div>
                                         <div class="badge col-2 col-lg-1 text-end"><b class="text-muted">hashRate</b><br /> <span class="text-warning fs-6"><%=formatNumber(gpu.hashRate, 'size')%>H/s</span></div>
-                                        <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuSuffix%><b class="text-light"><%=gpu.name%></b></div>
+                                        <div class="badge col-8 col-lg-4 text-start text-truncate"><img src="<%=gpuImg%>" class="rounded me-2" style="width:32px; height:32px;" /><%=gpuPrefix%><b class="text-light"><%=gpu.name%></b></div>
                                         <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">power</b><br /> <span class="text-light"><%=formatNumber(gpu.power)%> W</span></div>
                                         <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">temp.</b><br /> <span class="text-light"><%=formatNumber(gpu.temperature)%>°</span></div>
                                         <div class="badge col-4 col-lg-1 text-end"><b class="text-muted">fan</b><br /> <span class="text-light"><%=formatNumber(gpu.fanSpeed)%>%</span></div>

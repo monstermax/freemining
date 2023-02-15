@@ -73,7 +73,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.copyFileSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.cpSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true } );
         if (os.platform() === 'linux') {
             fs.renameSync(`${aliasDir}${SEP}wildrig-multi`, `${aliasDir}${SEP}wildrig`);
         }

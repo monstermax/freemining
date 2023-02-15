@@ -5,6 +5,7 @@ export * as bzminer from './bzminer';
 export * as ccminer from './ccminer';
 export * as claymore from './claymore';
 export * as cpuminer from './cpuminer';
+export * as dynexsolve from './dynexsolve';
 export * as ethminer from './ethminer';
 export * as firominer from './firominer';
 export * as gminer from './gminer';

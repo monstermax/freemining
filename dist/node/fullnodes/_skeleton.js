@@ -61,7 +61,8 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Install to target dir
             fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            //fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            fs_1.default.cpSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true });
             // Write report files
             this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
             // Cleaning

@@ -88,7 +88,7 @@
                         <div class="border border-light text-light rounded bg-<%= (cpu.hashRate ? "success" : "warning") %> p-1 my-2">
                             <div class="row">
                                 <div class="col-2 col-lg-1"><img src="/img/cpu4.png" class="rounded me-2" style="width:48px; height:48px;" /></div>
-                                <div class="col-2 col-lg-1"><b>ID</b> <br /> 0</div>
+                                <div class="col-2 col-lg-1"><b>ID</b> <br /> CPU0</div>
                                 <div class="col-8 col-lg-8 text-truncate"><b>Name</b> <br /> <%=cpu.name || [rigInfos.systemInfos.cpu.manufacturer, rigInfos.systemInfos.cpu.brand].join(' ')%></div>
                                 <div class="col-12 col-lg-2 text-truncate text-end"><b>Hashrate</b> <br /> <span class="text-dark fs-5 bg-light rounded p-1"><%=formatNumber(cpu.hashRate, 'size')%>H/sec.</span></div>
                             </div>
@@ -112,7 +112,7 @@
                             <div class="border border-light text-light rounded bg-<%= (gpu.hashRate ? "success" : "warning") %> p-1 my-2">
                                 <div class="row">
                                     <div class="col-2 col-lg-1"><img src="<%=gpuImg%>" class="rounded me-2" style="width:48px; height:48px;" /></div>
-                                    <div class="col-2 col-lg-1"><b>ID</b> <br /> <%=gpu.id%></div>
+                                    <div class="col-2 col-lg-1"><b>ID</b> <br /> GPU<%=gpu.id%></div>
                                     <div class="col-8 col-lg-3 text-truncate"><b>Name</b> <br /> <%=gpu.name%></div>
                                     <div class="col-4 col-lg-1 text-truncate text-end"><b>Power</b> <br /> <%=gpu.power%> W</div>
                                     <div class="col-4 col-lg-2 text-truncate text-end"><b>Temperature</b> <br /> <%=gpu.temperature%>°</div>

@@ -45,7 +45,7 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        const versionBis = version.replace( new RegExp('.', 'g'), '-');
+        const versionBis = version.replace( new RegExp('\\.', 'g'), '-');
         let subDir = `${SEP}SRBMiner-Multi-${versionBis}`;
 
         // Download url selection
@@ -74,7 +74,7 @@ export const minerInstall: t.minerInstallInfos = {
         // Install to target dir
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.copyFileSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.cpSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true } );
 
         // Write report files
         this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);

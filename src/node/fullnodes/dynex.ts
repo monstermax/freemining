@@ -1,5 +1,3 @@
-// 
-// https://github.com/dynexcoin/Dynex
 
 import fs from 'fs';
 import path from 'path';
@@ -19,13 +17,19 @@ Website  : https://dynexcoin.org/
 Github   : https://github.com/dynexcoin/Dynex
 Download : https://github.com/dynexcoin/Dynex/releases
 
+requirements:
+ sudo apt-get install libboost-all-dev libcurl4-openssl-dev
+ sudo apt-get install libevent-dev python3-zmq python3-dev libboost-python-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev
+
 */
 /* ########## CONFIG ######### */
 
-const fullnodeName  = '';
-const fullnodeTitle = '';
+const fullnodeName  = 'dynex';
+const fullnodeTitle = 'Dynex';
 const github        = 'dynexcoin/Dynex';
 const lastVersion   = '2.2.2';
+const versionLinux  = 'a518f5c';
+const versionDarwin = '93222e3';
 
 /* ########## MAIN ######### */
 
@@ -49,19 +53,25 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         let version = params.version || this.lastVersion;
         let subDir = `${SEP}Dynex-main-*`;
 
-        if (platform === 'linux') subDir = `${SEP}Dynex-main-a518f5c`;
+        if (platform === 'linux') subDir = `${SEP}Dynex-main-${versionLinux}`;
         if (platform === 'win32') subDir = ``; // none
-        if (platform === 'darwin') subDir = `${SEP}Dynex-main-93222e3`; // edit-me
+        if (platform === 'darwin') subDir = `${SEP}Dynex-main-${versionDarwin}`;
 
         if (! fullnodeName)  throw { message: `Install script not completed` };
         if (! fullnodeTitle) throw { message: `Install script not completed` };
         if (! lastVersion)   throw { message: `Install script not completed` };
 
+        let installFileName = 'dynexd';
+
+        if (platform === 'win32') {
+            installFileName = 'dynexd.exe';
+        }
+
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-a518f5c-ubuntu-22.04-linux-x64-core2.zip`,
+            'linux':   `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-${versionLinux}-ubuntu-22.04-linux-x64-nocona.zip`,
             'win32':   `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex_v${version}_windows.7z`,
-            'darwin':  `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-93222e3-macos-12.zip`,
+            'darwin':  `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-${versionDarwin}-macos-12.zip`,
             'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
@@ -83,7 +93,9 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         // Install to target dir
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        //fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.cpSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true } );
+        fs.chmodSync(`${aliasDir}/${installFileName}`, 0o755);
 
         // Write report files
         this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
@@ -100,9 +112,9 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
 export const fullnodeCommands: t.fullnodeCommandInfos = {
     ...baseFullnode.fullnodeCommands,
 
-    p2pPort: -1, // edit-me
-    rpcPort: -1, // edit-me
-    command: 'dynexd', // the filename of the executable (without .exe extension)
+    p2pPort: 17336, // default = 17336
+    rpcPort: 18333, // default = 18333
+    command: 'dynexd',
     managed: false, // set true when the getInfos() script is ready
 
 

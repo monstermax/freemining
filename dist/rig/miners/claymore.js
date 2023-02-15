@@ -57,7 +57,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             // Install to target dir
             fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
-            fs_1.default.copyFileSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            fs_1.default.cpSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true });
             // Write report files
             this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
             // Cleaning

@@ -4,6 +4,11 @@
         "algo": "",
         "explorer": "https://explorer.beam.mw/"
     },
+    "DNX": {
+        "coinName": "Dynex",
+        "algo": "",
+        "explorer": ""
+    },
     "ETC": {
         "coinName": "Ethereum Classic",
         "algo": "",

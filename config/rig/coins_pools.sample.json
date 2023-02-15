@@ -14,6 +14,11 @@
             }
         }
     },
+    "DNX": {
+        "ekapool": {
+            "default": "dnx.eu.ekapool.com:19666"
+        }
+    },
     "ETC": {
         "jjpool": {
             "user": "{wallet}.{worker}",

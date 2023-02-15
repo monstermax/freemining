@@ -9,6 +9,9 @@
         "apiPort": 42016,
         "extraArgs": "--cpu-priority 3 --threads=12"
     },
+    "dynexsolve": {
+        "apiPort": 42017
+    },
     "firominer": {
         "apiPort": 42003
     },

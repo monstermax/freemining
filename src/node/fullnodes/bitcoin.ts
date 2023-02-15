@@ -93,7 +93,8 @@ export const fullnodeInstall: t.fullnodeInstallInfos = {
         // Install to target dir
         fs.mkdirSync(aliasDir, {recursive: true});
         fs.rmSync(aliasDir, { recursive: true, force: true });
-        fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        //fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+        fs.cpSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true } );
 
         // Write report files
         this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);

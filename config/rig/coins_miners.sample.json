@@ -22,6 +22,12 @@
             "algo": ""
         }
     },
+    "DNX": {
+        "dynexsolve": {
+            "algo": "none",
+            "extraArgs": ""
+        }
+    },
     "ERG": {
         "bzminer": {
             "algo": "ergo"
