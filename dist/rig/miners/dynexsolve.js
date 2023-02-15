@@ -12,15 +12,16 @@ const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /*
 
 Website  :
-Github   : https://github.com/doktor83/SRBMiner-Multi
-Download : https://github.com/doktor83/SRBMiner-Multi/releases/
+Github   : https://github.com/dynexcoin/Dynex
+Download : https://github.com/dynexcoin/Dynex/releases/tag/DynexSolve
 
 */
 /* ########## CONFIG ######### */
-const minerName = 'srbminer';
-const minerTitle = 'SRBMiner Multi';
-const github = 'doktor83/SRBMiner-Multi';
-const lastVersion = '2.1.0';
+const minerName = 'dynexsolve';
+const minerTitle = 'Dynex Solve';
+const github = 'dynexcoin/Dynex';
+const lastVersion = '2.2.3';
+const versionLinux = '3a9c8aa';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -33,17 +34,24 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            const versionBis = version.replace(new RegExp('\\.', 'g'), '-');
-            let subDir = `${SEP}SRBMiner-Multi-${versionBis}`;
+            let subDir = `${SEP}DynexSolve-main-${versionLinux}`;
+            if (platform === 'win32')
+                subDir = `${SEP}dynexsolve_windows${version}`;
+            if (platform === 'linux')
+                subDir = `${SEP}DynexSolve-main-${versionLinux}`;
+            let installFileName = 'dynexsolve';
+            if (platform === 'win32') {
+                installFileName = 'dynexsolve.exe';
+            }
             // Download url selection
             const dlUrls = {
-                'linux': `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-Linux.tar.xz`,
-                'win32': `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-win64.zip`,
+                'linux': `https://github.com/dynexcoin/Dynex/releases/download/DynexSolve/DynexSolve-main-${versionLinux}-ubuntu-20.04-linux-x64-core2.zip`,
+                'win32': `https://github.com/dynexcoin/Dynex/releases/download/DynexSolve/dynexsolve_windows${version}.7z`,
                 'darwin': ``,
                 'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
-            if (!dlUrl)
+            if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
             const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
@@ -57,6 +65,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
             fs_1.default.cpSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true });
+            fs_1.default.chmodSync(`${aliasDir}/${installFileName}`, 0o755);
             // Write report files
             this.writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias);
             // Cleaning
@@ -64,29 +73,35 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52011, command: 'SRBMiner-MULTI', managed: true, getCommandArgs(config, params) {
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: 'dynexsolve', managed: false, // set true when the getInfos() script is ready
+    getCommandArgs(config, params) {
         const args = [
-            '--disable-cpu',
+            `-no-cpu`,
+            `-multi-gpu`,
         ];
         if (this.apiPort > 0) {
             args.push(...[
-                '--api-enable',
-                '--api-port', this.apiPort.toString(),
+                '--edit-me-api-host', '127.0.0.1',
+                '--edit-me-api-port', this.apiPort.toString(),
             ]);
         }
         if (params.algo) {
-            args.push('--algorithm');
-            args.push(params.algo);
+            //args.push('--edit-me-algo');
+            //args.push(params.algo);
         }
         if (params.poolUrl) {
-            args.push('--pool');
-            args.push(params.poolUrl);
+            const parts = params.poolUrl.split(':');
+            args.push('-stratum-url');
+            args.push(parts[0]);
+            args.push('-stratum-port');
+            args.push(parts[1]);
         }
         if (params.poolUser) {
-            args.push('--wallet');
-            args.push(params.poolUser);
-            //args.push('--edit-me-password');
-            //args.push('x');
+            const parts = params.poolUser.split('.');
+            args.push('-mining-address');
+            args.push(parts[0]);
+            args.push('-stratum-password');
+            args.push(parts[1]);
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);
@@ -96,28 +111,18 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {};
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers });
+            const headers = {}; // edit-me if needed
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const _algo = minerSummary.algorithms[0] || {};
-            const uptime = (_algo === null || _algo === void 0 ? void 0 : _algo.mining_time) || -1;
-            const algo = (_algo === null || _algo === void 0 ? void 0 : _algo.name) || '';
-            const workerHashRate = (_algo === null || _algo === void 0 ? void 0 : _algo.hashrate.gpu.total) || -1;
-            const poolUrl = (_algo === null || _algo === void 0 ? void 0 : _algo.pool.pool) || '';
-            const poolUser = '';
+            const uptime = -1; // edit-me
+            const algo = 'edit-me';
+            const workerHashRate = -1; // edit-me
+            const poolUrl = ''; // edit-me
+            const poolUser = ''; // edit-me
             const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = [];
-            const gpus = minerSummary.gpu_devices.map((gpu) => {
-                return {
-                    id: gpu.id,
-                    name: gpu.model,
-                    hashRate: _algo.hashrate.gpu[`gpu${gpu.id}`],
-                    temperature: gpu.temperature,
-                    fanSpeed: -1,
-                    power: gpu.asic_power,
-                };
-            });
+            const cpus = []; // edit-me
+            const gpus = []; // edit-me
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {

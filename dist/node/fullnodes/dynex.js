@@ -1,6 +1,4 @@
 "use strict";
-// 
-// https://github.com/dynexcoin/Dynex
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fullnodeCommands = exports.fullnodeInstall = void 0;
 const tslib_1 = require("tslib");
@@ -16,12 +14,18 @@ Website  : https://dynexcoin.org/
 Github   : https://github.com/dynexcoin/Dynex
 Download : https://github.com/dynexcoin/Dynex/releases
 
+requirements:
+ sudo apt-get install libboost-all-dev libcurl4-openssl-dev
+ sudo apt-get install libevent-dev python3-zmq python3-dev libboost-python-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev
+
 */
 /* ########## CONFIG ######### */
-const fullnodeName = '';
-const fullnodeTitle = '';
+const fullnodeName = 'dynex';
+const fullnodeTitle = 'Dynex';
 const github = 'dynexcoin/Dynex';
 const lastVersion = '2.2.2';
+const versionLinux = 'a518f5c';
+const versionDarwin = '93222e3';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -36,22 +40,26 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             let version = params.version || this.lastVersion;
             let subDir = `${SEP}Dynex-main-*`;
             if (platform === 'linux')
-                subDir = `${SEP}Dynex-main-a518f5c`;
+                subDir = `${SEP}Dynex-main-${versionLinux}`;
             if (platform === 'win32')
                 subDir = ``; // none
             if (platform === 'darwin')
-                subDir = `${SEP}Dynex-main-93222e3`; // edit-me
+                subDir = `${SEP}Dynex-main-${versionDarwin}`;
             if (!fullnodeName)
                 throw { message: `Install script not completed` };
             if (!fullnodeTitle)
                 throw { message: `Install script not completed` };
             if (!lastVersion)
                 throw { message: `Install script not completed` };
+            let installFileName = 'dynexd';
+            if (platform === 'win32') {
+                installFileName = 'dynexd.exe';
+            }
             // Download url selection
             const dlUrls = {
-                'linux': `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-a518f5c-ubuntu-22.04-linux-x64-core2.zip`,
+                'linux': `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-${versionLinux}-ubuntu-22.04-linux-x64-nocona.zip`,
                 'win32': `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex_v${version}_windows.7z`,
-                'darwin': `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-93222e3-macos-12.zip`,
+                'darwin': `https://github.com/dynexcoin/Dynex/releases/download/Dynex_${version}/Dynex-main-${versionDarwin}-macos-12.zip`,
                 'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
@@ -68,7 +76,9 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             // Install to target dir
             fs_1.default.mkdirSync(aliasDir, { recursive: true });
             fs_1.default.rmSync(aliasDir, { recursive: true, force: true });
-            fs_1.default.renameSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            //fs.renameSync( `${tempDir}${SEP}unzipped${subDir}${SEP}`, aliasDir);
+            fs_1.default.cpSync(`${tempDir}${SEP}unzipped${subDir}${SEP}`, `${aliasDir}${SEP}`, { recursive: true });
+            fs_1.default.chmodSync(`${aliasDir}/${installFileName}`, 0o755);
             // Write report files
             this.writeReport(version, fullnodeAlias, dlUrl, aliasDir, fullnodeDir, setAsDefaultAlias);
             // Cleaning
@@ -76,7 +86,7 @@ exports.fullnodeInstall = Object.assign(Object.assign({}, baseFullnode.fullnodeI
             console.log(`${(0, utils_1.now)()} [INFO] [NODE] Install complete into ${aliasDir}`);
         });
     } });
-exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: -1, rpcPort: -1, command: 'dynexd', managed: false, // set true when the getInfos() script is ready
+exports.fullnodeCommands = Object.assign(Object.assign({}, baseFullnode.fullnodeCommands), { p2pPort: 17336, rpcPort: 18333, command: 'dynexd', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [
             `-edit-me-datadir=${config.dataDir}${SEP}node${SEP}fullnodes${SEP}${params.fullnode}`,
