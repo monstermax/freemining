@@ -44,6 +44,11 @@
         "algo": "",
         "explorer": "https://explorer.mewccrypto.com/"
     },
+    "NEXA": {
+        "coinName": "Nexa",
+        "algo": "",
+        "explorer": ""
+    },
     "RTM": {
         "coinName": "Raptoreum",
         "algo": "",

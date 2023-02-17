@@ -11,6 +11,10 @@ import { decompressFile } from '../../common/decompress_archive';
 import type *  as t from '../../common/types';
 
 
+// https://masternodes.online/
+// https://www.youtube.com/watch?v=nNqfVu147NE - Comment choisir un Masternode en 2023
+
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;

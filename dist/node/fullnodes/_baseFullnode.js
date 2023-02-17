@@ -9,6 +9,8 @@ const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const client_js_1 = require("@open-rpc/client-js");
 const utils_1 = require("../../common/utils");
 const decompress_archive_1 = require("../../common/decompress_archive");
+// https://masternodes.online/
+// https://www.youtube.com/watch?v=nNqfVu147NE - Comment choisir un Masternode en 2023
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */

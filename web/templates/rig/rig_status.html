@@ -239,9 +239,9 @@ function stopMiner(minerName, minerAlias) {
 
 
 <%
-const availableCoinsMiners = Object.keys(rigInfos.config.coinsMiners);
-const availableCoinsWallets = Object.keys(rigInfos.config.coinsWallets);
-const availableCoinsPools = Object.keys(rigInfos.config.coinsPools);
+const availableCoinsMiners = Object.keys(rigInfos.config.coinsMiners || {});
+const availableCoinsWallets = Object.keys(rigInfos.config.coinsWallets || {});
+const availableCoinsPools = Object.keys(rigInfos.config.coinsPools || {});
 
 const availableCoinsAllTmp = Array.from(new Set( [
     ...availableCoinsMiners,

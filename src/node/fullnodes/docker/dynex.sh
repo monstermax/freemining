@@ -1,11 +1,28 @@
+#!/bin/bash
+
+set -e
+cd `dirname $0`
+
 
 # Dynex
 
+## Config
 
-docker pull ubuntu:22.04
-docker run -i -t --name dynex --hostname docker-dynex ubuntu:22.04
+WALLET_NAME="dynex"
+DOCKER_IMAGE="ubuntu:22.04"
 
-# in docker container
+is_docker_installed=$(command -v docker | wc -l)
+is_image_downloaded=$(docker images -f reference=${DOCKER_IMAGE} -q | wc -l)
+is_container_running=$(docker container ls -a -f name="^/${WALLET_NAME}$" -q |wc -l)
+
+## Install
+
+### on physical host...
+
+docker pull ${DOCKER_IMAGE}
+docker run -i -t --name ${WALLET_NAME} --hostname docker-${WALLET_NAME} ${DOCKER_IMAGE}
+
+#### in docker container...
 
 apt-get update
 apt-get install -y wget vim curl unzip screen
