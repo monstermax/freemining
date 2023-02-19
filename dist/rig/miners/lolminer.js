@@ -102,7 +102,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const _algo = minerSummary.Algorithms[0];
             const multipliers = {
                 "Mh/s": 1000 * 1000,
-                "Hh/s": 1000,
+                "Kh/s": 1000,
             };
             const uptime = minerSummary.Session.Uptime;
             const algo = _algo.Algorithm;
@@ -111,14 +111,14 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const poolUser = _algo.User;
             const workerName = poolUser.split('.').pop() || '';
             const cpus = [];
-            const gpus = minerSummary.Workers.map((worker) => {
+            const gpus = minerSummary.Workers.map((worker, idx) => {
                 return {
                     id: worker.Index,
                     name: worker.Name,
                     temperature: worker.Core_Temp,
                     fanSpeed: worker.Fan_Speed,
-                    hashRate: _algo.Worker_Performance[worker.Index] * (multipliers[_algo.Performance_Unit] || 1),
-                    power: minerSummary.Workers[worker.Index].Power,
+                    hashRate: _algo.Worker_Performance[idx] * (multipliers[_algo.Performance_Unit] || 1),
+                    power: minerSummary.Workers[idx].Power,
                 };
             });
             // EDIT THESE VALUES - END //

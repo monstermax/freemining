@@ -8,6 +8,8 @@ const os_1 = tslib_1.__importDefault(require("os"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const utils_1 = require("../../common/utils");
 const decompress_archive_1 = require("../../common/decompress_archive");
+// https://docs.google.com/spreadsheets/d/1IjCImtz4bPQbOoj5_QpQw6kVCPL71a7ncrY9YMS2haA/edit#gid=1761756353 - config overclocking
+// https://github.com/minershive/hive-pooltemplates/tree/master/miners - config miners algos + pools configs
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
