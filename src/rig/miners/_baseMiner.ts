@@ -10,6 +10,11 @@ import { decompressFile } from '../../common/decompress_archive';
 import type *  as t from '../../common/types';
 
 
+// https://docs.google.com/spreadsheets/d/1IjCImtz4bPQbOoj5_QpQw6kVCPL71a7ncrY9YMS2haA/edit#gid=1761756353 - config overclocking
+
+// https://github.com/minershive/hive-pooltemplates/tree/master/miners - config miners algos + pools configs
+
+
 /* ########## MAIN ######### */
 
 const SEP = path.sep;
