@@ -67,29 +67,27 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: 'rigel', managed: false, // set true when the getInfos() script is ready
-    getCommandArgs(config, params) {
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52009, command: 'rigel', managed: true, getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {
             args.push(...[
-                '--edit-me-api-host', '127.0.0.1',
-                '--edit-me-api-port', this.apiPort.toString(),
+                '--api-bind', `127.0.0.1:${this.apiPort}`,
             ]);
         }
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-a');
             args.push(params.algo);
         }
         if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
+            args.push('-o');
+            args.push(`stratum+tcp://${params.poolUrl}`);
         }
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('-u');
             args.push(params.poolUser);
         }
         if (true) {
-            args.push('--edit-me-password');
+            args.push('-p');
             args.push('x');
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
@@ -100,18 +98,29 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
     getInfos(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-            const headers = {}; // edit-me if needed
-            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers }); // EDIT API URL
+            const headers = {};
+            const minerSummaryRes = yield (0, node_fetch_1.default)(`${apiUrl}/`, { headers });
             const minerSummary = yield minerSummaryRes.json();
             // EDIT THESE VALUES - START //
-            const uptime = -1; // edit-me
-            const algo = 'edit-me';
-            const workerHashRate = -1; // edit-me
-            const poolUrl = ''; // edit-me
-            const poolUser = ''; // edit-me
-            const workerName = poolUser.split('.').pop() || ''; // edit-me
-            const cpus = []; // edit-me
-            const gpus = []; // edit-me
+            const uptime = minerSummary.uptime || -1;
+            const algo = minerSummary.algorithm || '';
+            const workerHashRate = Object.values(minerSummary.hashrate).shift() || 0;
+            const algoPools = Object.values(minerSummary.pools).shift();
+            const pool = algoPools[0];
+            const poolUrl = `${pool.connection_details.hostname}:${pool.connection_details.port}`;
+            const poolUser = pool.connection_details.username || '';
+            const workerName = pool.connection_details.worker || poolUser.split('.').pop() || '';
+            const cpus = [];
+            const gpus = minerSummary.devices.map((gpu) => {
+                return {
+                    id: gpu.id,
+                    name: gpu.name,
+                    hashRate: Object.values(gpu.hashrate).shift() || 0,
+                    temperature: gpu.monitoring_info.core_temperature,
+                    fanSpeed: gpu.monitoring_info.fan_speed,
+                    power: gpu.monitoring_info.power_usage,
+                };
+            });
             // EDIT THESE VALUES - END //
             let infos = {
                 miner: {

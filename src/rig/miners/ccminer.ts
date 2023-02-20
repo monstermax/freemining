@@ -100,8 +100,8 @@ export const minerInstall: t.minerInstallInfos = {
 export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
-    apiPort: -1, // edit-me
-    command: 'ccminer', // the filename of the executable (without .exe extension)
+    apiPort: 52018,
+    command: 'ccminer',
     managed: false, // set true when the getInfos() script is ready
 
     getCommandArgs(config, params) {

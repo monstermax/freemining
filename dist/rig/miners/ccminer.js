@@ -74,7 +74,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: -1, command: 'ccminer', managed: false, // set true when the getInfos() script is ready
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52018, command: 'ccminer', managed: false, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {

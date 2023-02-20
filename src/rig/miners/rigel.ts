@@ -94,9 +94,9 @@ export const minerInstall: t.minerInstallInfos = {
 export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
-    apiPort: -1, // edit-me
+    apiPort: 52009,
     command: 'rigel',
-    managed: false, // set true when the getInfos() script is ready
+    managed: true,
 
 
     getCommandArgs(config, params) {
@@ -106,29 +106,28 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--api-bind', `127.0.0.1:${this.apiPort}`,
                 ]
             );
         }
 
         if (params.algo) {
-            args.push('--edit-me-algo');
+            args.push('-a');
             args.push(params.algo);
         }
 
         if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
+            args.push('-o');
+            args.push( `stratum+tcp://${params.poolUrl}` );
         }
 
         if (params.poolUser) {
-            args.push('--edit-me-user');
+            args.push('-u');
             args.push(params.poolUser);
         }
 
         if (true) {
-            args.push('--edit-me-password');
+            args.push('-p');
             args.push('x');
         }
 
@@ -142,23 +141,34 @@ export const minerCommands: t.minerCommandInfos = {
 
     async getInfos(config, params) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
-        const headers: any = {}; // edit-me if needed
+        const headers: any = {};
 
-        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers}); // EDIT API URL
+        const minerSummaryRes = await fetch(`${apiUrl}/`, {headers});
         const minerSummary: any = await minerSummaryRes.json();
 
         // EDIT THESE VALUES - START //
-        const uptime = -1; // edit-me
-        const algo = 'edit-me';
-        const workerHashRate = -1; // edit-me
+        const uptime = minerSummary.uptime || -1;
+        const algo = minerSummary.algorithm || '';
+        const workerHashRate = Object.values(minerSummary.hashrate).shift() as number || 0;
 
-        const poolUrl = ''; // edit-me
-        const poolUser = ''; // edit-me
-        const workerName = poolUser.split('.').pop() as string || ''; // edit-me
+        const algoPools: any = Object.values(minerSummary.pools).shift();
+        const pool = algoPools[0];
+        const poolUrl = `${pool.connection_details.hostname}:${pool.connection_details.port}`;
+        const poolUser = pool.connection_details.username || '';
+        const workerName = pool.connection_details.worker || poolUser.split('.').pop() as string || '';
 
-        const cpus: t.MinerCpuInfos[] = []; // edit-me
+        const cpus: t.MinerCpuInfos[] = [];
 
-        const gpus: t.MinerGpuInfos[] = []; // edit-me
+        const gpus: t.MinerGpuInfos[] = minerSummary.devices.map((gpu: any) => {
+            return {
+                id: gpu.id as number,
+                name: gpu.name as string,
+                hashRate: Object.values(gpu.hashrate).shift() as number || 0,
+                temperature: gpu.monitoring_info.core_temperature as number,
+                fanSpeed: gpu.monitoring_info.fan_speed as number,
+                power: gpu.monitoring_info.power_usage as number,
+            }
+        });
         // EDIT THESE VALUES - END //
 
         let infos: t.MinerStats = {

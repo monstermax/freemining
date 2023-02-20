@@ -172,8 +172,14 @@
         }
     },
     "RXD": {
+        "ccminer": {
+            "algo": "rad"
+        },
         "bzminer": {
             "algo": "radiant"
+        },
+        "srbminer": {
+            "algo": "sha512_256d_radiant"
         }
     },
     "XMR": {
