@@ -111,6 +111,14 @@
             }
         }
     },
+    "NEXA": {
+        "rplant": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "stratum-eu.rplant.xyz:7092"
+            }
+        }
+    },
     "RTM": {
         "jjpool": {
             "user": "{wallet}.{worker}",
