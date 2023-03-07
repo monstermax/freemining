@@ -22,6 +22,20 @@
             "algo": ""
         }
     },
+    "CNX": {
+		"bminer": {
+            "algo": "conflux"
+        },
+		"nanominer": {
+            "algo": "octopus"
+        },
+		"nbminer": {
+            "algo": "octopus"
+        },
+		"trex": {
+            "algo": "octopus"
+        }
+    },
     "DNX": {
         "dynexsolve": {
             "algo": "none",

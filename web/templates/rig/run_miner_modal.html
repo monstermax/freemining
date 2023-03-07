@@ -1,6 +1,6 @@
 
 <%
-const allCoins = rigInfos.config.coins;
+const allCoins = rigInfos.config.coins || {};
 const availableCoinsMiners = Object.keys(rigInfos.config.coinsMiners);
 const availableCoinsWallets = Object.keys(rigInfos.config.coinsWallets);
 const availableCoinsPools = Object.keys(rigInfos.config.coinsPools);
@@ -36,8 +36,8 @@ const availableCoins = availableCoinsAllTmp.filter(coin => (
                         <select id="newMiner_coin" name="coin" class="form-select" aria-describedby="newMiner_coin_Help" onchange="modalStartMinerChangeCoin()">
                             <option></option>
 
-                            <%- availableCoins.map(coin => {
-                                const coinMiners = Object.keys(rigInfos.config.coinsMiners[coin])
+                            <% availableCoins.forEach(coin => {
+                                const coinMiners = Object.keys(rigInfos.config.coinsMiners[coin]);
                                 const installedCoinMiners = coinMiners.filter(miner => rigInfos.status.installedMiners.includes(miner));
 
                                 let suffix = '';
@@ -47,13 +47,13 @@ const availableCoins = availableCoinsAllTmp.filter(coin => (
                                 }
 
                                 if (installedCoinMiners.length > 0) {
-                                    return `<option value="${coin}">${coin}${suffix}</option>`;
+                                    %><option value="<%=coin%>"><%=coin%><%=suffix%></option><%;
 
                                 } else {
-                                    return `<option value="${coin}" disabled>${coin} (no miner installed. Try to install one of them : ${coinMiners.join(', ')})</option>`;
+                                    %><option value="<%=coin%>" disabled><%=coin%> (no miner installed. Try to install one of them : <%=coinMiners.join(', ')%>)</option><%
                                 }
 
-                            }).join('') %>
+                            }) %>
                         </select>
                         <div id="newMiner_coin_Help" class="form-text"></div>
                     </div>

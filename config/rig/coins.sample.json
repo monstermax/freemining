@@ -4,6 +4,11 @@
         "algo": "",
         "explorer": "https://explorer.beam.mw/"
     },
+    "CFX": {
+        "coinName": "Conflux",
+        "algo": "",
+        "explorer": ""
+    },
     "DNX": {
         "coinName": "Dynex",
         "algo": "",

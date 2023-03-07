@@ -40,7 +40,7 @@ export const minerInstall: t.minerInstallInfos = {
         const response = await fetch(url);
         const releaseInfos: any = await response.json();
 
-        let version = releaseInfos.tag_name;
+        let version = releaseInfos.tag_name || '';
         if (version.startsWith('v')) {
             version = version.slice(1);
         }
