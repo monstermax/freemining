@@ -30,7 +30,7 @@ exports.minerInstall = {
             const url = `https://api.github.com/repos/${this.github}/releases/latest`;
             const response = yield (0, node_fetch_1.default)(url);
             const releaseInfos = yield response.json();
-            let version = releaseInfos.tag_name;
+            let version = releaseInfos.tag_name || '';
             if (version.startsWith('v')) {
                 version = version.slice(1);
             }

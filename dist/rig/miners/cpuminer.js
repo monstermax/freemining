@@ -75,7 +75,10 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = ``; // edit-me
+            let subDir = ``;
+            // required packages:
+            // sudo apt-get install -y libcurl4-gnutls-dev
+            // sudo apt-get install -y automake autoconf pkg-config libcurl4-openssl-dev libjansson-dev libssl-dev libgmp-dev zlib1g-dev make g++
             // Some common install options
             const { minerAlias, tempDir, minerDir, aliasDir } = this.getInstallOptions(config, params, version);
             // Clone
