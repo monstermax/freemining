@@ -22,6 +22,12 @@
     "DNX": {
         "ekapool": {
             "default": "dnx.eu.ekapool.com:19666"
+        },
+        "jjpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "europe": "eu.jjpool.fr:6700"
+            }
         }
     },
     "ETC": {

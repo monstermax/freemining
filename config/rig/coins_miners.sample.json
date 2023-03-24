@@ -40,6 +40,10 @@
         "dynexsolve": {
             "algo": "none",
             "extraArgs": ""
+        },
+        "srbminer": {
+            "algo": "cryptonight",
+            "extraArgs": "--disable-cpu"
         }
     },
     "ERG": {
