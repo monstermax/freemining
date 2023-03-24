@@ -42,8 +42,8 @@
             "extraArgs": ""
         },
         "srbminer": {
-            "algo": "cryptonight",
-            "extraArgs": "--disable-cpu"
+            "algo": "dynex",
+            "extraArgs": "--mallob-endpoint mallob.neuropool.net:8081,https://dnx.eu.ekapool.com/ -p WORKER"
         }
     },
     "ERG": {

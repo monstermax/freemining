@@ -16,15 +16,21 @@
     },
     "CNX": {
         "whoolypooly": {
-            "default": "pool.woolypooly.com:3094"
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "pool.woolypooly.com:3094"
+            }
         }
     },
     "DNX": {
         "ekapool": {
-            "default": "dnx.eu.ekapool.com:19666"
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "europe": "dnx.eu.ekapool.com:19666"
+            }
         },
         "jjpool": {
-            "user": "{wallet}.{worker}",
+            "user": "{wallet}",
             "urls": {
                 "europe": "eu.jjpool.fr:6700"
             }
