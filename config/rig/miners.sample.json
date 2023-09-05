@@ -33,6 +33,9 @@
     "nbminer": {
         "apiPort": 42008
     },
+    "onezerominer": {
+        "apiPort": 42019
+    },
     "rigel": {
         "apiPort": 42009
     },

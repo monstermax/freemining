@@ -14,6 +14,7 @@ export * as lolminer from './lolminer';
 export * as miniz from './miniz';
 export * as nanominer from './nanominer';
 export * as nbminer from './nbminer';
+export * as onezerominer from './onezerominer';
 export * as rigel from './rigel';
 export * as srbminer from './srbminer';
 export * as teamblackminer from './teamblackminer';

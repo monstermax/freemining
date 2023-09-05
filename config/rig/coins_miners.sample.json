@@ -43,7 +43,11 @@
         },
         "srbminer": {
             "algo": "dynex",
-            "extraArgs": "--mallob-endpoint mallob.neuropool.net:8081,https://dnx.eu.ekapool.com/ -p WORKER"
+            "extraArgs": "--mallob-endpoint mallob.eu.neuropool.net:8081,https://dnx.eu.ekapool.com/ -p WORKER"
+        },
+        "onezerominer": {
+            "algo": "dynex",
+            "extraArgs": "--mallob-endpoint http://mallob-ml.eu.neuropool.net -p WORKER"
         }
     },
     "ERG": {
