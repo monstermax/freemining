@@ -20,7 +20,8 @@ Download : https://github.com/doktor83/SRBMiner-Multi/releases/
 const minerName = 'srbminer';
 const minerTitle = 'SRBMiner Multi';
 const github = 'doktor83/SRBMiner-Multi';
-const lastVersion = '2.2.3';
+//const lastVersion = '2.2.3';
+const lastVersion = '2.3.5';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
