@@ -290,6 +290,7 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
 };
 
 
+
 export async function rigMinerInstallPost(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
     const minerName = req.params.minerName;
     const action = req.body.action?.toString() || '';
@@ -341,6 +342,38 @@ export async function rigMinerInstallPost(rigData: t.RigData, req: express.Reque
 
     res.send(`Error: invalid action`);
 };
+
+
+
+export async function rigMinerUninstall(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const minerName = req.params.minerName;
+    const minerAlias = req.body.alias?.toString() || '';
+    //const action = req.query.action?.toString() || '';
+
+    const config = rigData.config;
+    const rigInfos = rigData.rigInfos;
+
+    // TODO
+
+    res.send('not available');
+};
+
+
+export async function rigMinerUninstallPost(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const minerName = req.params.minerName;
+    const minerAlias = req.body.alias?.toString() || '';
+    //const action = req.query.action?.toString() || '';
+
+    const config = rigData.config;
+    const rigInfos = rigData.rigInfos;
+    const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
+
+    // TODO
+
+    res.send('not available');
+};
+
+
 
 
 export async function rigMinerRun(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
@@ -456,7 +489,7 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
         }
 
         if (! config) {
-            res.send(`Error: cannot start miner install without config`);
+            res.send(`Error: cannot start miner run without config`);
             return;
         }
 
@@ -691,6 +724,17 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
     // POST Miner install page => /rig/miners/{minerName}/install
     app.post(`${urlPrefix}/miners/:minerName/install`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
         rigMinerInstallPost(await getRigData(), req, res, next);
+    });
+
+
+    // GET Miner uninstall page => /rig/miners/{minerName}/uninstall
+    app.get(`${urlPrefix}/miners/:minerName/uninstall`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        rigMinerUninstall(await getRigData(), req, res, next);
+    });
+
+    // POST Miner uninstall page => /rig/miners/{minerName}/uninstall
+    app.post(`${urlPrefix}/miners/:minerName/uninstall`, async (req: express.Request, res: express.Response, next: Function): Promise<void> => {
+        rigMinerUninstallPost(await getRigData(), req, res, next);
     });
 
 
