@@ -85,6 +85,32 @@ export const minerInstall: t.minerInstallInfos = {
     },
 
 
+    uninstall(minerAlias: string, minerDir: string): void {
+        if (! fs.existsSync(`${minerDir}/freeminingMiner.json`)) {
+            throw new Error('missing freeminingMiner.json');
+        }
+
+        const reportJson = fs.readFileSync(`${minerDir}/freeminingMiner.json`).toString();
+        const minerReport = JSON.parse(reportJson);
+
+        delete minerReport.versions[minerAlias];
+
+        const versionsList = Object.values(minerReport.versions) as {name: string, alias: string, version: string, installDate: string, installUrl: string}[];
+
+        if (versionsList.length === 0) {
+            fs.rmSync(minerDir, { recursive: true });
+            return;
+        }
+
+        if (minerReport.defaultAlias === minerAlias) {
+            const lastAlias = versionsList.at(-1)?.alias || '';
+            minerReport.defaultAlias = lastAlias;
+        }
+
+        fs.writeFileSync(`${minerDir}/freeminingMiner.json`, JSON.stringify(minerReport, null, 4));
+    },
+
+
     writeReport(version: string, minerAlias: string, dlUrl:string, aliasDir: string, minerDir: string, setAsDefaultAlias: boolean=false): void {
         // Alias report
         const aliasReport = {

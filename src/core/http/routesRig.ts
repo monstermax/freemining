@@ -377,41 +377,30 @@ export async function rigMinerUninstallPost(rigData: t.RigData, req: express.Req
     const config = rigData.config;
     const rigInfos = rigData.rigInfos;
 
-    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`;
-    const minerDir = `${minersDir}/${minerName}`;
 
-    if (! fs.existsSync(minerDir)) {
-        res.send(`Error: miner "${minerName}" is not installed`);
+    if (! config) {
+        res.send(`Error: cannot start miner install without config`);
         return;
     }
 
-    if (minerAlias) {
-        const minerAliasDir = `${minerDir}/${minerAlias}`;
+    try {
+        if (! rigData.isFarm) {
+            const params = {
+                miner: minerName,
+                alias: minerAlias,
+            };
 
-        if (! fs.existsSync(minerAliasDir)) {
-            res.send(`Error: miner alias "${minerAlias}" is not installed`);
-            return;
+            Rig.minerUninstallStart(config, rigInfos, params);
+
+        } else {
+
         }
 
-        if (rigInfos.status?.runningMiners.includes(minerName)) {
-            if (minerAlias in rigInfos.status.runningMinersAliases[minerName]) {
-                res.send(`Error: miner alias "${minerAlias}" is running`);
-                return;
-            }
-        }
+        res.send(`OK: miner uninstall started`);
 
-        fs.rmSync(minerAliasDir, {recursive: true});
-
-    } else {
-        if (rigInfos.status?.runningMiners.includes(minerName)) {
-            res.send(`Error: miner "${minerName}" is running`);
-            return;
-        }
-
-        fs.rmSync(minerDir, {recursive: true});
+    } catch (err: any) {
+        res.send(`Error: cannot start miner uninstall => ${err.message}`);
     }
-
-    res.send(`OK: miner install started`);
 };
 
 

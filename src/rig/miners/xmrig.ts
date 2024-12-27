@@ -49,7 +49,7 @@ export const minerInstall: t.minerInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-linux-x64.tar.gz`,
+            'linux':   `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-linux-static-x64.tar.gz`,
             'win32':   `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-gcc-win64.zip`,
             'darwin':  `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-macos-x64.tar.gz`,
             'freebsd': `https://github.com/${github}/releases/download/v${version}/xmrig-${version}-freebsd-static-x64.tar.gz`,

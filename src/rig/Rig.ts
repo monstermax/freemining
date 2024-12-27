@@ -277,6 +277,65 @@ export async function minerInstallStop(config: t.DaemonConfigAll, params: t.mine
 }
 
 
+export async function minerUninstallStart(config: t.DaemonConfigAll, rigInfos: t.RigInfos, params: t.minerInstallStopParams): Promise<void> {
+    const minerName = params.miner;
+    const minerAlias = params.alias;
+
+    if (! minerName) {
+        throw new Error(`Missing miner parameter`);
+    }
+
+    if (! minerAlias) {
+        throw new Error(`Missing alias parameter`);
+    }
+
+    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`;
+    const minerDir = `${minersDir}/${minerName}`;
+
+    if (! fs.existsSync(minerDir)) {
+        throw new Error(`Error: miner "${minerName}" is not installed`);
+    }
+
+    if (minerAlias) {
+        const minerAliasDir = `${minerDir}/${minerAlias}`;
+
+        if (! fs.existsSync(minerAliasDir)) {
+            //throw new Error(`Error: miner alias "${minerAlias}" is not installed`);
+
+        } else {
+            if (rigInfos.status?.runningMiners.includes(minerName)) {
+                if (minerAlias in rigInfos.status.runningMinersAliases[minerName]) {
+                    throw new Error(`Error: miner alias "${minerAlias}" is running`);
+                }
+            }
+
+            fs.rmSync(minerAliasDir, {recursive: true});
+        }
+
+    } else {
+        if (rigInfos.status?.runningMiners.includes(minerName)) {
+            throw new Error(`Error: miner "${minerName}" is running`);
+        }
+
+        fs.rmSync(minerDir, {recursive: true});
+    }
+
+    const minerInstall = minersInstalls[minerName];
+    minerInstall.uninstall(minerAlias, minerDir);
+}
+
+
+export async function minerUninstallStop(config: t.DaemonConfigAll, params: t.minerInstallStopParams): Promise<void> {
+    const minerName = params.miner;
+
+    if (! minerName) {
+        throw new Error(`Missing miner parameter`);
+    }
+
+    // TODO
+}
+
+
 export function getInstalledMinerConfiguration(config: t.DaemonConfigAll, minerName: string): t.InstalledMinerConfig {
     const minerDir = `${config.appDir }${SEP}rig${SEP}miners${SEP}${minerName}`;
     const configFile = `${minerDir}/freeminingMiner.json`;
