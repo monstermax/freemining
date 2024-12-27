@@ -5,7 +5,7 @@ import path from 'path';
 //import colors from 'colors/safe';
 import type express from 'express';
 
-import { now, formatNumber } from '../../common/utils';
+import { now, formatNumber, getDirFilesSync } from '../../common/utils';
 import * as Rig from '../../rig/Rig';
 import * as Farm from '../../farm/Farm';
 import * as Daemon from '../../core/Daemon';
@@ -183,6 +183,15 @@ export async function rigConfigCoinsMiners(rigData: t.RigData, req: express.Requ
 }
 
 
+export async function rigConfigGetInstallableVersions(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
+    const minerName = req.params.minerName?.toString();
+
+    const minerInstall = minersInstalls[minerName];
+    const installableVersions = minerInstall ? await minerInstall.getAllVersions() : '';
+
+    res.json(installableVersions);
+}
+
 
 
 
@@ -295,8 +304,8 @@ export async function rigMinerInstallPost(rigData: t.RigData, req: express.Reque
     const minerName = req.params.minerName;
     const action = req.body.action?.toString() || '';
     const minerAlias = req.body.alias?.toString() || '';
+    const minerVersion = req.body.version?.toString() || '';
     const minerDefault = req.body.default?.toString() || '';
-    const version = req.body.version?.toString() || '';
 
     const config = rigData.config;
     const rigInfos = rigData.rigInfos;
@@ -304,7 +313,7 @@ export async function rigMinerInstallPost(rigData: t.RigData, req: express.Reque
 
     if (action === 'start') {
         if (! minerName) {
-            res.send(`Error: missing 'miner' parameter`);
+            res.send(`Error: missing 'minerName' parameter`);
             return;
         }
 
@@ -322,7 +331,7 @@ export async function rigMinerInstallPost(rigData: t.RigData, req: express.Reque
             miner: minerName,
             alias: minerAlias,
             default: (minerDefault === '1'),
-            version,
+            version: minerVersion,
         };
 
         try {
@@ -362,15 +371,47 @@ export async function rigMinerUninstall(rigData: t.RigData, req: express.Request
 export async function rigMinerUninstallPost(rigData: t.RigData, req: express.Request, res: express.Response, next: Function) {
     const minerName = req.params.minerName;
     const minerAlias = req.body.alias?.toString() || '';
+    //const minerVersion = req.body.version?.toString() || '';
     //const action = req.query.action?.toString() || '';
 
     const config = rigData.config;
     const rigInfos = rigData.rigInfos;
-    const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
 
-    // TODO
+    const minersDir = `${config?.appDir}${SEP}rig${SEP}miners`;
+    const minerDir = `${minersDir}/${minerName}`;
 
-    res.send('not available');
+    if (! fs.existsSync(minerDir)) {
+        res.send(`Error: miner "${minerName}" is not installed`);
+        return;
+    }
+
+    if (minerAlias) {
+        const minerAliasDir = `${minerDir}/${minerAlias}`;
+
+        if (! fs.existsSync(minerAliasDir)) {
+            res.send(`Error: miner alias "${minerAlias}" is not installed`);
+            return;
+        }
+
+        if (rigInfos.status?.runningMiners.includes(minerName)) {
+            if (minerAlias in rigInfos.status.runningMinersAliases[minerName]) {
+                res.send(`Error: miner alias "${minerAlias}" is running`);
+                return;
+            }
+        }
+
+        fs.rmSync(minerAliasDir, {recursive: true});
+
+    } else {
+        if (rigInfos.status?.runningMiners.includes(minerName)) {
+            res.send(`Error: miner "${minerName}" is running`);
+            return;
+        }
+
+        fs.rmSync(minerDir, {recursive: true});
+    }
+
+    res.send(`OK: miner install started`);
 };
 
 
@@ -599,6 +640,11 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
     app.get(`${urlPrefix}/config/coins-miners`, async (req: express.Request, res: express.Response, next: Function) => {
         rigConfigCoinsMiners(await getRigData(), req, res, next);
+    });
+
+
+    app.get(`${urlPrefix}/config/miners/:minerName/installable-versions`, async (req: express.Request, res: express.Response, next: Function) => {
+        rigConfigGetInstallableVersions(await getRigData(), req, res, next);
     });
 
 

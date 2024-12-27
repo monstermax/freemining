@@ -53,7 +53,11 @@ export const minerInstall: t.minerInstallInfos = {
 
         const url = `https://api.github.com/repos/${this.github}/releases`;
         const response = await fetch(url);
-        const releaseVersions: any = await response.json();
+        const releaseVersions: any = await response.json().catch((err: any) => null);
+
+        if (! releaseVersions || ! Array.isArray(releaseVersions)) {
+            return [];
+        }
 
         return releaseVersions.map((release: any) => {
             let version = release.tag_name as string;
