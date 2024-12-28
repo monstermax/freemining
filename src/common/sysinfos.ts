@@ -42,7 +42,28 @@ export async function getSystemInfos() {
         const data = await si.graphics();
         const gpus = data.controllers;
 
-        sysInfos.gpus = gpus;
+        sysInfos.gpus = gpus.map((gpu, idx) => ({
+            idx,
+            name: gpu.name,
+            vendor: gpu.vendor,
+            model: gpu.model,
+            fanSpeed: gpu.fanSpeed,
+            memoryTotal: gpu.memoryTotal,
+            memoryUsed: gpu.memoryUsed,
+            memoryFree: gpu.memoryFree,
+            utilizationGpu: gpu.utilizationGpu,
+            utilizationMemory: gpu.utilizationMemory,
+            temperatureGpu: gpu.temperatureGpu,
+            powerDraw: gpu.powerDraw,
+            powerLimit: gpu.powerLimit,
+            clockCore: gpu.clockCore,
+            clockMemory: gpu.clockMemory,
+            driverVersion: gpu.driverVersion,
+            bus: gpu.bus,
+            pciBus: gpu.pciBus,
+            busAddress: gpu.busAddress,
+            subDeviceId: gpu.subDeviceId,
+        }));
 
         //const screens = data.displays; // vendor, model, connection, sizeX, sizeY, resolutionX, resolutionY, currentResX, currentResY, currentRefreshRate
 
