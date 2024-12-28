@@ -47,7 +47,7 @@
 
     Object.entries(minerConfig).forEach(aliasEntry => {
         const [ minerFullName, aliasConfig ] = aliasEntry;
-        const { miner, alias, pid, args, params } = aliasConfig;
+        const { miner, alias, pid, args, params, instanceName } = aliasConfig;
         //const minerFullName = `${miner}-${alias}`;
         const minerFullTitle = (miner === alias || ! alias) ? miner : `${alias} (${miner})`;
 
@@ -67,7 +67,7 @@
                         <div class="bg-dark text-light rounded p-1 text-center"><%=service.miner.name%><br /><small class="text-muted"><%=alias%></small></div>
                     </div>
                     <div class="col-12 col-lg-1">
-                        <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('<%=miner%>', '<%=alias%>')" />
+                        <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('<%=miner%>', '<%=alias%>', '<%=instanceName%>')" />
                     </div>
                 </div>
 
@@ -144,7 +144,7 @@
                         <div class="col-4 col-lg-2 text-truncate"></div>
                         <div class="col-12 col-lg-3 text-truncate"></div>
                         <div class="col-12 col-lg-1">
-                            <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('<%=miner%>', '<%=alias%>')" />
+                            <input type="button" value="Stop" class="btn btn-danger w-100" onclick="stopMiner('<%=miner%>', '<%=alias%>', '<%=instanceName%>')" />
                         </div>
                     </div>
                     <div class="alert alert-warning">
@@ -225,15 +225,15 @@ function startMiner(minerAlias='') {
     startMinerModal(minerName, minerAlias, onStart, onSuccess, onFail);
 }
 
-function stopMiner(minerName, minerAlias) {
-    const minerFullName = `${minerName}-${minerAlias}`;
+function stopMiner(minerName, minerAlias, instanceName) {
+    const minerFullName = instanceName || `${minerName}-${minerAlias}`;
     const onStart = null;
     const onSuccess = () => {
         jQuery(`#rig-service-${minerFullName.replaceAll('.', '-')}`).remove();
         jQuery('#startMinerModal').remove();
     };
     const onFail = null;
-    stopMinerAjax(minerName, minerAlias, onStart, onSuccess, onFail);
+    stopMinerAjax(minerName, minerAlias, instanceName, onStart, onSuccess, onFail);
 }
 </script>
 

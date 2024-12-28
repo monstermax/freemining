@@ -512,6 +512,9 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
     const poolUser = req.body.poolUser?.toString() || '';
     const extraArgs = (req.body.extraArgs?.toString() || '').split(' ').filter((arg: string) => !!arg);
 
+    const instanceName = req.body.instanceName?.toString() || '';
+    const minerAlias = req.body.minerAlias?.toString() || '';
+
     if (action === 'start') {
         if (! minerName || ! algo || ! poolUrl || ! poolUser) {
             res.send(`Error: missing parameters`);
@@ -525,6 +528,8 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
 
         const params = {
             miner: minerName,
+            minerAlias,
+            //instanceName,
             coin,
             algo,
             poolUrl,
@@ -564,6 +569,8 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
 
         const params = {
             miner: minerName,
+            minerAlias,
+            instanceName,
         };
 
         try {

@@ -228,48 +228,49 @@ function startMinerAjax(minerName, minerAlias='', coin='', algo='', poolUrl='', 
 
 
 // MINER RUN STOP
-function stopMinerAjax(minerName, minerAlias='', onStart=null, onSuccess=null, onFail=null) {
+function stopMinerAjax(minerName, minerAlias='', instanceName='', onStart=null, onSuccess=null, onFail=null) {
     if (! minerName) {
         console.warn(`Error: Missing {miner} parameter`);
         return;
     }
 
-    //const minerFullName = `${minerName}-${minerAlias}`;
-    const minerFullTitle = (minerName === minerAlias || ! minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
+    instanceName = instanceName || `${minerName}-${minerAlias}`;
 
 
-    alertify.confirm("<b>Miner stopping - confirmation</b>", `Do you want to stop the miner '<b>${minerFullTitle}</b>' ?`,
+    alertify.confirm("<b>Miner stopping - confirmation</b>", `Do you want to stop the miner '<b>${instanceName}</b>' ?`,
         function(){
-            alertify.success(`Stopping miner ${minerFullTitle}...`);
+            alertify.success(`Stopping miner ${instanceName}...`);
 
             if (typeof onStart === 'function') {
-                onStart(minerName, minerAlias);
+                onStart(minerName, minerAlias, instanceName);
             }
 
             const url = `/miners/${minerName}/run`;
             const data = {
                 action: 'stop',
                 miner: minerName,
+                alias: minerAlias,
+                instanceName,
             };
             jQuery.post(urlPrefix + url, data).then((response) => {
                 if (response.startsWith('OK:')) {
                     if (typeof onSuccess === 'function') {
-                        onSuccess(minerName, minerAlias, response);
+                        onSuccess(minerName, minerAlias, instanceName, response);
                     }
-                    alertify.success(`Miner ${minerFullTitle} stopped<hr />`);
+                    alertify.success(`Miner ${instanceName} stopped<hr />`);
 
                 } else {
                     if (typeof onFail === 'function') {
-                        onFail(minerName, minerAlias, { message: response });
+                        onFail(minerName, minerAlias, instanceName, { message: response });
                     }
-                    alertify.error(`Miner ${minerFullTitle} cannot be stopped. ${response}`);
+                    alertify.error(`Miner ${instanceName} cannot be stopped. ${response}`);
                 }
 
             }, (err) => {
                 if (typeof onFail === 'function') {
-                    onFail(minerName, minerAlias, err);
+                    onFail(minerName, minerAlias, instanceName, err);
                 }
-                alertify.error(`Miner ${minerFullTitle} cannot be stopped. ${err.message}`);
+                alertify.error(`Miner ${instanceName} cannot be stopped. ${err.message}`);
             });
         },
         function(){

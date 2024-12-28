@@ -95,7 +95,8 @@ function monitorCheckRig(config) {
                 const minerAlias = proc.name;
                 const minerName = proc.miner || '';
                 const instanceName = proc.instanceName || `${minerName}-${minerAlias}`;
-                const minerCommands = minersConfigs_1.minersCommands[minerName];
+                const minerCommands = Object.assign({}, minersConfigs_1.minersCommands[minerName]);
+                minerCommands.apiPort = proc.apiPort || minerCommands.apiPort;
                 viewedMiners.push(instanceName);
                 if (typeof minerCommands.getInfos === 'function') {
                     let minerStats;

@@ -394,7 +394,7 @@ function rigMinerRun(rigData, req, res, next) {
 exports.rigMinerRun = rigMinerRun;
 ;
 function rigMinerRunPost(rigData, req, res, next) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const minerName = req.params.minerName;
         const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
@@ -406,6 +406,8 @@ function rigMinerRunPost(rigData, req, res, next) {
         const poolUrl = ((_e = req.body.poolUrl) === null || _e === void 0 ? void 0 : _e.toString()) || '';
         const poolUser = ((_f = req.body.poolUser) === null || _f === void 0 ? void 0 : _f.toString()) || '';
         const extraArgs = (((_g = req.body.extraArgs) === null || _g === void 0 ? void 0 : _g.toString()) || '').split(' ').filter((arg) => !!arg);
+        const instanceName = ((_h = req.body.instanceName) === null || _h === void 0 ? void 0 : _h.toString()) || '';
+        const minerAlias = ((_j = req.body.minerAlias) === null || _j === void 0 ? void 0 : _j.toString()) || '';
         if (action === 'start') {
             if (!minerName || !algo || !poolUrl || !poolUser) {
                 res.send(`Error: missing parameters`);
@@ -417,6 +419,8 @@ function rigMinerRunPost(rigData, req, res, next) {
             }
             const params = {
                 miner: minerName,
+                minerAlias,
+                //instanceName,
                 coin,
                 algo,
                 poolUrl,
@@ -452,6 +456,8 @@ function rigMinerRunPost(rigData, req, res, next) {
             }
             const params = {
                 miner: minerName,
+                minerAlias,
+                instanceName,
             };
             try {
                 if (!rigData.isFarm) {

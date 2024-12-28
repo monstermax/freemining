@@ -120,7 +120,9 @@ export async function monitorCheckRig(config: t.DaemonConfigAll): Promise<void> 
             const minerName = proc.miner || '';
             const instanceName = proc.instanceName || `${minerName}-${minerAlias}`;
 
-            const minerCommands = minersCommands[minerName];
+            const minerCommands = { ...minersCommands[minerName] } as t.minerCommandInfos;
+            minerCommands.apiPort = proc.apiPort || minerCommands.apiPort;
+
             viewedMiners.push(instanceName);
 
             if (typeof minerCommands.getInfos === 'function') {
