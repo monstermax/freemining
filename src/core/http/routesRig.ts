@@ -263,9 +263,9 @@ export async function rigMinerInstall(rigData: t.RigData, req: express.Request, 
     //}
 
     //const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
-    //const minerFullName = `${minerName}-${minerAlias}`;
+    //const instanceName = req.query.instanceName?.toString() || `${minerName}-${minerAlias}`;
 
-    //const minerInfos = rigInfos.status?.minersStats[minerFullName];
+    //const minerInfos = rigInfos.status?.minersStats[instanceName];
     const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
     const allMiners = rigData.allMiners;
 
@@ -419,11 +419,11 @@ export async function rigMinerRun(rigData: t.RigData, req: express.Request, res:
     }
 
     const minerAlias = req.query.alias?.toString() || installedMinerConfig.defaultAlias;
-    const minerFullName = `${minerName}-${minerAlias}`;
+    const instanceName = req.query.instanceName?.toString() || `${minerName}-${minerAlias}`;
 
     const monitorStatus = rigData.monitorStatus;
     const rigInfos = rigData.rigInfos;
-    const minerInfos = rigInfos.status?.minersStats[minerFullName];
+    const minerInfos = rigInfos.status?.minersStats[instanceName];
     const minerStatus = rigInfos.status?.runningMiners.includes(minerName);
     const allMiners = rigData.allMiners;
 
@@ -512,8 +512,8 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
     const poolUser = req.body.poolUser?.toString() || '';
     const extraArgs = (req.body.extraArgs?.toString() || '').split(' ').filter((arg: string) => !!arg);
 
-    const instanceName = req.body.instanceName?.toString() || '';
     const minerAlias = req.body.minerAlias?.toString() || '';
+    const instanceName = req.body.instanceName?.toString() || `${minerName}-${minerAlias}`;
 
     if (action === 'start') {
         if (! minerName || ! algo || ! poolUrl || ! poolUser) {
