@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMiners = exports.getRigInfos = exports.getProcesses = exports.minerRunGetInfos = exports.minerRunGetLog = exports.minerRunGetStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerInstallStop = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
+exports.getAllMiners = exports.getRigInfos = exports.getProcesses = exports.minerRunGetInfos = exports.minerRunGetLog = exports.minerRunGetStatus = exports.minerRunStop = exports.minerRunStart = exports.getInstalledMinerConfiguration = exports.minerUninstallStop = exports.minerUninstallStart = exports.minerInstallStop = exports.minerInstallStart = exports.getManagedMiners = exports.getRunnableMiners = exports.getInstallableMiners = exports.getRunningMinersAliases = exports.getInstalledMinersAliases = exports.getInstalledMiners = exports.monitorCheckRig = exports.farmAgentGetStatus = exports.farmAgentStop = exports.farmAgentStart = exports.monitorGetStatus = exports.monitorStop = exports.monitorStart = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -231,6 +231,57 @@ function minerInstallStop(config, params) {
     });
 }
 exports.minerInstallStop = minerInstallStop;
+function minerUninstallStart(config, rigInfos, params) {
+    var _a, _b;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = params.miner;
+        const minerAlias = params.alias;
+        if (!minerName) {
+            throw new Error(`Missing miner parameter`);
+        }
+        if (!minerAlias) {
+            throw new Error(`Missing alias parameter`);
+        }
+        const minersDir = `${config === null || config === void 0 ? void 0 : config.appDir}${SEP}rig${SEP}miners`;
+        const minerDir = `${minersDir}/${minerName}`;
+        if (!fs_1.default.existsSync(minerDir)) {
+            throw new Error(`Error: miner "${minerName}" is not installed`);
+        }
+        if (minerAlias) {
+            const minerAliasDir = `${minerDir}/${minerAlias}`;
+            if (!fs_1.default.existsSync(minerAliasDir)) {
+                //throw new Error(`Error: miner alias "${minerAlias}" is not installed`);
+            }
+            else {
+                if ((_a = rigInfos.status) === null || _a === void 0 ? void 0 : _a.runningMiners.includes(minerName)) {
+                    if (minerAlias in rigInfos.status.runningMinersAliases[minerName]) {
+                        throw new Error(`Error: miner alias "${minerAlias}" is running`);
+                    }
+                }
+                fs_1.default.rmSync(minerAliasDir, { recursive: true });
+            }
+        }
+        else {
+            if ((_b = rigInfos.status) === null || _b === void 0 ? void 0 : _b.runningMiners.includes(minerName)) {
+                throw new Error(`Error: miner "${minerName}" is running`);
+            }
+            fs_1.default.rmSync(minerDir, { recursive: true });
+        }
+        const minerInstall = minersConfigs_1.minersInstalls[minerName];
+        minerInstall.uninstall(minerAlias, minerDir);
+    });
+}
+exports.minerUninstallStart = minerUninstallStart;
+function minerUninstallStop(config, params) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = params.miner;
+        if (!minerName) {
+            throw new Error(`Missing miner parameter`);
+        }
+        // TODO
+    });
+}
+exports.minerUninstallStop = minerUninstallStop;
 function getInstalledMinerConfiguration(config, minerName) {
     const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
     const configFile = `${minerDir}/freeminingMiner.json`;

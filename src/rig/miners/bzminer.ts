@@ -164,7 +164,7 @@ export const minerCommands: t.minerCommandInfos = {
 
         const gpus: t.MinerGpuInfos[] = minerSummary.devices.map((gpu:any, idx:number) => {
             return {
-                id: idx,
+                id: gpu.pci_device_id,
                 name: gpu.name as string,
                 hashRate: gpu.hashrate[0] as number || 0,
                 temperature: gpu.core_temp as number,

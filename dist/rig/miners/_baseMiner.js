@@ -43,7 +43,10 @@ exports.minerInstall = {
                 return [];
             const url = `https://api.github.com/repos/${this.github}/releases`;
             const response = yield (0, node_fetch_1.default)(url);
-            const releaseVersions = yield response.json();
+            const releaseVersions = yield response.json().catch((err) => null);
+            if (!releaseVersions || !Array.isArray(releaseVersions)) {
+                return [];
+            }
             return releaseVersions.map((release) => {
                 let version = release.tag_name;
                 if (version.startsWith('v')) {
@@ -64,6 +67,25 @@ exports.minerInstall = {
             minerDir,
             aliasDir,
         };
+    },
+    uninstall(minerAlias, minerDir) {
+        var _a;
+        if (!fs_1.default.existsSync(`${minerDir}/freeminingMiner.json`)) {
+            throw new Error('missing freeminingMiner.json');
+        }
+        const reportJson = fs_1.default.readFileSync(`${minerDir}/freeminingMiner.json`).toString();
+        const minerReport = JSON.parse(reportJson);
+        delete minerReport.versions[minerAlias];
+        const versionsList = Object.values(minerReport.versions);
+        if (versionsList.length === 0) {
+            fs_1.default.rmSync(minerDir, { recursive: true });
+            return;
+        }
+        if (minerReport.defaultAlias === minerAlias) {
+            const lastAlias = ((_a = versionsList.at(-1)) === null || _a === void 0 ? void 0 : _a.alias) || '';
+            minerReport.defaultAlias = lastAlias;
+        }
+        fs_1.default.writeFileSync(`${minerDir}/freeminingMiner.json`, JSON.stringify(minerReport, null, 4));
     },
     writeReport(version, minerAlias, dlUrl, aliasDir, minerDir, setAsDefaultAlias = false) {
         // Alias report

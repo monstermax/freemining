@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfigRig = exports.rigConfig = exports.rigHomepage = void 0;
+exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerUninstallPost = exports.rigMinerUninstall = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigGetInstallableVersions = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfigRig = exports.rigConfig = exports.rigHomepage = void 0;
 const tslib_1 = require("tslib");
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../../common/utils");
@@ -132,6 +132,16 @@ function rigConfigCoinsMiners(rigData, req, res, next) {
     });
 }
 exports.rigConfigCoinsMiners = rigConfigCoinsMiners;
+function rigConfigGetInstallableVersions(rigData, req, res, next) {
+    var _a;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = (_a = req.params.minerName) === null || _a === void 0 ? void 0 : _a.toString();
+        const minerInstall = minersConfigs_1.minersInstalls[minerName];
+        const installableVersions = minerInstall ? yield minerInstall.getAllVersions() : '';
+        res.json(installableVersions);
+    });
+}
+exports.rigConfigGetInstallableVersions = rigConfigGetInstallableVersions;
 function rigStatus(rigData, req, res, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const data = Object.assign(Object.assign(Object.assign({}, utilFuncs), { meta: {
@@ -217,14 +227,14 @@ function rigMinerInstallPost(rigData, req, res, next) {
         const minerName = req.params.minerName;
         const action = ((_a = req.body.action) === null || _a === void 0 ? void 0 : _a.toString()) || '';
         const minerAlias = ((_b = req.body.alias) === null || _b === void 0 ? void 0 : _b.toString()) || '';
-        const minerDefault = ((_c = req.body.default) === null || _c === void 0 ? void 0 : _c.toString()) || '';
-        const version = ((_d = req.body.version) === null || _d === void 0 ? void 0 : _d.toString()) || '';
+        const minerVersion = ((_c = req.body.version) === null || _c === void 0 ? void 0 : _c.toString()) || '';
+        const minerDefault = ((_d = req.body.default) === null || _d === void 0 ? void 0 : _d.toString()) || '';
         const config = rigData.config;
         const rigInfos = rigData.rigInfos;
         const minerStatus = (_e = rigInfos.status) === null || _e === void 0 ? void 0 : _e.runningMiners.includes(minerName);
         if (action === 'start') {
             if (!minerName) {
-                res.send(`Error: missing 'miner' parameter`);
+                res.send(`Error: missing 'minerName' parameter`);
                 return;
             }
             if (minerStatus) {
@@ -239,7 +249,7 @@ function rigMinerInstallPost(rigData, req, res, next) {
                 miner: minerName,
                 alias: minerAlias,
                 default: (minerDefault === '1'),
-                version,
+                version: minerVersion,
             };
             try {
                 if (!rigData.isFarm) {
@@ -259,6 +269,52 @@ function rigMinerInstallPost(rigData, req, res, next) {
     });
 }
 exports.rigMinerInstallPost = rigMinerInstallPost;
+;
+function rigMinerUninstall(rigData, req, res, next) {
+    var _a;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = req.params.minerName;
+        const minerAlias = ((_a = req.body.alias) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        //const action = req.query.action?.toString() || '';
+        const config = rigData.config;
+        const rigInfos = rigData.rigInfos;
+        // TODO
+        res.send('not available');
+    });
+}
+exports.rigMinerUninstall = rigMinerUninstall;
+;
+function rigMinerUninstallPost(rigData, req, res, next) {
+    var _a;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const minerName = req.params.minerName;
+        const minerAlias = ((_a = req.body.alias) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+        //const minerVersion = req.body.version?.toString() || '';
+        //const action = req.query.action?.toString() || '';
+        const config = rigData.config;
+        const rigInfos = rigData.rigInfos;
+        if (!config) {
+            res.send(`Error: cannot start miner install without config`);
+            return;
+        }
+        try {
+            if (!rigData.isFarm) {
+                const params = {
+                    miner: minerName,
+                    alias: minerAlias,
+                };
+                Rig.minerUninstallStart(config, rigInfos, params);
+            }
+            else {
+            }
+            res.send(`OK: miner uninstall started`);
+        }
+        catch (err) {
+            res.send(`Error: cannot start miner uninstall => ${err.message}`);
+        }
+    });
+}
+exports.rigMinerUninstallPost = rigMinerUninstallPost;
 ;
 function rigMinerRun(rigData, req, res, next) {
     var _a, _b, _c, _d, _e;
@@ -356,7 +412,7 @@ function rigMinerRunPost(rigData, req, res, next) {
                 return;
             }
             if (!config) {
-                res.send(`Error: cannot start miner install without config`);
+                res.send(`Error: cannot start miner run without config`);
                 return;
             }
             const params = {
@@ -446,6 +502,9 @@ function registerRigRoutes(app, urlPrefix = '') {
     }));
     app.get(`${urlPrefix}/config/coins-miners`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         rigConfigCoinsMiners(yield getRigData(), req, res, next);
+    }));
+    app.get(`${urlPrefix}/config/miners/:minerName/installable-versions`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigConfigGetInstallableVersions(yield getRigData(), req, res, next);
     }));
     // GET Rig status => /rig/status
     app.get(`${urlPrefix}/status`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -549,6 +608,14 @@ function registerRigRoutes(app, urlPrefix = '') {
     // POST Miner install page => /rig/miners/{minerName}/install
     app.post(`${urlPrefix}/miners/:minerName/install`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         rigMinerInstallPost(yield getRigData(), req, res, next);
+    }));
+    // GET Miner uninstall page => /rig/miners/{minerName}/uninstall
+    app.get(`${urlPrefix}/miners/:minerName/uninstall`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigMinerUninstall(yield getRigData(), req, res, next);
+    }));
+    // POST Miner uninstall page => /rig/miners/{minerName}/uninstall
+    app.post(`${urlPrefix}/miners/:minerName/uninstall`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        rigMinerUninstallPost(yield getRigData(), req, res, next);
     }));
     // GET Miner run page => /rig/miners/{minerName}/run
     app.get(`${urlPrefix}/miners/:minerName/run`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
