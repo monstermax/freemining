@@ -38,7 +38,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             let subDir = `${SEP}SRBMiner-Multi-${versionBis}`;
             // Download url selection
             const dlUrls = {
-                'linux': `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-Linux.tar.xz`,
+                'linux': `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-Linux.tar.gz`,
                 'win32': `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-win64.zip`,
                 'darwin': ``,
                 'freebsd': ``,
