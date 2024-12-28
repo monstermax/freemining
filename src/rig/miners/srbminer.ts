@@ -51,7 +51,7 @@ export const minerInstall: t.minerInstallInfos = {
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-Linux.tar.xz`,
+            'linux':   `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-Linux.tar.gz`,
             'win32':   `https://github.com/doktor83/SRBMiner-Multi/releases/download/${version}/SRBMiner-Multi-${versionBis}-win64.zip`,
             'darwin':  ``,
             'freebsd': ``,
