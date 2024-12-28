@@ -195,7 +195,7 @@ function websocketConnect(config) {
                         break;
                     case 'farmMinerRunStart':
                         {
-                            const ok = Rig.minerRunStart(config, message.params);
+                            const ok = yield Rig.minerRunStart(config, message.params);
                             rpcSendResponse(this, req.id, 'OK');
                         }
                         break;

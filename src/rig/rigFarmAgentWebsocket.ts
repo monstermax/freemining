@@ -249,7 +249,7 @@ function websocketConnect(config: t.DaemonConfigAll) {
 
                 case 'farmMinerRunStart':
                     {
-                        const ok = Rig.minerRunStart(config, message.params);
+                        const ok = await Rig.minerRunStart(config, message.params);
                         rpcSendResponse(this, req.id, 'OK');
                     }
                     break;

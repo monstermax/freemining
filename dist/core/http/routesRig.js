@@ -425,7 +425,7 @@ function rigMinerRunPost(rigData, req, res, next) {
             };
             try {
                 if (!rigData.isFarm) {
-                    Rig.minerRunStart(config, params);
+                    yield Rig.minerRunStart(config, params);
                 }
                 else {
                     Farm.farmMinerRunStart(rigData.rigName, params);

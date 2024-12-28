@@ -534,7 +534,7 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
 
         try {
             if (! rigData.isFarm) {
-                Rig.minerRunStart(config, params);
+                await Rig.minerRunStart(config, params);
 
             } else {
                 Farm.farmMinerRunStart(rigData.rigName, params);

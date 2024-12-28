@@ -256,7 +256,7 @@ function registerWssRoutes(config, wss) {
                             break;
                         case 'rigMinerRunStart':
                             try {
-                                Rig.minerRunStart(config, req.params);
+                                yield Rig.minerRunStart(config, req.params);
                                 rpcSendResponse(ws, req.id, 'OK');
                             }
                             catch (err) {

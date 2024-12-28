@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 //import { execSync } from 'child_process';
 
-import { now, getOpt, getLocalIpAddresses, getDirFiles, getDirFilesSync, tailFile, stringTemplate } from '../common/utils';
+import { now, getOpt, getLocalIpAddresses, getDirFiles, getDirFilesSync, tailFile, stringTemplate, getFreeTcpPort } from '../common/utils';
 import { exec } from '../common/exec';
 import { getCurrentLoad } from '../common/sysinfos';
 import { minersInstalls, minersCommands } from './minersConfigs';
@@ -29,7 +29,7 @@ let monitorIntervalId: ReturnType<typeof setInterval> | null = null;
 
 const defaultPollDelay = 10_000; // 10 seconds
 
-const minersStats: { [minerFullName: string]: t.MinerStats } = {};
+const minersStats: { [instanceName: string]: t.MinerStats } = {};
 
 let rigMainInfos: any | null = null;
 let dateLastCheck: number;
@@ -118,10 +118,10 @@ export async function monitorCheckRig(config: t.DaemonConfigAll): Promise<void> 
         if (proc.type === 'miner-run') {
             const minerAlias = proc.name;
             const minerName = proc.miner || '';
-            const minerFullName = `${minerName}-${minerAlias}`;
+            const instanceName = proc.instanceName || `${minerName}-${minerAlias}`;
 
             const minerCommands = minersCommands[minerName];
-            viewedMiners.push(minerFullName);
+            viewedMiners.push(instanceName);
 
             if (typeof minerCommands.getInfos === 'function') {
                 let minerStats: t.MinerStats;
@@ -131,19 +131,19 @@ export async function monitorCheckRig(config: t.DaemonConfigAll): Promise<void> 
                     minerStats.miner = minerStats.miner || {};
                     minerStats.miner.minerName = minerName;
                     minerStats.miner.minerAlias = minerAlias;
-                    minersStats[minerFullName] = minerStats;
+                    minersStats[instanceName] = minerStats;
 
                 } catch (err: any) {
                     //throw { message: err.message };
-                    delete minersStats[minerFullName];
+                    delete minersStats[instanceName];
                 }
             }
         }
     }
 
-    for (const minerFullName in minersStats) {
-        if (! viewedMiners.includes(minerFullName)) {
-            delete minersStats[minerFullName];
+    for (const instanceName in minersStats) {
+        if (! viewedMiners.includes(instanceName)) {
+            delete minersStats[instanceName];
         }
     }
 
@@ -185,10 +185,10 @@ export /* async */ function getInstalledMinersAliases(config: t.DaemonConfigAll)
 }
 
 
-export function getRunningMinersAliases(config: t.DaemonConfigAll): { [minerName: string]: { [minerFullName: string]: t.RunningMinerProcess } } {
+export function getRunningMinersAliases(config: t.DaemonConfigAll): { [minerName: string]: { [instanceName: string]: t.RunningMinerProcess } } {
     let procName: string;
     let rigProcesses = getProcesses();
-    const runningMiners: { [minerName: string]: { [minerFullName: string]: t.RunningMinerProcess } } = {};
+    const runningMiners: { [minerName: string]: { [instanceName: string]: t.RunningMinerProcess } } = {};
 
     for (procName in rigProcesses) {
         const proc = rigProcesses[procName];
@@ -196,18 +196,20 @@ export function getRunningMinersAliases(config: t.DaemonConfigAll): { [minerName
 
         const minerName = proc.miner || '';
         const minerAlias = proc.name;
-        const minerFullName = `${minerName}-${minerAlias}`;
+        const timestamp = proc.dateStart;
+        const instanceName = proc.instanceName || `${minerName}-${timestamp}`;
 
         runningMiners[minerName] = runningMiners[minerName] || {};
 
-        runningMiners[minerName][minerFullName] = {
+        runningMiners[minerName][instanceName] = {
             miner: minerName,
             alias: minerAlias,
+            instanceName,
             pid: proc.pid || 0,
             dateStart: proc.dateStart,
             args: proc.args,
             params: proc.params as t.minerRunStartParams,
-            //apiPort: proc.apiPort, // TODO
+            apiPort: proc.apiPort || 0,
         };
     }
 
@@ -362,11 +364,10 @@ export function getInstalledMinerConfiguration(config: t.DaemonConfigAll, minerN
 }
 
 
-export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.minerRunStartParams): t.Process {
+export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRunStartParams): Promise<t.Process> {
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
-    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
@@ -380,8 +381,12 @@ export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.m
         throw { message: `Unknown miner ${minerName}` };
     }
 
-    if (`miner-run-${minerAlias}` in processes) {
-        throw { message: `Miner ${minerFullTitle} run is already running` };
+
+    const timestamp = Date.now();
+    const instanceName = `${minerName}-${timestamp}`;
+
+    if (`miner-run-${instanceName}` in processes) {
+        throw { message: `Miner ${instanceName} run is already running` };
     }
 
 
@@ -391,7 +396,11 @@ export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.m
     };
     params.poolUser = stringTemplate(params.poolUser, opts, false, false, false) || '';
 
-    const minerCommands = minersCommands[minerName];
+    const minerCommands = { ...minersCommands[minerName] } as t.minerCommandInfos;
+
+    const apiPort = await getFreeTcpPort() || minerCommands.apiPort
+    minerCommands.apiPort = apiPort;
+
     const cmdFile = minerCommands.getCommandFile(config, params);
     const args = minerCommands.getCommandArgs(config, params);
 
@@ -429,26 +438,30 @@ export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.m
         type: 'miner-run',
         name: minerAlias,
         miner: minerName,
+        instanceName,
         params: params,
         cmdFile,
         args,
         dataDir,
         appDir: aliasDir,
         cmdPath,
-        dateStart: Date.now(),
+        dateStart: timestamp,
+        apiPort,
         pid: undefined,
         process: undefined
     };
-    processes[`miner-run-${minerName}-${minerAlias}`] = process;
 
-    const processName = `[freemining.rig.miners.${minerName}.${minerAlias}] ${cmdPath}`;
+    const processId = `miner-run-${instanceName}`;
+    processes[processId] = process;
+
+    const processName = `[freemining.rig.miners.${minerName}.${instanceName}] ${cmdPath}`;
 
 
     console.log(`${now()} [INFO] [RIG] Miner Run Start: ${minerName} (${minerAlias}))`);
 
     const onSpawn: t.ExecOnSpawn = function (proc) {
-        processes[`miner-run-${minerName}-${minerAlias}`].pid = proc.pid;
-        processes[`miner-run-${minerName}-${minerAlias}`].process = proc;
+        processes[processId].pid = proc.pid;
+        processes[processId].process = proc;
         fs.writeFileSync(pidFile, (proc.pid || -1).toString());
         console.debug(`${now()} [DEBUG] [RIG] PROCESS SPWANED ${minerName}-${minerAlias} (pid: ${proc.pid})`);
         /* await */ monitorAutoCheckRig(config);
@@ -463,7 +476,7 @@ export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.m
         fs.appendFileSync(errFile, data);
     }
     const onEnd: t.ExecOnEnd = function (returnCode, err) {
-        delete processes[`miner-run-${minerName}-${minerAlias}`];
+        delete processes[processId];
         fs.rmSync(pidFile, { force: true });
         /* await */ monitorAutoCheckRig(config);
         console.debug(`${now()} [DEBUG] [RIG] PROCESS COMPLETED ${minerName}-${minerAlias} (rc: ${returnCode})`);
@@ -476,7 +489,7 @@ export /* async */ function minerRunStart(config: t.DaemonConfigAll, params: t.m
             console.warn(`${now()} [WARNING] [RIG] PROCESS ERROR ${minerName}-${minerAlias} : ${err.message}`);
         });
 
-    return processes[`miner-run-${minerName}-${minerAlias}`];
+    return processes[processId];
 }
 
 
@@ -484,27 +497,29 @@ export function minerRunStop(config: t.DaemonConfigAll, params: t.minerRunStopPa
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
-    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
+    const instanceName = params.instanceName || `${minerName}-${minerAlias}`;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
     }
 
-    if (! minerAlias) {
-        throw new Error(`Missing alias parameter`);
+    //if (! minerAlias) {
+    //    throw new Error(`Missing alias parameter`);
+    //}
+
+    if (! (`miner-run-${instanceName}` in processes)) {
+        throw { message: `Miner ${instanceName} is not running` };
     }
 
-    if (! (`miner-run-${minerName}-${minerAlias}` in processes)) {
-        throw { message: `Miner ${minerFullTitle} is not running` };
-    }
-    const proc = processes[`miner-run-${minerName}-${minerAlias}`];
+    const processId = `miner-run-${instanceName}`;
+    const proc = processes[processId];
 
     if (! proc.process) {
-        throw { message: `Miner ${minerFullTitle} process is not killable` };
+        throw { message: `Miner ${instanceName} process is not killable` };
     }
 
     const signal = forceKill ? 'SIGKILL' : 'SIGINT';
-    console.debug(`${now()} [DEBUG] [RIG] KILLING PROCESS ${minerFullTitle} with signal ${signal}...`);
+    console.debug(`${now()} [DEBUG] [RIG] KILLING PROCESS ${instanceName} with signal ${signal}...`);
     proc.process.kill(signal);
 }
 
@@ -529,10 +544,14 @@ export function minerRunGetStatus(config: t.DaemonConfigAll, params: t.minerRunS
         return false;
     }
 
-    if (! (`miner-run-${minerName}-${minerAlias}` in processes)) {
+    const instanceName = params.instanceName || `${minerName}-${minerAlias}`;
+
+    if (! (`miner-run-${instanceName}` in processes)) {
         return false;
     }
-    const proc = processes[`miner-run-${minerName}-${minerAlias}`];
+
+    const processId = `miner-run-${instanceName}`;
+    const proc = processes[processId];
 
     if (! proc.process) {
         return false;
@@ -571,18 +590,18 @@ export async function minerRunGetInfos(config: t.DaemonConfigAll, params: t.mine
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
-    const minerFullTitle = (minerName === minerAlias) ? minerName : `${minerName} (${minerAlias}))`;
+    const instanceName = params.instanceName || `${minerName}-${minerAlias}`;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
     }
 
-    if (! minerAlias) {
-        throw new Error(`Missing alias parameter`);
-    }
+    //if (! minerAlias) {
+    //    throw new Error(`Missing alias parameter`);
+    //}
 
-    if (! (`miner-run-${minerName}-${minerAlias}` in processes)) {
-        throw { message: `Miner ${minerFullTitle} is not running` };
+    if (! (`miner-run-${instanceName}` in processes)) {
+        throw { message: `Miner ${instanceName} is not running` };
     }
 
     if (! (minerName in minersCommands)) {

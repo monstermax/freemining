@@ -319,7 +319,7 @@ function registerWssRoutes(config: t.DaemonConfigAll, wss: WebSocket.Server): vo
 
                     case 'rigMinerRunStart':
                         try {
-                            Rig.minerRunStart(config, req.params);
+                            await Rig.minerRunStart(config, req.params);
                             rpcSendResponse(ws, req.id, 'OK');
 
                         } catch (err: any) {

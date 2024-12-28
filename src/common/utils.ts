@@ -15,11 +15,11 @@ import type *  as t from './types';
 
 /* ########## FUNCTIONS ######### */
 
-export function hasOpt(keyName: string, argv: string[] | null=null): boolean {
+export function hasOpt(keyName: string, argv: string[] | null = null): boolean {
     argv = argv || process.argv;
-    var keyNames = (typeof(keyName) == 'object') ? keyName : [keyName];
+    var keyNames = (typeof (keyName) == 'object') ? keyName : [keyName];
 
-    for (var i=0; i<keyNames.length; i++) {
+    for (var i = 0; i < keyNames.length; i++) {
         var keyName = keyNames[i];
         if (argv.indexOf(keyName) > -1) {
             return true;
@@ -29,34 +29,34 @@ export function hasOpt(keyName: string, argv: string[] | null=null): boolean {
 }
 
 
-export function getOpt(keyName: string, argv: string[] | null=null): string | null {
+export function getOpt(keyName: string, argv: string[] | null = null): string | null {
     argv = argv || process.argv;
-    var keyNames = (typeof(keyName) == 'object') ? keyName : [keyName];
+    var keyNames = (typeof (keyName) == 'object') ? keyName : [keyName];
 
-    for (var i=0; i<keyNames.length; i++) {
+    for (var i = 0; i < keyNames.length; i++) {
         var keyName = keyNames[i];
         var idx = argv.indexOf(keyName);
         if (idx > -1) {
-            return (argv.length > idx+1) ? argv[idx+1] : null;
+            return (argv.length > idx + 1) ? argv[idx + 1] : null;
         }
     }
     return null;
 }
 
 
-export function getOpts(keyName: string, followCount: number=0, argv: string[] | null=null): null | boolean | string[] {
+export function getOpts(keyName: string, followCount: number = 0, argv: string[] | null = null): null | boolean | string[] {
     argv = argv || process.argv;
-    var keyNames = (typeof(keyName) == 'object') ? keyName : [keyName];
+    var keyNames = (typeof (keyName) == 'object') ? keyName : [keyName];
 
-    for (var i=0; i<keyNames.length; i++) {
+    for (var i = 0; i < keyNames.length; i++) {
         var keyName = keyNames[i];
         var idx = argv.indexOf(keyName);
         if (idx > -1) {
             if (followCount === 0) return true;
             if (followCount === -1) followCount = argv.length - idx - 1;
             const values: string[] = [];
-            for (let j=0; j<followCount; j++) {
-                let value = argv.slice(idx+j+1, idx+j+2).pop() || '';
+            for (let j = 0; j < followCount; j++) {
+                let value = argv.slice(idx + j + 1, idx + j + 2).pop() || '';
                 values.push(value);
             }
             return values;
@@ -68,7 +68,7 @@ export function getOpts(keyName: string, followCount: number=0, argv: string[] |
 
 
 
-export async function cmdExec(cmd: string, timeout: number | null=null): Promise<string | null> {
+export async function cmdExec(cmd: string, timeout: number | null = null): Promise<string | null> {
     let ret: string | null = null;
 
     await new Promise((resolve, reject) => {
@@ -80,7 +80,7 @@ export async function cmdExec(cmd: string, timeout: number | null=null): Promise
                 //killCmd = `pkill -f ${cmd.split(' ')[0]}`; // TODO: voir si on peut killer tous les fils shell (de script.ts), si possible en matchant un pattern
                 //await cmdExec(killCmd);
 
-                reject( { message: `command timeouted (${Math.round(10 * timeout/1000) / 10}) sec.` } );
+                reject({ message: `command timeouted (${Math.round(10 * timeout / 1000) / 10}) sec.` });
             }, timeout);
         }
 
@@ -91,12 +91,12 @@ export async function cmdExec(cmd: string, timeout: number | null=null): Promise
 
             if (error) {
                 //console.error(`${now()} [${colors.red('ERROR')}] [cmdExec] Error while running exec command : ${error.message.trim()}`);
-                reject( error );
+                reject(error);
                 return;
             }
 
             if (stderr) {
-                reject( { message: stderr, code: 500 } );
+                reject({ message: stderr, code: 500 });
                 return;
             }
             resolve(stdout);
@@ -113,7 +113,7 @@ export async function cmdExec(cmd: string, timeout: number | null=null): Promise
 }
 
 
-export function stringTemplate(text: string, params: any, ignoreErrors=false, recursive=true, expandTild=false, maxDepth=50): string | null {
+export function stringTemplate(text: string, params: any, ignoreErrors = false, recursive = true, expandTild = false, maxDepth = 50): string | null {
     const HOME = process.env.HOME;
     params.formatNumber = formatNumber;
 
@@ -123,7 +123,7 @@ export function stringTemplate(text: string, params: any, ignoreErrors=false, re
         let result = new Function(...names, `return \`${text}\`;`)(...vals);
 
         if (recursive && maxDepth > 0 && result && result.includes('${')) {
-            result = stringTemplate(result, params, ignoreErrors, recursive, expandTild, maxDepth-1);
+            result = stringTemplate(result, params, ignoreErrors, recursive, expandTild, maxDepth - 1);
         }
 
         if (result && expandTild && result.startsWith('~')) {
@@ -141,14 +141,14 @@ export function stringTemplate(text: string, params: any, ignoreErrors=false, re
 }
 
 
-function fixedRound(precision: number=0) {
+function fixedRound(precision: number = 0) {
     return function (val: number) {
         return Math.round(val * 10 ** precision) / 10 ** precision;
     }
 }
 
 
-export function formatNumber(n: number, type:string=''): string {
+export function formatNumber(n: number, type: string = ''): string {
     let ret = '';
 
     const round = fixedRound(1);
@@ -192,7 +192,7 @@ export function formatNumber(n: number, type:string=''): string {
 
 
 export function now(): string {
-    const options: {hour:string|any, minute:string|any, second:string|any} = {
+    const options: { hour: string | any, minute: string | any, second: string | any } = {
         /* year: "numeric", month: "2-digit", day: "2-digit", */
         hour: "2-digit", minute: "2-digit", second: "2-digit",
     }
@@ -204,28 +204,32 @@ export function createLruCache<T>(maxEntries: number = 20, store: Map<string, T>
     // source: https://gist.github.com/dherges/86012049be7b1263b2e594134ff5816a
 
     function put(key: string, value: T) {
-      if (store.size >= maxEntries) {
-        const keyToDelete = store.keys().next().value
-        store.delete(keyToDelete)
-      }
-      store.set(key, value)
+        if (store.size >= maxEntries) {
+            const keyToDelete = store.keys().next().value
+
+            if (keyToDelete) {
+                store.delete(keyToDelete);
+            }
+        }
+
+        store.set(key, value)
     }
 
     function get(key: string): T | undefined {
-      const hasKey = store.has(key)
-      if (!hasKey) return undefined
+        const hasKey = store.has(key)
+        if (!hasKey) return undefined
 
-      const entry = store.get(key)!
-      store.delete(key)
-      store.set(key, entry)
-      return entry
+        const entry = store.get(key)!
+        store.delete(key)
+        store.set(key, entry)
+        return entry
     }
 
     return {
-      put,
-      get,
-      maxEntries,
-      store,
+        put,
+        get,
+        maxEntries,
+        store,
     } as t.LruCache<T>;
 }
 
@@ -242,7 +246,7 @@ export function getLocalIpAddresses(): string[] {
         let interfaceInfos = interfaces[ifName];
         interfaceInfos = (interfaceInfos || []).filter(interfaceInfo => interfaceInfo.family === 'IPv4');
 
-        const interfaceAddresses = interfaceInfos.filter((intf: os.NetworkInterfaceInfo) => ! intf.internal).map(interfaceInfo => interfaceInfo.address);
+        const interfaceAddresses = interfaceInfos.filter((intf: os.NetworkInterfaceInfo) => !intf.internal).map(interfaceInfo => interfaceInfo.address);
         addresses.push(...interfaceAddresses);
 
         const internalInterfaceAddresses = interfaceInfos.filter((intf: os.NetworkInterfaceInfo) => intf.internal).map(interfaceInfo => interfaceInfo.address);
@@ -258,7 +262,7 @@ export function getLocalIpAddresses(): string[] {
 
 
 
-export function buildRpcRequest(id: number, method: string, params: any=[]): t.RpcRequest {
+export function buildRpcRequest(id: number, method: string, params: any = []): t.RpcRequest {
     const req: t.RpcRequest = {
         jsonrpc: "2.0",
         id,
@@ -269,7 +273,7 @@ export function buildRpcRequest(id: number, method: string, params: any=[]): t.R
 }
 
 
-export function buildRpcResponse(id: number, result: any=null): t.RpcResponse {
+export function buildRpcResponse(id: number, result: any = null): t.RpcResponse {
     //if (typeof result === 'object') {
     //    result = JSON.stringify(result);
     //}
@@ -296,18 +300,18 @@ export function buildRpcError(id: number, err: any): t.RpcError {
 
 
 export function stripFinalNewline(input: string): string {
-	const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt(0);
-	const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt(0);
+    const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt(0);
+    const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt(0);
 
-	if (input[input.length - 1] === LF) {
-		input = input.slice(0, -1);
-	}
+    if (input[input.length - 1] === LF) {
+        input = input.slice(0, -1);
+    }
 
-	if (input[input.length - 1] === CR) {
-		input = input.slice(0, -1);
-	}
+    if (input[input.length - 1] === CR) {
+        input = input.slice(0, -1);
+    }
 
-	return input;
+    return input;
 }
 
 
@@ -335,7 +339,7 @@ export async function downloadFile(url: string, targetFile: string): Promise<voi
 
 
 export function getDirFiles(dir: string): Promise<string[]> {
-    if (! fs.existsSync(dir)) {
+    if (!fs.existsSync(dir)) {
         return Promise.resolve([]);
     }
     //return = fs.promises.readdir(dir);
@@ -352,14 +356,14 @@ export function getDirFiles(dir: string): Promise<string[]> {
 
 
 export function getDirFilesSync(dir: string): string[] {
-    if (! fs.existsSync(dir)) {
+    if (!fs.existsSync(dir)) {
         return [];
     }
     return fs.readdirSync(dir);
 }
 
 
-export async function getDirSize(dir: string, recursive: boolean=true): Promise<number> {
+export async function getDirSize(dir: string, recursive: boolean = true): Promise<number> {
     let totalSize = 0;
     const files = await fs.promises.readdir(dir);
 
@@ -415,4 +419,17 @@ export function sendSocketMessage(message: string, host: string, port: number): 
         });
     });
 };
+
+
+export async function getFreeTcpPort(): Promise<number | null> {
+    return new Promise(res => {
+        const srv = net.createServer();
+
+        srv.listen(0, () => {
+            const address = srv.address() as net.AddressInfo;
+            const port = address?.port || null;
+            srv.close((err) => res(port))
+        });
+    })
+}
 

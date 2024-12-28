@@ -57,9 +57,10 @@ function getSystemInfos() {
                 clockMemory: gpu.clockMemory,
                 driverVersion: gpu.driverVersion,
                 bus: gpu.bus,
-                pciBus: gpu.pciBus,
                 busAddress: gpu.busAddress,
-                subDeviceId: gpu.subDeviceId,
+                pciBus: gpu.pciBus,
+                deviceId: gpu.deviceId,
+                subDeviceId: gpu.pciID,
             }));
             //const screens = data.displays; // vendor, model, connection, sizeX, sizeY, resolutionX, resolutionY, currentResX, currentResY, currentRefreshRate
             //console.log(data);

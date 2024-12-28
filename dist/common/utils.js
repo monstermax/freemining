@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendSocketMessage = exports.tailFile = exports.getDirSize = exports.getDirFilesSync = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
+exports.getFreeTcpPort = exports.sendSocketMessage = exports.tailFile = exports.getDirSize = exports.getDirFilesSync = exports.getDirFiles = exports.downloadFile = exports.sleep = exports.stripFinalNewline = exports.buildRpcError = exports.buildRpcResponse = exports.buildRpcRequest = exports.getLocalIpAddresses = exports.createLruCache = exports.now = exports.formatNumber = exports.stringTemplate = exports.cmdExec = exports.getOpts = exports.getOpt = exports.hasOpt = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const os_1 = tslib_1.__importDefault(require("os"));
@@ -186,7 +186,9 @@ function createLruCache(maxEntries = 20, store = new Map()) {
     function put(key, value) {
         if (store.size >= maxEntries) {
             const keyToDelete = store.keys().next().value;
-            store.delete(keyToDelete);
+            if (keyToDelete) {
+                store.delete(keyToDelete);
+            }
         }
         store.set(key, value);
     }
@@ -390,3 +392,16 @@ function sendSocketMessage(message, host, port) {
 }
 exports.sendSocketMessage = sendSocketMessage;
 ;
+function getFreeTcpPort() {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return new Promise(res => {
+            const srv = net_1.default.createServer();
+            srv.listen(0, () => {
+                const address = srv.address();
+                const port = (address === null || address === void 0 ? void 0 : address.port) || null;
+                srv.close((err) => res(port));
+            });
+        });
+    });
+}
+exports.getFreeTcpPort = getFreeTcpPort;

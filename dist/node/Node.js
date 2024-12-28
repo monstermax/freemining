@@ -70,9 +70,9 @@ function monitorCheckNode(config) {
             if (proc.type === 'fullnode-run') {
                 const fullnodeAlias = proc.name;
                 const fullnodeName = proc.fullnode || '';
-                const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+                const fullnodeInstanceName = proc.instanceName || `${fullnodeName}-${fullnodeAlias}`;
                 const fullnodeCommands = fullnodesConfigs_1.fullnodesCommands[fullnodeName];
-                viewedFullnodes.push(fullnodeFullName);
+                viewedFullnodes.push(fullnodeInstanceName);
                 if (typeof fullnodeCommands.getInfos === 'function') {
                     let fullnodeStats;
                     try {
@@ -81,18 +81,18 @@ function monitorCheckNode(config) {
                         fullnodeStats.fullnode = fullnodeStats.fullnode || {};
                         fullnodeStats.fullnode.fullnodeName = fullnodeName;
                         fullnodeStats.fullnode.fullnodeAlias = fullnodeAlias;
-                        fullnodesStats[fullnodeFullName] = fullnodeStats;
+                        fullnodesStats[fullnodeInstanceName] = fullnodeStats;
                     }
                     catch (err) {
                         //throw { message: err.message };
-                        delete fullnodesStats[fullnodeFullName];
+                        delete fullnodesStats[fullnodeInstanceName];
                     }
                 }
             }
         }
-        for (const fullnodeName in fullnodesStats) {
-            if (!viewedFullnodes.includes(fullnodeName)) {
-                delete fullnodesStats[fullnodeName];
+        for (const instanceName in fullnodesStats) {
+            if (!viewedFullnodes.includes(instanceName)) {
+                delete fullnodesStats[instanceName];
             }
         }
         dateLastCheck = Date.now();
@@ -136,9 +136,9 @@ function getRunningFullnodesAliases(config) {
             continue;
         const fullnodeName = proc.fullnode || '';
         const fullnodeAlias = proc.name;
-        const fullnodeFullName = `${fullnodeName}-${fullnodeAlias}`;
+        const instanceName = proc.instanceName || `${fullnodeName}-${fullnodeAlias}`;
         runningFullnodes[fullnodeName] = runningFullnodes[fullnodeName] || {};
-        runningFullnodes[fullnodeName][fullnodeFullName] = {
+        runningFullnodes[fullnodeName][instanceName] = {
             fullnode: fullnodeName,
             alias: fullnodeAlias,
             pid: proc.pid || 0,
@@ -235,7 +235,9 @@ function fullnodeRunStart(config, params) {
     if (!(fullnodeName in fullnodesConfigs_1.fullnodesCommands)) {
         throw { message: `Unknown fullnode ${fullnodeName}` };
     }
-    if (`fullnode-run-${fullnodeAlias}` in processes) {
+    const timestamp = Date.now();
+    const instanceName = `${fullnodeName}-${timestamp}`;
+    if (`fullnode-run-${instanceName}` in processes) {
         throw { message: `fullnode ${fullnodeFullTitle} run is already running` };
     }
     const fullnodeCommands = fullnodesConfigs_1.fullnodesCommands[fullnodeName];
@@ -268,6 +270,7 @@ function fullnodeRunStart(config, params) {
         type: 'fullnode-run',
         name: fullnodeAlias,
         fullnode: fullnodeName,
+        instanceName,
         params: params,
         cmdFile,
         args,
@@ -278,14 +281,14 @@ function fullnodeRunStart(config, params) {
         pid: undefined,
         process: undefined
     };
-    processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`] = process;
+    processes[`fullnode-run-${instanceName}`] = process;
     const processName = `[freemining.node.fullnodes.${fullnodeName}.${fullnodeAlias}] ${cmdPath}`;
     console.log(`${(0, utils_1.now)()} [INFO] [NODE] Fullnode Run Start: ${fullnodeName} (${fullnodeAlias}))`);
     const onSpawn = function (proc) {
-        processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`].pid = proc.pid;
-        processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`].process = proc;
+        processes[`fullnode-run-${instanceName}`].pid = proc.pid;
+        processes[`fullnode-run-${instanceName}`].process = proc;
         fs_1.default.writeFileSync(pidFile, (proc.pid || -1).toString());
-        console.debug(`${(0, utils_1.now)()} [DEBUG] [NODE] PROCESS SPWANED ${fullnodeName}-${fullnodeAlias} (pid: ${proc.pid})`);
+        console.debug(`${(0, utils_1.now)()} [DEBUG] [NODE] PROCESS SPWANED ${instanceName} (pid: ${proc.pid})`);
         // /* await */ monitorAutoCheckNode(config);
     };
     const onStdOut = function (data) {
@@ -298,23 +301,24 @@ function fullnodeRunStart(config, params) {
         fs_1.default.appendFileSync(errFile, data);
     };
     const onEnd = function (returnCode, err) {
-        delete processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`];
+        delete processes[`fullnode-run-${instanceName}`];
         fs_1.default.rmSync(pidFile, { force: true });
         // /* await */ monitorAutoCheckNode(config);
-        console.debug(`${(0, utils_1.now)()} [DEBUG] [NODE] PROCESS COMPLETED ${fullnodeName}-${fullnodeAlias} (rc: ${returnCode})`);
+        console.debug(`${(0, utils_1.now)()} [DEBUG] [NODE] PROCESS COMPLETED ${instanceName} (rc: ${returnCode})`);
     };
     //console.debug(`${now()} [DEBUG] [NODE] Running command: ${cmdPath} ${args.join(' ')}`);
     (0, exec_1.exec)(cmdPath, args, '', dataDir, onSpawn, onStdOut, onStdErr, onEnd, processName)
         .catch((err) => {
-        console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] PROCESS ERROR ${fullnodeName}-${fullnodeAlias} : ${err.message}`);
+        console.warn(`${(0, utils_1.now)()} [WARNING] [NODE] PROCESS ERROR ${instanceName} : ${err.message}`);
     });
-    return processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`];
+    return processes[`fullnode-run-${instanceName}`];
 }
 exports.fullnodeRunStart = fullnodeRunStart;
 function fullnodeRunStop(config, params, forceKill = false) {
     const fullnodeName = params.fullnode;
     const fullnodeConfig = getInstalledFullnodeConfiguration(config, fullnodeName);
     const fullnodeAlias = params.alias || fullnodeConfig.defaultAlias;
+    const instanceName = params.instanceName || `${fullnodeName}-${fullnodeAlias}`;
     const fullnodeFullTitle = (fullnodeName === fullnodeAlias) ? fullnodeName : `${fullnodeName} (${fullnodeAlias}))`;
     if (!fullnodeName) {
         throw new Error(`Missing fullnode parameter`);
@@ -322,10 +326,10 @@ function fullnodeRunStop(config, params, forceKill = false) {
     if (!fullnodeAlias) {
         throw new Error(`Missing alias parameter`);
     }
-    if (!(`fullnode-run-${fullnodeName}-${fullnodeAlias}` in processes)) {
+    if (!(`fullnode-run-${instanceName}` in processes)) {
         throw { message: `Fullnode ${fullnodeFullTitle} is not running` };
     }
-    const proc = processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`];
+    const proc = processes[`fullnode-run-${instanceName}`];
     if (!proc.process) {
         throw { message: `Fullnode ${fullnodeFullTitle} process is not killable` };
     }
@@ -337,6 +341,7 @@ exports.fullnodeRunStop = fullnodeRunStop;
 function fullnodeRunGetStatus(config, params) {
     const fullnodeName = params.fullnode;
     let fullnodeAlias = params.alias;
+    const instanceName = params.instanceName || `${fullnodeName}-${fullnodeAlias}`;
     if (!fullnodeAlias) {
         const fullnodeConfig = getInstalledFullnodeConfiguration(config, fullnodeName);
         fullnodeAlias = fullnodeConfig.defaultAlias;
@@ -349,10 +354,10 @@ function fullnodeRunGetStatus(config, params) {
         //throw new Error(`Missing alias parameter`);
         return false;
     }
-    if (!(`fullnode-run-${fullnodeName}-${fullnodeAlias}` in processes)) {
+    if (!(`fullnode-run-${instanceName}` in processes)) {
         return false;
     }
-    const proc = processes[`fullnode-run-${fullnodeName}-${fullnodeAlias}`];
+    const proc = processes[`fullnode-run-${instanceName}`];
     if (!proc.process) {
         return false;
     }

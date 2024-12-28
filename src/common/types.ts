@@ -165,6 +165,7 @@ export type Process = {
     type: string,
     name: string,
     miner?: string,
+    instanceName: string,
     fullnode?: string,
     params: minerRunStartParams | fullnodeRunStartParams,
     //alias?: string, // TODO: name=xxxFullName + miner/fullnode + alias
@@ -174,9 +175,9 @@ export type Process = {
     appDir: string,
     cmdPath: string,
     dateStart: number,
-    //apiPort: number,
-    //p2pPort: number,
-    //rpcPort: number,
+    apiPort?: number,
+    //p2pPort?: number,
+    //rpcPort?: number,
     pid: number | undefined,
     process: childProcess.ChildProcessWithoutNullStreams | undefined,
 }
@@ -419,8 +420,10 @@ export type InstalledMinerAliasConfig = {
 export type RunningMinerProcess = {
     miner: string,
     alias: string,
+    instanceName: string,
     pid: number,
     dateStart: number,
+    apiPort: number,
     args: string[],
     params: minerRunStartParams,
     //apiPort: number, // TODO
@@ -451,11 +454,13 @@ export type minerRunStartParams = {
 export type minerRunStopParams = {
     miner: string,
     alias?: string,
+    instanceName?: string,
 }
 
 export type minerRunStatusParams = {
     miner: string,
     alias?: string,
+    instanceName?: string,
 }
 
 export type minerRunLogParams = {
@@ -467,6 +472,7 @@ export type minerRunLogParams = {
 export type minerRunInfosParams = {
     miner: string,
     alias?: string,
+    instanceName?: string,
 }
 
 export type getMinerCommandArgsParams = {
@@ -688,11 +694,13 @@ export type fullnodeRunStartParams = {
 export type fullnodeRunStopParams = {
     fullnode: string,
     alias?: string,
+    instanceName?: string,
 }
 
 export type fullnodeRunStatusParams = {
     fullnode: string,
     alias?: string,
+    instanceName?: string,
 }
 
 export type fullnodeRunLogParams = {
