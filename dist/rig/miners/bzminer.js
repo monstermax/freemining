@@ -116,12 +116,13 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             const cpus = [];
             const gpus = minerSummary.devices.map((gpu, idx) => {
                 return {
-                    id: gpu.pci_device_id,
+                    id: idx,
                     name: gpu.name,
                     hashRate: gpu.hashrate[0] || 0,
                     temperature: gpu.core_temp,
                     fanSpeed: gpu.fan,
                     power: gpu.power,
+                    subDeviceId: gpu.subDeviceId,
                 };
             });
             // EDIT THESE VALUES - END //

@@ -393,6 +393,7 @@ export type MinerGpuInfos = GPU & {
     fanSpeed: number,
     hashRate: number,
     power: number | null,
+    subDeviceId?: string,
 };
 
 

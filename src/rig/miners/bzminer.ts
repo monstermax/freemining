@@ -164,12 +164,13 @@ export const minerCommands: t.minerCommandInfos = {
 
         const gpus: t.MinerGpuInfos[] = minerSummary.devices.map((gpu:any, idx:number) => {
             return {
-                id: idx, // BUG: fix here
+                id: idx,
                 name: gpu.name as string,
                 hashRate: gpu.hashrate[0] as number || 0,
                 temperature: gpu.core_temp as number,
                 fanSpeed: gpu.fan as number,
                 power: gpu.power as number,
+                subDeviceId: gpu.subDeviceId as string,
             };
         });
         // EDIT THESE VALUES - END //
