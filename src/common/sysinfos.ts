@@ -59,6 +59,9 @@ export async function getSystemInfos() {
             clockCore: gpu.clockCore,
             clockMemory: gpu.clockMemory,
             driverVersion: gpu.driverVersion,
+            bus: gpu.bus,
+            pciBus: gpu.pciBus,
+            busAddress: gpu.busAddress,
         }));
 
         //const screens = data.displays; // vendor, model, connection, sizeX, sizeY, resolutionX, resolutionY, currentResX, currentResY, currentRefreshRate
