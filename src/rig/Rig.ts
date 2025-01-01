@@ -432,7 +432,7 @@ export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRu
     }
 
     if (! fs.existsSync(cmdPath)) {
-        throw { message: `Miner ${minerName} cmdPath is misconfigured` };
+        throw { message: `Miner ${minerName} cmdPath is misconfigured => ${cmdPath}` };
     }
 
 

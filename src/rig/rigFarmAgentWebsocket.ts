@@ -84,7 +84,7 @@ async function sendRigStatusAuto(ws: WebSocket, config: t.DaemonConfigAll) {
         sendRigStatus(ws, rigInfos);
 
     } catch (err: any) {
-        console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${(ws as any)._connId}]`);
+        console.warn(`${now()} [${colors.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${(ws as any)?._connId}]`);
     }
 
     //sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws, config);
@@ -92,7 +92,7 @@ async function sendRigStatusAuto(ws: WebSocket, config: t.DaemonConfigAll) {
 
 
 function sendRigStatus(ws: WebSocket, rigInfos: t.RigInfos): void {
-    console.log(`${now()} [${colors.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${(websocket as any)._connId}]`);
+    console.log(`${now()} [${colors.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${(websocket as any)?._connId}]`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
 
     //const req: any = {
