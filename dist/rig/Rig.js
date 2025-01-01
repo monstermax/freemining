@@ -339,7 +339,7 @@ function minerRunStart(config, params) {
         const dataDir = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
         const minerDir = `${config.appDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
         const aliasDir = `${minerDir}${SEP}${minerAlias}`;
-        const cmdPath = cmdFile.startsWith('/') ? cmdFile : `${aliasDir}${SEP}${cmdFile}`;
+        const cmdPath = (cmdFile.startsWith(SEP) || cmdFile.includes(`:${SEP}`)) ? cmdFile : `${aliasDir}${SEP}${cmdFile}`;
         const logDir = `${config.logDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
         const logFile = `${logDir}${SEP}${minerAlias}.run.log`;
         const errFile = `${logDir}${SEP}${minerAlias}.run.err`;
