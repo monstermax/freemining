@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerRigRoutes = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerUninstallPost = exports.rigMinerUninstall = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigGetInstallableVersions = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfigRig = exports.rigConfig = exports.rigHomepage = void 0;
+exports.registerRigRoutes = exports.rigConfigUpdate = exports.rigMinerRunPost = exports.rigMinerRun = exports.rigMinerUninstallPost = exports.rigMinerUninstall = exports.rigMinerInstallPost = exports.rigMinerInstall = exports.rigMinerRunModal = exports.rigStatus = exports.rigConfigGetInstallableVersions = exports.rigConfigCoinsMiners = exports.rigConfigCoinsPools = exports.rigConfigCoinsWallets = exports.rigConfigMiners = exports.rigConfigCoins = exports.rigConfigRig = exports.rigConfig = exports.rigHomepage = void 0;
 const tslib_1 = require("tslib");
 const path_1 = tslib_1.__importDefault(require("path"));
 const utils_1 = require("../../common/utils");
@@ -8,6 +8,7 @@ const Rig = tslib_1.__importStar(require("../../rig/Rig"));
 const Farm = tslib_1.__importStar(require("../../farm/Farm"));
 const Daemon = tslib_1.__importStar(require("../../core/Daemon"));
 const minersConfigs_1 = require("../../rig/minersConfigs");
+const Config_1 = require("../Config");
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 const utilFuncs = {
@@ -478,6 +479,33 @@ function rigMinerRunPost(rigData, req, res, next) {
 }
 exports.rigMinerRunPost = rigMinerRunPost;
 ;
+function rigConfigUpdate(configType, newConfig) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = Daemon.getConfig();
+        const confDir = config.confDir;
+        if (configType === 'coins') {
+            (0, Config_1.saveDaemonRigCoinsConfig)(confDir, newConfig);
+            config.rig.coins = newConfig;
+        }
+        else if (configType === 'miners') {
+            (0, Config_1.saveDaemonRigMinersConfig)(confDir, newConfig);
+            config.rig.miners = newConfig;
+        }
+        else if (configType === 'coins_wallets') {
+            (0, Config_1.saveDaemonRigCoinsWalletsConfig)(confDir, newConfig);
+            config.rig.coinsWallets = newConfig;
+        }
+        else if (configType === 'coins_pools') {
+            (0, Config_1.saveDaemonRigCoinsPoolsConfig)(confDir, newConfig);
+            config.rig.coinsPools = newConfig;
+        }
+        else if (configType === 'coins_miners') {
+            (0, Config_1.saveDaemonRigCoinsMinersConfig)(confDir, newConfig);
+            config.rig.coinsMiners = newConfig;
+        }
+    });
+}
+exports.rigConfigUpdate = rigConfigUpdate;
 /* #### */
 function registerRigRoutes(app, urlPrefix = '') {
     // GET Rig homepage => /rig/
@@ -633,6 +661,76 @@ function registerRigRoutes(app, urlPrefix = '') {
     }));
     app.get(`${urlPrefix}/miners-run-modal`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         rigMinerRunModal(yield getRigData(), req, res, next);
+    }));
+    app.post(`${urlPrefix}/config/coins/update`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = req.body.config;
+        try {
+            const coins = JSON.parse(config || 'null');
+            if (!coins) {
+                return res.send('Error: invalid data');
+            }
+            yield rigConfigUpdate('coins', coins);
+            res.send('OK: Rig coins config updated');
+        }
+        catch (err) {
+            res.send('Error: invalid data');
+        }
+    }));
+    app.post(`${urlPrefix}/config/miners/update`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = req.body.config;
+        try {
+            const miners = JSON.parse(config || 'null');
+            if (!miners) {
+                return res.send('Error: invalid data');
+            }
+            yield rigConfigUpdate('miners', miners);
+            res.send('OK: Rig miners config updated');
+        }
+        catch (err) {
+            res.send('Error: invalid data');
+        }
+    }));
+    app.post(`${urlPrefix}/config/coins_wallets/update`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = req.body.config;
+        try {
+            const coinsWallets = JSON.parse(config || 'null');
+            if (!coinsWallets) {
+                return res.send('Error: invalid data');
+            }
+            yield rigConfigUpdate('coins_wallets', coinsWallets);
+            res.send('OK: Rig coins-wallets config updated');
+        }
+        catch (err) {
+            res.send('Error: invalid data');
+        }
+    }));
+    app.post(`${urlPrefix}/config/coins_pools/update`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = req.body.config;
+        try {
+            const coinsPools = JSON.parse(config || 'null');
+            if (!coinsPools) {
+                return res.send('Error: invalid data');
+            }
+            yield rigConfigUpdate('coins_pools', coinsPools);
+            res.send('OK: Rig coins-pools config updated');
+        }
+        catch (err) {
+            res.send('Error: invalid data');
+        }
+    }));
+    app.post(`${urlPrefix}/config/coins_miners/update`, (req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const config = req.body.config;
+        try {
+            const coinsMiners = JSON.parse(config || 'null');
+            if (!coinsMiners) {
+                return res.send('Error: invalid data');
+            }
+            yield rigConfigUpdate('coins_miners', coinsMiners);
+            res.send('OK: Rig coins-miners config updated');
+        }
+        catch (err) {
+            res.send('Error: invalid data');
+        }
     }));
 }
 exports.registerRigRoutes = registerRigRoutes;

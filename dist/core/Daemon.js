@@ -130,6 +130,7 @@ function registerHttpRoutes(config, app) {
     }
     // Parse Body (POST only)
     app.use(express_1.default.urlencoded({ extended: true }));
+    app.use(express_1.default.json({}));
     // Static files
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] Using static folder ${config.httpStaticDir}`);
     app.use(express_1.default.static(config.httpStaticDir));

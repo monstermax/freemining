@@ -66,13 +66,13 @@ function sendRigStatusAuto(ws, config) {
             sendRigStatus(ws, rigInfos);
         }
         catch (err) {
-            console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${ws._connId}]`);
+            console.warn(`${(0, utils_1.now)()} [${safe_1.default.yellow('WARNING')}] [RIG] cannot send status to farm : ${err.message} [connId: ${ws === null || ws === void 0 ? void 0 : ws._connId}]`);
         }
         //sendStatusTimeout = setTimeout(sendRigStatusAuto, sendStatusInterval, ws, config);
     });
 }
 function sendRigStatus(ws, rigInfos) {
-    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${websocket._connId}]`);
+    console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [RIG] Sending rigInfos to farm agent... [connId: ${websocket === null || websocket === void 0 ? void 0 : websocket._connId}]`);
     //ws.send( `rigStatus ${JSON.stringify(rigInfos)}`);
     //const req: any = {
     //    method: "farmRigUpdateStatus",

@@ -164,6 +164,7 @@ function registerHttpRoutes(config: t.DaemonConfigAll, app: express.Express): vo
 
     // Parse Body (POST only)
     app.use(express.urlencoded({ extended: true }));
+    app.use(express.json({  }));
 
     // Static files
     console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] Using static folder ${config.httpStaticDir}`);

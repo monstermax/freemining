@@ -357,7 +357,7 @@ function minerRunStart(config, params) {
             throw { message: `Miner ${minerName} is not installed` };
         }
         if (!fs_1.default.existsSync(cmdPath)) {
-            throw { message: `Miner ${minerName} cmdPath is misconfigured` };
+            throw { message: `Miner ${minerName} cmdPath is misconfigured => ${cmdPath}` };
         }
         const process = {
             type: 'miner-run',

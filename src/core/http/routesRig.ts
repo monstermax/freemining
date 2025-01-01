@@ -11,8 +11,9 @@ import * as Farm from '../../farm/Farm';
 import * as Daemon from '../../core/Daemon';
 import { minersInstalls, minersCommands } from '../../rig/minersConfigs';
 
+import { saveDaemonRigCoinsConfig, saveDaemonRigCoinsMinersConfig, saveDaemonRigCoinsPoolsConfig, saveDaemonRigCoinsWalletsConfig, saveDaemonRigMinersConfig } from '../Config';
+
 import type * as t from '../../common/types';
-import { config } from 'process';
 
 
 
@@ -593,6 +594,33 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
 
 
 
+export async function rigConfigUpdate<T extends t.RigConfigType>(configType: T, newConfig: t.RigConfigs<T>) {
+    const config = Daemon.getConfig();
+    const confDir =  config.confDir;
+
+    if (configType === 'coins') {
+        saveDaemonRigCoinsConfig(confDir, newConfig as t.rigCoinsConfig);
+        config.rig.coins = newConfig as t.rigCoinsConfig;
+
+    } else if (configType === 'miners') {
+        saveDaemonRigMinersConfig(confDir, newConfig as t.rigMinersConfig);
+        config.rig.miners = newConfig as t.rigMinersConfig;
+
+    } else if (configType === 'coins_wallets') {
+        saveDaemonRigCoinsWalletsConfig(confDir, newConfig as t.rigCoinsWalletsConfig);
+        config.rig.coinsWallets = newConfig as t.rigCoinsWalletsConfig;
+
+    } else if (configType === 'coins_pools') {
+        saveDaemonRigCoinsPoolsConfig(confDir, newConfig as t.rigCoinsPoolsConfig);
+        config.rig.coinsPools = newConfig as t.rigCoinsPoolsConfig;
+
+    } else if (configType === 'coins_miners') {
+        saveDaemonRigCoinsMinersConfig(confDir, newConfig as t.rigCoinsMinersConfig);
+        config.rig.coinsMiners = newConfig as t.rigCoinsMinersConfig;
+    }
+}
+
+
 
 /* #### */
 
@@ -793,6 +821,103 @@ export function registerRigRoutes(app: express.Express, urlPrefix: string='') {
 
     app.get(`${urlPrefix}/miners-run-modal`, async (req: express.Request, res: express.Response, next: Function) => {
         rigMinerRunModal(await getRigData(), req, res, next);
+    });
+
+
+    app.post(`${urlPrefix}/config/coins/update`, async (req: express.Request, res: express.Response, next: Function) => {
+        const config = req.body.config;
+
+        try {
+            const coins = JSON.parse(config || 'null');
+
+            if (! coins) {
+                return res.send('Error: invalid data');
+            }
+
+            await rigConfigUpdate('coins', coins);
+
+            res.send('OK: Rig coins config updated');
+
+        } catch (err: any) {
+            res.send('Error: invalid data');
+        }
+    });
+
+
+    app.post(`${urlPrefix}/config/miners/update`, async (req: express.Request, res: express.Response, next: Function) => {
+        const config = req.body.config;
+
+        try {
+            const miners = JSON.parse(config || 'null');
+
+            if (! miners) {
+                return res.send('Error: invalid data');
+            }
+
+            await rigConfigUpdate('miners', miners);
+
+            res.send('OK: Rig miners config updated');
+
+        } catch (err: any) {
+            res.send('Error: invalid data');
+        }
+    });
+
+    app.post(`${urlPrefix}/config/coins_wallets/update`, async (req: express.Request, res: express.Response, next: Function) => {
+        const config = req.body.config;
+
+        try {
+            const coinsWallets = JSON.parse(config || 'null');
+
+            if (! coinsWallets) {
+                return res.send('Error: invalid data');
+            }
+
+            await rigConfigUpdate('coins_wallets', coinsWallets);
+
+            res.send('OK: Rig coins-wallets config updated');
+
+        } catch (err: any) {
+            res.send('Error: invalid data');
+        }
+    });
+
+    app.post(`${urlPrefix}/config/coins_pools/update`, async (req: express.Request, res: express.Response, next: Function) => {
+        const config = req.body.config;
+
+        try {
+            const coinsPools = JSON.parse(config || 'null');
+
+            if (! coinsPools) {
+                return res.send('Error: invalid data');
+            }
+
+            await rigConfigUpdate('coins_pools', coinsPools);
+
+            res.send('OK: Rig coins-pools config updated');
+
+        } catch (err: any) {
+            res.send('Error: invalid data');
+        }
+    });
+
+    app.post(`${urlPrefix}/config/coins_miners/update`, async (req: express.Request, res: express.Response, next: Function) => {
+        const config = req.body.config;
+
+        try {
+            const coinsMiners = JSON.parse(config || 'null');
+
+            if (! coinsMiners) {
+                return res.send('Error: invalid data');
+            }
+
+            await rigConfigUpdate('coins_miners', coinsMiners);
+
+            res.send('OK: Rig coins-miners config updated');
+
+        } catch (err: any) {
+            res.send('Error: invalid data');
+        }
     });
 
 

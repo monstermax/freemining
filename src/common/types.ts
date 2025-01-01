@@ -205,6 +205,17 @@ export type GPU = {
 
 /* RIG */
 
+export type RigConfigType = 'coins' | 'miners' | 'coins_wallets' | 'coins_pools' | 'coins_miners';
+
+export type RigConfigs<T extends RigConfigType> = 
+    T extends 'coins'         ? rigCoinsConfig :
+    T extends 'coins_wallets' ? rigCoinsWalletsConfig :
+    T extends 'coins_miners'  ? rigCoinsMinersConfig :
+    T extends 'coins_pools'   ? rigCoinsPoolsConfig :
+    T extends 'miners'        ? rigMinersConfig :
+    never;
+
+
 export type RigConfig = {
     name?: string,
     farmAgent?: {
@@ -256,7 +267,7 @@ export type rigCoinsConfig = {
 
 export type rigMinersConfig = {
     [minerName: string]: {
-        apiPort?: string,
+        //apiPort?: string,
         extraArgs?: string,
     }
 };
