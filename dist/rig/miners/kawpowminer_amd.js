@@ -15,12 +15,12 @@ Website  :
 Github   : https://github.com/RavenCommunity/kawpowminer
 Download : https://github.com/RavenCommunity/kawpowminer/releases
 Minerstat: https://minerstat.com/miner/kawpowminer
-Command  : ./kawpowminer -P stratum+tcp://t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.max-omatic:x@rvn-eu.minerpool.pro:16059 --api-bind 127.0.0.1:3334 --cuda --cu-devices 0
+Command  : ./kawpowminer -P stratum+tcp://t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.max-omatic:x@rvn-eu.minerpool.pro:16059 --api-bind 127.0.0.1:3334 --opencl
 
 */
 /* ########## CONFIG ######### */
-const minerName = 'kawpowminer';
-const minerTitle = 'Kawpowminer';
+const minerName = 'kawpowminer_amd';
+const minerTitle = 'Kawpowminer AMD';
 const github = 'RavenCommunity/kawpowminer';
 const lastVersion = '1.2.4';
 /* ########## MAIN ######### */
@@ -35,11 +35,11 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = `${SEP}linux-ubuntu20-cuda11-1.2.4`;
+            let subDir = `${SEP}linux-ubuntu20-opencl-1.2.4`;
             // Download url selection
             const dlUrls = {
-                'linux': `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-ubuntu20-cuda11-${version}.tar.gz`,
-                'win32': `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-windows-cuda11-${version}.zip`,
+                'linux': `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-ubuntu20-opencl-${version}.tar.gz`,
+                'win32': `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-windows-opencl-${version}.zip`,
                 'darwin': ``,
                 'freebsd': ``,
             };
@@ -78,7 +78,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
             args.push(`stratum+tcp://${params.poolUser}.{worker}:x@${params.poolUrl}`);
         }
         if (true) {
-            args.push('--cuda');
+            args.push('--opencl');
         }
         if (params.extraArgs && params.extraArgs.length > 0) {
             args.push(...params.extraArgs);

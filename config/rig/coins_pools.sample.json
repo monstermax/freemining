@@ -14,8 +14,8 @@
             }
         }
     },
-    "CNX": {
-        "whoolypooly": {
+    "CFX": {
+        "woolypooly": {
             "user": "{wallet}.{worker}",
             "urls": {
                 "default": "pool.woolypooly.com:3094"

@@ -4,8 +4,7 @@ import path from 'path';
 import os from 'os';
 import fetch from 'node-fetch';
 
-import { now, getOpt, downloadFile } from '../../common/utils';
-import { decompressFile } from '../../common/decompress_archive';
+import { now, getOpt } from '../../common/utils';
 import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';

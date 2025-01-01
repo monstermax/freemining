@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadDaemonPoolConfig = exports.loadDaemonNodeConfig = exports.loadDaemonFarmConfig = exports.loadDaemonRigConfig = exports.loadDaemonConfig = exports.loadCliConfig = void 0;
+exports.loadDaemonPoolConfig = exports.loadDaemonNodeConfig = exports.loadDaemonFarmConfig = exports.saveDaemonRigCoinsConfig = exports.saveDaemonRigMinersConfig = exports.saveDaemonRigCoinsMinersConfig = exports.saveDaemonRigCoinsPoolsConfig = exports.saveDaemonRigCoinsWalletsConfig = exports.loadDaemonRigConfig = exports.loadDaemonConfig = exports.loadCliConfig = void 0;
 const tslib_1 = require("tslib");
 const os_1 = tslib_1.__importDefault(require("os"));
 const fs_1 = tslib_1.__importStar(require("fs"));
@@ -281,10 +281,15 @@ function loadDaemonRigCoinsWalletsConfig(confDir) {
         }
     }
     const coinsWallets = Object.assign({}, walletsConfig);
-    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
-    fs_1.default.writeFileSync(walletsConfigFile, JSON.stringify(coinsWallets, null, 4));
+    saveDaemonRigCoinsWalletsConfig(confDir, coinsWallets);
     return coinsWallets;
 }
+function saveDaemonRigCoinsWalletsConfig(confDir, coinsWallets) {
+    const walletsConfigFile = `${confDir}${SEP}rig${SEP}coins_wallets.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(walletsConfigFile, JSON.stringify(coinsWallets, null, 4));
+}
+exports.saveDaemonRigCoinsWalletsConfig = saveDaemonRigCoinsWalletsConfig;
 function loadDaemonRigCoinsPoolsConfig(confDir) {
     const poolsConfigFile = `${confDir}${SEP}rig${SEP}coins_pools.json`;
     const poolsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_pools.sample.json`;
@@ -307,6 +312,12 @@ function loadDaemonRigCoinsPoolsConfig(confDir) {
     fs_1.default.writeFileSync(poolsConfigFile, JSON.stringify(coinsPools, null, 4));
     return coinsPools;
 }
+function saveDaemonRigCoinsPoolsConfig(confDir, coinsPools) {
+    const poolsConfigFile = `${confDir}${SEP}rig${SEP}coins_pools.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(poolsConfigFile, JSON.stringify(coinsPools, null, 4));
+}
+exports.saveDaemonRigCoinsPoolsConfig = saveDaemonRigCoinsPoolsConfig;
 function loadDaemonRigCoinsMinersConfig(confDir) {
     const minersConfigFile = `${confDir}${SEP}rig${SEP}coins_miners.json`;
     const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins_miners.sample.json`;
@@ -329,6 +340,12 @@ function loadDaemonRigCoinsMinersConfig(confDir) {
     fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(coinsMiners, null, 4));
     return coinsMiners;
 }
+function saveDaemonRigCoinsMinersConfig(confDir, coinsMiners) {
+    const minersConfigFile = `${confDir}${SEP}rig${SEP}coins_miners.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(coinsMiners, null, 4));
+}
+exports.saveDaemonRigCoinsMinersConfig = saveDaemonRigCoinsMinersConfig;
 function loadDaemonRigMinersConfig(confDir) {
     const minersConfigFile = `${confDir}${SEP}rig${SEP}miners.json`;
     const minersConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}miners.sample.json`;
@@ -351,6 +368,12 @@ function loadDaemonRigMinersConfig(confDir) {
     fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(miners, null, 4));
     return miners;
 }
+function saveDaemonRigMinersConfig(confDir, miners) {
+    const minersConfigFile = `${confDir}${SEP}rig${SEP}miners.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(minersConfigFile, JSON.stringify(miners, null, 4));
+}
+exports.saveDaemonRigMinersConfig = saveDaemonRigMinersConfig;
 function loadDaemonRigCoinsConfig(confDir) {
     const coinsConfigFile = `${confDir}${SEP}rig${SEP}coins.json`;
     const coinsConfigDemoFile = `${__dirname}${SEP}..${SEP}..${SEP}config${SEP}rig${SEP}coins.sample.json`;
@@ -373,6 +396,12 @@ function loadDaemonRigCoinsConfig(confDir) {
     fs_1.default.writeFileSync(coinsConfigFile, JSON.stringify(coins, null, 4));
     return coins;
 }
+function saveDaemonRigCoinsConfig(confDir, coins) {
+    const coinsConfigFile = `${confDir}${SEP}rig${SEP}coins.json`;
+    (0, fs_1.mkdirSync)(`${confDir}${SEP}rig${SEP}`, { recursive: true });
+    fs_1.default.writeFileSync(coinsConfigFile, JSON.stringify(coins, null, 4));
+}
+exports.saveDaemonRigCoinsConfig = saveDaemonRigCoinsConfig;
 function loadDaemonFarmConfig(confDir) {
     // Read farm config
     let farmName = defaultFarmName;

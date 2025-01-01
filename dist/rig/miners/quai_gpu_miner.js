@@ -11,18 +11,19 @@ const baseMiner = tslib_1.__importStar(require("./_baseMiner"));
 /* ########## DESCRIPTION ######### */
 /*
 
-Website  :
-Github   : https://github.com/RavenCommunity/kawpowminer
-Download : https://github.com/RavenCommunity/kawpowminer/releases
-Minerstat: https://minerstat.com/miner/kawpowminer
-Command  : ./kawpowminer -P stratum+tcp://t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.max-omatic:x@rvn-eu.minerpool.pro:16059 --api-bind 127.0.0.1:3334 --cuda --cu-devices 0
+Website  : https://qu.ai/
+Github   : https://github.com/dominant-strategies/quai-gpu-miner
+Download : https://github.com/dominant-strategies/quai-gpu-miner/releases/
+Video    : https://www.youtube.com/watch?v=Uq0zq6EgYM8
+Minerstat:
+Command  : ./quai-gpu-miner -U --HWMON 1 -P stratum://anonymous.0x690BF6Cfce1Affb8C0E72Fe863Bd0A2ab06374Cc.worker@pool-poussin.fr:3334 --api-bind 127.0.0.1:3334 --cuda --cu-devices 0
 
 */
 /* ########## CONFIG ######### */
-const minerName = 'kawpowminer';
-const minerTitle = 'Kawpowminer';
-const github = 'RavenCommunity/kawpowminer';
-const lastVersion = '1.2.4';
+const minerName = 'quai_gpu_miner';
+const minerTitle = 'quai-gpu-miner';
+const github = 'dominant-strategies/quai-gpu-miner';
+const lastVersion = 'v0.4.1';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
 /* ########## FUNCTIONS ######### */
@@ -35,15 +36,16 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             const platform = (0, utils_1.getOpt)('--platform', config._args) || os_1.default.platform(); // aix | android | darwin | freebsd | linux | openbsd | sunos | win32 | android (experimental)
             const setAsDefaultAlias = params.default || false;
             let version = params.version || this.lastVersion;
-            let subDir = `${SEP}linux-ubuntu20-cuda11-1.2.4`;
+            let subDir = `${SEP}quai-gpu-miner-amd`;
             // Download url selection
             const dlUrls = {
-                'linux': `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-ubuntu20-cuda11-${version}.tar.gz`,
-                'win32': `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-windows-cuda11-${version}.zip`,
+                'linux': `https://github.com/dominant-strategies/quai-gpu-miner/releases/download/${version}/quai-gpu-miner-nvidia-${version}.tar.gz`,
+                'win32': ``,
                 'darwin': ``,
                 'freebsd': ``,
             };
             let dlUrl = dlUrls[platform] || '';
+            //throw { message: `edit-me then delete this line` };
             if (dlUrl === '')
                 throw { message: `No installation script available for the platform ${platform}` };
             // Some common install options
@@ -65,7 +67,7 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52023, command: 'kawpowminer', managed: false, // set true when the getInfos() script is ready
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52021, command: 'quai-gpu-miner', managed: true, // set true when the getInfos() script is ready
     getCommandArgs(config, params) {
         const args = [];
         if (this.apiPort > 0) {

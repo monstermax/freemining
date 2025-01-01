@@ -409,7 +409,7 @@ export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRu
     const dataDir  = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
     const minerDir = `${config.appDir }${SEP}rig${SEP}miners${SEP}${minerName}`;
     const aliasDir = `${minerDir}${SEP}${minerAlias}`;
-    const cmdPath  = `${aliasDir}${SEP}${cmdFile}`;
+    const cmdPath  = cmdFile.startsWith('/') ? cmdFile : `${aliasDir}${SEP}${cmdFile}`;
 
     const logDir   = `${config.logDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
     const logFile  = `${logDir}${SEP}${minerAlias}.run.log`;

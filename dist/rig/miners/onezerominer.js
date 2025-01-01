@@ -64,13 +64,16 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52019, command: 'onezerominer', managed: true, getCommandArgs(config, params) {
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52019, command: 'onezerominer', 
+    //command: '/usr/bin/docker', // TEST DOCKER
+    managed: true, getCommandArgs(config, params) {
         const args = [
-        //'--disable-cpu',
+        //'run', '--rm', '--gpus', 'all', '-p', `${this.apiPort}:${this.apiPort}`, 'onezerominer:1.4.3', // TEST DOCKER
         ];
         if (this.apiPort > 0) {
             args.push(...[
                 //'--api-enable',
+                '--api-host', '0.0.0.0',
                 '--api-port', this.apiPort.toString(),
             ]);
         }

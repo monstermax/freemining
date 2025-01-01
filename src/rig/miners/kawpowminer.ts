@@ -15,16 +15,18 @@ import type *  as t from '../../common/types';
 /*
 
 Website  : 
-Github   : 
-Download :
+Github   : https://github.com/RavenCommunity/kawpowminer
+Download : https://github.com/RavenCommunity/kawpowminer/releases
+Minerstat: https://minerstat.com/miner/kawpowminer
+Command  : ./kawpowminer -P stratum+tcp://t1MiHMrh6QHxiJN1eUHZxg95ZfJqqY7Ur9w.max-omatic:x@rvn-eu.minerpool.pro:16059 --api-bind 127.0.0.1:3334 --cuda --cu-devices 0
 
 */
 /* ########## CONFIG ######### */
 
-const minerName   = ''; // edit-me
-const minerTitle  = ''; // edit-me
-const github      = ''; // edit-me
-const lastVersion = ''; // edit-me
+const minerName   = 'kawpowminer';
+const minerTitle  = 'Kawpowminer';
+const github      = 'RavenCommunity/kawpowminer';
+const lastVersion = '1.2.4';
 
 /* ########## MAIN ######### */
 
@@ -37,8 +39,7 @@ export const minerInstall: t.minerInstallInfos = {
     ...baseMiner.minerInstall,
     minerName,
     minerTitle,
-    //lastVersion,   // uncomment me when install script is ready
-    lastVersion: '', // delete me    when install script is ready
+    lastVersion,
     github,
 
 
@@ -47,18 +48,16 @@ export const minerInstall: t.minerInstallInfos = {
         const setAsDefaultAlias = params.default || false;
 
         let version = params.version || this.lastVersion;
-        let subDir = ``; // edit-me
+        let subDir = `${SEP}linux-ubuntu20-cuda11-1.2.4`;
 
         // Download url selection
         const dlUrls: any = {
-            'linux':   ``, // edit-me
-            'win32':   ``, // edit-me
-            'darwin':  ``, // edit-me
-            'freebsd': ``, // edit-me
+            'linux':   `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-ubuntu20-cuda11-${version}.tar.gz`,
+            'win32':   `https://github.com/RavenCommunity/kawpowminer/releases/download/${version}/kawpowminer-windows-cuda11-${version}.zip`,
+            'darwin':  ``,
+            'freebsd': ``,
         }
         let dlUrl = dlUrls[platform] || '';
-
-        throw { message: `edit-me then delete this line` };
 
         if (dlUrl === '') throw { message: `No installation script available for the platform ${platform}` };
 
@@ -94,8 +93,8 @@ export const minerInstall: t.minerInstallInfos = {
 export const minerCommands: t.minerCommandInfos = {
     ...baseMiner.minerCommands,
 
-    apiPort: -1, // edit-me
-    command: '', // edit-me // the filename of the executable (without .exe extension)
+    apiPort: 52023,
+    command: 'kawpowminer', // the filename of the executable (without .exe extension)
     managed: false, // set true when the getInfos() script is ready
 
 
@@ -106,30 +105,18 @@ export const minerCommands: t.minerCommandInfos = {
         if (this.apiPort > 0) {
             args.push(
                 ...[
-                    '--edit-me-api-host', '127.0.0.1',
-                    '--edit-me-api-port', this.apiPort.toString(),
+                    '--api-bind', `127.0.0.1:${this.apiPort}`,
                 ]
             );
         }
 
-        if (params.algo) {
-            args.push('--edit-me-algo');
-            args.push(params.algo);
-        }
-
-        if (params.poolUrl) {
-            args.push('--edit-me-url');
-            args.push(params.poolUrl);
-        }
-
-        if (params.poolUser) {
-            args.push('--edit-me-user');
-            args.push(params.poolUser);
+        if (params.poolUrl &&params.poolUser) {
+            args.push('--pool');
+            args.push( `stratum+tcp://${params.poolUser}.{worker}:x@${params.poolUrl}` );
         }
 
         if (true) {
-            args.push('--edit-me-password');
-            args.push('x');
+            args.push('--cuda');
         }
 
         if (params.extraArgs && params.extraArgs.length > 0) {

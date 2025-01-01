@@ -5,7 +5,6 @@ import os from 'os';
 import fetch from 'node-fetch';
 
 import { now, getOpt, downloadFile } from '../../common/utils';
-import { decompressFile } from '../../common/decompress_archive';
 import * as baseMiner from './_baseMiner';
 
 import type *  as t from '../../common/types';

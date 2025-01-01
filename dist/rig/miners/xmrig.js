@@ -72,8 +72,11 @@ exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), 
             console.log(`${(0, utils_1.now)()} [INFO] [RIG] Install complete into ${aliasDir}`);
         });
     } });
-exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52003, command: 'xmrig', managed: true, getCommandArgs(config, params) {
+exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands), { apiPort: 52003, command: 'xmrig', 
+    //command: '/usr/bin/docker', // TEST DOCKER
+    managed: true, getCommandArgs(config, params) {
         const args = [
+            //'run', '--rm', '-p', `${this.apiPort}:${this.apiPort}`, 'xmrig:6.22.2', // TEST DOCKER
             '-k',
             //'--cpu-max-threads-hint', '75',
             //'--cpu-priority', '3',
@@ -84,7 +87,7 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         if (this.apiPort > 0) {
             args.push(...[
                 '--http-enabled',
-                '--http-host', '127.0.0.1',
+                '--http-host', '0.0.0.0',
                 '--http-port', this.apiPort.toString(),
                 '--http-access-token=freemining-token',
                 '--http-no-restricted',

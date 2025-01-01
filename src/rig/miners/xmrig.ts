@@ -100,10 +100,12 @@ export const minerCommands: t.minerCommandInfos = {
 
     apiPort: 52003,
     command: 'xmrig',
+    //command: '/usr/bin/docker', // TEST DOCKER
     managed: true,
 
     getCommandArgs(config, params) {
         const args: string[] = [
+            //'run', '--rm', '-p', `${this.apiPort}:${this.apiPort}`, 'xmrig:6.22.2', // TEST DOCKER
             '-k',
             //'--cpu-max-threads-hint', '75',
             //'--cpu-priority', '3',
@@ -116,7 +118,7 @@ export const minerCommands: t.minerCommandInfos = {
             args.push(
                 ...[
                     '--http-enabled',
-                    '--http-host', '127.0.0.1',
+                    '--http-host', '0.0.0.0',
                     '--http-port', this.apiPort.toString(),
                     '--http-access-token=freemining-token',
                     '--http-no-restricted',

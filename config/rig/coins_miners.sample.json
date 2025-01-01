@@ -22,7 +22,7 @@
             "algo": ""
         }
     },
-    "CNX": {
+    "CFX": {
 		"bminer": {
             "algo": "conflux"
         },

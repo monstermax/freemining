@@ -1,61 +1,8 @@
 {
-    "bminer": {
-        "apiPort": 42001
-    },
-    "bzminer": {
-        "apiPort": 42002
-    },
-    "ccminer": {
-        "apiPort": 42018
-    },
     "cpuminer": {
-        "apiPort": 42016,
-        "extraArgs": "--cpu-priority 3 --threads=12"
-    },
-    "dynexsolve": {
-        "apiPort": 42017
-    },
-    "firominer": {
-        "apiPort": 42003
-    },
-    "gminer": {
-        "apiPort": 42004
-    },
-    "lolminer": {
-        "apiPort": 42005
-    },
-    "miniz": {
-        "apiPort": 42006
-    },
-    "nanominer": {
-        "apiPort": 42007
-    },
-    "nbminer": {
-        "apiPort": 42008
-    },
-    "onezerominer": {
-        "apiPort": 42019
-    },
-    "rigel": {
-        "apiPort": 42009
-    },
-    "srbminer": {
-        "apiPort": 42010
-    },
-    "teamblackminer": {
-        "apiPort": 42015
-    },
-    "teamredminer": {
-        "apiPort": 42011
-    },
-    "trex": {
-        "apiPort": 42012
-    },
-    "wildrig": {
-        "apiPort": 42014
+        "extraArgs": "--cpu-priority 3"
     },
     "xmrig": {
-        "apiPort": 42013,
         "extraArgs": "--cpu-priority 3 --cpu-max-threads-hint 75"
     }
 }

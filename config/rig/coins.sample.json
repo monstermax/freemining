@@ -1,77 +1,104 @@
 {
+    "ALPH": {
+        "coinName": "Alephium",
+        "algo": "",
+        "website": "https://alephium.org/",
+        "explorer": "https://explorer.alephium.org/"
+    },
     "BEAM": {
         "coinName": "Beam",
         "algo": "",
+        "website": "https://www.beam.mw/",
         "explorer": "https://explorer.beam.mw/"
     },
     "CFX": {
         "coinName": "Conflux",
         "algo": "",
-        "explorer": ""
+        "website": "https://confluxnetwork.org/",
+        "explorer": "https://www.confluxscan.io/"
     },
     "DNX": {
         "coinName": "Dynex",
         "algo": "",
-        "explorer": ""
+        "website": "https://dynexcoin.org/",
+        "explorer": "https://explorer.dynexcoin.org/"
     },
     "ETC": {
         "coinName": "Ethereum Classic",
         "algo": "",
+        "website": "https://ethereumclassic.org/",
         "explorer": "https://blockscout.com/etc/mainnet"
     },
     "ETHW": {
         "coinName": "Ethereum POW",
         "algo": "",
+        "website": "",
         "explorer": "https://blockroma.com/ethw/mainnet"
     },
     "ERG": {
         "coinName": "Ergo",
         "algo": "",
+        "website": "https://ergoplatform.org/",
         "explorer": "https://explorer.ergoplatform.com/"
     },
     "FIRO": {
         "coinName": "Firo",
         "algo": "",
+        "website": "https://firo.org/",
         "explorer": "https://explorer.zcoin.io/"
     },
     "FLUX": {
         "coinName": "Flux",
         "algo": "",
+        "website": "https://runonflux.io/",
         "explorer": "https://explorer.runonflux.io/"
     },
     "FNNC": {
         "coinName": "Fennec",
         "algo": "",
+        "website": "fennecblockchain.com",
         "explorer": "https://scan.fennecblockchain.com/"
     },
     "MEWC": {
         "coinName": "Meowcoin",
         "algo": "",
+        "website": "https://www.mewccrypto.com/",
         "explorer": "https://explorer.mewccrypto.com/"
     },
     "NEXA": {
         "coinName": "Nexa",
         "algo": "",
+        "website": "https://nexa.org/",
+        "explorer": "https://explorer.nexa.org/"
+    },
+    "QUAI": {
+        "coinName": "Quai",
+        "algo": "",
+        "website": "https://qu.ai/",
         "explorer": ""
     },
     "RTM": {
         "coinName": "Raptoreum",
         "algo": "",
+        "website": "https://raptoreum.com/",
         "explorer": "https://explorer.raptoreum.com/"
     },
     "RXD": {
         "coinName": "Radiant",
         "algo": "",
+        "website": "https://radiantblockchain.org/",
         "explorer": "https://explorer.radiantblockchain.org/"
     },
     "RVN": {
         "coinName": "Ravencoin",
         "algo": "",
+        "website": "https://ravencoin.org/",
         "explorer": "https://ravencoin.network/"
     },
     "XMR": {
         "coinName": "Monero",
         "algo": "",
+        "website": "https://www.getmonero.org/",
         "explorer": "https://localmonero.co/blocks/"
     }
 }
