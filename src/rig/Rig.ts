@@ -523,6 +523,10 @@ export function minerRunStop(config: t.DaemonConfigAll, params: t.minerRunStopPa
     const signal = forceKill ? 'SIGKILL' : 'SIGINT';
     console.debug(`${now()} [DEBUG] [RIG] KILLING PROCESS ${instanceName} with signal ${signal}...`);
     proc.process.kill(signal);
+
+    if (proc.pid) {
+        process.kill(proc.pid, signal)
+    }
 }
 
 

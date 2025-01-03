@@ -432,6 +432,9 @@ function minerRunStop(config, params, forceKill = false) {
     const signal = forceKill ? 'SIGKILL' : 'SIGINT';
     console.debug(`${(0, utils_1.now)()} [DEBUG] [RIG] KILLING PROCESS ${instanceName} with signal ${signal}...`);
     proc.process.kill(signal);
+    if (proc.pid) {
+        process.kill(proc.pid, signal);
+    }
 }
 exports.minerRunStop = minerRunStop;
 function minerRunGetStatus(config, params) {

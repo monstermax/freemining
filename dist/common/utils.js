@@ -348,13 +348,18 @@ function tailFile(file, numLines) {
         const rl = readline_1.default.createInterface({ input: stream });
         let buffer = [];
         try {
-            for (var _d = true, rl_1 = tslib_1.__asyncValues(rl), rl_1_1; rl_1_1 = yield rl_1.next(), _a = rl_1_1.done, !_a; _d = true) {
+            for (var _d = true, rl_1 = tslib_1.__asyncValues(rl), rl_1_1; rl_1_1 = yield rl_1.next(), _a = rl_1_1.done, !_a;) {
                 _c = rl_1_1.value;
                 _d = false;
-                const line = _c;
-                buffer.push(line);
-                if (buffer.length > numLines) {
-                    buffer.shift();
+                try {
+                    const line = _c;
+                    buffer.push(line);
+                    if (buffer.length > numLines) {
+                        buffer.shift();
+                    }
+                }
+                finally {
+                    _d = true;
                 }
             }
         }

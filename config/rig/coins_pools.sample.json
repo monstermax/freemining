@@ -32,7 +32,7 @@
         "jjpool": {
             "user": "{wallet}",
             "urls": {
-                "europe": "eu.jjpool.fr:6700"
+                "europe": "fr.jjpool.fr:6900"
             }
         }
     },
