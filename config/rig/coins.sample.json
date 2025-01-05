@@ -1,7 +1,7 @@
 {
     "ALPH": {
         "coinName": "Alephium",
-        "algo": "",
+        "algo": "Blake3",
         "website": "https://alephium.org/",
         "explorer": "https://explorer.alephium.org/"
     },
@@ -19,7 +19,7 @@
     },
     "DNX": {
         "coinName": "Dynex",
-        "algo": "",
+        "algo": "DynexSolve",
         "website": "https://dynexcoin.org/",
         "explorer": "https://explorer.dynexcoin.org/"
     },
@@ -37,7 +37,7 @@
     },
     "ERG": {
         "coinName": "Ergo",
-        "algo": "",
+        "algo": "Autolykos",
         "website": "https://ergoplatform.org/",
         "explorer": "https://explorer.ergoplatform.com/"
     },
@@ -59,6 +59,12 @@
         "website": "fennecblockchain.com",
         "explorer": "https://scan.fennecblockchain.com/"
     },
+    "KAS": {
+        "coinName": "Kaspa",
+        "algo": "kHeavyHash",
+        "website": "https://kaspa.org/",
+        "explorer": "https://explorer.kaspa.org/"
+    },
     "MEWC": {
         "coinName": "Meowcoin",
         "algo": "",
@@ -79,13 +85,13 @@
     },
     "RTM": {
         "coinName": "Raptoreum",
-        "algo": "",
+        "algo": "Ghostrider",
         "website": "https://raptoreum.com/",
         "explorer": "https://explorer.raptoreum.com/"
     },
     "RXD": {
         "coinName": "Radiant",
-        "algo": "",
+        "algo": "Sha512256D",
         "website": "https://radiantblockchain.org/",
         "explorer": "https://explorer.radiantblockchain.org/"
     },

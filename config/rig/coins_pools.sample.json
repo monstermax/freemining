@@ -1,4 +1,12 @@
 {
+    "ALPH": {
+        "jjpool": {
+            "user": "{wallet}",
+            "urls": {
+                "europe": "fr.jjpool.fr:7950"
+            }
+        }
+    },
     "BEAM": {
         "cruxpool": {
             "user": "{wallet}.{worker}",
@@ -24,7 +32,7 @@
     },
     "DNX": {
         "ekapool": {
-            "user": "{wallet}.{worker}",
+            "user": "{wallet}",
             "urls": {
                 "europe": "dnx.eu.ekapool.com:19666"
             }
@@ -68,7 +76,7 @@
         "jjpool": {
             "user": "{wallet}.{worker}",
             "urls": {
-                "europe": "eu.jjpool.fr:3056"
+                "europe": "fr.jjpool.fr:3056"
             }
         },
         "cruxpool": {
@@ -120,6 +128,14 @@
             }
         }
     },
+    "KAS": {
+        "jjpool": {
+            "user": "{wallet}.{worker}",
+            "urls": {
+                "default": "fr.jjpool.fr:7800"
+            }
+        }
+    },
     "MEWC": {
         "minerpool": {
             "user": "{wallet}.{worker}",
@@ -144,11 +160,19 @@
             }
         }
     },
+    "QUAI": {
+        "poussin": {
+            "user": "you_nickname.{wallet}.{worker}",
+            "urls": {
+                "default": "pool-poussin.fr:3334"
+            }
+        }
+    },
     "RTM": {
         "jjpool": {
             "user": "{wallet}.{worker}",
             "urls": {
-                "default": "jjpool.eu:7070"
+                "default": "fr.jjpool.fr:7070"
             }
         }
     },
@@ -156,7 +180,7 @@
         "jjpool": {
             "user": "{wallet}.{worker}",
             "urls": {
-                "europe": "eu.jjpool.fr:5550"
+                "europe": "fr.jjpool.fr:5550"
             }
         }
     },

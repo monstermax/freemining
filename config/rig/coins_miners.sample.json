@@ -139,8 +139,23 @@
             "algo": "yescryptr16"
         }
     },
-    "KASPA": {
+    "KAS": {
         "bzminer": {
+            "algo": "kaspa"
+        },
+        "gminer": {
+            "algo": "kaspa"
+        },
+        "lolminer": {
+            "algo": "kaspa"
+        },
+        "srbminer": {
+            "algo": "kaspa"
+        },
+        "rigel": {
+            "algo": "kaspa"
+        },
+        "teamredminer": {
             "algo": "kaspa"
         }
     },
@@ -160,6 +175,11 @@
     "NEXA": {
         "bzminer": {
             "algo": "nexa"
+        }
+    },
+    "QUAI": {
+        "srbminer": {
+            "algo": "progpow_quai"
         }
     },
     "RTM": {

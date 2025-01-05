@@ -1,4 +1,7 @@
 {
+    "ALPH": {
+        "wallet1": "1F6gMYJNdLQ44HmqfSw9TFFYLQUy1bJhfsp8WxNmoT1rp"
+    },
     "DNX": {
         "wallet1": "XwoZvac1kfXYigFmpyt5HR4xxR6eaeNX93PghScnJu2YdJoWmWUyxmY8Jvzb24jdG3QMEHAUGFtmVFzBgtrtCZR433R518BM8"
     },
@@ -20,11 +23,17 @@
     "FNNC": {
         "wallet1": "FbQDVcGjtiq5ucfBrhauKuC1t6KSkjbUN9"
     },
+    "KAS": {
+        "wallet1": "kaspa:qpkw985m0qp3ceckunle559g5r03m7u6pttme2td3deng7tp4eyqg8xnfv5jx"
+    },
     "MEWC": {
         "wallet1": "MJxPvVq1Gbd71XMuXvprQnTmHiAH3KXi89"
     },
     "NEXA": {
         "maxomatic": "nexa:nqtsq5g5ez39k23a5ez2z9zsg9y0e0t2hjce6w5my69c7w4q"
+    },
+    "QUAI": {
+        "pelagus": "0x006AEEd3e8d1ef7813Bf98577Ffb22d8D1a208f2"
     },
     "RTM": {
         "wallet1": "RHKVBwdYEongNGwUj2oBk4yZHx9QEpMyAR"
