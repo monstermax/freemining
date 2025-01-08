@@ -23,6 +23,33 @@ const github = 'OneZeroMiner/onezerominer';
 const lastVersion = '1.2.3';
 /* ########## MAIN ######### */
 const SEP = path_1.default.sep;
+const minerStatsMapping = {
+    miner: {
+        name: 'onezerominer',
+        worker: { path: 'worker.name', default: '' },
+        uptime: { path: 'uptime_seconds', default: 0 },
+        algo: { path: 'algos.0.name', default: '' },
+        hashRate: { path: 'algos.0.total_hashrate', default: 0 },
+    },
+    pool: {
+        url: { path: 'algos.0.pool.pool', default: '' },
+        account: { path: 'algos.0.pool.account', default: '' },
+    },
+    devices: {
+        cpus: [],
+        gpus: (apiResponse) => apiResponse.devices.map((gpu) => {
+            var _a;
+            return ({
+                id: gpu.id,
+                name: `${gpu.vendor} ${gpu.name}`,
+                hashRate: (_a = apiResponse.algos[0]) === null || _a === void 0 ? void 0 : _a.hashrates[gpu.id],
+                temperature: gpu.temp,
+                fanSpeed: gpu.fan,
+                power: gpu.power,
+            });
+        }),
+    },
+};
 /* ########## FUNCTIONS ######### */
 exports.minerInstall = Object.assign(Object.assign({}, baseMiner.minerInstall), { minerName,
     minerTitle,
@@ -97,6 +124,15 @@ exports.minerCommands = Object.assign(Object.assign({}, baseMiner.minerCommands)
         return args;
     },
     getInfos(config, params) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const apiUrl = `http://127.0.0.1:${this.apiPort}`;
+            const response = yield (0, node_fetch_1.default)(apiUrl);
+            const apiResponse = yield response.json();
+            // Appliquer le mapping spécifique au miner
+            return this.mapApiResponse(apiResponse, minerStatsMapping);
+        });
+    },
+    getInfos_OLD(config, params) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const apiUrl = `http://127.0.0.1:${this.apiPort}`;
             const headers = {};

@@ -162,7 +162,7 @@
     },
     "QUAI": {
         "poussin": {
-            "user": "you_nickname.{wallet}.{worker}",
+            "user": "your_nickname.{wallet}.{worker}",
             "urls": {
                 "default": "pool-poussin.fr:3334"
             }

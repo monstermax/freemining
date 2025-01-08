@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSysInfos = exports.getConfig = exports.safeQuit = exports.run = void 0;
 const tslib_1 = require("tslib");
 const express_1 = tslib_1.__importDefault(require("express"));
+const cors_1 = tslib_1.__importDefault(require("cors"));
 const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const http = tslib_1.__importStar(require("http"));
@@ -131,6 +132,8 @@ function registerHttpRoutes(config, app) {
     // Parse Body (POST only)
     app.use(express_1.default.urlencoded({ extended: true }));
     app.use(express_1.default.json({}));
+    // CORS
+    app.use((0, cors_1.default)({}));
     // Static files
     console.log(`${(0, utils_1.now)()} [${safe_1.default.blue('INFO')}] [DAEMON] Using static folder ${config.httpStaticDir}`);
     app.use(express_1.default.static(config.httpStaticDir));

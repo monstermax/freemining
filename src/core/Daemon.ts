@@ -1,5 +1,6 @@
 
 import express from 'express';
+import cors from 'cors';
 import colors from 'colors/safe';
 import path from 'path';
 import os from 'os';
@@ -165,6 +166,9 @@ function registerHttpRoutes(config: t.DaemonConfigAll, app: express.Express): vo
     // Parse Body (POST only)
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json({  }));
+
+    // CORS
+    app.use(cors({}));
 
     // Static files
     console.log(`${now()} [${colors.blue('INFO')}] [DAEMON] Using static folder ${config.httpStaticDir}`);

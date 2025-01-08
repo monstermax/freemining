@@ -30,6 +30,33 @@ const lastVersion = '1.2.3';
 
 const SEP = path.sep;
 
+const minerStatsMapping: {[key: string]: any} = {
+    miner: {
+        name: 'onezerominer',
+        worker: { path: 'worker.name', default: '' },
+        uptime: { path: 'uptime_seconds', default: 0 },
+        algo: { path: 'algos.0.name', default: '' },
+        hashRate: { path: 'algos.0.total_hashrate', default: 0 },
+    },
+    pool: {
+        url: { path: 'algos.0.pool.pool', default: '' },
+        account: { path: 'algos.0.pool.account', default: '' },
+    },
+    devices: {
+        cpus: [], // Pas d'informations CPU pour ce miner
+        gpus: (apiResponse: OnezerominerApiResponse) => apiResponse.devices.map((gpu: any) => ({
+            id: gpu.id,
+            name: `${gpu.vendor} ${gpu.name}`,
+            hashRate: apiResponse.algos[0]?.hashrates[gpu.id],
+            temperature: gpu.temp,
+            fanSpeed: gpu.fan,
+            power: gpu.power,
+        })),
+    },
+};
+
+type OnezerominerApiResponse = any; // TODO
+
 
 /* ########## FUNCTIONS ######### */
 
@@ -137,12 +164,21 @@ export const minerCommands: t.minerCommandInfos = {
     },
 
 
-    async getInfos(config, params) {
+    async getInfos(config: t.DaemonConfig, params: t.getMinerInfosParams) {
+        const apiUrl = `http://127.0.0.1:${this.apiPort}`;
+        const response = await fetch(apiUrl);
+        const apiResponse = await response.json() as OnezerominerApiResponse;
+
+        // Appliquer le mapping spécifique au miner
+        return this.mapApiResponse(apiResponse, minerStatsMapping);
+    },
+
+    async getInfos_OLD(config: t.DaemonConfig, params: t.getMinerInfosParams) {
         const apiUrl = `http://127.0.0.1:${this.apiPort}`;
         const headers: any = {};
 
         const minerSummaryRes = await fetch(`${apiUrl}/`, {headers});
-        const minerSummary: any = await minerSummaryRes.json();
+        const minerSummary = await minerSummaryRes.json() as OnezerominerApiResponse;
 
         // EDIT THESE VALUES - START //
         const _algo = minerSummary.algos[0] || {};

@@ -19,6 +19,8 @@ import type *  as t from '../../common/types';
 
 const SEP = path.sep;
 
+type MinerApiResponse = any; // extends me
+
 
 /* ########## FUNCTIONS ######### */
 
@@ -214,7 +216,50 @@ export const minerCommands: t.minerCommandInfos = {
         };
 
         return infos;
+    },
+
+    mapApiResponse(apiResponse: MinerApiResponse, mapping: {[key: string]: any}): t.MinerStats {
+        const result: any = {};
+
+        for (const key1 in mapping) {
+            const value1 = mapping[key1] as {[key: string]: any};
+
+            result[key1] = result[key1] || {};
+
+            for (const [key2, value2] of Object.entries(value1)) {
+                if (typeof value2 === 'string') {
+                    // Accéder à la valeur dans l'API avec une clé simple
+                    //result[key1][key2] = apiResponse[value2];
+                    result[key1][key2] = mapping[key1][key2];
+
+                } else if (typeof value2 === 'object' && value2?.path) {
+                    // Parcourir un chemin dans l'objet
+                    const pathParts = value2.path.split('.');
+                    let current = apiResponse;
+
+                    for (const part of pathParts) {
+                        if (current && current[part] !== undefined) {
+                            current = current[part];
+                        } else {
+                            current = undefined;
+                            break;
+                        }
+                    }
+                    result[key1][key2] = current !== undefined ? current : value2.default;
+
+                } else if (typeof value2 === 'object') {
+                    result[key1][key2] = mapping[key1][key2];
+
+                } else if (typeof value2 === 'function') {
+                    // Appliquer une fonction custom
+                    result[key1][key2] = value2(apiResponse);
+                }
+            }
+        }
+
+        return result as t.MinerStats;
     }
+
 };
 
 
