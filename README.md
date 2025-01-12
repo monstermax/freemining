@@ -77,6 +77,9 @@ npm install
 # edit config files
 nano ~/.freemining/config/freemining.json      # change httpAllowedIps if wanted
 nano ~/.freemining/config/rig/rig.json         # change name if wanted + set farmAgent host/port/pass
+
+nano ~/.freemining/config/rig/coins_pools.json
+nano ~/.freemining/config/rig/coins_wallets.json
 ```
 
 Note: on Windows, adapt the code with:
