@@ -221,3 +221,15 @@ frm-cli <params>
         --pool-engine-uninstall                                # uninstall an engine
 ```
 
+
+
+## Screenshots
+
+![freemining_home](freemining_home.png)
+![rig](rig.png)
+![rigs_list](rigs_list.jpg)
+![rig_status](rig_status.png)
+![run_miner](run_miner.png)
+
+
+
