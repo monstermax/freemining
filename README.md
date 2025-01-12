@@ -65,7 +65,7 @@ cd Python-3.9.7
 
 ```bash
 # Clone
-git clone gogs@gogs.karmas.fr:monstermax/freemining.git
+git clone https://github.com/monstermax/freemining 
 
 # Install NPM dependencies
 cd freemining
