@@ -16,7 +16,7 @@ Github   : https://github.com/dominant-strategies/quai-gpu-miner
 Download : https://github.com/dominant-strategies/quai-gpu-miner/releases/
 Video    : https://www.youtube.com/watch?v=Uq0zq6EgYM8
 Minerstat:
-Command  : ./quai-gpu-miner -G --HWMON 1 -P stratum://anonymous.0x690BF6Cfce1Affb8C0E72Fe863Bd0A2ab06374Cc.worker@pool-poussin.fr:3334 --api-bind 127.0.0.1:3334 --opencl
+Command  : ./quai-gpu-miner -G --HWMON 1 -P stratum://anonymous.0x006AEEd3e8d1ef7813Bf98577Ffb22d8D1a208f2.worker@pool-poussin.fr:3334 --api-bind 127.0.0.1:3334 --opencl
 
 */
 /* ########## CONFIG ######### */
