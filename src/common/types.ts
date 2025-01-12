@@ -457,9 +457,11 @@ export type minerRunStartParams = {
     miner: string,
     alias?: string,
     algo: string,
+    coin?: string,
     poolUrl: string,
     poolUser: string,
     extraArgs?: string,
+    dockerize?: boolean,
 }
 
 export type minerRunStopParams = {

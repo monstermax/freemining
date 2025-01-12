@@ -511,6 +511,7 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
     const algo = req.body.algo?.toString() || '';
     const poolUrl = req.body.poolUrl?.toString() || '';
     const poolUser = req.body.poolUser?.toString() || '';
+    const dockerize = !! req.body.dockerize;
     const extraArgs = (req.body.extraArgs?.toString() || '').split(' ').filter((arg: string) => !!arg);
 
     const minerAlias = req.body.minerAlias?.toString() || '';
@@ -527,15 +528,16 @@ export async function rigMinerRunPost(rigData: t.RigData, req: express.Request, 
             return;
         }
 
-        const params = {
+        const params: t.minerRunStartParams = {
             miner: minerName,
-            minerAlias,
+            alias: minerAlias,
             //instanceName,
             coin,
             algo,
             poolUrl,
             poolUser,
             extraArgs,
+            dockerize,
         };
 
         try {

@@ -370,6 +370,7 @@ export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRu
     const minerName = params.miner;
     const minerConfig = getInstalledMinerConfiguration(config, minerName);
     const minerAlias = params.alias || minerConfig.defaultAlias;
+    const dockerize = !! params.dockerize;
 
     if (! minerName) {
         throw new Error(`Missing miner parameter`);
@@ -403,8 +404,12 @@ export async function minerRunStart(config: t.DaemonConfigAll, params: t.minerRu
     const apiPort = await getFreeTcpPort() || minerCommands.apiPort
     minerCommands.apiPort = apiPort;
 
-    const cmdFile = minerCommands.getCommandFile(config, params);
-    const args = minerCommands.getCommandArgs(config, params);
+    const cmdFile = dockerize ? "/usr/bin/docker" : minerCommands.getCommandFile(config, params);
+
+    const dockerArgs = dockerize ? [
+        'run', '--rm', '--name', instanceName, '-p', `${apiPort}:${apiPort}`, '--gpus', 'all', `${minerName}:${minerAlias.slice(minerName.length+1)}`,
+    ] : [];
+    const args = [...dockerArgs, ...minerCommands.getCommandArgs(config, params)];
 
     const dataDir  = `${config.dataDir}${SEP}rig${SEP}miners${SEP}${minerName}`;
     const minerDir = `${config.appDir }${SEP}rig${SEP}miners${SEP}${minerName}`;

@@ -104,15 +104,16 @@ export const minerCommands: t.minerCommandInfos = {
     managed: true,
 
     getCommandArgs(config, params) {
-        const args: string[] = [
-            //'run', '--rm', '-p', `${this.apiPort}:${this.apiPort}`, 'xmrig:6.22.2', // TEST DOCKER
+        const args: string[] = [];
+
+        args.push(...[
             '-k',
             //'--cpu-max-threads-hint', '75',
             //'--cpu-priority', '3',
             '--randomx-no-rdmsr',
             '--no-color',
             //`--log-file=${SEP}tmp${SEP}debug_xmrig.log`,
-        ];
+        ]);
 
         if (this.apiPort > 0) {
             args.push(

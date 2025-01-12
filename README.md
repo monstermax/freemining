@@ -45,7 +45,7 @@ Download NodeJS from https://nodejs.org/en/download/
 Advice (optional): install and use Git Bash. https://gitforwindows.org/
 
 
-# Python 3 
+#### Python 3 
 
 (if not already installed. For example on Ubuntu 16.04).
 Use this if `npm install` failed.

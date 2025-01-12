@@ -124,9 +124,7 @@ export const minerCommands: t.minerCommandInfos = {
     managed: true,
 
     getCommandArgs(config, params) {
-        const args: string[] = [
-            //'run', '--rm', '--gpus', 'all', '-p', `${this.apiPort}:${this.apiPort}`, 'onezerominer:1.4.3', // TEST DOCKER
-        ];
+        const args: string[] = [];
 
         if (this.apiPort > 0) {
             args.push(
