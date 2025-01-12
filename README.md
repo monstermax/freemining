@@ -225,11 +225,11 @@ frm-cli <params>
 
 ## Screenshots
 
-![freemining_home](freemining_home.png)
-![rig](rig.png)
-![rigs_list](rigs_list.jpg)
-![rig_status](rig_status.png)
-![run_miner](run_miner.png)
+![freemining_home](./data/infos/freemining_home.png)
+![rig](./data/infos/rig.png)
+![rigs_list](./data/infos/rigs_list.jpg)
+![rig_status](./data/infos/rig_status.png)
+![run_miner](./data/infos/run_miner.png)
 
 
 
